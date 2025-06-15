@@ -1912,6 +1912,11 @@ font-weight: 700;
 
 /* Mobile responsive layout (991px and below) */
 @media (max-width: 991px) {
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
     
     #srix-NewCostCalForm {
         height: 100vh;
@@ -2052,5 +2057,25 @@ font-weight: 700;
     }
     #srix-NewCostCalForm .selection-summary{
         padding: 0px;
+    }
+}
+
+.mobile-header {
+    display: none;
+    background-color: white;
+    text-align: center;
+    padding: 0.8rem 0;
+    width: 100%;
+}
+
+.mobile-logo {
+    max-height: 40px;
+    width: auto;
+}
+
+@media (max-width: 991px) {
+    .mobile-header {
+        display: block;
+        padding: .8rem 0px !important;
     }
 }

@@ -128,7 +128,7 @@
     }
 
     function updateProgressPill(step) {
-        const displayStep = (step > totalSteps) ? totalSteps : step;
+        const displayStep = (step > totalSteps) ? displayTotalSteps : step;
         document.getElementById("current-step").innerText = displayStep;
 
         const stepDisplay = document.getElementById("heading-top-right-numbs-steps-1");
@@ -163,7 +163,7 @@
     function updateStepDisplay() {
         const currentStepDisplay = document.getElementById("current-step");
         if (currentStepDisplay) {
-            const displayStep = (currentStep > totalSteps) ? totalSteps : currentStep;
+            const displayStep = (currentStep > totalSteps) ? displayTotalSteps : currentStep;
             currentStepDisplay.textContent = displayStep;
         }
         

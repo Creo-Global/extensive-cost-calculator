@@ -1,0 +1,543 @@
+<section id="srix-NewCostCalForm">
+<div class="form-container">
+    <div class="header">
+        <div class="header-grid-srix">
+            <div class="icon">
+                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/6847e3049112d43f19fa23da_Group%201000005348.svg" alt="Document with checkmark">
+            </div>
+            <h2 id="theHeading">Get Started</h2>
+        </div>
+        <div class="step-counter">
+            <span id="heading-top-right-numbs-steps-1">
+                <span class="step-word">Step</span> <span id="current-step">1</span>/7
+            </span>
+            <span id="heading-top-right-numbs-steps-2"></span>
+        </div>
+    </div>
+    
+    <div class="progress-container">
+        <div class="step-progress"></div>
+    </div>
+
+    <form id="multiStepForm">
+        <div class="form-step-container">
+            <div class="form-step active" id="step-1">
+                <h3 class="form-step-title">Fill in your details:</h3>
+                <div class="form-group">
+                    <label for="full-name">Enter your full name *</label>
+                    <input type="text" id="full-name" placeholder="Your name" required>
+                    <div class="error-message" id="full-name-error"></div>
+                        </div>
+
+                        <div class="form-group">
+                    <label for="phone">Enter phone number *</label>
+                    <div class="phone-input">
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone number" required>
+                    </div>
+                    <div class="error-message" id="phone-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Enter email address *</label>
+                <input type="email" id="email" placeholder="Email address" required>
+                <div class="error-message" id="email-error"></div>
+                    </div>
+
+            </div>
+
+                        <div class="form-step" id="step-2">
+                <h3 class="form-step-title">Business License Type</h3>
+                
+                <div class="license-type-options">
+                    <div class="license-option">
+                        <input type="radio" id="fawri-license" name="license-type" value="fawri">
+                        <label for="fawri-license">Fawri License</label>
+                    </div>
+                    <div class="license-option">
+                        <input type="radio" id="regular-license" name="license-type" value="regular">
+                        <label for="regular-license">Regular Business License</label>
+                </div>
+            </div>
+
+                <div class="duration-info">
+                    <p>Duration: <span class="duration-value">60 Minutes</span></p>
+                </div>
+
+               
+                <div class="form-group">
+                <label for="license-duration">Duration of Business License</label>
+                    <select id="license-duration" aria-label="Duration of Business License" required>
+                        <option value="" disabled selected>Select Years</option>
+                        <option value="1">1 Year</option>
+                        <option value="2">2 Years</option>
+                        <option value="3">3 Years</option>
+                        <option value="4">4 Years</option>
+                        <option value="5">5 Years</option>
+                        <option value="6">6 Years</option>
+                        <option value="7">7 Years</option>
+                    </select>
+                    <div class="error-message" id="license-duration-error"></div>
+                    <p class="discount-note">Discount on multi-year licenses</p>
+                </div>
+
+              <label for="shareholders-range">Number of Shareholders</label>
+                <div class="form-group">
+                     <select id="shareholders-range" aria-label="Number of Shareholders" required onchange="updateShareholderNationalities()">
+                         <option value="" disabled selected>Select Number</option>
+                         <option value="1">1</option>
+                         <option value="2">2</option>
+                         <option value="3">3</option>
+                         <option value="4">4</option>
+                         <option value="5">5</option>
+                         <option value="6">6</option>
+                    </select>
+                    <div class="error-message" id="shareholders-range-error"></div>
+                    <div id="shareholder-nationalities-container" class="shareholder-input"></div>
+                </div>
+                    </div>
+
+            <div class="form-step" id="step-3">
+                <h3 class="form-step-title">Please select your business activity group</h3>
+                
+                <div class="activity-search-container">
+                    <input type="text" class="activity-search-input" placeholder="Search for activity" aria-label="Search for business activities">
+                    <span class="search-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 21L16.65 16.65" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    </div>
+                
+                <div class="activity-groups-container">
+                    <div class="activity-group" data-group="administrative" data-count="0">
+                        Administrative <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                        </div>
+                    <div class="activity-group" data-group="agriculture" data-count="0">
+                        Agriculture <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="art" data-count="0">
+                        Art <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                        </div>
+                    <div class="activity-group" data-group="education" data-count="0">
+                        Education <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                </div>
+                    <div class="activity-group" data-group="ict" data-count="0">
+                        ICT <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="fnb" data-count="0">
+                        F&B, Rentals <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="financial" data-count="0">
+                        Financial <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="healthcare" data-count="0">
+                        Health Care <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="maintenance" data-count="0">
+                        Maintenance <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="services" data-count="0">
+                        Services <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="professional" data-count="0">
+                        Professional <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="realestate" data-count="0">
+                        Real Estate <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="sewerage" data-count="0">
+                        Sewerage <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="trading" data-count="0">
+                        Trading <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="transportation" data-count="0">
+                        Transportation <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="waste" data-count="0">
+                        Waste Collection <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+                    </div>
+                    <div class="activity-group" data-group="manufacturing" data-count="0">
+                        Manufacturing <span class="activity-count">(0)</span>
+                        <span class="plus-icon">
+                        </span>
+            </div>
+                <div id="activities-list-placeholder"></div>
+                <div class="selection-summary">
+                    <p>Groups Selected: <span id="groups-selected-count">0</span></p>
+                    <p>Activities Selected: <span id="activities-selected-count">0</span></p>
+                    <p class="fee-warning">You will be charged +AED 1,000 for each group activity above 3</p>
+                </div>
+                </div>
+            </div>
+
+            <div class="form-step" id="step-4">
+                <div class="visa-options">
+                    <div class="visa-option">
+                        <div class="visa-toggle">
+                            <label for="investor-visa-toggle" class="visa-label">Investor Visa</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="investor-visa-toggle" onchange="toggleVisaOptions('investor')" aria-label="Toggle investor visa options">
+                                <span class="toggle-slider">
+                                    <span class="toggle-no">NO</span>
+                                    <span class="toggle-yes">YES</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div id="investor-visa-options" style="display: none; margin-top: 10px;">
+                            <select id="investor-visa-count" aria-label="Number of Investor Visas">
+                                <option value="" disabled selected>Select number</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                    </select>
+                            <div class="error-message" id="investor-visa-count-error"></div>
+                </div>
+            </div>
+
+                    <div class="visa-option">
+                        <div class="visa-toggle">
+                            <label for="employee-visa-toggle" class="visa-label">Employee Visa</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="employee-visa-toggle" onchange="toggleVisaOptions('employee')" aria-label="Toggle employee visa options">
+                                <span class="toggle-slider">
+                                    <span class="toggle-no">NO</span>
+                                    <span class="toggle-yes">YES</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div id="employee-visa-options" style="display: none; margin-top: 10px;">
+                            <select id="employee-visa-count" aria-label="Number of Employee Visas">
+                                <option value="" disabled selected>Select number</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                    </select>
+                            <div class="error-message" id="employee-visa-count-error"></div>
+                        </div>
+                </div>
+
+                    <div class="visa-option">
+                        <div class="visa-toggle">
+                            <label for="dependency-visa-toggle" class="visa-label">Dependency Visa</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="dependency-visa-toggle" onchange="toggleVisaOptions('dependency')" aria-label="Toggle dependency visa options">
+                                <span class="toggle-slider">
+                                    <span class="toggle-no">NO</span>
+                                    <span class="toggle-yes">YES</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div id="dependency-visa-options" style="display: none; margin-top: 10px;">
+                            <select id="dependency-visas" aria-label="Number of Dependency Visas">
+                                <option value="" disabled selected>Select number</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                            <div class="error-message" id="dependency-visas-error"></div>
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+
+            <div class="form-step " id="step-5">
+                <div class="office-options">
+                    <h3 class="form-step-title" style="margin-bottom: 8px;">Please select your office type</h3>
+                    <div class="form-field-container">
+                        <select id="office-type" class="form-input" required aria-label="Office Type">
+                            <option value="" disabled selected>Select your office type</option>
+                            <option value="shared-office">Shared Office / Shared Desk</option>
+                            <option value="dedicated-office">Dedicated Office</option>
+                        </select>
+                        <div class="error-message" id="office-type-error"></div>
+                </div>
+                    </div>
+                </div>
+                <div class="form-step" id="step-6">
+                    <div class="addons-section">
+                        <h3 class="form-step-title" style="margin-bottom: 24px;">Please select required services needed</h3>
+                        
+                        <div class="services-category">
+                            <h4>mCore</h4>
+                            <div class="services-container">
+                                <div class="service-option">
+                                    <input type="checkbox" id="bank-account" class="service-checkbox" value="bank-account">
+                                    <label for="bank-account" class="service-label">Bank Account</label>
+                            </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="business-card" class="service-checkbox" value="business-card">
+                                    <label for="business-card" class="service-label">Business Card</label>
+                        </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="company-stamp" class="service-checkbox" value="company-stamp">
+                                    <label for="company-stamp" class="service-label">Company Stamp</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="ecommerce-starter" class="service-checkbox" value="ecommerce-starter">
+                                    <label for="ecommerce-starter" class="service-label">E-commerce Starter</label>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="services-category">
+                            <h4>mResidency</h4>
+                            <div class="services-container">
+                                <div class="service-option">
+                                    <input type="checkbox" id="medical-emirates-id" class="service-checkbox" value="medical-emirates-id">
+                                    <label for="medical-emirates-id" class="service-label">Medical and Emirates ID</label>
+                        </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="medical-insurance" class="service-checkbox" value="medical-insurance">
+                                    <label for="medical-insurance" class="service-label">Medical Insurance</label>
+                    </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="dependent-visa" class="service-checkbox" value="dependent-visa">
+                                    <label for="dependent-visa" class="service-label">Dependent Visa</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="eid-card-delivery" class="service-checkbox" value="eid-card-delivery">
+                                    <label for="eid-card-delivery" class="service-label">EID Card Delivery</label>
+                                </div>
+                                
+                        </div>
+                    </div>
+
+                        <div class="services-category">
+                            <h4>mAssist</h4>
+                            <div class="services-container">
+                                <div class="service-option">
+                                    <input type="checkbox" id="melite" class="service-checkbox" value="melite">
+                                    <label for="melite" class="service-label">mElite (new)</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="meeting-rooms" class="service-checkbox" value="meeting-rooms">
+                                    <label for="meeting-rooms" class="service-label">Meeting Rooms</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="po-box" class="service-checkbox" value="po-box">
+                                    <label for="po-box" class="service-label">PO Box (new)</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="mail-management" class="service-checkbox" value="mail-management">
+                                    <label for="mail-management" class="service-label">Mail Management (new)</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="document-translation" class="service-checkbox" value="document-translation">
+                                    <label for="document-translation" class="service-label">Document Translation</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="virtual-assistant" class="service-checkbox" value="virtual-assistant">
+                                    <label for="virtual-assistant" class="service-label">Virtual Assistant</label>
+                                </div>
+                            </div>
+            </div>
+
+                        <div class="services-category">
+                            <h4>mAccounting</h4>
+                            <div class="services-container">
+                                <div class="service-option">
+                                    <input type="checkbox" id="corporate-tax" class="service-checkbox tax-compliance-checkbox" value="corporate-tax" checked onchange="checkTaxCompliance()">
+                                    <label for="corporate-tax" class="service-label">Corporate Tax</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="vat-registration" class="service-checkbox tax-compliance-checkbox" value="vat-registration" checked onchange="checkTaxCompliance()">
+                                    <label for="vat-registration" class="service-label">VAT Registration</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="liquidation-report" class="service-checkbox" value="liquidation-report">
+                                    <label for="liquidation-report" class="service-label">Liquidation Report</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="financial-audit-report" class="service-checkbox" value="financial-audit-report">
+                                    <label for="financial-audit-report" class="service-label">Financial Audit Report</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="valuation-report" class="service-checkbox" value="valuation-report">
+                                    <label for="valuation-report" class="service-label">Valuation Report</label>
+                                </div>
+                                <div class="service-option">
+                                    <input type="checkbox" id="bookkeeping" class="service-checkbox" value="bookkeeping">
+                                    <label for="bookkeeping" class="service-label">Bookkeeping</label>
+                                </div>
+                            </div>
+                            <div id="tax-compliance-warning" class="tax-compliance-warning" style="display: none;">
+                                <p>Corporate Tax and VAT Registration are mandatory for UAE businesses. We strongly recommend keeping these services.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-step" id="step-7">
+                    <div class="summary-container">
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <h3>Company Setup</h3>
+                                <button type="button" class="card-edit-button" onclick="toggleEditMode('package-type')">
+                                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
+                                </button>
+                            </div>
+                            <div class="summary-card-content">
+                                <div class="summary-item">
+                                    <div class="summary-label">License Type</div>
+                                    <div class="summary-value" id="summary-package-type">Standard</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">License Duration</div>
+                                    <div class="summary-value" id="summary-license-duration">1 year</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Shareholders</div>
+                                    <div class="summary-value" id="summary-shareholders">1</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <h3>Business Activities</h3>
+                                <button type="button" class="card-edit-button" onclick="toggleEditMode('business-activities')">
+                                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
+                                </button>
+                            </div>
+                            <div class="summary-card-content" id="business-activities-summary">
+                                <div class="activity-tags" id="activity-tags-container">
+                                </div>
+                                <div class="summary-value price" id="business-activities-cost">AED 1,000</div>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <h3>Number of Visas</h3>
+                                <button type="button" class="card-edit-button" onclick="toggleEditMode('visa-info')">
+                                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
+                                </button>
+                            </div>
+                            <div class="summary-card-content">
+                                <div class="summary-item">
+                                    <div class="summary-label">Investor Visa <span id="summary-investor-visa-display">(0)</span></div>
+                                    <div class="summary-value price" id="investor-visa-cost">AED 0</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Employee Visa <span id="summary-employee-visa-display">(0)</span></div>
+                                    <div class="summary-value price" id="employee-visa-cost">AED 0</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Dependency Visa <span id="summary-dependency-visa-display">(0)</span></div>
+                                    <div class="summary-value price" id="dependency-visa-cost">AED 0</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <h3>Office Type</h3>
+                                <button type="button" class="card-edit-button" onclick="toggleEditMode('office-type')">
+                                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
+                                </button>
+                            </div>
+                            <div class="summary-card-content">
+                                <div class="summary-item">
+                                    <div class="summary-value" id="summary-office-type-display">None selected</div>
+                                    <div class="summary-value price" id="office-space-cost-display">AED 0</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <h3>Banking and Add-ons</h3>
+                                <button type="button" class="card-edit-button" onclick="toggleEditMode('addons')">
+                                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
+                                </button>
+                            </div>
+                            <div class="summary-card-content" id="addons-summary-container">
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card total-card">
+                            <div class="summary-card-header total-card-header">
+                                <h3>Total</h3>
+                            </div>
+                            <div class="summary-card-content">
+                                <div class="summary-item">
+                                    <div class="summary-value total-price" id="total-cost-display">AED 0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        </div>
+        </div>
+
+        <div class="form-navigation">
+                <button class="d-none" type="button" id="prevBtn" onclick="prevStep()"><span>Previous</span></button>
+            <button type="button" id="nextBtn" onclick="nextStep()"><span>Next</span> <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5.5 12H19.5M19.5 12L12.5 5M19.5 12L12.5 19" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg></button>
+            <button class="d-none" type="button" id="submitBtn"><span style="margin-right: 5px;">Get a Call</span> <svg xmlns="http://www.w3.org/2000/svg" width="8" height="12" viewBox="0 0 8 12" fill="none">
+                <path d="M1.72266 10.5206L6.51532 5.72797L1.72266 0.935303" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg></button>
+            </div>
+        </div>
+    </form>
+            <div id="theFinalSuccessMessage" class="d-none">
+                <h2>Thank you, <span id="success-first-name"></span>!</h2>
+                <p>Your enquiry has been submitted successfully. One of our Business Setup Advisors will contact you soon.</p>
+            </div>
+            
+                    </div>
+</div>
+</section>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<link rel="stylesheet" href="calculator.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/calculator.js"></script>

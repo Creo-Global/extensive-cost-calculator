@@ -1912,11 +1912,6 @@ font-weight: 700;
 
 /* Mobile responsive layout (991px and below) */
 @media (max-width: 991px) {
-    body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-    }
     
     #srix-NewCostCalForm {
         height: 100vh;
@@ -1954,7 +1949,7 @@ font-weight: 700;
     
     #srix-NewCostCalForm .form-navigation {
         position: fixed;
-        bottom: 25px;
+        bottom: 25px !important;
         left: 0;
         right: 0;
         background: transparent;

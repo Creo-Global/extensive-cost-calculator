@@ -204,7 +204,7 @@
                 <div class="selection-summary">
                     <p>Groups Selected: <span id="groups-selected-count">0</span></p>
                     <p>Activities Selected: <span id="activities-selected-count">0</span></p>
-                    <p class="fee-warning">You will be charged +AED 1,000 for each group activity above 3</p>
+                    <p class="fee-warning">You will be charged +AED 1,000 for each Activity group above 3</p>
                 </div>
                 </div>
             </div>
@@ -419,6 +419,7 @@
                         <div class="summary-card">
                             <div class="summary-card-header accordion-header">
                                 <h3>Company Setup</h3>
+                                <div class="summary-price" id="company-setup-price">AED 0</div>
                                 <button type="button" class="card-edit-button" onclick="toggleEditMode('package-type')">
                                     <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
                                 </button>
@@ -440,6 +441,10 @@
                                 <div class="summary-item">
                                     <div class="summary-label">Shareholders</div>
                                     <div class="summary-value" id="summary-shareholders">1</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">License Cost</div>
+                                    <div class="summary-value price" id="license-base-cost">AED 0</div>
                                 </div>
                             </div>
                         </div>
@@ -489,6 +494,10 @@
                                 <div class="summary-item">
                                     <div class="summary-label">Dependency Visa <span id="summary-dependency-visa-display">(0)</span></div>
                                     <div class="summary-value price" id="dependency-visa-cost">AED 0</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Immigration Card Fee</div>
+                                    <div class="summary-value price" id="immigration-card-cost">AED 0</div>
                                 </div>
                             </div>
                         </div>

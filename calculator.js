@@ -23,6 +23,11 @@
                 count.style.display = 'none';
             });
             
+            const feeWarning = document.querySelector('.fee-warning');
+            if (feeWarning) {
+                feeWarning.style.display = 'none';
+            }
+            
             selectedActivities = [];
             
             document.querySelectorAll('.activity-group').forEach(group => {
@@ -157,9 +162,9 @@
             4: "Visa Types",
             5: "Office Selection",
             6: "Banking and Add-ons",
-            7: "Summary"
+            7: "Cost Summary"
         };
-        document.getElementById("theHeading").innerHTML = headings[step] || "Summary";
+        document.getElementById("theHeading").innerHTML = headings[step] || "Cost Summary";
         updateStepDisplay();
     }
 
@@ -171,7 +176,7 @@
         }
         
         if (currentStep > totalSteps || currentStep === 7) {
-            document.getElementById("theHeading").innerHTML = "Summary";
+            document.getElementById("theHeading").innerHTML = "Cost Summary";
             document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
             document.getElementById('step-7').classList.add('active');
         }
@@ -421,7 +426,6 @@
             investorVisas: (investorVisaToggle && investorVisaToggle.checked) ? parseInt(document.getElementById("investor-visa-count").value) || 0 : 0,
             employeeVisas: (employeeVisaToggle && employeeVisaToggle.checked) ? parseInt(document.getElementById("employee-visa-count").value) || 0 : 0,
             dependencyVisas: (dependencyVisaToggle && dependencyVisaToggle.checked) ? parseInt(document.getElementById("dependency-visas").value) || 0 : 0,
-            businessBankAccount: document.getElementById("bank-account")?.checked,
             officeType: document.getElementById("office-type")?.value || '',
             selectedAddons: selectedAddonsList,
         };
@@ -464,10 +468,6 @@
             cost += addonCosts[addon] || 0;
         });
 
-        if (selectedAddons.includes("medical-insurance")) {
-            cost += 800 * (investorVisas + employeeVisas + dependencyVisas);
-        }
-
         return cost;
     }
 
@@ -478,22 +478,30 @@
     function calculateVisaCost(snapshot) {
         let visaAdditionalCosts = 0;
         const { investorVisas, employeeVisas, dependencyVisas } = snapshot;
-        const hasAnyVisa = investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0;
 
+        // Fixed visa costs as specified
         if (investorVisas > 0) {
-            visaAdditionalCosts += (2200 * investorVisas) + (700 * investorVisas);
-            visaAdditionalCosts += 2280;
+            visaAdditionalCosts += 5850 * investorVisas; // 5,850 AED per investor visa
         }
 
-        if (employeeVisas > 0) visaAdditionalCosts += (3700 * employeeVisas);
-        if (dependencyVisas > 0) visaAdditionalCosts += (3700 * dependencyVisas);
-        if (hasAnyVisa) visaAdditionalCosts += 330;
+        if (employeeVisas > 0) {
+            visaAdditionalCosts += 5350 * employeeVisas; // 5,350 AED per employee visa
+        }
+        
+        if (dependencyVisas > 0) {
+            visaAdditionalCosts += 7850 * dependencyVisas; // 7,850 AED per dependency visa
+        }
+        
+        // Add immigration card fee (2,000 AED) if any visas are selected (including dependency visas)
+        if (investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0) {
+            visaAdditionalCosts += 2000; // Immigration card fee
+        }
         
         return visaAdditionalCosts;
     }
 
     function calculateLicenseCost(snapshot) {
-        const { licenseType, packageType, licenseDuration, investorVisas, employeeVisas } = snapshot;
+        const { licenseType, packageType, licenseDuration, investorVisas, employeeVisas, dependencyVisas } = snapshot;
         
         let baseLicenseCost = 0;
         if (licenseType === "fawri") {
@@ -505,15 +513,23 @@
         let discountPercentage = licenseDuration > 1 ? 15 : 0; // 15% discount for multi-year licenses
 
         let businessLicenseCost = baseLicenseCost * licenseDuration;
-        let leaseAgreementTotal = 375 * licenseDuration;
 
-        let totalBeforeDiscount = businessLicenseCost + leaseAgreementTotal;
+        let totalBeforeDiscount = businessLicenseCost;
         let discountAmount = totalBeforeDiscount * (discountPercentage / 100);
-        let licenseAfterDiscount = totalBeforeDiscount - discountAmount + 10;
+        let licenseAfterDiscount = totalBeforeDiscount - discountAmount;
         
-        let immigrationCardTotal = (investorVisas > 0 || employeeVisas > 0) ? 2000 : 0;
+        // Store the base license cost for display in summary
+        window.baseLicenseCostValue = baseLicenseCost;
         
-        return licenseAfterDiscount + immigrationCardTotal;
+        // Apply immigration card fee if any visas are selected (including dependency visas)
+        let immigrationCardTotal = (investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0) ? 2000 : 0;
+        
+        // Store the immigration card fee for display in summary
+        window.immigrationCardFee = immigrationCardTotal;
+        
+        // Return only the license cost without adding immigration card fee
+        // The immigration card fee will be displayed separately in the visa section
+        return licenseAfterDiscount;
     }
 
     function updateSummaryUI(costs, snapshot) {
@@ -528,6 +544,18 @@
         // Update shareholders count
         const shareholdersCount = parseInt(document.getElementById("shareholders-range")?.value) || 1;
         document.getElementById("summary-shareholders").innerText = shareholdersCount;
+        
+        // Update license base cost
+        const licenseCostElement = document.getElementById("license-base-cost");
+        if (licenseCostElement) {
+            licenseCostElement.innerText = `AED ${window.baseLicenseCostValue.toLocaleString()}`;
+        }
+        
+        // Update company setup header price
+        const companySetupPrice = document.getElementById("company-setup-price");
+        if (companySetupPrice) {
+            companySetupPrice.innerText = `AED ${licenseCost.toLocaleString()}`;
+        }
         
         // Update business activities summary
         const activityTagsContainer = document.getElementById("activity-tags-container");
@@ -576,6 +604,16 @@
                     if (businessActivitiesHeader) {
                         businessActivitiesHeader.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
                     }
+                    
+                    // Show/hide fee warning based on number of activity groups
+                    const feeWarning = document.querySelector('.fee-warning');
+                    if (feeWarning) {
+                        if (uniqueGroups > 3) {
+                            feeWarning.style.display = 'block';
+                        } else {
+                            feeWarning.style.display = 'none';
+                        }
+                    }
                 }
             } else {
                 // Fallback to old method for backward compatibility
@@ -602,13 +640,25 @@
                 // Update business activities cost
                 const businessActivitiesCost = document.getElementById("business-activities-cost");
                 if (businessActivitiesCost) {
-                    const activitiesCostValue = Object.keys(activityGroups).length > 0 ? 1000 : 0;
+                    const uniqueGroups = Object.keys(activityGroups).length;
+                    const extraGroups = Math.max(0, uniqueGroups - 3);
+                    const activitiesCostValue = extraGroups * 1000;
                     businessActivitiesCost.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
                     
                     // Update the price in the accordion header
                     const businessActivitiesHeader = document.querySelector('.summary-card:nth-child(2) .summary-price');
                     if (businessActivitiesHeader) {
                         businessActivitiesHeader.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
+                    }
+                    
+                    // Show/hide fee warning based on number of activity groups
+                    const feeWarning = document.querySelector('.fee-warning');
+                    if (feeWarning) {
+                        if (uniqueGroups > 3) {
+                            feeWarning.style.display = 'block';
+                        } else {
+                            feeWarning.style.display = 'none';
+                        }
                     }
                 }
             }
@@ -643,17 +693,23 @@
         document.getElementById("summary-employee-visa-display").innerText = employeeVisas > 0 ? `(${employeeVisas})` : "(0)";
         document.getElementById("summary-dependency-visa-display").innerText = dependencyVisas > 0 ? `(${dependencyVisas})` : "(0)";
         
-        // Calculate individual visa costs (including allocation fees)
-        const investorVisaCost = investorVisas > 0 ? (2200 + 1850) * investorVisas : 0; // Added 1850 allocation fee per visa
-        const employeeVisaCost = employeeVisas > 0 ? (3700 + 1600) * employeeVisas : 0; // Added 1600 allocation fee per visa
-        const dependencyVisaCost = dependencyVisas > 0 ? 6000 * dependencyVisas : 0; // AED 6,000 per dependent visa
+        // Calculate individual visa costs with fixed prices
+        const investorVisaCost = investorVisas > 0 ? 5850 * investorVisas : 0; // 5,850 AED per investor visa
+        const employeeVisaCost = employeeVisas > 0 ? 5350 * employeeVisas : 0; // 5,350 AED per employee visa
+        const dependencyVisaCost = dependencyVisas > 0 ? 7850 * dependencyVisas : 0; // 7,850 AED per dependency visa
         
         document.getElementById("investor-visa-cost").innerText = investorVisaCost > 0 ? `AED ${investorVisaCost.toLocaleString()}` : 'AED 0';
         document.getElementById("employee-visa-cost").innerText = employeeVisaCost > 0 ? `AED ${employeeVisaCost.toLocaleString()}` : 'AED 0';
         document.getElementById("dependency-visa-cost").innerText = dependencyVisaCost > 0 ? `AED ${dependencyVisaCost.toLocaleString()}` : 'AED 0';
         
-        // Update the visa price in the accordion header
-        const totalVisaCost = investorVisaCost + employeeVisaCost + dependencyVisaCost;
+        // Update immigration card fee
+        const immigrationCardElement = document.getElementById("immigration-card-cost");
+        if (immigrationCardElement) {
+            immigrationCardElement.innerText = window.immigrationCardFee > 0 ? `AED ${window.immigrationCardFee.toLocaleString()}` : 'AED 0';
+        }
+        
+        // Update the visa price in the accordion header (including immigration card fee)
+        const totalVisaCost = investorVisaCost + employeeVisaCost + dependencyVisaCost + window.immigrationCardFee;
         const visaHeader = document.querySelector('.summary-card:nth-child(3) .summary-price');
         if (visaHeader) {
             visaHeader.innerText = `AED ${totalVisaCost.toLocaleString()}`;
@@ -758,7 +814,7 @@
                     addonRow.style.display = 'flex';
                     addonRow.style.justifyContent = 'space-between';
                     addonRow.style.alignItems = 'center';
-                    addonRow.style.marginBottom = '8px';
+
                     
                     const addonNameSpan = document.createElement('span');
                     addonNameSpan.className = 'addon-name';
@@ -797,23 +853,46 @@
         
         const licenseComponent = calculateLicenseCost(snapshot);
         const visaComponent = calculateVisaCost(snapshot);
-        const bankAccountComponent = snapshot.businessBankAccount ? 2000 : 0;
         const officeComponent = calculateOfficeCost(snapshot);
         const addonsComponent = calculateAddonsCost(snapshot);
         
-        const totalCost = licenseComponent + visaComponent + bankAccountComponent + officeComponent + addonsComponent;
+        // Calculate business activities cost
+        let businessActivitiesCost = 0;
+        if (window.selectedActivities && window.selectedActivities.length > 0) {
+            // Group activities by category
+            const activityGroups = {};
+            window.selectedActivities.forEach(activity => {
+                const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
+                if (!activityGroups[groupName]) {
+                    activityGroups[groupName] = [];
+                }
+                activityGroups[groupName].push(activity);
+            });
+            
+            // First 3 groups are free, then 1000 AED per additional group
+            const uniqueGroups = Object.keys(activityGroups).length;
+            const extraGroups = Math.max(0, uniqueGroups - 3);
+            businessActivitiesCost = extraGroups * 1000;
+        }
+        
+        // Bank account cost is now included in add-ons, so we don't add it separately
+        const totalCost = licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost;
         
         const costs = {
             licenseCost: licenseComponent,
             visaCost: visaComponent,
-            bankAccountCost: bankAccountComponent,
+            bankAccountCost: 0, // Set to 0 as it's included in add-ons
             officeCost: officeComponent,
             addonsCost: addonsComponent,
+            businessActivitiesCost: businessActivitiesCost,
             totalCost: totalCost
         };
         
+        // Set global variables for access in other functions
         LicenseCost = Math.round(licenseComponent);
         VisaCost = Math.round(visaComponent);
+        window.AddonsComponent = Math.round(addonsComponent);
+        window.BusinessActivitiesCost = Math.round(businessActivitiesCost);
 
         updateSummaryUI(costs, snapshot);
         
@@ -826,9 +905,56 @@
     }
 
     function calculateTotalCost() {
-        return (parseInt(document.getElementById("license-cost").innerText.replace(/,/g, '')) || 0) +
-               (parseInt(document.getElementById("visa-cost").innerText.replace(/,/g, '')) || 0) +
-               (parseInt(document.getElementById("bank-account-cost").innerText.replace(/,/g, '')) || 0);
+        // Use the global variables set in calculateCosts function
+        // If they're not set yet, calculate them
+        if (typeof LicenseCost === 'undefined' || typeof VisaCost === 'undefined' || 
+            typeof window.AddonsComponent === 'undefined' || typeof window.BusinessActivitiesCost === 'undefined') {
+            
+            // Calculate all components
+            const snapshot = getFormSnapshot();
+            const licenseComponent = calculateLicenseCost(snapshot);
+            const visaComponent = calculateVisaCost(snapshot);
+            const officeComponent = calculateOfficeCost(snapshot);
+            const addonsComponent = calculateAddonsCost(snapshot);
+            
+            // Calculate business activities cost
+            let businessActivitiesCost = 0;
+            if (window.selectedActivities && window.selectedActivities.length > 0) {
+                // Group activities by category
+                const activityGroups = {};
+                window.selectedActivities.forEach(activity => {
+                    const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
+                    if (!activityGroups[groupName]) {
+                        activityGroups[groupName] = [];
+                    }
+                    activityGroups[groupName].push(activity);
+                });
+                
+                // First 3 groups are free, then 1000 AED per additional group
+                const uniqueGroups = Object.keys(activityGroups).length;
+                const extraGroups = Math.max(0, uniqueGroups - 3);
+                businessActivitiesCost = extraGroups * 1000;
+            }
+            
+            console.log("Calculated Total Cost Components:");
+            console.log("License: " + licenseComponent);
+            console.log("Visa: " + visaComponent);
+            console.log("Office: " + officeComponent);
+            console.log("Add-ons: " + addonsComponent);
+            console.log("Business Activities: " + businessActivitiesCost);
+            
+            // Return the total cost
+            return Math.round(licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost);
+        } else {
+            console.log("Using Global Variables for Total Cost:");
+            console.log("License: " + LicenseCost);
+            console.log("Visa: " + VisaCost);
+            console.log("Add-ons: " + window.AddonsComponent);
+            console.log("Business Activities: " + window.BusinessActivitiesCost);
+            
+            // Return the total cost using global variables
+            return LicenseCost + VisaCost + (window.AddonsComponent || 0) + (window.BusinessActivitiesCost || 0);
+        }
     }
 
     function submitPartialData(step, status = 'incomplete') {
@@ -959,7 +1085,7 @@
             elementorForm.find('input[name="form_fields[total_cost]"]').val(calculateTotalCost());
             elementorForm.find('input[name="form_fields[license_cost]"]').val(LicenseCost);
             elementorForm.find('input[name="form_fields[visa_cost]"]').val(VisaCost);
-            elementorForm.find('input[name="form_fields[bank_cost]"]').val(document.getElementById("bank-account")?.checked ? 2000 : 0);
+            elementorForm.find('input[name="form_fields[bank_cost]"]').val(0); // Bank cost is included in add-ons
             elementorForm.find('input[name="form_fields[form_status]"]').val('complete');
 
             setTimeout(function() {
@@ -1370,7 +1496,7 @@
             
             results.forEach(activity => {
                 const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
+                resultItem.className = 'search-result-items';
                 resultItem.innerHTML = `<span class="activity-code">${activity.Code}</span><span class="activity-name">${activity["Activity Name"]}</span>`;
                 resultItem.addEventListener('click', () => selectActivity(activity));
                 searchResultsDropdown.appendChild(resultItem);
@@ -1447,9 +1573,21 @@
             
             const totalActivities = window.selectedActivities.length;
             const activeGroups = new Set(window.selectedActivities.map(a => a.groupName));
+            const numActiveGroups = activeGroups.size;
             
-            groupsSelectedCount.textContent = activeGroups.size;
+            // Update the counts
+            groupsSelectedCount.textContent = numActiveGroups;
             activitiesSelectedCount.textContent = totalActivities;
+            
+            // Show/hide fee warning based on number of activity groups
+            const feeWarning = document.querySelector('.fee-warning');
+            if (feeWarning) {
+                if (numActiveGroups > 3) {
+                    feeWarning.style.display = 'block';
+                } else {
+                    feeWarning.style.display = 'none';
+                }
+            }
         }
         
         function removeActivity(code) {
@@ -1481,51 +1619,46 @@
     function initAccordion() {
         const accordionHeaders = document.querySelectorAll('.accordion-header');
         
-        // Make sure all accordions are collapsed by default on mobile
-        if (window.innerWidth <= 991) {
-            accordionHeaders.forEach(header => {
-                header.classList.remove('active');
-                const toggleButton = header.querySelector('.accordion-toggle');
-                if (toggleButton) {
-                    toggleButton.setAttribute('aria-expanded', 'false');
-                }
-            });
-            
-            // Hide all accordion contents
-            document.querySelectorAll('.accordion-content').forEach(content => {
-                content.style.display = 'none';
-            });
-        }
+        // Make sure all accordions are collapsed by default
+        accordionHeaders.forEach(header => {
+            header.classList.remove('active');
+            const toggleButton = header.querySelector('.accordion-toggle');
+            if (toggleButton) {
+                toggleButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+        
+        // Hide all accordion contents
+        document.querySelectorAll('.accordion-content').forEach(content => {
+            content.style.display = 'none';
+        });
         
         accordionHeaders.forEach(header => {
             header.addEventListener('click', function(e) {
-                // Only activate accordion on mobile
-                if (window.innerWidth <= 991) {
-                    // Don't trigger if clicking on the edit button
-                    if (e.target.closest('.card-edit-button')) {
-                        return;
+                // Don't trigger if clicking on the edit button
+                if (e.target.closest('.card-edit-button')) {
+                    return;
+                }
+                
+                // Toggle active class
+                this.classList.toggle('active');
+                
+                // Get the content element
+                const content = this.nextElementSibling;
+                if (content && (content.classList.contains('accordion-content') || content.id === 'business-activities-summary')) {
+                    // Toggle display
+                    if (this.classList.contains('active')) {
+                        content.style.display = content.id === 'business-activities-summary' ? 'flex' : 'block';
+                    } else {
+                        content.style.display = 'none';
                     }
-                    
-                    // Toggle active class
-                    this.classList.toggle('active');
-                    
-                    // Get the content element
-                    const content = this.nextElementSibling;
-                    if (content && (content.classList.contains('accordion-content') || content.id === 'business-activities-summary')) {
-                        // Toggle display
-                        if (this.classList.contains('active')) {
-                            content.style.display = content.id === 'business-activities-summary' ? 'flex' : 'block';
-                        } else {
-                            content.style.display = 'none';
-                        }
-                    }
-                    
-                    // Update aria-expanded attribute for accessibility
-                    const toggleButton = this.querySelector('.accordion-toggle');
-                    if (toggleButton) {
-                        const isExpanded = this.classList.contains('active');
-                        toggleButton.setAttribute('aria-expanded', isExpanded);
-                    }
+                }
+                
+                // Update aria-expanded attribute for accessibility
+                const toggleButton = this.querySelector('.accordion-toggle');
+                if (toggleButton) {
+                    const isExpanded = this.classList.contains('active');
+                    toggleButton.setAttribute('aria-expanded', isExpanded);
                 }
             });
         });
@@ -1538,27 +1671,24 @@
                 // Prevent event bubbling to the header
                 e.stopPropagation();
                 
-                // Only activate on mobile
-                if (window.innerWidth <= 991) {
-                    const header = this.closest('.accordion-header');
-                    if (header) {
-                        header.classList.toggle('active');
-                        
-                        // Get the content element
-                        const content = header.nextElementSibling;
-                        if (content && (content.classList.contains('accordion-content') || content.id === 'business-activities-summary')) {
-                            // Toggle display
-                            if (header.classList.contains('active')) {
-                                content.style.display = content.id === 'business-activities-summary' ? 'flex' : 'block';
-                            } else {
-                                content.style.display = 'none';
-                            }
+                const header = this.closest('.accordion-header');
+                if (header) {
+                    header.classList.toggle('active');
+                    
+                    // Get the content element
+                    const content = header.nextElementSibling;
+                    if (content && (content.classList.contains('accordion-content') || content.id === 'business-activities-summary')) {
+                        // Toggle display
+                        if (header.classList.contains('active')) {
+                            content.style.display = content.id === 'business-activities-summary' ? 'flex' : 'block';
+                        } else {
+                            content.style.display = 'none';
                         }
-                        
-                        // Update aria-expanded attribute
-                        const isExpanded = header.classList.contains('active');
-                        this.setAttribute('aria-expanded', isExpanded);
                     }
+                    
+                    // Update aria-expanded attribute
+                    const isExpanded = header.classList.contains('active');
+                    this.setAttribute('aria-expanded', isExpanded);
                 }
             });
         });
@@ -1566,47 +1696,21 @@
 
     // Update accordion state on window resize
     window.addEventListener('resize', function() {
+        // Keep accordion functionality consistent across all screen sizes
+        // Just ensure the display properties are consistent with the active state
+        
         const accordionHeaders = document.querySelectorAll('.accordion-header');
         
-        if (window.innerWidth <= 991) {
-            // On mobile: ensure all accordions are collapsed by default
-            accordionHeaders.forEach(header => {
-                header.classList.remove('active');
-                const toggleButton = header.querySelector('.accordion-toggle');
-                if (toggleButton) {
-                    toggleButton.setAttribute('aria-expanded', 'false');
+        accordionHeaders.forEach(header => {
+            const content = header.nextElementSibling;
+            if (content && (content.classList.contains('accordion-content') || content.id === 'business-activities-summary')) {
+                if (header.classList.contains('active')) {
+                    // If accordion is active, show the content
+                    content.style.display = content.id === 'business-activities-summary' ? 'flex' : 'block';
+                } else {
+                    // If accordion is not active, hide the content
+                    content.style.display = 'none';
                 }
-            });
-            
-            // Hide all accordion contents
-            document.querySelectorAll('.accordion-content').forEach(content => {
-                content.style.display = 'none';
-            });
-            
-            // Also hide business activities summary specifically
-            const businessActivitiesSummary = document.getElementById('business-activities-summary');
-            if (businessActivitiesSummary) {
-                businessActivitiesSummary.style.display = 'none';
             }
-        } else {
-            // On desktop: show all content and remove active states
-            accordionHeaders.forEach(header => {
-                header.classList.remove('active');
-                const toggleButton = header.querySelector('.accordion-toggle');
-                if (toggleButton) {
-                    toggleButton.setAttribute('aria-expanded', 'false');
-                }
-            });
-            
-            // Show all accordion contents on desktop
-            document.querySelectorAll('.accordion-content').forEach(content => {
-                content.style.display = 'block';
-            });
-            
-            // Show business activities summary with flex display
-            const businessActivitiesSummary = document.getElementById('business-activities-summary');
-            if (businessActivitiesSummary) {
-                businessActivitiesSummary.style.display = 'flex';
-            }
-        }
+        });
     });

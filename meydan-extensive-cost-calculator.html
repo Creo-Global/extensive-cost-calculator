@@ -3663,7 +3663,7 @@ font-weight: 700;
             
             results.forEach(activity => {
                 const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
+                resultItem.className = 'search-result-items';
                 resultItem.innerHTML = `<span class="activity-code">${activity.Code}</span><span class="activity-name">${activity["Activity Name"]}</span>`;
                 resultItem.addEventListener('click', () => selectActivity(activity));
                 searchResultsDropdown.appendChild(resultItem);
@@ -3786,7 +3786,7 @@ font-weight: 700;
     top: 100%;
     box-sizing: border-box;
 }
-.search-result-item {
+.search-result-items {
     padding: 16px 9px !important;
     color: rgba(28, 28, 28, 0.80);
     font-family: "Plus Jakarta Sans";
@@ -3800,8 +3800,8 @@ font-weight: 700;
     gap: 12px;
     margin-bottom: 3px !important;
 }
-.search-result-item:last-child { border-bottom: none; }
-.search-result-item:hover { background-color: rgba(171, 129, 197, 0.05); }
+.search-result-items:last-child { border-bottom: none; }
+.search-result-items:hover { background-color: rgba(171, 129, 197, 0.05); }
 .activity-code {
     color: rgba(28, 28, 28, 0.80);
     font-family: "Plus Jakarta Sans";

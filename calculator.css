@@ -288,7 +288,7 @@ line-height: 24px; /* 171.429% */
 .summary-section h4 {
     font-size: 14px;
     color: #333;
-    margin-bottom: 8px;
+    margin-bottom: 6px !important;
     font-weight: 600;
 }
 
@@ -1767,7 +1767,7 @@ font-weight: 700;
     top: 100%;
     box-sizing: border-box;
 }
-.search-result-item {
+.search-result-items {
     padding: 16px 9px !important;
     color: rgba(28, 28, 28, 0.80);
     font-family: "Plus Jakarta Sans";
@@ -1779,10 +1779,11 @@ font-weight: 700;
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-direction: row;
     margin-bottom: 3px !important;
 }
-.search-result-item:last-child { border-bottom: none; }
-.search-result-item:hover { background-color: rgba(171, 129, 197, 0.05); }
+.search-result-items:last-child { border-bottom: none; }
+.search-result-items:hover { background-color: rgba(171, 129, 197, 0.05); }
 .activity-code {
     color: rgba(28, 28, 28, 0.80);
     font-family: "Plus Jakarta Sans";
@@ -2108,7 +2109,7 @@ font-weight: 700;
 
 /* Accordion styles for mobile */
 .accordion-toggle {
-    display: none;
+    display: block;
     background: none;
     border: none;
     cursor: pointer;
@@ -2124,7 +2125,7 @@ font-weight: 700;
 }
 
 .summary-price {
-    display: none;
+    display: block;
     font-weight: 600;
     color: #333;
     margin-left: auto;
@@ -2135,6 +2136,7 @@ font-weight: 700;
     display: flex;
     align-items: center;
     gap: 8px;
+    cursor: pointer;
 }
 
 .accordion-header h3 {
@@ -2145,33 +2147,25 @@ font-weight: 700;
     margin-right: 8px;
 }
 
-@media (max-width: 991px) {
-    .accordion-toggle {
-        display: block;
-    }
-    
-    .summary-price {
-        display: block;
-    }
-    
-    .accordion-header {
-        cursor: pointer;
-    }
-    
-    .accordion-content {
-        display: none;
-        padding: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-    }
-    
-    .accordion-header.active .accordion-arrow {
-        transform: rotate(180deg);
-    }
-    
-    .accordion-header.active + .accordion-content {
-        display: block;
-    }
+.accordion-content {
+    display: none;
+    padding: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.accordion-header.active .accordion-arrow {
+    transform: rotate(180deg);
+}
+
+.accordion-header.active + .accordion-content {
+    display: block;
+}
+
+/* Special handling for business activities summary */
+.accordion-header.active + #business-activities-summary.accordion-content {
+    display: flex;
+    flex-direction: column;
 }
 
 

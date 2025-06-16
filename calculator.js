@@ -96,6 +96,9 @@
         } catch (err) {
             console.error("Error during DOMContentLoaded initialization:", err);
         }
+        
+        // Initialize accordion functionality for mobile
+        initAccordion();
     });
 
     document.addEventListener('change', function(e) {
@@ -567,6 +570,12 @@
                     businessActivitiesCost.style.textAlign = "right";
                     businessActivitiesCost.style.width = "100%";
                     businessActivitiesCost.style.marginTop = "12px";
+                    
+                    // Update the price in the accordion header
+                    const businessActivitiesHeader = document.querySelector('.summary-card:nth-child(2) .summary-price');
+                    if (businessActivitiesHeader) {
+                        businessActivitiesHeader.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
+                    }
                 }
             } else {
                 // Fallback to old method for backward compatibility
@@ -595,6 +604,12 @@
                 if (businessActivitiesCost) {
                     const activitiesCostValue = Object.keys(activityGroups).length > 0 ? 1000 : 0;
                     businessActivitiesCost.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
+                    
+                    // Update the price in the accordion header
+                    const businessActivitiesHeader = document.querySelector('.summary-card:nth-child(2) .summary-price');
+                    if (businessActivitiesHeader) {
+                        businessActivitiesHeader.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
+                    }
                 }
             }
         }
@@ -636,6 +651,13 @@
         document.getElementById("investor-visa-cost").innerText = investorVisaCost > 0 ? `AED ${investorVisaCost.toLocaleString()}` : 'AED 0';
         document.getElementById("employee-visa-cost").innerText = employeeVisaCost > 0 ? `AED ${employeeVisaCost.toLocaleString()}` : 'AED 0';
         document.getElementById("dependency-visa-cost").innerText = dependencyVisaCost > 0 ? `AED ${dependencyVisaCost.toLocaleString()}` : 'AED 0';
+        
+        // Update the visa price in the accordion header
+        const totalVisaCost = investorVisaCost + employeeVisaCost + dependencyVisaCost;
+        const visaHeader = document.querySelector('.summary-card:nth-child(3) .summary-price');
+        if (visaHeader) {
+            visaHeader.innerText = `AED ${totalVisaCost.toLocaleString()}`;
+        }
         
         // Update office type (no cost impact)
         const officeTypeDisplay = document.getElementById("summary-office-type-display");
@@ -697,6 +719,12 @@
 
         if (Object.keys(groupedAddons).length === 0) {
             addonsContainer.innerHTML = '<span class="no-addons">No optional services selected</span>';
+            
+            // Update the addons price in the accordion header to 0
+            const addonsHeader = document.querySelector('.summary-card:nth-child(5) .summary-price');
+            if (addonsHeader) {
+                addonsHeader.innerText = 'AED 0';
+            }
         } else {
             // Define unified costs for each group
             const groupCosts = {
@@ -705,6 +733,9 @@
                 "mAssist": 1000,
                 "mAccounting": 1000
             };
+            
+            // Calculate total addons cost
+            let totalAddonsCost = 0;
             
             Object.keys(groupedAddons).forEach(groupName => {
                 const addons = groupedAddons[groupName];
@@ -739,6 +770,8 @@
                     addonCostSpan.style.marginLeft = 'auto';
                     addonCostSpan.style.flexShrink = '0';
                     
+                    totalAddonsCost += addon.cost;
+                    
                     addonRow.appendChild(addonNameSpan);
                     addonRow.appendChild(addonCostSpan);
                     itemsContainer.appendChild(addonRow);
@@ -747,6 +780,12 @@
                 groupSection.appendChild(itemsContainer);
                 addonsContainer.appendChild(groupSection);
             });
+            
+            // Update the addons price in the accordion header
+            const addonsHeader = document.querySelector('.summary-card:nth-child(5) .summary-price');
+            if (addonsHeader) {
+                addonsHeader.innerText = `AED ${totalAddonsCost.toLocaleString()}`;
+            }
         }
         
         // Update total cost
@@ -1435,5 +1474,139 @@
                 document.querySelectorAll('.activity-group').forEach(group => group.style.opacity = '1');
             }
             updateSelectionSummary();
+        }
+    });
+
+    // Function to initialize accordion functionality
+    function initAccordion() {
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        
+        // Make sure all accordions are collapsed by default on mobile
+        if (window.innerWidth <= 991) {
+            accordionHeaders.forEach(header => {
+                header.classList.remove('active');
+                const toggleButton = header.querySelector('.accordion-toggle');
+                if (toggleButton) {
+                    toggleButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Hide all accordion contents
+            document.querySelectorAll('.accordion-content').forEach(content => {
+                content.style.display = 'none';
+            });
+        }
+        
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', function(e) {
+                // Only activate accordion on mobile
+                if (window.innerWidth <= 991) {
+                    // Don't trigger if clicking on the edit button
+                    if (e.target.closest('.card-edit-button')) {
+                        return;
+                    }
+                    
+                    // Toggle active class
+                    this.classList.toggle('active');
+                    
+                    // Get the content element
+                    const content = this.nextElementSibling;
+                    if (content && (content.classList.contains('accordion-content') || content.id === 'business-activities-summary')) {
+                        // Toggle display
+                        if (this.classList.contains('active')) {
+                            content.style.display = content.id === 'business-activities-summary' ? 'flex' : 'block';
+                        } else {
+                            content.style.display = 'none';
+                        }
+                    }
+                    
+                    // Update aria-expanded attribute for accessibility
+                    const toggleButton = this.querySelector('.accordion-toggle');
+                    if (toggleButton) {
+                        const isExpanded = this.classList.contains('active');
+                        toggleButton.setAttribute('aria-expanded', isExpanded);
+                    }
+                }
+            });
+        });
+        
+        // Add click handler specifically for the toggle buttons
+        const toggleButtons = document.querySelectorAll('.accordion-toggle');
+        toggleButtons.forEach(button => {
+            button.setAttribute('aria-expanded', 'false');
+            button.addEventListener('click', function(e) {
+                // Prevent event bubbling to the header
+                e.stopPropagation();
+                
+                // Only activate on mobile
+                if (window.innerWidth <= 991) {
+                    const header = this.closest('.accordion-header');
+                    if (header) {
+                        header.classList.toggle('active');
+                        
+                        // Get the content element
+                        const content = header.nextElementSibling;
+                        if (content && (content.classList.contains('accordion-content') || content.id === 'business-activities-summary')) {
+                            // Toggle display
+                            if (header.classList.contains('active')) {
+                                content.style.display = content.id === 'business-activities-summary' ? 'flex' : 'block';
+                            } else {
+                                content.style.display = 'none';
+                            }
+                        }
+                        
+                        // Update aria-expanded attribute
+                        const isExpanded = header.classList.contains('active');
+                        this.setAttribute('aria-expanded', isExpanded);
+                    }
+                }
+            });
+        });
+    }
+
+    // Update accordion state on window resize
+    window.addEventListener('resize', function() {
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        
+        if (window.innerWidth <= 991) {
+            // On mobile: ensure all accordions are collapsed by default
+            accordionHeaders.forEach(header => {
+                header.classList.remove('active');
+                const toggleButton = header.querySelector('.accordion-toggle');
+                if (toggleButton) {
+                    toggleButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Hide all accordion contents
+            document.querySelectorAll('.accordion-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Also hide business activities summary specifically
+            const businessActivitiesSummary = document.getElementById('business-activities-summary');
+            if (businessActivitiesSummary) {
+                businessActivitiesSummary.style.display = 'none';
+            }
+        } else {
+            // On desktop: show all content and remove active states
+            accordionHeaders.forEach(header => {
+                header.classList.remove('active');
+                const toggleButton = header.querySelector('.accordion-toggle');
+                if (toggleButton) {
+                    toggleButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Show all accordion contents on desktop
+            document.querySelectorAll('.accordion-content').forEach(content => {
+                content.style.display = 'block';
+            });
+            
+            // Show business activities summary with flex display
+            const businessActivitiesSummary = document.getElementById('business-activities-summary');
+            if (businessActivitiesSummary) {
+                businessActivitiesSummary.style.display = 'flex';
+            }
         }
     });

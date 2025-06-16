@@ -369,7 +369,7 @@ content: none;
 #srix-NewCostCalForm .form-step-title {
     color: #000;
 font-family: "Plus Jakarta Sans";
-font-size: 18px;
+font-size: 14px;
 font-style: normal;
 font-weight: 600;
 line-height: 24px; 
@@ -1743,6 +1743,7 @@ line-height: 24px;
 }
 #business-activities-summary{
     display: flex;
+    flex-direction: row;
 }
 
 .total-card-header{
@@ -1950,8 +1951,12 @@ font-weight: 700;
         overflow-y: auto;
         padding-bottom: 20px;
         -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        max-height: 591px !important;
     }
     
+    #srix-NewCostCalForm .form-step-title{
+        padding-bottom: 0px !important;
+    }
     #srix-NewCostCalForm .form-navigation {
         position: fixed;
         bottom: 25px !important;
@@ -2014,6 +2019,12 @@ font-weight: 700;
         padding: 10px 14px;
         font-size: 14px;
     }
+    #srix-NewCostCalForm .shareholder-input{
+        gap: 5px !important;
+    }
+    #srix-NewCostCalForm .service-label{
+        padding: 8px 16px !important;
+    }
     
     /* Adjust summary cards for mobile */
     .summary-container {
@@ -2058,6 +2069,21 @@ font-weight: 700;
     #srix-NewCostCalForm .selection-summary{
         padding: 0px;
     }
+    #srix-NewCostCalForm label {
+        margin-bottom: 0px;
+        margin-top: 6px;
+        }
+
+        #srix-NewCostCalForm .services-container{
+            gap: 5px !important;
+        }
+        #srix-NewCostCalForm .total-card-title{
+            font-size: 16px !important;
+        }
+        #srix-NewCostCalForm .activity-tag {
+            padding: 4px 8px !important;
+            line-height: 100% !important;
+        }
 }
 
 .mobile-header {
@@ -2079,3 +2105,73 @@ font-weight: 700;
         padding: .8rem 0px !important;
     }
 }
+
+/* Accordion styles for mobile */
+.accordion-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+}
+
+.accordion-arrow {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+    color: #666;
+}
+
+.summary-price {
+    display: none;
+    font-weight: 600;
+    color: #333;
+    margin-left: auto;
+    margin-right: 8px;
+}
+
+.accordion-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.accordion-header h3 {
+    flex: 1;
+}
+
+.card-edit-button {
+    margin-right: 8px;
+}
+
+@media (max-width: 991px) {
+    .accordion-toggle {
+        display: block;
+    }
+    
+    .summary-price {
+        display: block;
+    }
+    
+    .accordion-header {
+        cursor: pointer;
+    }
+    
+    .accordion-content {
+        display: none;
+        padding: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+    
+    .accordion-header.active .accordion-arrow {
+        transform: rotate(180deg);
+    }
+    
+    .accordion-header.active + .accordion-content {
+        display: block;
+    }
+}
+
+

@@ -1,6 +1,6 @@
     let currentStep = 1;
-    const totalSteps = 6; 
-    const displayTotalSteps = 7; 
+    const totalSteps = 5; 
+    const displayTotalSteps = 6; 
     let selectedActivities = []; 
 
     let LicenseCost = 0;
@@ -27,6 +27,12 @@
             if (feeWarning) {
                 feeWarning.style.display = 'none';
             }
+            
+            // Ensure Bank Account and Company Stamp are checked by default
+            const bankAccount = document.getElementById('bank-account');
+            const companyStamp = document.getElementById('company-stamp');
+            if (bankAccount) bankAccount.checked = true;
+            if (companyStamp) companyStamp.checked = true;
             
             selectedActivities = [];
             
@@ -122,14 +128,13 @@
         if (progressBar) {
             let progressWidth;
             switch(step) {
-                case 1: progressWidth = '12%'; break;
-                case 2: progressWidth = '25%'; break;
-                case 3: progressWidth = '42%'; break;
-                case 4: progressWidth = '57%'; break;
-                case 5: progressWidth = '71%'; break;
-                case 6: progressWidth = '85%'; break;
-                case 7: progressWidth = '100%'; break;
-                default: progressWidth = '12%';
+                case 1: progressWidth = '15%'; break;
+                case 2: progressWidth = '30%'; break;
+                case 3: progressWidth = '50%'; break;
+                case 4: progressWidth = '70%'; break;
+                case 5: progressWidth = '85%'; break;
+                case 6: progressWidth = '100%'; break; 
+                default: progressWidth = '15%';
             }
             progressBar.style.width = progressWidth;
         }
@@ -160,9 +165,8 @@
             2: "Company Setup",
             3: "Business Activity Selection",
             4: "Visa Types",
-            5: "Office Selection",
-            6: "Banking and Add-ons",
-            7: "Cost Summary"
+            5: "Banking and Add-ons",
+            6: "Cost Summary"       
         };
         document.getElementById("theHeading").innerHTML = headings[step] || "Cost Summary";
         updateStepDisplay();
@@ -175,10 +179,10 @@
             currentStepDisplay.textContent = displayStep;
         }
         
-        if (currentStep > totalSteps || currentStep === 7) {
+        if (currentStep > totalSteps || currentStep === 6) { // Changed from 7 to 6 as we removed step 5
             document.getElementById("theHeading").innerHTML = "Cost Summary";
             document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
-            document.getElementById('step-7').classList.add('active');
+            document.getElementById('step-7').classList.add('active'); 
         }
     }
 
@@ -190,7 +194,7 @@
 
         prevBtn.classList.toggle("d-none", step === 1);
         
-        if (step >= 7) { 
+        if (step >= 6) { // Changed from 7 to 6 as we removed step 5
             nextBtn.classList.add("d-none");
             submitBtn.classList.remove("d-none");
             if (isInEditMode) {
@@ -199,7 +203,7 @@
             }
             
             calculateCosts();
-        } else if (step === 6) {
+        } else if (step === 5) { // Changed from 6 to 5 as we removed step 5
             nextBtn.classList.remove("d-none");
             submitBtn.classList.add("d-none");
             
@@ -229,8 +233,8 @@
                 
                                  if (isInEditMode) {
                      // If in edit mode, go directly to summary step
-                     currentStep = 7;
-                     document.getElementById('step-7').classList.add("active");
+                     currentStep = 6; // Changed from 7 to 6 as we removed step 5
+                     document.getElementById('step-7').classList.add("active"); // Still using step-7 ID for backward compatibility
                      // Edit mode is reset in updateButtonsDisplay
                  } else {
                     // Normal flow - go to next step
@@ -258,7 +262,13 @@
 
     function prevStep() {
         if (currentStep > 1) {
-            document.getElementById(`step-${currentStep}`).classList.remove("active");
+            // Special handling for summary step (still using step-7 ID for backward compatibility)
+            if (currentStep === 6) { // Summary step
+                document.getElementById('step-7').classList.remove("active");
+            } else {
+                document.getElementById(`step-${currentStep}`).classList.remove("active");
+            }
+            
             currentStep--;
             document.getElementById(`step-${currentStep}`).classList.add("active");
             
@@ -367,46 +377,8 @@
     }
 
     function updateShareholderNationalities() {
-        const count = parseInt(document.getElementById("shareholders-range").value) || 0;
-        const container = document.getElementById("shareholder-nationalities-container");
-        container.innerHTML = '';
-        
-        if (count > 0) {
-            for (let i = 0; i < count; i++) {
-                const selectId = `shareholder-nationality-${i+1}`;
-                
-                const select = document.createElement('select');
-                select.id = selectId;
-                select.className = 'nationality-select';
-                select.required = true;
-                
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                defaultOption.textContent = `Nationality of Shareholder ${i+1}`;
-                select.appendChild(defaultOption);
-                
-                countries.forEach(country => {
-                    const option = document.createElement('option');
-                    option.value = country;
-                    option.textContent = country;
-                    select.appendChild(option);
-                });
-                
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                errorDiv.id = `${selectId}-error`;
-                
-                container.appendChild(select);
-                container.appendChild(errorDiv);
-            }
-            
-            $('.nationality-select').select2({
-                placeholder: "Select Nationality",
-                width: '100%'
-            });
-        }
+        // Function now empty - we're removing the nationality fields
+        // and only keeping the shareholder count
     }
         
     function getFormSnapshot() {
@@ -423,10 +395,10 @@
             licenseType: document.getElementById("fawri-license").checked ? "fawri" : "regular",
             packageType: "standard",
             licenseDuration: parseInt(document.getElementById("license-duration")?.value) || 1,
-            investorVisas: (investorVisaToggle && investorVisaToggle.checked) ? parseInt(document.getElementById("investor-visa-count").value) || 0 : 0,
-            employeeVisas: (employeeVisaToggle && employeeVisaToggle.checked) ? parseInt(document.getElementById("employee-visa-count").value) || 0 : 0,
-            dependencyVisas: (dependencyVisaToggle && dependencyVisaToggle.checked) ? parseInt(document.getElementById("dependency-visas").value) || 0 : 0,
-            officeType: document.getElementById("office-type")?.value || '',
+            investorVisas: (investorVisaToggle && investorVisaToggle.checked) ? 1 : 0, // Investor visa is always 1 if checked
+            employeeVisas: (employeeVisaToggle && employeeVisaToggle.checked) ? parseInt(document.getElementById("employee-visa-count").value) || 1 : 0,
+            dependencyVisas: (dependencyVisaToggle && dependencyVisaToggle.checked) ? parseInt(document.getElementById("dependency-visas").value) || 1 : 0,
+            // officeType removed as step 5 was removed
             selectedAddons: selectedAddonsList,
         };
     }
@@ -444,7 +416,7 @@
             // mResidency
             "medical-emirates-id": 2250,
             "dependent-visa": 6000,
-            "eid-card-delivery": 250,
+            // "eid-card-delivery": 250, // Service removed
             "medical-insurance": 1080,
             
             // mAssist
@@ -471,7 +443,8 @@
         return cost;
     }
 
-    function calculateOfficeCost(snapshot) {
+    // Office cost calculation removed as step 5 was removed
+    function calculateOfficeCost() {
         return 0;
     }
 
@@ -518,17 +491,15 @@
         let discountAmount = totalBeforeDiscount * (discountPercentage / 100);
         let licenseAfterDiscount = totalBeforeDiscount - discountAmount;
         
-        // Store the base license cost for display in summary
         window.baseLicenseCostValue = baseLicenseCost;
         
-        // Apply immigration card fee if any visas are selected (including dependency visas)
+       
         let immigrationCardTotal = (investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0) ? 2000 : 0;
         
-        // Store the immigration card fee for display in summary
+       
         window.immigrationCardFee = immigrationCardTotal;
         
-        // Return only the license cost without adding immigration card fee
-        // The immigration card fee will be displayed separately in the visa section
+      
         return licenseAfterDiscount;
     }
 
@@ -576,7 +547,6 @@
                     activityGroups[groupName].push(activity);
                 });
                 
-                // Create tags for each category (not individual activities)
                 Object.keys(activityGroups).forEach(groupName => {
                     const activities = activityGroups[groupName];
                     
@@ -590,7 +560,6 @@
                 // Update business activities cost
                 const businessActivitiesCost = document.getElementById("business-activities-cost");
                 if (businessActivitiesCost) {
-                    // Calculate cost based on number of groups (first 3 are free, then 1000 AED per additional group)
                     const uniqueGroups = Object.keys(activityGroups).length;
                     const extraGroups = Math.max(0, uniqueGroups - 3);
                     const activitiesCostValue = extraGroups * 1000;
@@ -616,7 +585,6 @@
                     }
                 }
             } else {
-                // Fallback to old method for backward compatibility
                 const activityGroups = {};
                 selectedActivities.forEach(activity => {
                     const groupMatch = activity.match(/(.*?) Activity/);
@@ -715,20 +683,7 @@
             visaHeader.innerText = `AED ${totalVisaCost.toLocaleString()}`;
         }
         
-        // Update office type (no cost impact)
-        const officeTypeDisplay = document.getElementById("summary-office-type-display");
-        const officeSpaceCostDisplay = document.getElementById("office-space-cost-display");
-        
-        if (officeType) {
-            const officeTypeName = officeType === 'shared-office' ? 'Shared Office / Shared Desk' : 'Dedicated Office';
-            officeTypeDisplay.innerText = officeTypeName;
-            officeSpaceCostDisplay.innerText = "Included"; // No cost impact
-        } else {
-            officeTypeDisplay.innerText = "None selected";
-            officeSpaceCostDisplay.innerText = "Included"; // No cost impact
-        }
-
-        // Update banking and add-ons
+     
         const addonsContainer = document.getElementById("addons-summary-container");
         addonsContainer.innerHTML = '';
 
@@ -742,7 +697,7 @@
             // Group 2: mResidency
             "medical-emirates-id": { name: "Medical & Emirates ID", cost: 2250, group: "mResidency" },
             "dependent-visa": { name: "Dependent Visa", cost: 6000, group: "mResidency" },
-            "eid-card-delivery": { name: "EID Card Delivery", cost: 250, group: "mResidency" },
+            // "eid-card-delivery" service removed
             "medical-insurance": { name: "Medical Insurance", cost: 1080, group: "mResidency" },
 
             // Group 3: mAssist
@@ -781,15 +736,13 @@
             if (addonsHeader) {
                 addonsHeader.innerText = 'AED 0';
             }
-        } else {
-            // Define unified costs for each group
-            const groupCosts = {
-                "mCore": 2250,
-                "mResidency": 1000,
-                "mAssist": 1000,
-                "mAccounting": 1000
-            };
             
+            // Also update the Meydan Plus price with the ID
+            const meydanPlusPrice = document.getElementById('meydan-plus-price');
+            if (meydanPlusPrice) {
+                meydanPlusPrice.innerText = 'AED 0';
+            }
+        } else {
             // Calculate total addons cost
             let totalAddonsCost = 0;
             
@@ -841,6 +794,12 @@
             const addonsHeader = document.querySelector('.summary-card:nth-child(5) .summary-price');
             if (addonsHeader) {
                 addonsHeader.innerText = `AED ${totalAddonsCost.toLocaleString()}`;
+            }
+            
+            // Also update the Meydan Plus price with the ID
+            const meydanPlusPrice = document.getElementById('meydan-plus-price');
+            if (meydanPlusPrice) {
+                meydanPlusPrice.innerText = `AED ${totalAddonsCost.toLocaleString()}`;
             }
         }
         
@@ -959,7 +918,8 @@
 
     function submitPartialData(step, status = 'incomplete') {
         const shareholdersCount = parseInt(document.getElementById("shareholders-range").value) || 0;
-        const shareholderNationalities = Array.from({ length: shareholdersCount }, (_, i) => document.getElementById(`shareholder-nationality-${i+1}`)?.value || '');
+        // Use default nationality value instead of collecting from removed fields
+        const shareholderNationalities = Array(shareholdersCount).fill('Default');
 
         const selectedAddons = [];
         document.querySelectorAll('.service-checkbox:checked').forEach(checkbox => selectedAddons.push(checkbox.value));
@@ -978,7 +938,7 @@
             investor_visas: document.getElementById("investor-visa-toggle").checked ? (document.getElementById("investor-visa-count")?.value || '0') : '0',
             employee_visas: document.getElementById("employee-visa-toggle").checked ? (document.getElementById("employee-visa-count")?.value || '0') : '0',
             dependency_visas: document.getElementById("dependency-visa-toggle").checked ? (document.getElementById("dependency-visas")?.value || '0') : '0',
-            office_type: document.getElementById("office-type")?.value || '',
+            office_type: "none", // Office type removed as step 5 was removed
             selected_addons: selectedAddons.join(','),
             bank_account: document.getElementById("bank-account")?.checked ? 'yes' : 'no',
             business_bank_account: document.getElementById("business-bank-account")?.value || '',
@@ -1070,7 +1030,8 @@
         const licenseType = document.getElementById("fawri-license").checked ? "fawri" : "regular";
         
         const shareholdersCount = parseInt(document.getElementById("shareholders-range").value) || 0;
-        const shareholderNationalities = Array.from({length: shareholdersCount}, (_,i) => document.getElementById(`shareholder-nationality-${i+1}`)?.value || '');
+        // Use default nationality value instead of collecting from removed fields
+        const shareholderNationalities = Array(shareholdersCount).fill('Default');
 
         const elementorForm = $('#my-calculator-elementor-form');
         if (elementorForm.length > 0) {
@@ -1111,28 +1072,7 @@
         }
     });
 
-    const countries = [
-        "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
-        "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan",
-        "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia",
-        "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica",
-        "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador",
-        "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France",
-        "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau",
-        "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
-        "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South",
-        "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein",
-        "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania",
-        "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
-        "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway",
-        "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland",
-        "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
-        "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands",
-        "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
-        "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan",
-        "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City",
-        "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-    ];
+    // Countries array removed as we no longer need nationality selection
 
     document.addEventListener('DOMContentLoaded', function() {
         if (localStorage.getItem('formHasPartialData') === 'true') {
@@ -1181,16 +1121,28 @@
     function toggleVisaOptions(visaType) {
         const toggle = document.getElementById(`${visaType}-visa-toggle`);
         const optionsDiv = document.getElementById(`${visaType}-visa-options`);
-        const visaSelect = document.getElementById(visaType === 'dependency' ? 'dependency-visas' : `${visaType}-visa-count`);
+        const visaInput = document.getElementById(visaType === 'dependency' ? 'dependency-visas' : `${visaType}-visa-count`);
         
         if (toggle.checked) {
             optionsDiv.style.display = 'block';
-            visaSelect.setAttribute('required', 'required');
+            visaInput.setAttribute('required', 'required');
+            
+            // For investor visa, automatically set to 1 and disable changing it
+            if (visaType === 'investor') {
+                visaInput.value = '1';
+                visaInput.setAttribute('readonly', 'readonly');
+                visaInput.style.backgroundColor = '#f9f9f9';
+            } else {
+                // For employee and dependency visas, set default to 1 but allow changes
+                visaInput.value = '1';
+                visaInput.removeAttribute('readonly');
+                visaInput.style.backgroundColor = '#FFF';
+            }
         } else {
             optionsDiv.style.display = 'none';
-            visaSelect.removeAttribute('required');
-            visaSelect.value = '';
-            const errorElement = document.getElementById(visaSelect.id + '-error');
+            visaInput.removeAttribute('required');
+            visaInput.value = '';
+            const errorElement = document.getElementById(visaInput.id + '-error');
             if (errorElement) errorElement.textContent = '';
         }
         
@@ -1223,13 +1175,10 @@
             // Navigate to step 4 (Visa Options)
             goToStep(4);
             break;
-        case 'office-type':
-            // Navigate to step 5 (Office Type)
-            goToStep(5);
-            break;
+        // case 'office-type' removed as step 5 was removed
         case 'addons':
-            // Navigate to step 6 (Add-ons)
-            goToStep(6);
+            // Navigate to step 5 (Add-ons, previously step 6)
+            goToStep(5);
             break;
     }
     
@@ -1252,7 +1201,13 @@
         });
         
         // Show the selected step
-        const targetStep = document.getElementById(`step-${stepNumber}`);
+        let targetStepId = `step-${stepNumber}`;
+        // Special handling for summary step (still using step-7 ID for backward compatibility)
+        if (stepNumber === 6) {
+            targetStepId = 'step-7';
+        }
+        
+        const targetStep = document.getElementById(targetStepId);
         if (targetStep) {
             targetStep.classList.add('active');
             currentStep = stepNumber;
@@ -1261,13 +1216,13 @@
             updateProgressBar(stepNumber);
             
             // If coming from summary page, set edit mode
-            if (stepNumber < 7 && !sessionStorage.getItem('editMode') && currentStep !== 1) {
+            if (stepNumber < 6 && !sessionStorage.getItem('editMode') && currentStep !== 1) {
                 sessionStorage.setItem('editMode', 'true');
-                sessionStorage.setItem('returnToStep', '7');
+                sessionStorage.setItem('returnToStep', '6'); // Changed from 7 to 6
             }
             
             // If going to the summary step, recalculate costs
-            if (stepNumber === 7) {
+            if (stepNumber === 6) { // Changed from 7 to 6
                 calculateCosts();
             }
             
@@ -1696,8 +1651,6 @@
 
     // Update accordion state on window resize
     window.addEventListener('resize', function() {
-        // Keep accordion functionality consistent across all screen sizes
-        // Just ensure the display properties are consistent with the active state
         
         const accordionHeaders = document.querySelectorAll('.accordion-header');
         

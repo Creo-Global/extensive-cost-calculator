@@ -393,7 +393,7 @@ padding-bottom: 8px;
   z-index: 1;
   border-radius: 0px 15px 15px 0px;
   transition: width 0.3s ease;
-    width: 12%; 
+    width: 15%; /* Updated for 6 steps instead of 7 */
 }
 
 #srix-NewCostCalForm .form-step-container {
@@ -820,46 +820,6 @@ border-top:1px solid #80808029;
     border-color: #dc3545;
 }
 
-/* Add styles for the nationality dropdown to match other dropdowns */
-.nationality-select {
-    width: 100%;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    background-color: white;
-    margin-bottom: 10px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background: url(https://cdn.prod.website-files.com/6746fa16829349829922b7c4/67756f26013b809b43a2c9bd_2bc6d774f44f463a510e3f2e562f66b87d9af327dd8a32323c4be73c8913bc86.webp) no-repeat;
-    background-position: 96% center;
-    background-size: 20px;
-    background-color: white;
-    color: black;
-}
-
-.nationality-select:focus {
-    outline: none;
-}
-
-.nationality-select option {
-    padding: 10px;
-}
-
-
-.nationality-select.error {
-    border: 1px solid #dc3545;
-}
-
-
-@media (max-width: 767px) {
-    .nationality-select {
-        padding: 8px 12px;
-    }
-}
-
-
 .select2-container {
     margin-bottom: 10px !important;
 
@@ -989,9 +949,7 @@ border-top:1px solid #80808029;
     overflow-y: auto !important;
 }
 
-.nationality-dropdown {
-    display: none !important;
-}
+
 
 #theFinalSuccessMessage {
     display: none; 
@@ -1007,9 +965,7 @@ border-top:1px solid #80808029;
     padding: 30px;
 }
 
-.nationality-dropdown .select2-results__option {
-    padding: 10px 15px;
-}
+
 
 #srix-NewCostCalForm .step-text-white,
 #srix-NewCostCalForm .step-text-white span,
@@ -1179,6 +1135,23 @@ margin-left: auto;
 #srix-NewCostCalForm input[type="number"] {
     -moz-appearance: textfield; 
     appearance: textfield; 
+}
+
+/* Visa number input styling */
+#srix-NewCostCalForm .visa-number-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    border: 1px solid #EDEDED;
+    background: #FFF;
+    font-size: 1em;
+    font-family: "Plus Jakarta Sans";
+}
+
+#srix-NewCostCalForm .visa-number-input:focus {
+    outline: none;
+    border: 1px solid #AB81C5;
 }
 
 .cost-disclaimer {

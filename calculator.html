@@ -87,7 +87,7 @@
 
               <label for="shareholders-range">Number of Shareholders</label>
                 <div class="form-group">
-                     <select id="shareholders-range" aria-label="Number of Shareholders" required onchange="updateShareholderNationalities()">
+                     <select id="shareholders-range" aria-label="Number of Shareholders" required>
                          <option value="" disabled selected>Select Number</option>
                          <option value="1">1</option>
                          <option value="2">2</option>
@@ -97,7 +97,8 @@
                          <option value="6">6</option>
                     </select>
                     <div class="error-message" id="shareholders-range-error"></div>
-                    <div id="shareholder-nationalities-container" class="shareholder-input"></div>
+                    <!-- Shareholder nationalities container hidden -->
+                    <div id="shareholder-nationalities-container" class="shareholder-input" style="display: none;"></div>
                 </div>
                     </div>
 
@@ -226,11 +227,6 @@
                             <select id="investor-visa-count" aria-label="Number of Investor Visas">
                                 <option value="" disabled selected>Select number</option>
                                 <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
                     </select>
                             <div class="error-message" id="investor-visa-count-error"></div>
                 </div>
@@ -248,15 +244,7 @@
                             </label>
                         </div>
                         <div id="employee-visa-options" style="display: none; margin-top: 10px;">
-                            <select id="employee-visa-count" aria-label="Number of Employee Visas">
-                                <option value="" disabled selected>Select number</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                    </select>
+                            <input type="number" id="employee-visa-count" aria-label="Number of Employee Visas" min="1" placeholder="Enter number" class="visa-number-input">
                             <div class="error-message" id="employee-visa-count-error"></div>
                         </div>
                 </div>
@@ -273,35 +261,15 @@
                             </label>
                         </div>
                         <div id="dependency-visa-options" style="display: none; margin-top: 10px;">
-                            <select id="dependency-visas" aria-label="Number of Dependency Visas">
-                                <option value="" disabled selected>Select number</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                            </select>
+                            <input type="number" id="dependency-visas" aria-label="Number of Dependency Visas" min="1" placeholder="Enter number" class="visa-number-input">
                             <div class="error-message" id="dependency-visas-error"></div>
                         </div>
                     </div>
                         </div>
                     </div>
 
-            <div class="form-step " id="step-5">
-                <div class="office-options">
-                    <h3 class="form-step-title" style="margin-bottom: 8px;">Please select your office type</h3>
-                    <div class="form-field-container">
-                        <select id="office-type" class="form-input" required aria-label="Office Type">
-                            <option value="" disabled selected>Select your office type</option>
-                            <option value="shared-office">Shared Office / Shared Desk</option>
-                            <option value="dedicated-office">Dedicated Office</option>
-                        </select>
-                        <div class="error-message" id="office-type-error"></div>
-                </div>
-                    </div>
-                </div>
-                <div class="form-step" id="step-6">
+            <!-- Step 5 (Office Type) removed -->
+                <div class="form-step" id="step-5"><!-- Changed from step-6 to step-5 -->
                     <div class="addons-section">
                         <h3 class="form-step-title" style="margin-bottom: 24px;">Please select required services needed</h3>
                         
@@ -309,7 +277,7 @@
                             <h4>mCore</h4>
                             <div class="services-container">
                                 <div class="service-option">
-                                    <input type="checkbox" id="bank-account" class="service-checkbox" value="bank-account">
+                                    <input type="checkbox" id="bank-account" class="service-checkbox" value="bank-account" checked>
                                     <label for="bank-account" class="service-label">Bank Account</label>
                             </div>
                                 <div class="service-option">
@@ -317,7 +285,7 @@
                                     <label for="business-card" class="service-label">Business Card</label>
                         </div>
                                 <div class="service-option">
-                                    <input type="checkbox" id="company-stamp" class="service-checkbox" value="company-stamp">
+                                    <input type="checkbox" id="company-stamp" class="service-checkbox" value="company-stamp" checked>
                                     <label for="company-stamp" class="service-label">Company Stamp</label>
                                 </div>
                                 <div class="service-option">
@@ -342,10 +310,7 @@
                                     <input type="checkbox" id="dependent-visa" class="service-checkbox" value="dependent-visa">
                                     <label for="dependent-visa" class="service-label">Dependent Visa</label>
                                 </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="eid-card-delivery" class="service-checkbox" value="eid-card-delivery">
-                                    <label for="eid-card-delivery" class="service-label">EID Card Delivery</label>
-                                </div>
+                                <!-- EID Card Delivery service removed -->
                                 
                         </div>
                     </div>
@@ -355,7 +320,7 @@
                             <div class="services-container">
                                 <div class="service-option">
                                     <input type="checkbox" id="melite" class="service-checkbox" value="melite">
-                                    <label for="melite" class="service-label">mElite (new)</label>
+                                    <label for="melite" class="service-label">mElite </label>
                                 </div>
                                 <div class="service-option">
                                     <input type="checkbox" id="meeting-rooms" class="service-checkbox" value="meeting-rooms">
@@ -363,11 +328,11 @@
                                 </div>
                                 <div class="service-option">
                                     <input type="checkbox" id="po-box" class="service-checkbox" value="po-box">
-                                    <label for="po-box" class="service-label">PO Box (new)</label>
+                                    <label for="po-box" class="service-label">PO Box </label>
                                 </div>
                                 <div class="service-option">
                                     <input type="checkbox" id="mail-management" class="service-checkbox" value="mail-management">
-                                    <label for="mail-management" class="service-label">Mail Management (new)</label>
+                                    <label for="mail-management" class="service-label">Mail Management </label>
                                 </div>
                                 <div class="service-option">
                                     <input type="checkbox" id="document-translation" class="service-checkbox" value="document-translation">
@@ -502,34 +467,16 @@
                             </div>
                         </div>
                         
-                        <div class="summary-card">
-                            <div class="summary-card-header accordion-header">
-                                <h3>Office Type</h3>
-                                <button type="button" class="card-edit-button" onclick="toggleEditMode('office-type')">
-                                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
-                                </button>
-                                <button type="button" class="accordion-toggle" aria-label="Toggle Office Type details">
-                                    <svg class="accordion-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="summary-card-content accordion-content">
-                                <div class="summary-item">
-                                    <div class="summary-value" id="summary-office-type-display">None selected</div>
-                                    <div class="summary-value price" id="office-space-cost-display">AED 0</div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Office Type summary section removed -->
                         
                         <div class="summary-card">
                             <div class="summary-card-header accordion-header">
-                                <h3>Banking and Add-ons</h3>
-                                <div class="summary-price">AED 3,200</div>
+                                <h3>Meydan Plus</h3>
+                                <div class="summary-price" id="meydan-plus-price">AED 0</div>
                                 <button type="button" class="card-edit-button" onclick="toggleEditMode('addons')">
                                     <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
                                 </button>
-                                <button type="button" class="accordion-toggle" aria-label="Toggle Banking and Add-ons details">
+                                <button type="button" class="accordion-toggle" aria-label="Toggle Meydan Plus details">
                                     <svg class="accordion-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>

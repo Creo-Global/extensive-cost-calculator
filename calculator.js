@@ -1,8 +1,4 @@
-    let currentStep = 1;
-    const totalSteps = 5; 
-    const displayTotalSteps = 6; 
     let selectedActivities = []; 
-
     let LicenseCost = 0;
     let VisaCost = 0;
     let inactivityTimer;
@@ -14,10 +10,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         try {
             hasStartedForm = false;
-            updateProgressBar(1);
-            
-            sessionStorage.removeItem('editMode');
-            sessionStorage.removeItem('returnToStep');
             
             document.querySelectorAll('.activity-count').forEach(count => {
                 count.style.display = 'none';
@@ -28,315 +20,338 @@
                 feeWarning.style.display = 'none';
             }
             
-            // Ensure Bank Account and Company Stamp are checked by default
-            const bankAccount = document.getElementById('bank-account');
-            const companyStamp = document.getElementById('company-stamp');
-            if (bankAccount) bankAccount.checked = true;
-            if (companyStamp) companyStamp.checked = true;
+            // Ensure default services are checked and pills are properly synced
+            const defaultServices = ['bank-account', 'company-stamp', 'melite', 'corporate-tax'];
+            defaultServices.forEach(serviceId => {
+                const input = document.getElementById(serviceId);
+                const pill = document.querySelector(`.service-pill[data-service="${serviceId}"]`);
+                
+                if (input && pill) {
+                    input.checked = true;
+                    pill.classList.add('selected');
+                    
+                    // Ensure check icon is present for selected pills
+                    const existingIcon = pill.querySelector('.check-icon');
+                    if (!existingIcon) {
+                        const checkIcon = document.createElement('span');
+                        checkIcon.className = 'check-icon';
+                        checkIcon.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                            </svg>
+                        `;
+                        pill.insertBefore(checkIcon, pill.firstChild);
+                    }
+                }
+            });
             
             selectedActivities = [];
             
-            document.querySelectorAll('.activity-group').forEach(group => {
-                group.addEventListener('click', function() {
-                    this.classList.toggle('selected');
-                    
-                    if (this.classList.contains('selected') && this.getAttribute('data-count') === "0") {
-                        this.setAttribute('data-count', "0");
-                        
-                        const countElement = this.querySelector('.activity-count');
-                        if (!countElement) {
-                            const countSpan = document.createElement('span');
-                            countSpan.className = 'activity-count';
-                            countSpan.textContent = ' (0)';
-                            this.appendChild(countSpan);
-                        } else {
-                            countElement.textContent = ' (0)';
-                        }
-                        
-                        const plusIcon = this.querySelector('.plus-icon');
-                        if (plusIcon) {
-                            plusIcon.style.display = 'inline-flex';
-                            plusIcon.style.visibility = 'visible';
-                        }
-                    } else if (!this.classList.contains('selected')) {
-                        this.setAttribute('data-count', "0");
-                        
-                        const plusIcon = this.querySelector('.plus-icon');
-                        if (plusIcon) {
-                            plusIcon.style.display = 'none';
-                            plusIcon.style.visibility = 'hidden';
-                        }
-                    }
-                    
-                    const selectedGroups = document.querySelectorAll('.activity-group.selected');
-                    document.getElementById('groups-selected-count').textContent = selectedGroups.length;
-                    
-                    let totalActivities = 0;
-                    selectedGroups.forEach(group => {
-                        totalActivities += parseInt(group.getAttribute('data-count') || "0");
-                    });
-                    document.getElementById('activities-selected-count').textContent = totalActivities;
-                    
-                    selectedActivities = [];
-                    selectedGroups.forEach(group => {
-                        const groupName = group.textContent.trim().split('(')[0].trim();
-                        const count = parseInt(group.getAttribute('data-count') || "0");
-                        
-                        for (let i = 1; i <= count; i++) {
-                            selectedActivities.push(groupName + ' Activity ' + i);
-                        }
-                    });
-                });
-            });
+            setupLiveCalculations();
             
-            const searchInput = document.querySelector('.activity-search-input');
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    const searchTerm = this.value.toLowerCase().trim();
-                    
-                    document.querySelectorAll('.activity-group').forEach(group => {
-                        const groupText = group.textContent.toLowerCase();
-                        if (searchTerm === '' || groupText.includes(searchTerm)) {
-                            group.style.display = 'flex';
-                        } else {
-                            group.style.display = 'none';
-                        }
-                    });
-                });
-            }
+            initializeActivityGroups();
+            
+            calculateCosts();
+            
         } catch (err) {
             console.error("Error during DOMContentLoaded initialization:", err);
         }
-        
-        // Initialize accordion functionality for mobile
-        initAccordion();
     });
 
-    document.addEventListener('change', function(e) {
-        const isFormField = e.target.tagName === 'INPUT' || 
-                            e.target.tagName === 'SELECT' || 
-                            e.target.tagName === 'TEXTAREA';
-        
-        if (isFormField && !hasStartedForm) {
-            hasStartedForm = true;
-        }
-    });
-
-    function updateProgressBar(step) {
-        const progressBar = document.querySelector('#srix-NewCostCalForm .step-progress');
-        
-        if (progressBar) {
-            let progressWidth;
-            switch(step) {
-                case 1: progressWidth = '15%'; break;
-                case 2: progressWidth = '30%'; break;
-                case 3: progressWidth = '50%'; break;
-                case 4: progressWidth = '70%'; break;
-                case 5: progressWidth = '85%'; break;
-                case 6: progressWidth = '100%'; break; 
-                default: progressWidth = '15%';
+    function setupLiveCalculations() {
+        document.addEventListener('input', function(e) {
+            if (e.target.matches('input, select')) {
+                hasStartedForm = true;
+                calculateCosts();
             }
-            progressBar.style.width = progressWidth;
-        }
-    }
+        });
 
-    function updateProgressPill(step) {
-        const displayStep = (step > totalSteps) ? displayTotalSteps : step;
-        document.getElementById("current-step").innerText = displayStep;
-
-        const stepDisplay = document.getElementById("heading-top-right-numbs-steps-1");
-        if (stepDisplay) {
-            const currentStepElem = document.getElementById("current-step");
-            if (currentStepElem && stepDisplay.textContent.includes('/')) {
-                stepDisplay.innerHTML = `<span class="step-word">Step</span> <span id="current-step">${displayStep}</span>/${displayTotalSteps}`;
+        document.addEventListener('change', function(e) {
+            if (e.target.matches('input, select')) {
+                hasStartedForm = true;
+                calculateCosts();
             }
-        }
-        
-        updateProgressBar(step);
-    }
-    updateProgressPill(currentStep);
+        });
 
-    document.getElementById("heading-top-right-numbs-steps-1").classList.add("step-text-colored");
-    document.querySelector(".step-word").style.color = "#6226FF";
-
-    function changeHeading(step){
-        const headings = {
-            1: "Get Started",
-            2: "Company Setup",
-            3: "Business Activity Selection",
-            4: "Visa Types",
-            5: "Banking and Add-ons",
-            6: "Cost Summary"       
-        };
-        document.getElementById("theHeading").innerHTML = headings[step] || "Cost Summary";
-        updateStepDisplay();
-    }
-
-    function updateStepDisplay() {
-        const currentStepDisplay = document.getElementById("current-step");
-        if (currentStepDisplay) {
-            const displayStep = (currentStep > totalSteps) ? displayTotalSteps : currentStep;
-            currentStepDisplay.textContent = displayStep;
-        }
-        
-        if (currentStep > totalSteps || currentStep === 6) { // Changed from 7 to 6 as we removed step 5
-            document.getElementById("theHeading").innerHTML = "Cost Summary";
-            document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
-            document.getElementById('step-7').classList.add('active'); 
-        }
-    }
-
-    function updateButtonsDisplay(step) {
-        const prevBtn = document.getElementById("prevBtn");
-        const nextBtn = document.getElementById("nextBtn");
-        const submitBtn = document.getElementById("submitBtn");
-        const isInEditMode = sessionStorage.getItem('editMode') === 'true';
-
-        prevBtn.classList.toggle("d-none", step === 1);
-        
-        if (step >= 6) { // Changed from 7 to 6 as we removed step 5
-            nextBtn.classList.add("d-none");
-            submitBtn.classList.remove("d-none");
-            if (isInEditMode) {
-                sessionStorage.removeItem('editMode');
-                sessionStorage.removeItem('returnToStep');
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('input[type="checkbox"], input[type="radio"]')) {
+                setTimeout(() => calculateCosts(), 10); // Small delay to ensure state is updated
             }
+        });
+
+        // Setup license card selection
+        setupLicenseCardSelection();
+        
+        // Setup pill option selections
+        setupPillOptions();
+        
+        // Setup service pill selections
+        setupServicePills();
+    }
+
+    // Setup license card selection functionality
+    function setupLicenseCardSelection() {
+        const licenseCards = document.querySelectorAll('.license-card');
+        const licenseSelectBtns = document.querySelectorAll('.license-select-btn');
+        
+        licenseCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const licenseType = this.getAttribute('data-license');
+                selectLicenseType(licenseType);
+                });
+            });
             
-            calculateCosts();
-        } else if (step === 5) { // Changed from 6 to 5 as we removed step 5
-            nextBtn.classList.remove("d-none");
-            submitBtn.classList.add("d-none");
-            
-            if (isInEditMode) {
-                nextBtn.querySelector('span').textContent = "Back to Summary";
+        licenseSelectBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent card click
+                const licenseType = this.getAttribute('data-license');
+                selectLicenseType(licenseType);
+                    });
+                });
+    }
+    
+    function selectLicenseType(licenseType) {
+        // Update all cards and buttons
+        document.querySelectorAll('.license-card').forEach(card => {
+            card.classList.remove('selected');
+            if (card.getAttribute('data-license') === licenseType) {
+                card.classList.add('selected');
+            }
+        });
+        
+        document.querySelectorAll('.license-select-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.getAttribute('data-license') === licenseType) {
+                btn.classList.add('selected');
+                btn.innerHTML = '<span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/></svg></span>Selected';
             } else {
-            nextBtn.querySelector('span').textContent = "View Summary";
+                btn.textContent = 'Select';
+            }
+        });
+        
+        // Update hidden input
+        document.getElementById('license-type').value = licenseType;
+        
+        // Trigger calculation
+        calculateCosts();
+    }
+    
+    // Setup pill option selections
+    function setupPillOptions() {
+        // Duration options
+        const durationOptions = document.querySelectorAll('#duration-options .pill-option');
+        durationOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                durationOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                const value = this.getAttribute('data-value');
+                document.getElementById('license-duration').value = value;
+                
+                calculateCosts();
+            });
+        });
+        
+        // Shareholders options
+        const shareholdersOptions = document.querySelectorAll('#shareholders-options .pill-option');
+        shareholdersOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                shareholdersOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                const value = this.getAttribute('data-value');
+                document.getElementById('shareholders-range').value = value;
+                
+                calculateCosts();
+            });
+        });
+    }
+    
+    // Setup service pill selections
+    function setupServicePills() {
+        const servicePills = document.querySelectorAll('.service-pill');
+        
+        servicePills.forEach(pill => {
+            pill.addEventListener('click', function() {
+                const serviceId = this.getAttribute('data-service');
+                const hiddenInput = document.getElementById(serviceId);
+                
+                if (!hiddenInput) return;
+                
+                // Toggle selected state
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    hiddenInput.checked = false;
+                    
+                    // Remove check icon if it exists
+                    const checkIcon = this.querySelector('.check-icon');
+                    if (checkIcon) {
+                        checkIcon.remove();
             }
         } else {
-            nextBtn.classList.remove("d-none");
-            submitBtn.classList.add("d-none");
-            
-            if (isInEditMode) {
-                nextBtn.querySelector('span').textContent = "Back to Summary";
-            } else {
-            nextBtn.querySelector('span').textContent = "Next";
-            }
-        }
-    }
-
-    function nextStep() {
-        if(validateStep(currentStep)){
-            if (currentStep <= totalSteps) {
-                document.getElementById(`step-${currentStep}`).classList.remove("active");
-                
-                const isInEditMode = sessionStorage.getItem('editMode') === 'true';
-                
-                                 if (isInEditMode) {
-                     // If in edit mode, go directly to summary step
-                     currentStep = 6; // Changed from 7 to 6 as we removed step 5
-                     document.getElementById('step-7').classList.add("active"); // Still using step-7 ID for backward compatibility
-                     // Edit mode is reset in updateButtonsDisplay
-                 } else {
-                    // Normal flow - go to next step
-                currentStep++;
-
-                if (currentStep > totalSteps) {
-                    document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
-                    document.getElementById('step-7').classList.add("active");
-                } else {
-                    document.getElementById(`step-${currentStep}`).classList.add("active");
+                    this.classList.add('selected');
+                    hiddenInput.checked = true;
+                    
+                    // Add check icon if it doesn't exist
+                    const existingIcon = this.querySelector('.check-icon');
+                    if (!existingIcon) {
+                        const checkIcon = document.createElement('span');
+                        checkIcon.className = 'check-icon';
+                        checkIcon.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                            </svg>
+                        `;
+                        this.insertBefore(checkIcon, this.firstChild);
                     }
                 }
-
-                changeHeading(currentStep);
-                updateStepDisplay();
-                updateButtonsDisplay(currentStep);
+                
+                // Special handling for tax compliance pills
+                if (this.classList.contains('tax-compliance-pill')) {
+                    checkTaxCompliance();
+                }
+                
+                // Trigger calculation
                 calculateCosts();
-                updateProgressBar(currentStep);
-
-                hasStartedForm = true;
-                setupInactivityTimer();
-            }
-        }
+            });
+        });
     }
 
-    function prevStep() {
-        if (currentStep > 1) {
-            // Special handling for summary step (still using step-7 ID for backward compatibility)
-            if (currentStep === 6) { // Summary step
-                document.getElementById('step-7').classList.remove("active");
+    // Initialize activity groups functionality
+    function initializeActivityGroups() {
+        document.querySelectorAll('.activity-group').forEach(group => {
+            group.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                
+                if (this.classList.contains('selected') && this.getAttribute('data-count') === "0") {
+                    this.setAttribute('data-count', "0");
+                    
+                    const countElement = this.querySelector('.activity-count');
+                    if (!countElement) {
+                        const countSpan = document.createElement('span');
+                        countSpan.className = 'activity-count';
+                        countSpan.textContent = ' (0)';
+                        this.appendChild(countSpan);
+                } else {
+                        countElement.textContent = ' (0)';
+                    }
+                    
+                    const plusIcon = this.querySelector('.plus-icon');
+                    if (plusIcon) {
+                        plusIcon.style.display = 'inline-flex';
+                        plusIcon.style.visibility = 'visible';
+                    }
+                } else if (!this.classList.contains('selected')) {
+                    this.setAttribute('data-count', "0");
+                    
+                    const plusIcon = this.querySelector('.plus-icon');
+                    if (plusIcon) {
+                        plusIcon.style.display = 'none';
+                        plusIcon.style.visibility = 'hidden';
+                    }
+                }
+                
+                updateActivitySelection();
+                calculateCosts(); // Trigger live calculation
+            });
+        });
+        
+        const searchInput = document.querySelector('.activity-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                document.querySelectorAll('.activity-group').forEach(group => {
+                    const groupText = group.textContent.toLowerCase();
+                    if (searchTerm === '' || groupText.includes(searchTerm)) {
+                        group.style.display = 'flex';
             } else {
-                document.getElementById(`step-${currentStep}`).classList.remove("active");
-            }
-            
-            currentStep--;
-            document.getElementById(`step-${currentStep}`).classList.add("active");
-            
-            // Update navigation elements
-            changeHeading(currentStep);
-            updateStepDisplay();
-            updateButtonsDisplay(currentStep);
-            updateProgressBar(currentStep);
-            
-            // Reset inactivity timer
-            setupInactivityTimer();
+                        group.style.display = 'none';
+                    }
+                });
+            });
         }
     }
 
-    function validateStep(step) {
-        let valid = true;
-        const stepElement = document.getElementById(`step-${step}`);
-        const inputs = stepElement.querySelectorAll("input:not([type='radio']), select");
+    // Update activity selection counts and selectedActivities array
+    function updateActivitySelection() {
+        const selectedGroups = document.querySelectorAll('.activity-group.selected');
+        document.getElementById('groups-selected-count').textContent = selectedGroups.length;
+        
+        let totalActivities = 0;
+        selectedGroups.forEach(group => {
+            totalActivities += parseInt(group.getAttribute('data-count') || "0");
+        });
+        document.getElementById('activities-selected-count').textContent = totalActivities;
+        
+        selectedActivities = [];
+        selectedGroups.forEach(group => {
+            const groupName = group.textContent.trim().split('(')[0].trim();
+            const count = parseInt(group.getAttribute('data-count') || "0");
+            
+            for (let i = 1; i <= count; i++) {
+                selectedActivities.push(groupName + ' Activity ' + i);
+            }
+        });
+    }
 
+    // Validate entire form before submission
+    function validateForm() {
+        let valid = true;
+
+        // Clear previous error messages
         document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
         document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
 
-        inputs.forEach(input => {
+        // Validate required fields
+        const requiredInputs = document.querySelectorAll("input[required], select[required]");
+        requiredInputs.forEach(input => {
             const errorElement = document.getElementById(`${input.id}-error`);
-            const isVisible = input.offsetParent !== null;
 
-            if (isVisible && input.hasAttribute("required") && !input.value) {
+            if (!input.value) {
                 input.classList.add('error');
                 if (errorElement) errorElement.textContent = "This field is required";
                 valid = false;
             }
 
-            if (isVisible && input.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) {
+            if (input.type === "email" && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) {
                 input.classList.add('error');
                 if (errorElement) errorElement.textContent = "Please enter a valid email address";
                 valid = false;
             }
 
-            if (isVisible && input.type === "tel" && !phoneInput.isValidNumber()) {
+            if (input.type === "tel" && input.value && !phoneInput.isValidNumber()) {
                 input.classList.add('error');
                 if (errorElement) errorElement.textContent = "Please enter a valid phone number";
                 valid = false;
             }
 
-            if (isVisible && input.id === "full-name" && !/^[A-Za-z\s]+$/.test(input.value)) {
+            if (input.id === "full-name" && input.value && !/^[A-Za-z\s]+$/.test(input.value)) {
                 input.classList.add('error');
                 if (errorElement) errorElement.textContent = "Name should contain only letters and spaces";
                 valid = false;
             }
         });
 
-        if (step === 2) {
-            if (!document.getElementById("fawri-license").checked && !document.getElementById("regular-license").checked) {
-                const licenseOptionsContainer = document.querySelector('.license-type-options');
-                if (!licenseOptionsContainer.querySelector('.error-message')) {
+        // Validate license type selection (now using hidden input)
+        const licenseTypeInput = document.getElementById("license-type");
+        if (!licenseTypeInput.value) {
+            const licenseCardsContainer = document.querySelector('.license-cards-container');
+            if (licenseCardsContainer && !licenseCardsContainer.querySelector('.error-message')) {
                     const licenseErrorElement = document.createElement('div');
                     licenseErrorElement.className = 'error-message';
                     licenseErrorElement.textContent = "Please select a license type";
-                    licenseOptionsContainer.appendChild(licenseErrorElement);
+                licenseErrorElement.style.textAlign = "center";
+                licenseErrorElement.style.marginTop = "15px";
+                licenseErrorElement.style.color = "#EB5F40";
+                licenseCardsContainer.appendChild(licenseErrorElement);
                 }
                 valid = false;
-            }
         }
         
-        // Validate business activities in step 3
-        if (step === 3) {
+        // Validate business activities
             if (window.selectedActivities.length === 0) {
-                const activitiesContainer = document.getElementById('step-3');
+            const activitiesContainer = document.getElementById('business-activities-section');
                 if (activitiesContainer && !activitiesContainer.querySelector('.activity-error')) {
                     const activityErrorElement = document.createElement('div');
                     activityErrorElement.className = 'error-message activity-error';
@@ -361,16 +376,6 @@
                     }
                 }
                 valid = false;
-            }
-        }
-        
-        if (step === 1 && valid) {
-            firstStepData = {
-                fullName: document.getElementById("full-name").value,
-                phone: document.getElementById("phone").value,
-                email: document.getElementById("email").value
-            };
-            setupInactivityTimer();
         }
 
         return valid;
@@ -392,7 +397,7 @@
         });
 
         return {
-            licenseType: document.getElementById("fawri-license").checked ? "fawri" : "regular",
+            licenseType: document.getElementById("license-type")?.value || "fawri",
             packageType: "standard",
             licenseDuration: parseInt(document.getElementById("license-duration")?.value) || 1,
             investorVisas: (investorVisaToggle && investorVisaToggle.checked) ? 1 : 0, // Investor visa is always 1 if checked
@@ -568,8 +573,8 @@
                     businessActivitiesCost.style.width = "100%";
                     businessActivitiesCost.style.marginTop = "12px";
                     
-                    // Update the price in the accordion header
-                    const businessActivitiesHeader = document.querySelector('.summary-card:nth-child(2) .summary-price');
+                    // Update the price in the business activities header
+                    const businessActivitiesHeader = document.getElementById('business-activities-header-price');
                     if (businessActivitiesHeader) {
                         businessActivitiesHeader.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
                     }
@@ -676,9 +681,9 @@
             immigrationCardElement.innerText = window.immigrationCardFee > 0 ? `AED ${window.immigrationCardFee.toLocaleString()}` : 'AED 0';
         }
         
-        // Update the visa price in the accordion header (including immigration card fee)
+        // Update the visa price in the summary header
         const totalVisaCost = investorVisaCost + employeeVisaCost + dependencyVisaCost + window.immigrationCardFee;
-        const visaHeader = document.querySelector('.summary-card:nth-child(3) .summary-price');
+        const visaHeader = document.getElementById('visas-header-price');
         if (visaHeader) {
             visaHeader.innerText = `AED ${totalVisaCost.toLocaleString()}`;
         }
@@ -928,7 +933,7 @@
             fullName: document.getElementById("full-name")?.value || '',
             phone: phoneInput.getNumber(),
             email: document.getElementById("email")?.value || '',
-            license_type: document.getElementById("fawri-license").checked ? "fawri" : (document.getElementById("regular-license").checked ? "regular" : ""),
+            license_type: document.getElementById("license-type")?.value || "fawri",
             business_activities: selectedActivities.join(', '),
             shareholders_range: document.getElementById("shareholders-range")?.value || '',
             nationalities: "Default Nationality",
@@ -1027,7 +1032,7 @@
         const fullName = document.getElementById("full-name").value;
         const phone = phoneInput.getNumber();
         const email = document.getElementById("email").value;
-        const licenseType = document.getElementById("fawri-license").checked ? "fawri" : "regular";
+        const licenseType = document.getElementById("license-type")?.value || "fawri";
         
         const shareholdersCount = parseInt(document.getElementById("shareholders-range").value) || 0;
         // Use default nationality value instead of collecting from removed fields
@@ -1099,55 +1104,103 @@
         
         updateButtonsDisplay(currentStep);
 
-        const fawriLicense = document.getElementById("fawri-license");
-        const regularLicense = document.getElementById("regular-license");
+        // License type event listeners removed - now handled by card interface
         
-        if (fawriLicense && regularLicense) {
-            fawriLicense.addEventListener('change', () => {
-                if (fawriLicense.checked) document.querySelector('.duration-value').textContent = "60 Minutes";
-            });
-            
-            regularLicense.addEventListener('change', () => {
-                if (regularLicense.checked) document.querySelector('.duration-value').textContent = "3-5 Business Days";
-            });
-            
-            fawriLicense.checked = true;
-            document.querySelector('.duration-value').textContent = "60 Minutes";
-        }
+        // Ensure Fawri license is selected by default for calculations
+        selectLicenseType('fawri');
+        
+        // Trigger initial calculation to populate summary
+        calculateCosts();
         
         checkTaxCompliance();
     });
 
-    function toggleVisaOptions(visaType) {
-        const toggle = document.getElementById(`${visaType}-visa-toggle`);
-        const optionsDiv = document.getElementById(`${visaType}-visa-options`);
-        const visaInput = document.getElementById(visaType === 'dependency' ? 'dependency-visas' : `${visaType}-visa-count`);
+    // New visa card toggle functionality
+    function toggleVisaCard(visaType) {
+        const toggle = document.getElementById(`${visaType === 'dependent' ? 'dependency' : visaType}-visa-toggle`);
+        const card = toggle.closest('.visa-card');
+        const quantityControl = card.querySelector('.visa-quantity-control');
         
         if (toggle.checked) {
-            optionsDiv.style.display = 'block';
-            visaInput.setAttribute('required', 'required');
+            card.classList.add('selected');
             
-            // For investor visa, automatically set to 1 and disable changing it
-            if (visaType === 'investor') {
-                visaInput.value = '1';
-                visaInput.setAttribute('readonly', 'readonly');
-                visaInput.style.backgroundColor = '#f9f9f9';
-            } else {
-                // For employee and dependency visas, set default to 1 but allow changes
-                visaInput.value = '1';
-                visaInput.removeAttribute('readonly');
-                visaInput.style.backgroundColor = '#FFF';
+            // Show quantity control for employee and dependent visas
+            if (visaType === 'employee' || visaType === 'dependent') {
+                if (quantityControl) {
+                    quantityControl.style.display = 'flex';
+                }
+                // Set initial quantity to 1
+                const quantityValue = document.getElementById(`${visaType === 'dependent' ? 'dependent' : visaType}-quantity`);
+                if (quantityValue) {
+                    quantityValue.textContent = '1';
+                }
+                
+                // Update hidden inputs
+                if (visaType === 'employee') {
+                    document.getElementById('employee-visa-count').value = '1';
+                } else if (visaType === 'dependent') {
+                    document.getElementById('dependency-visas').value = '1';
+                }
+            } else if (visaType === 'investor') {
+                // For investor visa, just set to 1 (no quantity selector)
+                document.getElementById('investor-visa-count').value = '1';
             }
-        } else {
-            optionsDiv.style.display = 'none';
-            visaInput.removeAttribute('required');
-            visaInput.value = '';
-            const errorElement = document.getElementById(visaInput.id + '-error');
-            if (errorElement) errorElement.textContent = '';
+            } else {
+            card.classList.remove('selected');
+            
+            // Hide quantity control
+            if (quantityControl) {
+                quantityControl.style.display = 'none';
+            }
+            
+            // Reset hidden inputs
+            if (visaType === 'employee') {
+                document.getElementById('employee-visa-count').value = '0';
+            } else if (visaType === 'dependent') {
+                document.getElementById('dependency-visas').value = '0';
+            } else if (visaType === 'investor') {
+                document.getElementById('investor-visa-count').value = '0';
+            }
         }
         
-        if (currentStep >= 5) calculateCosts();
+        calculateCosts();
     }
+    
+    // Adjust visa quantity with +/- buttons
+    function adjustVisaQuantity(visaType, change) {
+        const quantityElement = document.getElementById(`${visaType === 'dependent' ? 'dependent' : visaType}-quantity`);
+        const currentQuantity = parseInt(quantityElement.textContent) || 1;
+        const newQuantity = Math.max(1, currentQuantity + change);
+        
+        quantityElement.textContent = newQuantity;
+        
+        // Update hidden inputs
+        if (visaType === 'employee') {
+            document.getElementById('employee-visa-count').value = newQuantity;
+        } else if (visaType === 'dependent') {
+            document.getElementById('dependency-visas').value = newQuantity;
+        }
+        
+        // Update minus button state
+        const minusBtn = quantityElement.parentElement.querySelector('.quantity-btn.minus');
+        if (newQuantity <= 1) {
+            minusBtn.disabled = true;
+        } else {
+            minusBtn.disabled = false;
+        }
+        
+        calculateCosts();
+    }
+    
+         // Legacy function for backward compatibility
+     function toggleVisaOptions(visaType) {
+         // This function is kept for any remaining references
+         toggleVisaCard(visaType);
+     }
+
+     // Make functions globally available for onclick handlers
+     window.toggleVisaCard = toggleVisaCard;
+     window.adjustVisaQuantity = adjustVisaQuantity;
     
     function checkTaxCompliance() {
         const corporateTaxChecked = document.getElementById('corporate-tax').checked;

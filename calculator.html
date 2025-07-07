@@ -5,518 +5,615 @@
     </a>
 </header>
 <div class="form-container">
-    <div class="header">
-        <div class="header-grid-srix">
-            <div class="icon">
-                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/6847e3049112d43f19fa23da_Group%201000005348.svg" alt="Document with checkmark">
-            </div>
-            <h2 id="theHeading">Get Started</h2>
-        </div>
-        <div class="step-counter">
-            <span id="heading-top-right-numbs-steps-1">
-                <span class="step-word">Step</span> <span id="current-step">1</span>/7
-            </span>
-            <span id="heading-top-right-numbs-steps-2"></span>
-        </div>
-    </div>
+
     
-    <div class="progress-container">
-        <div class="step-progress"></div>
-    </div>
+    <div class="main-content-wrapper">
+        <!-- Left side - Form sections -->
+        <div class="form-sections-container">
+            <form id="multiStepForm">
 
-    <div class="form-step-container">
-        <form id="multiStepForm">
-            <div class="form-step active" id="step-1">
-                <h3 class="form-step-title">Fill in your details:</h3>
-                <div class="form-group">
-                    <label for="full-name">Enter your full name *</label>
-                    <input type="text" id="full-name" placeholder="Your name" required>
-                    <div class="error-message" id="full-name-error"></div>
+
+                <!-- Company Setup Section -->
+                <div class="form-section" id="company-setup-section">
+                    <div class="section-header">
+                        <h2>What Type Of Business License You Prefer?  📑</h2>
+                        <p class="section-subtitle">Choose The License That Fits Your Business Needs</p>
+                    </div>
+                    
+                    <div class="license-cards-container">
+                        <div class="license-card" data-license="fawri">
+                            <div class="license-card-image">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b601639b2df4bfdbec4_fawri.webp" alt="Fawri License">
+                            </div>
+                            <div class="license-card-content">
+                                <div class="license-header">
+                                    <h3>Fawri License</h3>
+                                    <div class="license-duration">
+                                        <p>In 60 Mins</p>
+                                        <span class="duration-icon">🚀</span>
+                                    </div>
+                                </div>
+                                <p class="license-description">Your instant digital license to start solo, fast and scale with ease.</p>
+                                <div class="license-footer">
+                                    <button type="button" class="learn-more-btn">Learn More →</button>
+                                    <button type="button" class="license-select-btn selected" data-license="fawri">
+                                        <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                          </svg></span>
+                                        Selected
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                    <label for="phone">Enter phone number *</label>
-                    <div class="phone-input">
-                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone number" required>
+                        <div class="license-card" data-license="regular">
+                            <div class="license-card-image">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b602ab2cde8b87325e8_regular.webp" alt="Regular Business License">
+                            </div>
+                            <div class="license-card-content">
+                                <div class="license-header">
+                                    <h3>Regular Business License</h3>
+                                    <div class="license-duration">
+                                        <span>3-5 Days</span>
+                                        <span class="duration-icon">📨</span>
+                                    </div>
+                                </div>
+                                <p class="license-description">A full-fledged entity with broader activities and long-term growth options.</p>
+                                <div class="license-footer">
+                                    <button type="button" class="learn-more-btn">Learn More →</button>
+                                    <button type="button" class="license-select-btn" data-license="regular">
+                                        Select
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="error-message" id="phone-error"></div>
+
+                    <div class="license-options-container">
+                        <div class="license-option-group">
+                            <h4>Duration of Business License</h4>
+                            <div class="pill-options" id="duration-options">
+                                <button type="button" class="pill-option selected" data-value="1">1 Year</button>
+                                <button type="button" class="pill-option" data-value="2">2</button>
+                                <button type="button" class="pill-option" data-value="3">3</button>
+                                <button type="button" class="pill-option" data-value="4">4</button>
+                                <button type="button" class="pill-option" data-value="5">5</button>
+                                <button type="button" class="pill-option" data-value="6">6</button>
+                            </div>
+                            <p class="option-note">* Discount On Multi-Year Licenses</p>
+                        </div>
+
+                        <div class="license-option-group">
+                            <h4>Number of Shareholders</h4>
+                            <div class="pill-options" id="shareholders-options">
+                                <button type="button" class="pill-option selected" data-value="1">1</button>
+                                <button type="button" class="pill-option" data-value="2">2</button>
+                                <button type="button" class="pill-option" data-value="3">3</button>
+                                <button type="button" class="pill-option" data-value="4">4</button>
+                                <button type="button" class="pill-option" data-value="5">5</button>
+                                <button type="button" class="pill-option" data-value="6">6</button>
+                            </div>
+                            <p class="option-note">* Free consultation for more than 6 visas</p>
+                        </div>
+                    </div>
+
+                    <!-- Hidden inputs for form validation -->
+                    <input type="hidden" id="license-type" name="license-type" value="fawri" required>
+                    <input type="hidden" id="license-duration" name="license-duration" value="1" required>
+                    <input type="hidden" id="shareholders-range" name="shareholders-range" value="1" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="email">Enter email address *</label>
-                <input type="email" id="email" placeholder="Email address" required>
-                <div class="error-message" id="email-error"></div>
+                <!-- Business Activities Section -->
+                <div class="form-section" id="business-activities-section">
+                    <h3 class="form-section-title">Business Activities</h3>
+                    
+                    <div class="activity-search-container">
+                        <input type="text" class="activity-search-input" placeholder="Search for activity" aria-label="Search for business activities">
+                        <span class="search-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21 21L16.65 16.65" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                    </div>
+                    
+                    <div class="activity-groups-container">
+                        <div class="activity-group" data-group="administrative" data-count="0">
+                            Administrative <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="agriculture" data-count="0">
+                            Agriculture <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="art" data-count="0">
+                            Art <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="education" data-count="0">
+                            Education <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="ict" data-count="0">
+                            ICT <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="fnb" data-count="0">
+                            F&B, Rentals <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="financial" data-count="0">
+                            Financial <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="healthcare" data-count="0">
+                            Health Care <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="maintenance" data-count="0">
+                            Maintenance <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="services" data-count="0">
+                            Services <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="professional" data-count="0">
+                            Professional <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="realestate" data-count="0">
+                            Real Estate <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="sewerage" data-count="0">
+                            Sewerage <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="trading" data-count="0">
+                            Trading <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="transportation" data-count="0">
+                            Transportation <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="waste" data-count="0">
+                            Waste Collection <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                        <div class="activity-group" data-group="manufacturing" data-count="0">
+                            Manufacturing <span class="activity-count">(0)</span>
+                            <span class="plus-icon"></span>
+                        </div>
+                    </div>
+                    
+                    <div id="activities-list-placeholder"></div>
+                    
+                    <div class="selection-summary">
+                        <p>Groups Selected: <span id="groups-selected-count">0</span></p>
+                        <p>Activities Selected: <span id="activities-selected-count">0</span></p>
+                        <p class="fee-warning">You will be charged +AED 1,000 for each Activity group above 3</p>
+                    </div>
+                </div>
+
+                <!-- Visa Options Section -->
+                <div class="form-section" id="visa-options-section">
+                    <div class="section-header">
+                        <h2>Please Select Your Visa Type 📋</h2>
+                        <p class="section-subtitle">Whether it's for you, your staff, or your family, choose the visa categories that apply.</p>
+                    </div>
+                    
+                    <div class="visa-cards-container">
+                        <div class="visa-card" data-visa="investor">
+                            <div class="visa-card-image">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=200&fit=crop&crop=face" alt="Investor Visa">
+                            </div>
+                            <div class="visa-card-content">
+                                <h3>Investor Visa</h3>
+                                <p class="visa-description">The Dubai Investor Visa lets company owners live and operate their business in the UAE.</p>
+                                <div class="visa-footer">
+                                    <button type="button" class="learn-more-btn">Learn More →</button>
+                                    <div class="visa-toggle-container">
+                                        <label class="visa-toggle-switch">
+                                            <input type="checkbox" id="investor-visa-toggle" onchange="toggleVisaCard('investor')" aria-label="Toggle investor visa">
+                                            <span class="visa-toggle-slider">
+                                                <span class="toggle-no">No</span>
+                                                <span class="toggle-yes">Yes</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="visa-card" data-visa="employee">
+                            <div class="visa-card-image">
+                                <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400&h=200&fit=crop&crop=faces" alt="Employee Visa">
+                            </div>
+                            <div class="visa-card-content">
+                                <h3>Employee Visa</h3>
+                                <p class="visa-description">Dubai's employee visa system is key to hiring, scaling, and staying compliant.</p>
+                                <div class="visa-footer">
+                                    <button type="button" class="learn-more-btn">Learn More →</button>
+                                    <div class="visa-toggle-container">
+                                        <label class="visa-toggle-switch">
+                                            <input type="checkbox" id="employee-visa-toggle" onchange="toggleVisaCard('employee')" aria-label="Toggle employee visa">
+                                            <span class="visa-toggle-slider">
+                                                <span class="toggle-no">No</span>
+                                                <span class="toggle-yes">Yes</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="visa-quantity-control" id="employee-visa-control" style="display: none;">
+                                    <div class="quantity-selector">
+                                        <button type="button" class="quantity-btn minus" onclick="adjustVisaQuantity('employee', -1)">−</button>
+                                        <span class="quantity-value" id="employee-quantity">1</span>
+                                        <button type="button" class="quantity-btn plus" onclick="adjustVisaQuantity('employee', 1)">+</button>
+                                    </div>
+                                    <button type="button" class="visa-selected-btn">
+                                        <span class="check-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                                <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                            </svg>
+                                        </span>
+                                        Selected
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="visa-card" data-visa="dependent">
+                            <div class="visa-card-image">
+                                <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400&h=200&fit=crop&crop=faces" alt="Dependent Visa">
+                            </div>
+                            <div class="visa-card-content">
+                                <h3>Dependent Visa</h3>
+                                <p class="visa-description">The UAE Dependent Visa lets residents sponsor family members to live together.</p>
+                                <div class="visa-footer">
+                                    <button type="button" class="learn-more-btn">Learn More →</button>
+                                    <div class="visa-toggle-container">
+                                        <label class="visa-toggle-switch">
+                                            <input type="checkbox" id="dependency-visa-toggle" onchange="toggleVisaCard('dependent')" aria-label="Toggle dependent visa">
+                                            <span class="visa-toggle-slider">
+                                                <span class="toggle-no">No</span>
+                                                <span class="toggle-yes">Yes</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="visa-quantity-control" id="dependent-visa-control" style="display: none;">
+                                    <div class="quantity-selector">
+                                        <button type="button" class="quantity-btn minus" onclick="adjustVisaQuantity('dependent', -1)">−</button>
+                                        <span class="quantity-value" id="dependent-quantity">1</span>
+                                        <button type="button" class="quantity-btn plus" onclick="adjustVisaQuantity('dependent', 1)">+</button>
+                                    </div>
+                                    <button type="button" class="visa-selected-btn">
+                                        <span class="check-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                                <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                            </svg>
+                                        </span>
+                                        Selected
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-            </div>
-
-                        <div class="form-step" id="step-2">
-                <h3 class="form-step-title">Business License Type</h3>
-                
-                <div class="license-type-options">
-                    <div class="license-option">
-                        <input type="radio" id="fawri-license" name="license-type" value="fawri">
-                        <label for="fawri-license">Fawri License</label>
-                    </div>
-                    <div class="license-option">
-                        <input type="radio" id="regular-license" name="license-type" value="regular">
-                        <label for="regular-license">Regular Business License</label>
-                </div>
-            </div>
-
-                <div class="duration-info">
-                    <p>Duration: <span class="duration-value">60 Minutes</span></p>
-                </div>
-
-               
-                <div class="form-group">
-                <label for="license-duration">Duration of Business License</label>
-                    <select id="license-duration" aria-label="Duration of Business License" required>
-                        <option value="" disabled selected>Select Years</option>
-                        <option value="1">1 Year</option>
-                        <option value="2">2 Years</option>
-                        <option value="3">3 Years</option>
-                        <option value="4">4 Years</option>
-                        <option value="5">5 Years</option>
-                        <option value="6">6 Years</option>
-                        <option value="7">7 Years</option>
+                    <!-- Hidden inputs for backward compatibility -->
+                    <input type="number" id="employee-visa-count" value="0" style="display: none;">
+                    <input type="number" id="dependency-visas" value="0" style="display: none;">
+                    <select id="investor-visa-count" style="display: none;">
+                        <option value="0" selected>0</option>
+                        <option value="1">1</option>
                     </select>
-                    <div class="error-message" id="license-duration-error"></div>
-                    <p class="discount-note">Discount on multi-year licenses</p>
                 </div>
 
-              <label for="shareholders-range">Number of Shareholders</label>
-                <div class="form-group">
-                     <select id="shareholders-range" aria-label="Number of Shareholders" required>
-                         <option value="" disabled selected>Select Number</option>
-                         <option value="1">1</option>
-                         <option value="2">2</option>
-                         <option value="3">3</option>
-                         <option value="4">4</option>
-                         <option value="5">5</option>
-                         <option value="6">6</option>
-                    </select>
-                    <div class="error-message" id="shareholders-range-error"></div>
-                    <!-- Shareholder nationalities container hidden -->
-                    <div id="shareholder-nationalities-container" class="shareholder-input" style="display: none;"></div>
-                </div>
+                <!-- Add-ons Section -->
+                <div class="form-section" id="addons-section">
+                    <div class="section-header">
+                        <h2>Add-Ons</h2>
+                        <p class="section-subtitle">Select the extra services you need to launch and operate smoothly.</p>
                     </div>
+                    
+                    <div class="addons-container">
+                        <div class="addon-category-card">
+                            <div class="addon-category-header">
+                                <h3>mCore</h3>
+                                <button type="button" class="learn-more-btn">Learn More →</button>
+                            </div>
+                            <p class="addon-category-description">Essential tools to kickstart your business with ease, from banking to branding.</p>
+                            <div class="addon-services">
+                                <button type="button" class="service-pill selected" data-service="bank-account">
+                                    <span class="check-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                        </svg>
+                                    </span>
+                                    Bank Account
+                                </button>
+                                <button type="button" class="service-pill" data-service="business-card">Business Card</button>
+                                <button type="button" class="service-pill selected" data-service="company-stamp">
+                                    <span class="check-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                        </svg>
+                                    </span>
+                                    Company Stamp
+                                </button>
+                                <button type="button" class="service-pill" data-service="ecommerce-starter">E-commerce Starter</button>
+                            </div>
+                        </div>
 
-            <div class="form-step" id="step-3">
-                <h3 class="form-step-title">Please select your business activity group</h3>
-                
-                <div class="activity-search-container">
-                    <input type="text" class="activity-search-input" placeholder="Search for activity" aria-label="Search for business activities">
-                    <span class="search-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M21 21L16.65 16.65" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </span>
-                    </div>
-                
-                <div class="activity-groups-container">
-                    <div class="activity-group" data-group="administrative" data-count="0">
-                        Administrative <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
+                        <div class="addon-category-card">
+                            <div class="addon-category-header">
+                                <h3>mResidency</h3>
+                                <button type="button" class="learn-more-btn">Learn More →</button>
+                            </div>
+                            <p class="addon-category-description">Simplified residency services for you, your employees, or your family.</p>
+                            <div class="addon-services">
+                                <button type="button" class="service-pill" data-service="medical-emirates-id">Medical & Emirates ID</button>
+                                <button type="button" class="service-pill" data-service="medical-insurance">Medical Insurance</button>
+                                <button type="button" class="service-pill" data-service="dependent-visa">Dependent Visa</button>
+                            </div>
                         </div>
-                    <div class="activity-group" data-group="agriculture" data-count="0">
-                        Agriculture <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="art" data-count="0">
-                        Art <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                        </div>
-                    <div class="activity-group" data-group="education" data-count="0">
-                        Education <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                </div>
-                    <div class="activity-group" data-group="ict" data-count="0">
-                        ICT <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="fnb" data-count="0">
-                        F&B, Rentals <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="financial" data-count="0">
-                        Financial <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="healthcare" data-count="0">
-                        Health Care <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="maintenance" data-count="0">
-                        Maintenance <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="services" data-count="0">
-                        Services <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="professional" data-count="0">
-                        Professional <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="realestate" data-count="0">
-                        Real Estate <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="sewerage" data-count="0">
-                        Sewerage <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="trading" data-count="0">
-                        Trading <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="transportation" data-count="0">
-                        Transportation <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="waste" data-count="0">
-                        Waste Collection <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-                    </div>
-                    <div class="activity-group" data-group="manufacturing" data-count="0">
-                        Manufacturing <span class="activity-count">(0)</span>
-                        <span class="plus-icon">
-                        </span>
-            </div>
-                <div id="activities-list-placeholder"></div>
-                <div class="selection-summary">
-                    <p>Groups Selected: <span id="groups-selected-count">0</span></p>
-                    <p>Activities Selected: <span id="activities-selected-count">0</span></p>
-                    <p class="fee-warning">You will be charged +AED 1,000 for each Activity group above 3</p>
-                </div>
-                </div>
-            </div>
 
-            <div class="form-step" id="step-4">
-                <div class="visa-options">
-                    <div class="visa-option">
-                        <div class="visa-toggle">
-                            <label for="investor-visa-toggle" class="visa-label">Investor Visa</label>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="investor-visa-toggle" onchange="toggleVisaOptions('investor')" aria-label="Toggle investor visa options">
-                                <span class="toggle-slider">
-                                    <span class="toggle-no">NO</span>
-                                    <span class="toggle-yes">YES</span>
-                                </span>
-                            </label>
+                        <div class="addon-category-card">
+                            <div class="addon-category-header">
+                                <h3>mAssist</h3>
+                                <button type="button" class="learn-more-btn">Learn More →</button>
+                            </div>
+                            <p class="addon-category-description">A full range of tools and administration support built for smooth, hassle-free operation.</p>
+                            <div class="addon-services">
+                                <button type="button" class="service-pill selected" data-service="melite">
+                                    <span class="check-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                        </svg>
+                                    </span>
+                                    mElite
+                                </button>
+                                <button type="button" class="service-pill" data-service="meeting-rooms">Meeting Rooms</button>
+                                <button type="button" class="service-pill" data-service="po-box">PO Box</button>
+                                <button type="button" class="service-pill" data-service="document-translation">Document Translation</button>
+                                <button type="button" class="service-pill" data-service="mail-management">Mail Management</button>
+                                <button type="button" class="service-pill" data-service="virtual-assistant">Virtual Assistant</button>
+                            </div>
                         </div>
-                        <div id="investor-visa-options" style="display: none; margin-top: 10px;">
-                            <select id="investor-visa-count" aria-label="Number of Investor Visas">
-                                <option value="" disabled selected>Select number</option>
-                                <option value="1">1</option>
-                    </select>
-                            <div class="error-message" id="investor-visa-count-error"></div>
-                </div>
-            </div>
 
-                    <div class="visa-option">
-                        <div class="visa-toggle">
-                            <label for="employee-visa-toggle" class="visa-label">Employee Visa</label>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="employee-visa-toggle" onchange="toggleVisaOptions('employee')" aria-label="Toggle employee visa options">
-                                <span class="toggle-slider">
-                                    <span class="toggle-no">NO</span>
-                                    <span class="toggle-yes">YES</span>
-                                </span>
-                            </label>
-                        </div>
-                        <div id="employee-visa-options" style="display: none; margin-top: 10px;">
-                            <input type="number" id="employee-visa-count" aria-label="Number of Employee Visas" min="1" placeholder="Enter number" class="visa-number-input">
-                            <div class="error-message" id="employee-visa-count-error"></div>
-                        </div>
-                </div>
-
-                    <div class="visa-option">
-                        <div class="visa-toggle">
-                            <label for="dependency-visa-toggle" class="visa-label">Dependent Visa</label>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="dependency-visa-toggle" onchange="toggleVisaOptions('dependency')" aria-label="Toggle dependency visa options">
-                                <span class="toggle-slider">
-                                    <span class="toggle-no">NO</span>
-                                    <span class="toggle-yes">YES</span>
-                                </span>
-                            </label>
-                        </div>
-                        <div id="dependency-visa-options" style="display: none; margin-top: 10px;">
-                            <input type="number" id="dependency-visas" aria-label="Number of Dependency Visas" min="1" placeholder="Enter number" class="visa-number-input">
-                            <div class="error-message" id="dependency-visas-error"></div>
-                        </div>
-                    </div>
+                        <div class="addon-category-card">
+                            <div class="addon-category-header">
+                                <h3>mAccounting</h3>
+                                <button type="button" class="learn-more-btn">Learn More →</button>
+                            </div>
+                            <p class="addon-category-description">Full-service tax, audit, and bookkeeping to keep your finances compliant.</p>
+                            <div class="addon-services">
+                                <button type="button" class="service-pill selected tax-compliance-pill" data-service="corporate-tax">
+                                    <span class="check-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                        </svg>
+                                    </span>
+                                    Corporate Tax
+                                </button>
+                                <button type="button" class="service-pill" data-service="vat-registration">VAT Registration</button>
+                                <button type="button" class="service-pill" data-service="bookkeeping">Book Keeping</button>
+                                <button type="button" class="service-pill" data-service="liquidation-report">Liquidation Report</button>
+                                <button type="button" class="service-pill" data-service="financial-audit-report">Financial Audit Report</button>
+                                <button type="button" class="service-pill" data-service="valuation-report">Valuation Report</button>
+                            </div>
                         </div>
                     </div>
 
-            <!-- Step 5 (Office Type) removed -->
-                <div class="form-step" id="step-5"><!-- Changed from step-6 to step-5 -->
-                    <div class="addons-section">
-                        <h3 class="form-step-title" style="margin-bottom: 24px;">Please select required services needed</h3>
+                    <!-- Hidden inputs for backward compatibility -->
+                    <input type="checkbox" id="bank-account" class="service-checkbox" value="bank-account" checked style="display: none;">
+                    <input type="checkbox" id="business-card" class="service-checkbox" value="business-card" style="display: none;">
+                    <input type="checkbox" id="company-stamp" class="service-checkbox" value="company-stamp" checked style="display: none;">
+                    <input type="checkbox" id="ecommerce-starter" class="service-checkbox" value="ecommerce-starter" style="display: none;">
+                    <input type="checkbox" id="medical-emirates-id" class="service-checkbox" value="medical-emirates-id" style="display: none;">
+                    <input type="checkbox" id="medical-insurance" class="service-checkbox" value="medical-insurance" style="display: none;">
+                    <input type="checkbox" id="dependent-visa" class="service-checkbox" value="dependent-visa" style="display: none;">
+                    <input type="checkbox" id="melite" class="service-checkbox" value="melite" checked style="display: none;">
+                    <input type="checkbox" id="meeting-rooms" class="service-checkbox" value="meeting-rooms" style="display: none;">
+                    <input type="checkbox" id="po-box" class="service-checkbox" value="po-box" style="display: none;">
+                    <input type="checkbox" id="mail-management" class="service-checkbox" value="mail-management" style="display: none;">
+                    <input type="checkbox" id="document-translation" class="service-checkbox" value="document-translation" style="display: none;">
+                    <input type="checkbox" id="virtual-assistant" class="service-checkbox" value="virtual-assistant" style="display: none;">
+                    <input type="checkbox" id="corporate-tax" class="service-checkbox tax-compliance-checkbox" value="corporate-tax" checked style="display: none;">
+                    <input type="checkbox" id="vat-registration" class="service-checkbox tax-compliance-checkbox" value="vat-registration" style="display: none;">
+                    <input type="checkbox" id="liquidation-report" class="service-checkbox" value="liquidation-report" style="display: none;">
+                    <input type="checkbox" id="financial-audit-report" class="service-checkbox" value="financial-audit-report" style="display: none;">
+                    <input type="checkbox" id="valuation-report" class="service-checkbox" value="valuation-report" style="display: none;">
+                    <input type="checkbox" id="bookkeeping" class="service-checkbox" value="bookkeeping" style="display: none;">
+
+                    <div id="tax-compliance-warning" class="tax-compliance-warning" style="display: none;">
+                        <p>Corporate Tax and VAT Registration are mandatory for UAE businesses. We strongly recommend keeping these services.</p>
+                    </div>
+                </div>
+
+                <!-- Personal Details Section -->
+                <div class="form-section contact-form-section" id="personal-details-section">
+                    <div class="contact-form-container">
+                        <div class="contact-form-header">
+                            <div class="contact-avatars">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbeca07af928355615613_avatars.png" alt="Team member" class="avatar">
                         
-                        <div class="services-category">
-                            <h4>mCore</h4>
-                            <div class="services-container">
-                                <div class="service-option">
-                                    <input type="checkbox" id="bank-account" class="service-checkbox" value="bank-account" checked>
-                                    <label for="bank-account" class="service-label">Bank Account</label>
                             </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="business-card" class="service-checkbox" value="business-card">
-                                    <label for="business-card" class="service-label">Business Card</label>
+                            <h2 class="contact-title">Fill In And Let's Get One Step Closer</h2>
+                            <p class="contact-subtitle">Enter your details to receive your full setup process and the next steps to launch in Dubai.</p>
                         </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="company-stamp" class="service-checkbox" value="company-stamp" checked>
-                                    <label for="company-stamp" class="service-label">Company Stamp</label>
-                                </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="ecommerce-starter" class="service-checkbox" value="ecommerce-starter">
-                                    <label for="ecommerce-starter" class="service-label">E-commerce Starter</label>
-                                </div>
-                            </div>
-                        </div>
-    
-                        <div class="services-category">
-                            <h4>mResidency</h4>
-                            <div class="services-container">
-                                <div class="service-option">
-                                    <input type="checkbox" id="medical-emirates-id" class="service-checkbox" value="medical-emirates-id">
-                                    <label for="medical-emirates-id" class="service-label">Medical and Emirates ID</label>
-                        </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="medical-insurance" class="service-checkbox" value="medical-insurance">
-                                    <label for="medical-insurance" class="service-label">Medical Insurance</label>
-                    </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="dependent-visa" class="service-checkbox" value="dependent-visa">
-                                    <label for="dependent-visa" class="service-label">Dependent Visa</label>
-                                </div>
-                                <!-- EID Card Delivery service removed -->
-                                
-                        </div>
-                    </div>
 
-                        <div class="services-category">
-                            <h4>mAssist</h4>
-                            <div class="services-container">
-                                <div class="service-option">
-                                    <input type="checkbox" id="melite" class="service-checkbox" value="melite">
-                                    <label for="melite" class="service-label">mElite </label>
-                                </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="meeting-rooms" class="service-checkbox" value="meeting-rooms">
-                                    <label for="meeting-rooms" class="service-label">Meeting Rooms</label>
-                                </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="po-box" class="service-checkbox" value="po-box">
-                                    <label for="po-box" class="service-label">PO Box </label>
-                                </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="mail-management" class="service-checkbox" value="mail-management">
-                                    <label for="mail-management" class="service-label">Mail Management </label>
-                                </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="document-translation" class="service-checkbox" value="document-translation">
-                                    <label for="document-translation" class="service-label">Document Translation</label>
-                                </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="virtual-assistant" class="service-checkbox" value="virtual-assistant">
-                                    <label for="virtual-assistant" class="service-label">Virtual Assistant</label>
-                                </div>
+                        <div class="contact-form-fields">
+                            <div class="form-group">
+                                <label for="full-name">Enter your full name *</label>
+                                <input type="text" id="full-name" placeholder="Your name" required>
+                                <div class="error-message" id="full-name-error"></div>
                             </div>
-            </div>
 
-                        <div class="services-category">
-                            <h4>mAccounting</h4>
-                            <div class="services-container">
-                                <div class="service-option">
-                                    <input type="checkbox" id="corporate-tax" class="service-checkbox tax-compliance-checkbox" value="corporate-tax" checked onchange="checkTaxCompliance()">
-                                    <label for="corporate-tax" class="service-label">Corporate Tax</label>
+                            <div class="form-group">
+                                <label for="phone">Enter phone number *</label>
+                                <div class="phone-input">
+                                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone number" required>
                                 </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="vat-registration" class="service-checkbox tax-compliance-checkbox" value="vat-registration" checked onchange="checkTaxCompliance()">
-                                    <label for="vat-registration" class="service-label">VAT Registration</label>
-                                </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="liquidation-report" class="service-checkbox" value="liquidation-report">
-                                    <label for="liquidation-report" class="service-label">Liquidation Report</label>
-                                </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="financial-audit-report" class="service-checkbox" value="financial-audit-report">
-                                    <label for="financial-audit-report" class="service-label">Financial Audit Report</label>
-                                </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="valuation-report" class="service-checkbox" value="valuation-report">
-                                    <label for="valuation-report" class="service-label">Valuation Report</label>
-                                </div>
-                                <div class="service-option">
-                                    <input type="checkbox" id="bookkeeping" class="service-checkbox" value="bookkeeping">
-                                    <label for="bookkeeping" class="service-label">Bookkeeping</label>
-                                </div>
+                                <div class="error-message" id="phone-error"></div>
                             </div>
-                            <div id="tax-compliance-warning" class="tax-compliance-warning" style="display: none;">
-                                <p>Corporate Tax and VAT Registration are mandatory for UAE businesses. We strongly recommend keeping these services.</p>
+
+                            <div class="form-group">
+                                <label for="email">Enter email address *</label>
+                                <input type="email" id="email" placeholder="Email address" required>
+                                <div class="error-message" id="email-error"></div>
                             </div>
+
+                            <button type="button" id="submitBtn" class="submit-button">
+                                <span>Submit</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14"></path>
+                                    <path d="m12 5 7 7-7 7"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div class="form-step" id="step-7">
-                    <div class="summary-container">
-                        <div class="summary-card">
-                            <div class="summary-card-header accordion-header">
-                                <h3>Company Setup</h3>
-                                <div class="summary-price" id="company-setup-price">AED 0</div>
-                                <button type="button" class="card-edit-button" onclick="toggleEditMode('package-type')">
-                                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
-                                </button>
-                                <button type="button" class="accordion-toggle" aria-label="Toggle Company Setup details">
-                                    <svg class="accordion-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="summary-card-content accordion-content">
-                                <div class="summary-item">
-                                    <div class="summary-label">License Type</div>
-                                    <div class="summary-value" id="summary-package-type">Standard</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">License Duration</div>
-                                    <div class="summary-value" id="summary-license-duration">1 year</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">Shareholders</div>
-                                    <div class="summary-value" id="summary-shareholders">1</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">License Cost</div>
-                                    <div class="summary-value price" id="license-base-cost">AED 0</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="summary-card">
-                            <div class="summary-card-header accordion-header">
-                                <h3>Business Activities</h3>
-                                <div class="summary-price">AED 1,000</div>
-                                <button type="button" class="card-edit-button" onclick="toggleEditMode('business-activities')">
-                                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
-                                </button>
-                                <button type="button" class="accordion-toggle" aria-label="Toggle Business Activities details">
-                                    <svg class="accordion-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="summary-card-content accordion-content" id="business-activities-summary">
-                                <div class="activity-tags" id="activity-tags-container">
-                                </div>
-                                <div class="summary-value price" id="business-activities-cost">AED 1,000</div>
-                            </div>
-                        </div>
-                        
-                        <div class="summary-card">
-                            <div class="summary-card-header accordion-header">
-                                <h3>Number of Visas</h3>
-                                <div class="summary-price">AED 9,000</div>
-                                <button type="button" class="card-edit-button" onclick="toggleEditMode('visa-info')">
-                                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
-                                </button>
-                                <button type="button" class="accordion-toggle" aria-label="Toggle Visa details">
-                                    <svg class="accordion-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="summary-card-content accordion-content">
-                                <div class="summary-item">
-                                    <div class="summary-label">Investor Visa <span id="summary-investor-visa-display">(0)</span></div>
-                                    <div class="summary-value price" id="investor-visa-cost">AED 0</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">Employee Visa <span id="summary-employee-visa-display">(0)</span></div>
-                                    <div class="summary-value price" id="employee-visa-cost">AED 0</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">Dependency Visa <span id="summary-dependency-visa-display">(0)</span></div>
-                                    <div class="summary-value price" id="dependency-visa-cost">AED 0</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">Immigration Card Fee</div>
-                                    <div class="summary-value price" id="immigration-card-cost">AED 0</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Office Type summary section removed -->
-                        
-                        <div class="summary-card">
-                            <div class="summary-card-header accordion-header">
-                                <h3>Meydan Plus</h3>
-                                <div class="summary-price" id="meydan-plus-price">AED 0</div>
-                                <button type="button" class="card-edit-button" onclick="toggleEditMode('addons')">
-                                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/684aa9b0513a914ea32fd797_8f564e7b40f92fcf17afd82da9042501ff0956f1457deaf68f11bcb56e26d7ff.png" alt="Edit">
-                                </button>
-                                <button type="button" class="accordion-toggle" aria-label="Toggle Meydan Plus details">
-                                    <svg class="accordion-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="summary-card-content accordion-content" id="addons-summary-container">
-                            </div>
-                        </div>
-                        
-                        <div class="summary-card total-card">
-                            <div class="summary-card-header total-card-header">
-                                <h3 class="total-card-title">Total</h3>
-                            </div>
-                            <div class="summary-card-content">
-                                <div class="summary-item">
-                                    <div class="summary-value total-price" id="total-cost-display">AED 0</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                        </div>
+            </form>
         </div>
 
-        <div class="form-navigation">
-                <button class="d-none" type="button" id="prevBtn" onclick="prevStep()"><span>Previous</span></button>
-            <button type="button" id="nextBtn" onclick="nextStep()"><span>Next</span> <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5.5 12H19.5M19.5 12L12.5 5M19.5 12L12.5 19" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg></button>
-            <button class="d-none" type="button" id="submitBtn"><span style="margin-right: 5px;">Get a Call</span> <svg xmlns="http://www.w3.org/2000/svg" width="8" height="12" viewBox="0 0 8 12" fill="none">
-                <path d="M1.72266 10.5206L6.51532 5.72797L1.72266 0.935303" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg></button>
-            </div>
-        </div>
-    </form>
-            <div id="theFinalSuccessMessage" class="d-none">
-                <h2>Thank you, <span id="success-first-name"></span>!</h2>
-                <p>Your enquiry has been submitted successfully. One of our Business Setup Advisors will contact you soon.</p>
+        <!-- Right side - Sticky summary -->
+        <div class="sticky-summary-container">
+            <div class="summary-header">
+                <h3>Your Business Setup Estimate</h3>
+                <p class="summary-subtitle">Real-Time Cost Breakdown To Launch Smart</p>
             </div>
             
+            <div class="summary-section">
+                <div class="summary-section-header">
+                    <h4>Company Setup</h4>
+                    <button class="edit-btn" type="button" aria-label="Edit company setup">
+                        <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.36084 12.3975C0.36084 8.66993 0.36084 6.80616 0.969804 5.33599C1.78176 3.37577 3.33915 1.81838 5.29937 1.00642C6.76954 0.397461 8.63331 0.397461 12.3608 0.397461C16.0884 0.397461 17.9521 0.397461 19.4223 1.00642C21.3825 1.81838 22.9399 3.37577 23.7519 5.33599C24.3608 6.80616 24.3608 8.66993 24.3608 12.3975C24.3608 16.125 24.3608 17.9888 23.7519 19.4589C22.9399 21.4192 21.3825 22.9765 19.4223 23.7885C17.9521 24.3975 16.0884 24.3975 12.3608 24.3975C8.63331 24.3975 6.76954 24.3975 5.29937 23.7885C3.33915 22.9765 1.78176 21.4192 0.969804 19.4589C0.36084 17.9888 0.36084 16.125 0.36084 12.3975Z" fill="#882392"/>
+                            <path d="M13.2004 6.7963L7.72708 12.5896C7.52042 12.8096 7.32042 13.243 7.28042 13.543L7.03375 15.703C6.94708 16.483 7.50708 17.0163 8.28042 16.883L10.4271 16.5163C10.7271 16.463 11.1471 16.243 11.3537 16.0163L16.8271 10.223C17.7737 9.22297 18.2004 8.08297 16.7271 6.68964C15.2604 5.30964 14.1471 5.7963 13.2004 6.7963Z" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12.2866 7.76465C12.5733 9.60465 14.0666 11.0113 15.92 11.198" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6.36084 19.0635H18.3608" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            
+                    </button>
+                </div>
+                
+                <div class="summary-content">
+                    <div class="summary-row">
+                        <span class="summary-label">License type</span>
+                        <span class="summary-value" id="summary-package-type">Fawri License 🚀</span>
                     </div>
+                    <div class="summary-row">
+                        <span class="summary-label">License Duration</span>
+                        <span class="summary-value" id="summary-license-duration">1 Year</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Shareholders</span>
+                        <span class="summary-value" id="summary-shareholders">1</span>
+                    </div>
+                    <div class="summary-total">
+                        <span class="summary-label">Total Cost</span>
+                        <span class="summary-price" id="company-setup-price">AED 0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-section">
+                <div class="summary-section-header">
+                    <h4>Business Activity</h4>
+                    <button class="edit-btn" type="button" aria-label="Edit business activities">
+                        <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.36084 12.3975C0.36084 8.66993 0.36084 6.80616 0.969804 5.33599C1.78176 3.37577 3.33915 1.81838 5.29937 1.00642C6.76954 0.397461 8.63331 0.397461 12.3608 0.397461C16.0884 0.397461 17.9521 0.397461 19.4223 1.00642C21.3825 1.81838 22.9399 3.37577 23.7519 5.33599C24.3608 6.80616 24.3608 8.66993 24.3608 12.3975C24.3608 16.125 24.3608 17.9888 23.7519 19.4589C22.9399 21.4192 21.3825 22.9765 19.4223 23.7885C17.9521 24.3975 16.0884 24.3975 12.3608 24.3975C8.63331 24.3975 6.76954 24.3975 5.29937 23.7885C3.33915 22.9765 1.78176 21.4192 0.969804 19.4589C0.36084 17.9888 0.36084 16.125 0.36084 12.3975Z" fill="#882392"/>
+                            <path d="M13.2004 6.7963L7.72708 12.5896C7.52042 12.8096 7.32042 13.243 7.28042 13.543L7.03375 15.703C6.94708 16.483 7.50708 17.0163 8.28042 16.883L10.4271 16.5163C10.7271 16.463 11.1471 16.243 11.3537 16.0163L16.8271 10.223C17.7737 9.22297 18.2004 8.08297 16.7271 6.68964C15.2604 5.30964 14.1471 5.7963 13.2004 6.7963Z" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12.2866 7.76465C12.5733 9.60465 14.0666 11.0113 15.92 11.198" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6.36084 19.0635H18.3608" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            
+                    </button>
+                </div>
+                
+                <div class="summary-content" id="business-activity-summary">
+                    <div class="activity-tags" id="activity-tags-container"></div>
+                    <div class="summary-total">
+                        <span class="summary-label">Total Cost</span>
+                        <span class="summary-price" id="business-activities-cost">AED 0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-section">
+                <div class="summary-section-header">
+                    <h4>Number of Visas</h4>
+                    <button class="edit-btn" type="button" aria-label="Edit visa selections">
+                        <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.36084 12.3975C0.36084 8.66993 0.36084 6.80616 0.969804 5.33599C1.78176 3.37577 3.33915 1.81838 5.29937 1.00642C6.76954 0.397461 8.63331 0.397461 12.3608 0.397461C16.0884 0.397461 17.9521 0.397461 19.4223 1.00642C21.3825 1.81838 22.9399 3.37577 23.7519 5.33599C24.3608 6.80616 24.3608 8.66993 24.3608 12.3975C24.3608 16.125 24.3608 17.9888 23.7519 19.4589C22.9399 21.4192 21.3825 22.9765 19.4223 23.7885C17.9521 24.3975 16.0884 24.3975 12.3608 24.3975C8.63331 24.3975 6.76954 24.3975 5.29937 23.7885C3.33915 22.9765 1.78176 21.4192 0.969804 19.4589C0.36084 17.9888 0.36084 16.125 0.36084 12.3975Z" fill="#882392"/>
+                            <path d="M13.2004 6.7963L7.72708 12.5896C7.52042 12.8096 7.32042 13.243 7.28042 13.543L7.03375 15.703C6.94708 16.483 7.50708 17.0163 8.28042 16.883L10.4271 16.5163C10.7271 16.463 11.1471 16.243 11.3537 16.0163L16.8271 10.223C17.7737 9.22297 18.2004 8.08297 16.7271 6.68964C15.2604 5.30964 14.1471 5.7963 13.2004 6.7963Z" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12.2866 7.76465C12.5733 9.60465 14.0666 11.0113 15.92 11.198" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6.36084 19.0635H18.3608" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            
+                    </button>
+                </div>
+                
+                <div class="summary-content" id="visas-summary">
+                    <div class="summary-row">
+                        <span class="summary-label">Investor Visa <span id="summary-investor-visa-display">(0)</span></span>
+                        <span class="summary-value" id="investor-visa-cost">AED 0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Employee Visa <span id="summary-employee-visa-display">(0)</span></span>
+                        <span class="summary-value" id="employee-visa-cost">AED 0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Dependency Visa <span id="summary-dependency-visa-display">(0)</span></span>
+                        <span class="summary-value" id="dependency-visa-cost">AED 0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-section">
+                <div class="summary-section-header">
+                    <h4>Additional Services</h4>
+                    <button aria-label="Edit additional services" class="edit-btn" type="button">
+                        <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0.36084 12.3975C0.36084 8.66993 0.36084 6.80616 0.969804 5.33599C1.78176 3.37577 3.33915 1.81838 5.29937 1.00642C6.76954 0.397461 8.63331 0.397461 12.3608 0.397461C16.0884 0.397461 17.9521 0.397461 19.4223 1.00642C21.3825 1.81838 22.9399 3.37577 23.7519 5.33599C24.3608 6.80616 24.3608 8.66993 24.3608 12.3975C24.3608 16.125 24.3608 17.9888 23.7519 19.4589C22.9399 21.4192 21.3825 22.9765 19.4223 23.7885C17.9521 24.3975 16.0884 24.3975 12.3608 24.3975C8.63331 24.3975 6.76954 24.3975 5.29937 23.7885C3.33915 22.9765 1.78176 21.4192 0.969804 19.4589C0.36084 17.9888 0.36084 16.125 0.36084 12.3975Z" fill="#882392"/>
+                            <path d="M13.2004 6.7963L7.72708 12.5896C7.52042 12.8096 7.32042 13.243 7.28042 13.543L7.03375 15.703C6.94708 16.483 7.50708 17.0163 8.28042 16.883L10.4271 16.5163C10.7271 16.463 11.1471 16.243 11.3537 16.0163L16.8271 10.223C17.7737 9.22297 18.2004 8.08297 16.7271 6.68964C15.2604 5.30964 14.1471 5.7963 13.2004 6.7963Z" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12.2866 7.76465C12.5733 9.60465 14.0666 11.0113 15.92 11.198" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6.36084 19.0635H18.3608" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            
+                    </button>
+                </div>
+                
+                <div class="summary-content" id="addons-summary-container">
+                    <!-- Addons will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="grand-total-container">
+                <div class="grand-total">
+                    <span class="grand-total-label">Grand Total</span>
+                    <span class="grand-total-amount" id="total-cost-display">AED 0</span>
+                </div>
+            </div>
+            
+            <button class="get-call-btn" type="button">
+                Get A Call
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Success message -->
+    <div id="theFinalSuccessMessage" class="d-none">
+        <h2>Thank you, <span id="success-first-name"></span>!</h2>
+        <p>Your enquiry has been submitted successfully. One of our Business Setup Advisors will contact you soon.</p>
+    </div>
 </div>
 </section>
 

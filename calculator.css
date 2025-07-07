@@ -83,7 +83,7 @@ font-weight: 700;
 
 .sticky-summary-container {
     position: sticky;
-    top: 100px;
+    top: 30px;
     height: fit-content;
     max-height: calc(100vh - 120px);
     overflow-y: auto;
@@ -97,7 +97,7 @@ background: #F9FAFB;
 .form-section {
     display: flex;
     flex-direction: column;
-    gap: 16px !important;
+    gap: 32px !important;
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 64px !important;
@@ -249,10 +249,11 @@ border-radius: 50%;
 }
 
 .section-subtitle {
-    font-size: 16px;
-    color: #666;
+    font-size: 14px;
+    color: #1C1C1C;
     margin: 0;
     font-weight: 400;
+    opacity: 0.8;
 }
 
 /* License cards styling */
@@ -305,6 +306,18 @@ backdrop-filter: blur(24px);
     display: flex;
     flex-direction: column;
     gap: 16px !important;
+}
+
+/* Selected license card styles */
+.license-card.selected {
+    background: linear-gradient(163deg, rgba(5, 102, 51, 0.1) 10.55%, rgba(5, 102, 51, 0.05) 118.78%);
+    border: 2px solid #056633;
+}
+
+/* Reset Fawri special styling when selected to match regular card */
+.license-card[data-license="fawri"].selected {
+    background: linear-gradient(163deg, rgba(5, 102, 51, 0.1) 10.55%, rgba(5, 102, 51, 0.05) 118.78%);
+    border: 2px solid #056633;
 }
 
 .license-header {
@@ -1733,20 +1746,27 @@ background: #F9FAFB;
 
 /* Add-ons Section Styles */
 .addons-container {
+    padding: 16px !important;
     display: flex;
     flex-direction: column;
     gap: 24px;
     margin-top: 24px;
+    border-radius: 10px;
+border: 1px solid #DADBE1;
 }
 
 .addon-category-card {
     background: white;
-    border: 1px solid #E5E7EB;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
+    padding: 16px 16px 24px 16px !important;
+display: flex;
+flex-direction: column;
+gap: 8px;
+border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
+}
+.addon-category-card:last-of-type {
+    border-bottom: none !important;
+}
 .addon-category-header {
     display: flex;
     justify-content: space-between;
@@ -1765,7 +1785,7 @@ background: #F9FAFB;
     color: #6B7280;
     font-size: 14px;
     line-height: 1.5;
-    margin: 0 0 20px 0;
+    margin: 0 0 16px 0 !important;
 }
 
 .addon-services {
@@ -1778,11 +1798,11 @@ background: #F9FAFB;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid #E5E7EB;
-    background: #F9FAFB;
-    color: #6B7280;
+    padding: 12px 16px !important;
+    border-radius: 40px;
+    background: #E3ECE7;
+    color: #056633;
+    border:none;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;

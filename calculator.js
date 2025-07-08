@@ -92,7 +92,7 @@
     // Setup license card selection functionality
     function setupLicenseCardSelection() {
         const licenseCards = document.querySelectorAll('.license-card');
-        const licenseSelectBtns = document.querySelectorAll('.license-select-btn');
+        const licenseSelectBtns = document.querySelectorAll('.select-btn[data-license]');
         
         licenseCards.forEach(card => {
             card.addEventListener('click', function() {
@@ -111,22 +111,15 @@
     }
     
     function selectLicenseType(licenseType) {
-        // Update all cards and buttons
+        // Update all cards and buttons using unified approach
         document.querySelectorAll('.license-card').forEach(card => {
-            card.classList.remove('selected');
-            if (card.getAttribute('data-license') === licenseType) {
-                card.classList.add('selected');
-            }
+            const isSelected = card.getAttribute('data-license') === licenseType;
+            card.classList.toggle('selected', isSelected);
         });
         
-        document.querySelectorAll('.license-select-btn').forEach(btn => {
-            btn.classList.remove('selected');
-            if (btn.getAttribute('data-license') === licenseType) {
-                btn.classList.add('selected');
-                btn.innerHTML = '<span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/></svg></span>Selected';
-            } else {
-                btn.textContent = 'Select';
-            }
+        document.querySelectorAll('.select-btn[data-license]').forEach(btn => {
+            const isSelected = btn.getAttribute('data-license') === licenseType;
+            updateButtonState(btn, isSelected);
         });
         
         // Update hidden input
@@ -192,16 +185,12 @@
                     this.classList.add('selected');
                     hiddenInput.checked = true;
                     
-                    // Add check icon if it doesn't exist
+                    // Add check icon using unified approach
                     const existingIcon = this.querySelector('.check-icon');
                     if (!existingIcon) {
                         const checkIcon = document.createElement('span');
                         checkIcon.className = 'check-icon';
-                        checkIcon.innerHTML = `
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
-                            </svg>
-                        `;
+                        checkIcon.innerHTML = createSelectedButton().match(/<svg.*?<\/svg>/)[0];
                         this.insertBefore(checkIcon, this.firstChild);
                     }
                 }
@@ -387,22 +376,23 @@
     }
         
     function getFormSnapshot() {
-        const investorVisaToggle = document.getElementById('investor-visa-toggle');
-        const employeeVisaToggle = document.getElementById('employee-visa-toggle');
-        const dependencyVisaToggle = document.getElementById('dependency-visa-toggle');
-
         const selectedAddonsList = [];
         document.querySelectorAll('.service-checkbox:checked').forEach(checkbox => {
             selectedAddonsList.push(checkbox.value);
         });
 
+        // For the new visa card system, check the hidden inputs directly
+        const employeeVisaCount = parseInt(document.getElementById("employee-visa-count")?.value) || 0;
+        const dependencyVisaCount = parseInt(document.getElementById("dependency-visas")?.value) || 0;
+        const investorVisaCount = parseInt(document.getElementById("investor-visa-count")?.value) || 0;
+
         return {
             licenseType: document.getElementById("license-type")?.value || "fawri",
             packageType: "standard",
             licenseDuration: parseInt(document.getElementById("license-duration")?.value) || 1,
-            investorVisas: (investorVisaToggle && investorVisaToggle.checked) ? 1 : 0, // Investor visa is always 1 if checked
-            employeeVisas: (employeeVisaToggle && employeeVisaToggle.checked) ? parseInt(document.getElementById("employee-visa-count").value) || 1 : 0,
-            dependencyVisas: (dependencyVisaToggle && dependencyVisaToggle.checked) ? parseInt(document.getElementById("dependency-visas").value) || 1 : 0,
+            investorVisas: investorVisaCount,
+            employeeVisas: employeeVisaCount,
+            dependencyVisas: dependencyVisaCount,
             // officeType removed as step 5 was removed
             selectedAddons: selectedAddonsList,
         };
@@ -1115,50 +1105,25 @@
         checkTaxCompliance();
     });
 
-    // New visa card toggle functionality
+    // Visa card toggle functionality - handles Yes/No toggle for investor visa
     function toggleVisaCard(visaType) {
         const toggle = document.getElementById(`${visaType === 'dependent' ? 'dependency' : visaType}-visa-toggle`);
         const card = toggle.closest('.visa-card');
-        const quantityControl = card.querySelector('.visa-quantity-control');
         
         if (toggle.checked) {
+            // YES state - visa is selected
             card.classList.add('selected');
             
-            // Show quantity control for employee and dependent visas
-            if (visaType === 'employee' || visaType === 'dependent') {
-                if (quantityControl) {
-                    quantityControl.style.display = 'flex';
-                }
-                // Set initial quantity to 1
-                const quantityValue = document.getElementById(`${visaType === 'dependent' ? 'dependent' : visaType}-quantity`);
-                if (quantityValue) {
-                    quantityValue.textContent = '1';
-                }
-                
-                // Update hidden inputs
-                if (visaType === 'employee') {
-                    document.getElementById('employee-visa-count').value = '1';
-                } else if (visaType === 'dependent') {
-                    document.getElementById('dependency-visas').value = '1';
-                }
-            } else if (visaType === 'investor') {
-                // For investor visa, just set to 1 (no quantity selector)
+            if (visaType === 'investor') {
+                // For investor visa, set to 1 when "Yes" is selected
                 document.getElementById('investor-visa-count').value = '1';
             }
-            } else {
+        } else {
+            // NO state - visa is not selected
             card.classList.remove('selected');
             
-            // Hide quantity control
-            if (quantityControl) {
-                quantityControl.style.display = 'none';
-            }
-            
-            // Reset hidden inputs
-            if (visaType === 'employee') {
-                document.getElementById('employee-visa-count').value = '0';
-            } else if (visaType === 'dependent') {
-                document.getElementById('dependency-visas').value = '0';
-            } else if (visaType === 'investor') {
+            if (visaType === 'investor') {
+                // For investor visa, set to 0 when "No" is selected
                 document.getElementById('investor-visa-count').value = '0';
             }
         }
@@ -1166,31 +1131,7 @@
         calculateCosts();
     }
     
-    // Adjust visa quantity with +/- buttons
-    function adjustVisaQuantity(visaType, change) {
-        const quantityElement = document.getElementById(`${visaType === 'dependent' ? 'dependent' : visaType}-quantity`);
-        const currentQuantity = parseInt(quantityElement.textContent) || 1;
-        const newQuantity = Math.max(1, currentQuantity + change);
-        
-        quantityElement.textContent = newQuantity;
-        
-        // Update hidden inputs
-        if (visaType === 'employee') {
-            document.getElementById('employee-visa-count').value = newQuantity;
-        } else if (visaType === 'dependent') {
-            document.getElementById('dependency-visas').value = newQuantity;
-        }
-        
-        // Update minus button state
-        const minusBtn = quantityElement.parentElement.querySelector('.quantity-btn.minus');
-        if (newQuantity <= 1) {
-            minusBtn.disabled = true;
-        } else {
-            minusBtn.disabled = false;
-        }
-        
-        calculateCosts();
-    }
+
     
          // Legacy function for backward compatibility
      function toggleVisaOptions(visaType) {
@@ -1200,7 +1141,6 @@
 
      // Make functions globally available for onclick handlers
      window.toggleVisaCard = toggleVisaCard;
-     window.adjustVisaQuantity = adjustVisaQuantity;
     
     function checkTaxCompliance() {
         const corporateTaxChecked = document.getElementById('corporate-tax').checked;
@@ -1720,3 +1660,125 @@
             }
         });
     });
+
+    // Select visa card function (for employee and dependent visas) - unified approach
+    function selectVisaCard(visaType) {
+        const card = document.querySelector(`[data-visa="${visaType}"]`);
+        const selectBtn = card.querySelector('.select-btn');
+        const selectedControls = document.getElementById(`${visaType}-selected-controls`);
+        const quantityValue = document.getElementById(`${visaType}-quantity`);
+        const selectedBtn = selectedControls?.querySelector('.select-btn');
+        
+        if (card && selectBtn && selectedControls) {
+            // Select the card using unified styling
+            card.classList.add('selected');
+            selectBtn.style.display = 'none';
+            selectedControls.style.display = 'flex';
+            
+            // Update the selected button to use unified styling
+            if (selectedBtn) {
+                updateButtonState(selectedBtn, true);
+            }
+            
+            // Set initial quantity to 1
+            if (quantityValue) {
+                quantityValue.textContent = '1';
+            }
+            
+            // Update hidden input with initial quantity
+            if (visaType === 'employee') {
+                document.getElementById('employee-visa-count').value = 1;
+            } else if (visaType === 'dependent') {
+                document.getElementById('dependency-visas').value = 1;
+            }
+            
+            // Trigger calculation
+            calculateCosts();
+        }
+    }
+
+    // Adjust visa quantity with +/- buttons (unified approach)
+    function adjustVisaQuantity(visaType, change) {
+        const quantityElement = document.getElementById(`${visaType}-quantity`);
+        const currentQuantity = parseInt(quantityElement.textContent) || 1;
+        const newQuantity = Math.max(1, currentQuantity + change);
+        
+        quantityElement.textContent = newQuantity;
+        
+        // Update hidden inputs
+        if (visaType === 'employee') {
+            document.getElementById('employee-visa-count').value = newQuantity;
+        } else if (visaType === 'dependent') {
+            document.getElementById('dependency-visas').value = newQuantity;
+        }
+        
+        // Update minus button state
+        const minusBtn = quantityElement.parentElement.querySelector('.quantity-btn.minus');
+        if (newQuantity <= 1) {
+            minusBtn.disabled = true;
+        } else {
+            minusBtn.disabled = false;
+        }
+        
+        calculateCosts();
+    }
+
+    // Make functions globally available
+    window.selectVisaCard = selectVisaCard;
+    window.deselectVisaCard = deselectVisaCard;
+    window.adjustVisaQuantity = adjustVisaQuantity;
+
+    // Deselect visa card function - unified approach
+    function deselectVisaCard(visaType) {
+        const card = document.querySelector(`[data-visa="${visaType}"]`);
+        const selectBtn = card.querySelector('.select-btn');
+        const selectedControls = document.getElementById(`${visaType}-selected-controls`);
+        const quantityValue = document.getElementById(`${visaType}-quantity`);
+        const selectedBtn = selectedControls?.querySelector('.select-btn');
+        
+        if (card && selectBtn && selectedControls) {
+            // Deselect the card using unified styling
+            card.classList.remove('selected');
+            selectBtn.style.display = 'block';
+            selectedControls.style.display = 'none';
+            
+            // Reset the selected button to use unified styling
+            if (selectedBtn) {
+                updateButtonState(selectedBtn, false);
+            }
+            
+            // Reset quantity to 1
+            if (quantityValue) {
+                quantityValue.textContent = '1';
+            }
+            
+            // Update hidden input
+            if (visaType === 'employee') {
+                document.getElementById('employee-visa-count').value = 0;
+            } else if (visaType === 'dependent') {
+                document.getElementById('dependency-visas').value = 0;
+            }
+            
+            // Trigger calculation
+            calculateCosts();
+        }
+    }
+
+    // Make function globally available
+    window.deselectVisaCard = deselectVisaCard;
+
+    // Unified function to create select/selected button with consistent styling
+    function createSelectedButton() {
+        return '<span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/></svg></span>Selected';
+    }
+
+    // Unified function to handle button state changes for consistency
+    function updateButtonState(button, isSelected) {
+        if (isSelected) {
+            button.classList.add('selected');
+            button.innerHTML = createSelectedButton();
+        } else {
+            button.classList.remove('selected');
+            button.textContent = 'Select';
+        }
+    }

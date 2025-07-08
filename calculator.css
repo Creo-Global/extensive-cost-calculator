@@ -186,15 +186,6 @@ align-items: center;
 background: white;
 }
 
-#srix-NewCostCalForm .license-option:hover {
-    border-color: #AB81C5;
-}
-
-#srix-NewCostCalForm .license-option.selected {
-    border-color: #AB81C5;
-    background: linear-gradient(163deg, rgba(171, 129, 197, 0.1) 10.55%, rgba(66, 184, 198, 0.1) 118.78%);
-}
-
 #srix-NewCostCalForm .license-option label {
     margin: 0;
     color: #333;
@@ -243,7 +234,7 @@ border-radius: 50%;
 .section-header h2 {
     font-size: 24px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #1c1c1c;
     margin-bottom: 16px !important;
     line-height: 1.2;
 }
@@ -265,7 +256,7 @@ border-radius: 50%;
 }
 
 .license-card {
-    background-color: #f9fafb;
+
     border-radius: 10px;
     overflow: hidden;
  
@@ -280,14 +271,6 @@ border-radius: 50%;
 background-color: #f9fafb;
 }
 
-.license-card[data-license="fawri"] {
-    border: 3px solid #056633;
-
-    background: linear-gradient(0deg, rgba(246, 255, 250, 0.80) 0%, rgba(246, 255, 250, 0.80) 100%), rgba(217, 217, 217, 0.25);
-    
-    -webkit-backdrop-filter: blur(24px);
-backdrop-filter: blur(24px);
-}
 
 .license-card-image {
     width: 100%;
@@ -314,12 +297,6 @@ backdrop-filter: blur(24px);
     border: 2px solid #056633;
 }
 
-/* Reset Fawri special styling when selected to match regular card */
-.license-card[data-license="fawri"].selected {
-    background: linear-gradient(163deg, rgba(5, 102, 51, 0.1) 10.55%, rgba(5, 102, 51, 0.05) 118.78%);
-    border: 2px solid #056633;
-}
-
 .license-header {
     display: flex;
     justify-content: space-between;
@@ -328,9 +305,9 @@ backdrop-filter: blur(24px);
 }
 
 .license-header h3 {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #1c1c1c;
     margin: 0;
 }
 
@@ -359,10 +336,11 @@ backdrop-filter: blur(24px);
 }
 
 .license-description {
-    font-size: 14px;
-    color: #666;
+    font-size: 12px;
+    color: #1C1C1C;
     line-height: 1.5;
-    margin-bottom: 24px;
+    margin-bottom: 16px !important;
+    opacity: 0.8;
 }
 
 .license-footer {
@@ -386,35 +364,38 @@ backdrop-filter: blur(24px);
     color: #056633;
 }
 
-.license-select-btn {
+.select-btn {
     padding: 8px 12px !important;
     border-radius: 40px;
-background: #E3ECE7;
+    background: #E3ECE7;
     border: none;
+    color: #056633;
     width: 101.67px;
     justify-content: center;
-align-items: center;
-gap: 8px;
-    border-radius: 25px;
-    padding: 10px 20px;
+    align-items: center;
+    gap: 8px;
     font-size: 12px;
     font-weight: 600;
+    line-height: 24px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
 }
 
-.license-select-btn.selected {
+.select-btn.selected {
     background: #056633;
     color: white;
 }
 
-.license-select-btn:hover:not(.selected) {
+.select-btn:hover:not(.selected) {
     background: #d1d5db;
 }
 
+/* Check icon styling */
 .check-icon {
     font-size: 12px;
+    display: flex;
+    align-items: center;
 }
 
 /* License options styling */
@@ -422,7 +403,6 @@ gap: 8px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
-    margin-top: 24px !important;
 }
 .license-option-group{
     display: flex;
@@ -435,9 +415,9 @@ gap: 8px;
 border: 1px solid #DADBE1;
 }
 .license-option-group h4 {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #1c1c1c;
     margin-bottom: 16px;
 }
 
@@ -474,10 +454,14 @@ border: 1px solid #DADBE1;
 }
 
 .option-note {
-    font-size: 14px;
-    color: #3b82f6;
-    margin: 0;
-    font-style: italic;
+    color: #004A98;
+    font-family: "Plus Jakarta Sans";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 22px; 
+    text-transform: capitalize;
+    opacity: 0.8;
 }
 
 .activity-search-container {
@@ -620,31 +604,28 @@ border: 1px solid #DADBE1;
 
 .visa-card {
     background: white;
-    border-radius: 16px;
+    border-radius: 10px;
+    border: 1px solid #DADBE1;
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
-    border: 2px solid transparent;
 }
 
 .visa-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+   background: #F9FAFB;
 }
 
-.visa-card.selected {
-    border-color: #056633;
-}
 
 .visa-card-image {
     width: 100%;
-    height: 180px;
+    height: 100px;
     overflow: hidden;
 }
 
 .visa-card-image img {
     width: 100%;
-    height: 100%;
+    height: 100px;
     object-fit: cover;
 }
 
@@ -655,15 +636,18 @@ border: 1px solid #DADBE1;
 .visa-card-content h3 {
     font-size: 20px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #1c1c1c;
     margin: 0 0 12px 0;
 }
 
 .visa-description {
-    font-size: 14px;
-    color: #666;
+    font-size: 12px;
+    color: #1C1C1C;
     line-height: 1.5;
-    margin-bottom: 24px;
+    margin-bottom: 16px !important;
+    font-family: "Plus Jakarta Sans";
+    font-weight: 400;
+    opacity: 0.8;
 }
 
 .visa-footer {
@@ -676,13 +660,42 @@ border: 1px solid #DADBE1;
 .visa-toggle-container {
     display: flex;
     align-items: center;
+    gap: 8px;
+    border-radius: 40px;
+background: #E3ECE7;
+padding: 8px 12px !important;
+}
+
+.visa-toggle-labels {
+    position: relative;
+    min-width: 24px;
+
+}
+
+.visa-toggle-label {
+    position: absolute;
+    left: 0;
+    top: -8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #056633;
+    transition: opacity 0.3s ease;
+}
+
+.visa-toggle-label.no {
+    opacity: 1;
+}
+
+.visa-toggle-label.yes {
+    opacity: 0;
 }
 
 .visa-toggle-switch {
     position: relative;
     display: inline-block;
-    width: 90px;
-    height: 40px;
+    width: 50px;
+    height: 30px;
+    margin-bottom: 0 !important;
 }
 
 .visa-toggle-switch input {
@@ -698,137 +711,40 @@ border: 1px solid #DADBE1;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #e8f0ed;
-    border-radius: 20px;
+    background-color: #DADBE1;
+    border-radius: 15px;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    padding-left: 16px;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.visa-toggle-slider .toggle-no {
-    position: absolute;
-    left: 16px;
-    z-index: 3;
-    color: #4a7c59;
-    transition: all 0.3s ease;
-}
-
-.visa-toggle-slider .toggle-yes {
-    position: absolute;
-    left: 16px;
-    z-index: 3;
-    color: #4a7c59;
-    transition: all 0.3s ease;
-    opacity: 0;
 }
 
 .visa-toggle-slider:before {
     position: absolute;
     content: "";
-    height: 32px;
-    width: 32px;
-    right: 4px;
+    height: 22px;
+    width: 22px;
+    left: 4px;
     top: 4px;
     background-color: white;
-    border-radius: 16px;
+    border-radius: 50%;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 2;
+}
+
+.visa-toggle-switch input:checked + .visa-toggle-slider {
+    background-color: #056633;
 }
 
 .visa-toggle-switch input:checked + .visa-toggle-slider:before {
-    transform: translateX(-50px);
+    transform: translateX(20px);
 }
 
-.visa-toggle-switch input:checked + .visa-toggle-slider .toggle-yes {
-    opacity: 1;
-}
-
-.visa-toggle-switch input:checked + .visa-toggle-slider .toggle-no {
+.visa-toggle-container:has(.visa-toggle-switch input:checked) .visa-toggle-label.no {
     opacity: 0;
 }
 
-/* Visa quantity controls */
-.visa-quantity-control {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 16px;
-    border-top: 1px solid #f3f4f6;
-    margin-top: 16px;
+.visa-toggle-container:has(.visa-toggle-switch input:checked) .visa-toggle-label.yes {
+    opacity: 1;
 }
 
-.quantity-selector {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #f8fafc;
-    border-radius: 25px;
-    padding: 4px;
-}
-
-.quantity-btn {
-    width: 32px;
-    height: 32px;
-    border: none;
-    border-radius: 50%;
-    background: #056633;
-    color: white;
-    font-size: 18px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.quantity-btn:hover {
-    background: #16a34a;
-    transform: scale(1.05);
-}
-
-.quantity-btn.minus:disabled {
-    background: #e5e7eb;
-    color: #9ca3af;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.quantity-value {
-    min-width: 24px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 600;
-    color: #1f2937;
-}
-
-.visa-selected-btn {
-    background: #056633;
-    color: white;
-    border: none;
-    border-radius: 25px;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.3s ease;
-}
-
-.visa-selected-btn:hover {
-    background: #16a34a;
-}
-
-.visa-selected-btn .check-icon {
-    display: flex;
-    align-items: center;
-}
 
 .toggle-switch {
     position: relative;
@@ -1580,10 +1496,7 @@ background: #F9FAFB;
         align-items: stretch;
     }
     
-    .license-select-btn {
-        justify-content: center;
-        width: 100%;
-    }
+
     
     /* Mobile styles for pill options */
     .license-options-container {
@@ -1635,10 +1548,7 @@ background: #F9FAFB;
         align-items: center;
     }
     
-    .visa-selected-btn {
-    width: 100%;
-        justify-content: center;
-}
+
 }
 
 .progress-container,
@@ -1987,4 +1897,87 @@ border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         width: 100%;
         align-self: center;
     }
+}
+
+
+
+/* Selected visa card styles */
+.visa-card.selected {
+    border-radius: 10px;
+    border: 3px solid #056633;
+    background: linear-gradient(0deg, rgba(246, 255, 250, 0.80) 0%, rgba(246, 255, 250, 0.80) 100%), linear-gradient(0deg, rgba(255, 255, 255, 0.60) 0%, rgba(255, 255, 255, 0.60) 100%), rgba(217, 217, 217, 0.25);
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+}
+
+/* Visa header layout */
+.visa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px !important;
+}
+
+.visa-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+/* Visa footer with controls */
+.visa-footer {
+    display: flex;
+        justify-content: flex-end;
+        align-items: center;
+}
+
+.visa-selected-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* Quantity selector with green circle */
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.quantity-btn {
+    background: #e9efec;
+    border: none;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    color: #056633;
+    font-size: 20px;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.quantity-btn:hover {
+    background: #056633;
+    color: white;
+}
+
+.quantity-value {
+    background: #056633;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: "Plus Jakarta Sans";
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

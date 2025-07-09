@@ -206,82 +206,501 @@
         });
     }
 
+    // Initialize Supabase client
+    const supabaseUrl = 'https://bwommjnbmumvgtlyfddn.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3b21tam5ibXVtdmd0bHlmZGRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0NDM0NTAsImV4cCI6MjA2NTAxOTQ1MH0.1OxopB9p-yoGoYpY7AUyHs-T7Fe0cK2dUjFq_FbCL-I';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    window.selectedActivities = window.selectedActivities || [];
+
     // Initialize activity groups functionality
     function initializeActivityGroups() {
-        document.querySelectorAll('.activity-group').forEach(group => {
-            group.addEventListener('click', function() {
-                this.classList.toggle('selected');
-                
-                if (this.classList.contains('selected') && this.getAttribute('data-count') === "0") {
-                    this.setAttribute('data-count', "0");
-                    
-                    const countElement = this.querySelector('.activity-count');
-                    if (!countElement) {
-                        const countSpan = document.createElement('span');
-                        countSpan.className = 'activity-count';
-                        countSpan.textContent = ' (0)';
-                        this.appendChild(countSpan);
-                } else {
-                        countElement.textContent = ' (0)';
+        const groups = [
+            { name: "F&B, Rentals", group: "fnb,rentals", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e641d24b90c96dfafdc34_d431eb034e1a686ed0a5ae255ad6cf5a9bbd5f8bdf1b61ed4f6d01c555ea3d78.png" },
+            { name: "Financial", group: "financial", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e642316bbf305f8e487a3_38de45a3cb52fb4ab3afc9e833ae57e84444434efed8001b01a697990d7b35ea.png" },
+            { name: "Education", group: "education", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e64260ad8af5c3d69f211_879ec5f9869afa804e916bb99888aad8ce26efbb286a02f5879c1941257397bb.png" },
+            { name: "Transportation", group: "transportation", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e64208f117b22b75ec5ef_55c616434ce274d0e445905bfb2f80866fe3201a85ff5beeb6e469373fce2ede.png" },
+            { name: "Maintenance", group: "maintenance", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e644dcfa0b9f15e914df6_89592b5bd60a9091d367ba0c123ab57389d3276ede8f8e9fc06f4540d5349b9a.png" },
+            { name: "Real Estate", group: "realestate", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e645f24b90c96dfb01ada_9d419d848a5d582d7fcbdd95afb68d2afea53b1583d707f615383ab652f39f29.png" },
+            { name: "Administrative", group: "administrative", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e6800108c99cf14ab7d92_289b192ec79ecb38926fdb5e00570aef3306f5026282f58165024e31f1507bc7.png" },
+            { name: "Agriculture", group: "agriculture", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e6441d775866c5a428411_2259ef99aba05e1260ed45d53205346e30587661bb6e0ea857a59b12ee92bc61.png" },
+            { name: "Art", group: "art", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e645710be6e1a2c9c8859_3433ab633670e596ff531f10e43b4b4c4a2117b0ba5e17363b3618a5aad911eb.png" },
+            { name: "ICT", group: "ict", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e6478b5d69a994162ea64_356a5ddca879de1a0a9d8b7efb588da5474b15bb46e3833303ce91097ef8b0db.png" },
+            { name: "Health Care", group: "healthcare", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e644a7afd519c334e2dc5_ba72fb6b951ceb1bbe752d9c90d3bb4f797c9a8b711a8548d55b7774712d7e3d.png" },
+            { name: "Services", group: "services", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e647b1f864562f8be0dce_427dca92cbdac3f7d860b97c442e62841bc613a6a1be5a7bd1e99c9af25cec12.png" },
+            { name: "Professional", group: "professional", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e643e7cb5992fa0758299_841ae68fac18927fd0b0a8d3669eef41098c973cad8471d53bc4a244aaadd9a5.png" },
+            { name: "Sewerage", group: "sewerage", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e649e493fb8933a8bc29b_85b78022048b39d8b16d509165289201a5ef0973c39681cb3384025e0af0f297.png" },
+            { name: "Trading", group: "trading", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e649436c79ebb53083e4d_37610fecfe4fe44b5b17208f4ba91c4ea481fe3a1520f6d8de0c93b7422184ec.png" },
+            { name: "Waste Collection", group: "waste", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e64994001239338faf90d_cd9b5d6d70e62b356547c76722455a54e960d708ee8c8769d2f5fb4f2323ece5.png" },
+            { name: "Manufacturing", group: "manufacturing", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e64a1516df3f972e8aff3_ec0fdf4e82cdbee6f54835bee98f804b24793be92e247687884fa73958b73e9f.png" },
+        ];
+
+        const container = document.querySelector('.activity-cards-container');
+        container.innerHTML = ''; // Clear existing content
+
+        groups.forEach(groupInfo => {
+            const card = document.createElement('div');
+            card.className = 'activity-card';
+            card.dataset.group = groupInfo.group;
+            
+            card.innerHTML = `
+                <div class="activity-card-header">
+                    <span class="selected-activities-count" style="display: none;">Selected Activities: 0</span>
+                    <div class="activity-checkbox">
+                        <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="11" viewBox="0 0 14 11" fill="none">
+                            <path d="M1 5.5L5 9.5L13 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="activity-card-body">
+                    <img src="${groupInfo.icon}" alt="${groupInfo.name} Icon" class="activity-icon">
+                    <h3>${groupInfo.name}</h3>
+                    <a href="#" class="select-activity-link">Select your activity <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none">
+  <path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979589 8.88906 1.05226 8.92198 1.13219C8.95483 1.21213 8.97163 1.29779 8.97135 1.3842Z" fill="url(#paint0_linear_4640_6386)"/>
+  <defs>
+    <linearGradient id="paint0_linear_4640_6386" x1="-2.20508" y1="5.4043" x2="8.75062" y2="-1.23878" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB5F40"/>
+      <stop offset="1" stop-color="#B5348B"/>
+    </linearGradient>
+  </defs></svg></span></a></div>
+            `;
+            
+            container.appendChild(card);
+
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                // If the click is on the link, open the modal, otherwise toggle selection
+                if (e.target.closest('.select-activity-link')) {
+                    if (!card.classList.contains('selected')) {
+                        toggleActivityGroup(card, true); // Select the card first
                     }
-                    
-                    const plusIcon = this.querySelector('.plus-icon');
-                    if (plusIcon) {
-                        plusIcon.style.display = 'inline-flex';
-                        plusIcon.style.visibility = 'visible';
-                    }
-                } else if (!this.classList.contains('selected')) {
-                    this.setAttribute('data-count', "0");
-                    
-                    const plusIcon = this.querySelector('.plus-icon');
-                    if (plusIcon) {
-                        plusIcon.style.display = 'none';
-                        plusIcon.style.visibility = 'hidden';
-                    }
+                    openActivityModal(groupInfo);
+            } else {
+                    toggleActivityGroup(card);
                 }
-                
-                updateActivitySelection();
-                calculateCosts(); // Trigger live calculation
             });
         });
+
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalOverlay = document.getElementById('activity-search-modal');
+        closeModalBtn.addEventListener('click', closeActivityModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeActivityModal();
+            }
+        });
+
+        // Setup scroll indicator
+        setupScrollIndicator();
+    }
+
+    function toggleActivityGroup(card, forceSelect = false) {
+        if (forceSelect) {
+            card.classList.add('selected');
+        } else {
+            card.classList.toggle('selected');
+        }
         
-        const searchInput = document.querySelector('.activity-search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase().trim();
-                
-                document.querySelectorAll('.activity-group').forEach(group => {
-                    const groupText = group.textContent.toLowerCase();
-                    if (searchTerm === '' || groupText.includes(searchTerm)) {
-                        group.style.display = 'flex';
+        const isSelected = card.classList.contains('selected');
+        const countElement = card.querySelector('.selected-activities-count');
+        const linkElement = card.querySelector('.select-activity-link');
+
+        if (isSelected) {
+            countElement.style.display = 'block';
+            linkElement.innerHTML = 'Select more activities <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979589 8.88906 1.05226 8.92198 1.13219C8.95483 1.21213 8.97163 1.29779 8.97135 1.3842Z" fill="url(#paint0_linear_4640_6386)"/><defs><linearGradient id="paint0_linear_4640_6386" x1="-2.20508" y1="5.4043" x2="8.75062" y2="-1.23878" gradientUnits="userSpaceOnUse"><stop stop-color="#EB5F40"/><stop offset="1" stop-color="#B5348B"/></linearGradient></defs></svg></span>';
+        } else {
+            countElement.style.display = 'none';
+            // Also deselect all activities within this group
+            const group = card.dataset.group;
+            window.selectedActivities = window.selectedActivities.filter(act => act.groupName !== group);
+            updateActivityCountOnCard(group);
+        }
+        
+        updateSelectedGroupsCount();
+        calculateCosts();
+    }
+
+    function setupScrollIndicator() {
+        const wrapper = document.querySelector('.activity-cards-wrapper');
+        const container = document.querySelector('.activity-cards-container');
+        const scrollIndicator = document.getElementById('scroll-indicator');
+        
+        if (!wrapper || !container || !scrollIndicator) return;
+
+        function updateScrollIndicator() {
+            const scrollLeft = wrapper.scrollLeft;
+            const scrollWidth = wrapper.scrollWidth;
+            const clientWidth = wrapper.clientWidth;
+            
+            // Hide indicator if content doesn't overflow horizontally
+            if (scrollWidth <= clientWidth + 5) {
+                scrollIndicator.classList.add('hidden');
+                return;
+            }
+            
+            // Hide indicator if scrolled to near the end
+            if (scrollLeft >= scrollWidth - clientWidth - 20) {
+                scrollIndicator.classList.add('hidden');
             } else {
-                        group.style.display = 'none';
-                    }
-                });
+                scrollIndicator.classList.remove('hidden');
+            }
+        }
+
+        // Update indicator on scroll
+        wrapper.addEventListener('scroll', updateScrollIndicator);
+        
+        // Update indicator on resize
+        window.addEventListener('resize', updateScrollIndicator);
+        
+        // Initial update
+        setTimeout(updateScrollIndicator, 100);
+
+        // Click handler for scroll indicator
+        scrollIndicator.addEventListener('click', () => {
+            const cardWidth = 216; // 200px card + 16px gap
+            const scrollAmount = cardWidth * 2; // Scroll by 2 columns (1 column per row)
+            wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        });
+    }
+
+    function openActivityModal(groupInfo) {
+        const modal = document.getElementById('activity-search-modal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+
+        // Store current group info for reference
+        window.currentModalGroup = groupInfo;
+
+        // Initialize category pills
+        initializeModalCategoryPills();
+        
+        // Set the initial selected category
+        setModalSelectedCategory(groupInfo.group);
+        
+        // Setup modal event listeners
+        setupModalEventListeners();
+
+        // Fetch activities for the selected group
+        fetchActivitiesForModal(groupInfo.group);
+    }
+
+    function closeActivityModal() {
+        const modal = document.getElementById('activity-search-modal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Clear search input
+        const searchInput = document.getElementById('modal-search-input');
+        if (searchInput) searchInput.value = '';
+    }
+
+    function initializeModalCategoryPills() {
+        const pillsContainer = document.getElementById('modal-category-pills');
+        const categories = [
+            { name: 'Agriculture', group: 'agriculture' },
+            { name: 'Art', group: 'art' },
+            { name: 'F&B, Rentals', group: 'fnb' },
+            { name: 'Education', group: 'education' },
+            { name: 'Maintenance', group: 'maintenance' },
+            { name: 'Services', group: 'services' },
+            { name: 'ICT', group: 'ict' },
+            { name: 'Trading', group: 'trading' }
+        ];
+
+        let pillsHtml = '';
+        categories.forEach(category => {
+            pillsHtml += `<button class="modal-category-pill" data-group="${category.group}">${category.name}</button>`;
+        });
+        pillsContainer.innerHTML = pillsHtml;
+
+        // Add click handlers for category pills
+        pillsContainer.querySelectorAll('.modal-category-pill').forEach(pill => {
+            pill.addEventListener('click', function() {
+                setModalSelectedCategory(this.dataset.group);
+                fetchActivitiesForModal(this.dataset.group);
             });
+        });
+    }
+
+    function setModalSelectedCategory(groupName) {
+        // Update selected category pill
+        document.querySelectorAll('.modal-category-pill').forEach(pill => {
+            pill.classList.remove('selected');
+        });
+        const selectedPill = document.querySelector(`.modal-category-pill[data-group="${groupName}"]`);
+        if (selectedPill) {
+            selectedPill.classList.add('selected');
+        }
+        
+        // Store current group for reference
+        if (window.currentModalGroup) {
+            window.currentModalGroup.group = groupName;
         }
     }
 
-    // Update activity selection counts and selectedActivities array
-    function updateActivitySelection() {
-        const selectedGroups = document.querySelectorAll('.activity-group.selected');
-        document.getElementById('groups-selected-count').textContent = selectedGroups.length;
+    function setupModalEventListeners() {
+        // Close modal handlers
+        const closeBtn = document.getElementById('close-modal-btn');
+        const modal = document.getElementById('activity-search-modal');
+        const backBtn = document.getElementById('modal-back-btn');
+        const continueBtn = document.getElementById('modal-continue-btn');
+        const searchInput = document.getElementById('modal-search-input');
         
-        let totalActivities = 0;
-        selectedGroups.forEach(group => {
-            totalActivities += parseInt(group.getAttribute('data-count') || "0");
-        });
-        document.getElementById('activities-selected-count').textContent = totalActivities;
+        // Remove any existing listeners
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
         
-        selectedActivities = [];
-        selectedGroups.forEach(group => {
-            const groupName = group.textContent.trim().split('(')[0].trim();
-            const count = parseInt(group.getAttribute('data-count') || "0");
-            
-            for (let i = 1; i <= count; i++) {
-                selectedActivities.push(groupName + ' Activity ' + i);
+        const newBackBtn = backBtn.cloneNode(true);
+        backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+        
+        const newContinueBtn = continueBtn.cloneNode(true);
+        continueBtn.parentNode.replaceChild(newContinueBtn, continueBtn);
+        
+        const newSearchInput = searchInput.cloneNode(true);
+        searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+        
+        // Add fresh listeners
+        document.getElementById('close-modal-btn').addEventListener('click', closeActivityModal);
+        document.getElementById('modal-back-btn').addEventListener('click', closeActivityModal);
+        document.getElementById('modal-continue-btn').addEventListener('click', closeActivityModal);
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeActivityModal();
             }
         });
+
+        // Search input handler
+        let searchDebounce;
+        document.getElementById('modal-search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.trim();
+            clearTimeout(searchDebounce);
+            
+            if (searchTerm === '') {
+                // If search is cleared, show activities for currently selected category
+                const selectedPill = document.querySelector('.modal-category-pill.selected');
+                if (selectedPill) {
+                    fetchActivitiesForModal(selectedPill.dataset.group);
+                }
+                return;
+            }
+            
+            searchDebounce = setTimeout(() => {
+                searchActivitiesInModal(searchTerm);
+            }, 300);
+        });
+    }
+
+    async function searchActivitiesInModal(searchTerm) {
+        const modalList = document.getElementById('modal-activities-list');
+        modalList.innerHTML = '<div class="loading-results">Searching...</div>';
+        
+        try {
+            const { data, error } = await supabase
+                .from('Activity List')
+                .select('*')
+                .or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`)
+                .limit(50);
+
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                displaySearchResultsInModal(data);
+            } else {
+                modalList.innerHTML = '<div class="no-results">No activities found matching your search.</div>';
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            modalList.innerHTML = '<div class="error-results">Error searching activities.</div>';
+        }
+    }
+
+    function displaySearchResultsInModal(activities) {
+        const modalList = document.getElementById('modal-activities-list');
+        const selectedActivityCodes = window.selectedActivities.map(a => a.Code);
+
+        let html = '';
+        activities.forEach(activity => {
+            const isSelected = selectedActivityCodes.includes(activity.Code);
+            html += `
+                <div class="modal-activity-item" data-code="${activity.Code}" data-name="${activity["Activity Name"]}" data-category="${activity.Category}" data-group="${activity.Group}">
+                    <div class="modal-activity-checkbox ${isSelected ? 'checked' : ''}">
+                        <span class="check-icon">✓</span>
+                    </div>
+                    <div class="modal-activity-info">
+                        <div class="modal-activity-code">${activity.Code}</div>
+                        <div class="modal-activity-name">${activity["Activity Name"]}</div>
+                    </div>
+                </div>`;
+        });
+        modalList.innerHTML = html;
+
+        // Add click handlers for search result items
+        modalList.querySelectorAll('.modal-activity-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const checkbox = this.querySelector('.modal-activity-checkbox');
+                const isCurrentlySelected = checkbox.classList.contains('checked');
+                
+                const activityData = { 
+                    Code: this.dataset.code, 
+                    "Activity Name": this.dataset.name, 
+                    Category: this.dataset.category, 
+                    Group: this.dataset.group 
+                };
+                
+                const groupName = this.dataset.group;
+                
+                if (isCurrentlySelected) {
+                    checkbox.classList.remove('checked');
+                    removeActivity(activityData.Code);
+                } else {
+                    checkbox.classList.add('checked');
+                    addActivityToSelected(activityData, groupName);
+                    
+                    // Ensure the group card is selected
+                    const groupCard = document.querySelector(`.activity-card[data-group="${groupName}"]`);
+                    if (groupCard && !groupCard.classList.contains('selected')) {
+                        toggleActivityGroup(groupCard, true);
+                    }
+                }
+                
+                updateActivityCountOnCard(groupName);
+                updateSelectedGroupsCount();
+                calculateCosts();
+            });
+        });
+    }
+
+    async function fetchActivitiesForModal(groupName) {
+        const modalList = document.getElementById('modal-activities-list');
+        modalList.innerHTML = '<div class="loading-results">Loading activities...</div>';
+        
+        try {
+            const categoryName = mapGroupToCategory(groupName);
+            const { data, error } = await supabase
+                .from('Activity List')
+                .select('Code, "Activity Name", Category, Group')
+                .eq('Category', categoryName)
+                .order('Code')
+                .limit(200);
+
+            if (error) throw error;
+            
+            displayActivitiesInModal(data, groupName);
+
+        } catch (err) {
+            console.error('Error fetching activities for modal:', err);
+            modalList.innerHTML = '<div class="error-results">Error fetching activities.</div>';
+        }
+    }
+
+    function displayActivitiesInModal(activities, groupName) {
+        const modalList = document.getElementById('modal-activities-list');
+        if (!activities || activities.length === 0) {
+            modalList.innerHTML = '<div class="no-activities">No activities found for this category.</div>';
+            return;
+        }
+
+        const selectedActivityCodes = window.selectedActivities
+            .filter(a => a.groupName === groupName)
+            .map(a => a.Code);
+
+        let html = '';
+        activities.forEach(activity => {
+            const isSelected = selectedActivityCodes.includes(activity.Code);
+            html += `
+                <div class="modal-activity-item" data-code="${activity.Code}" data-name="${activity["Activity Name"]}" data-category="${activity.Category}" data-group="${activity.Group}">
+                    <div class="modal-activity-checkbox ${isSelected ? 'checked' : ''}">
+                        <span class="check-icon">✓</span>
+                    </div>
+                    <div class="modal-activity-info">
+                        <div class="modal-activity-code">${activity.Code}</div>
+                        <div class="modal-activity-name">${activity["Activity Name"]}</div>
+                    </div>
+                </div>`;
+        });
+        modalList.innerHTML = html;
+
+        // Add click handlers for activity items
+        modalList.querySelectorAll('.modal-activity-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const checkbox = this.querySelector('.modal-activity-checkbox');
+                const isCurrentlySelected = checkbox.classList.contains('checked');
+                
+                const activityData = { 
+                    Code: this.dataset.code, 
+                    "Activity Name": this.dataset.name, 
+                    Category: this.dataset.category, 
+                    Group: this.dataset.group 
+                };
+                
+                if (isCurrentlySelected) {
+                    checkbox.classList.remove('checked');
+                    removeActivity(activityData.Code);
+                } else {
+                    checkbox.classList.add('checked');
+                    addActivityToSelected(activityData, groupName);
+                }
+                
+                updateActivityCountOnCard(groupName);
+                updateSelectedGroupsCount();
+                calculateCosts();
+            });
+        });
+    }
+    
+    function addActivityToSelected(activity, groupName) {
+        if (!window.selectedActivities.some(item => item.Code === activity.Code)) {
+            window.selectedActivities.push({ ...activity, groupName });
+        }
+    }
+
+    function removeActivity(code) {
+        window.selectedActivities = window.selectedActivities.filter(a => a.Code !== code);
+    }
+    
+    function updateActivityCountOnCard(groupName) {
+        const card = document.querySelector(`.activity-card[data-group="${groupName}"]`);
+        if (card) {
+            const count = window.selectedActivities.filter(a => a.groupName === groupName).length;
+            const countElement = card.querySelector('.selected-activities-count');
+            countElement.textContent = `Selected Activities: ${count}`;
+        }
+    }
+
+    function mapGroupToCategory(groupName) {
+        const groupToCategoryMap = { 
+            'administrative': 'Administrative', 
+            'agriculture': 'Agriculture', 
+            'art': 'Art', 
+            'education': 'Education', 
+            'ict': 'ICT', 
+            'fnb': 'F&B', 
+            'financial': 'Financial', 
+            'healthcare': 'HealthCare', 
+            'maintenance': 'Maintenance', 
+            'services': 'Services', 
+            'professional': 'Professional', 
+            'realestate': 'Realestate', 
+            'sewerage': 'Sewerage', 
+            'trading': 'Trading', 
+            'transportation': 'Transportation', 
+            'waste': 'Waste Collection', 
+            'manufacturing': 'Manufacturing' 
+        };
+        return groupToCategoryMap[groupName] || groupName;
+    }
+
+    function updateSelectedGroupsCount() {
+        const selectedGroups = document.querySelectorAll('.activity-card.selected').length;
+        document.getElementById('groups-selected-count').textContent = selectedGroups;
+
+        const feeWarning = document.querySelector('.fee-warning');
+        if (selectedGroups > 3) {
+            feeWarning.style.display = 'block';
+        } else {
+            feeWarning.style.display = 'none';
+        }
     }
 
     // Validate entire form before submission
@@ -356,13 +775,7 @@
                     activityErrorElement.style.fontFamily = "Plus Jakarta Sans";
                     activityErrorElement.style.width = "100%";
                     
-                    // Insert before the selection summary
-                    const selectionSummary = activitiesContainer.querySelector('.selection-summary');
-                    if (selectionSummary) {
-                        activitiesContainer.insertBefore(activityErrorElement, selectionSummary);
-                    } else {
-                        activitiesContainer.appendChild(activityErrorElement);
-                    }
+                    activitiesContainer.appendChild(activityErrorElement);
                 }
                 valid = false;
         }
@@ -1240,12 +1653,6 @@
     window.addEventListener('focus', function() {
         setupInactivityTimer();
     });
-    // Initialize Supabase client
-    const supabaseUrl = 'https://bwommjnbmumvgtlyfddn.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3b21tam5ibXVtdmd0bHlmZGRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0NDM0NTAsImV4cCI6MjA2NTAxOTQ1MH0.1OxopB9p-yoGoYpY7AUyHs-T7Fe0cK2dUjFq_FbCL-I';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-    window.selectedActivities = window.selectedActivities || [];
     
     document.addEventListener('DOMContentLoaded', function() {
         const placeholder = document.querySelector('#activities-list-placeholder');
@@ -1263,167 +1670,67 @@
         searchResultsDropdown.style.display = 'none';
         
         const searchContainer = document.querySelector('.activity-search-container');
+        if (searchContainer) {
         searchContainer.style.position = 'relative';
         searchContainer.appendChild(searchResultsDropdown);
+        }
         
         function updateDropdownDimensions() {
+            if (searchInput && searchResultsDropdown) {
             searchResultsDropdown.style.width = searchInput.getBoundingClientRect().width + 'px';
             searchResultsDropdown.style.left = searchInput.offsetLeft + 'px';
+            }
         }
         
+        if (searchInput) {
         updateDropdownDimensions();
         window.addEventListener('resize', updateDropdownDimensions);
-        
-        document.querySelectorAll('.activity-group').forEach(group => {
-            group.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const groupName = this.getAttribute('data-group');
-                const activitiesList = document.querySelector('.activities-list-container');
-                const isActivitiesVisible = activitiesList && activitiesList.style.display !== 'none' && activitiesList.getAttribute('data-current-group') === groupName;
-                
-                if (isActivitiesVisible) {
-                    activitiesList.style.display = 'none';
-                } else {
-                    toggleActivityGroup(this, groupName);
-                    document.querySelectorAll('.activity-group').forEach(g => {
-                        g.style.opacity = (g !== this) ? '0.7' : '1';
-                        if (g === this && g.querySelector('.plus-icon')) g.querySelector('.plus-icon').style.display = 'inline-flex';
-                    });
-                }
-            });
-        });
-        
-        function toggleActivityGroup(groupElement, groupName) {
-            if (!groupElement.classList.contains('selected')) {
-                groupElement.classList.add('selected');
-                groupElement.style.opacity = '1';
-                if(groupElement.querySelector('.plus-icon')) groupElement.querySelector('.plus-icon').style.display = 'inline-flex';
-                document.querySelectorAll('.activity-group:not(.selected)').forEach(otherGroup => otherGroup.style.opacity = '0.7');
-                updateSelectionSummary();
-            }
-            fetchActivitiesByGroup(groupName);
-        }
-        
-        async function fetchActivitiesByGroup(groupName) {
-            try {
-                window.currentGroupName = groupName;
-                showActivitiesLoading(groupName);
-                const categoryName = mapGroupToCategory(groupName);
-                const { data, error } = await supabase.from('Activity List').select('Code, "Activity Name", Category, Group').eq('Category', categoryName).order('Code').limit(100);
-                if (error) throw error;
-                displayActivitiesWithCheckboxes(data, groupName);
-            } catch (err) {
-                console.error('Error fetching activities:', err);
-                showActivitiesError('Error fetching activities', groupName);
-            }
-        }
-        
-        function mapGroupToCategory(groupName) {
-            const groupToCategoryMap = { 'administrative': 'Administrative', 'agriculture': 'Agriculture', 'art': 'Art', 'education': 'Education', 'ict': 'ICT', 'fnb': 'F&B', 'financial': 'Financial', 'healthcare': 'HealthCare', 'maintenance': 'Maintenance', 'services': 'Services', 'professional': 'Professional', 'realestate': 'Realestate', 'sewerage': 'Sewerage', 'trading': 'Trading', 'transportation': 'Transportation', 'waste': 'Waste Collection', 'manufacturing': 'Manufacturing' };
-            return groupToCategoryMap[groupName] || groupName;
-        }
-        
-        function showActivitiesLoading(groupName) {
-            let activitiesList = document.querySelector('.activities-list-container');
-            if (!activitiesList) {
-                activitiesList = document.createElement('div');
-                activitiesList.className = 'activities-list-container';
-                document.querySelector('#activities-list-placeholder').appendChild(activitiesList);
-            }
-            activitiesList.innerHTML = '<div class="activities-loading">Loading activities...</div>';
-            activitiesList.style.display = 'block';
-            activitiesList.setAttribute('data-current-group', groupName);
-        }
-        
-        function showActivitiesError(message, groupName) {
-            let activitiesList = document.querySelector('.activities-list-container');
-            if (!activitiesList) {
-                activitiesList = document.createElement('div');
-                activitiesList.className = 'activities-list-container';
-                document.querySelector('#activities-list-placeholder').appendChild(activitiesList);
-            }
-            activitiesList.innerHTML = `<div class="activities-error">${message}</div>`;
-            activitiesList.style.display = 'block';
-            if (window.currentGroupName) activitiesList.setAttribute('data-current-group', window.currentGroupName);
-        }
-
-        function displayActivitiesWithCheckboxes(activities, groupName) {
-            let activitiesList = document.querySelector('.activities-list-container');
-            if (!activitiesList) {
-                activitiesList = document.createElement('div');
-                activitiesList.className = 'activities-list-container';
-                document.querySelector('#activities-list-placeholder').appendChild(activitiesList);
-            }
-            
-            if (!activities || activities.length === 0) {
-                activitiesList.innerHTML = '<div class="no-activities">No activities found for this category</div>';
-                activitiesList.style.display = 'block';
-                return;
-            }
-            
-            const selectedActivityCodes = window.selectedActivities.filter(a => a.groupName === groupName).map(a => a.Code);
-            
-            let html = `<div class="activities-filter"><input type="text" class="activities-filter-input" placeholder="Filter activities in ${mapGroupToCategory(groupName)}..." /></div><div class="activities-list">`;
-            activities.forEach(activity => {
-                const isSelected = selectedActivityCodes.includes(activity.Code);
-                html += `<div class="activity-checkbox-item"><label class="activity-checkbox-label"><div class="activity-checkbox-info"><span class="activity-code">${activity.Code}</span><span class="activity-name">${activity["Activity Name"]}</span></div><input type="checkbox" class="activity-checkbox" data-code="${activity.Code}" data-name="${activity["Activity Name"]}" data-category="${activity.Category}" data-group="${activity.Group}" ${isSelected ? 'checked' : ''}></label></div>`;
-            });
-            html += '</div>';
-            activitiesList.innerHTML = html;
-            activitiesList.style.display = 'block';
-            activitiesList.setAttribute('data-current-group', groupName);
-            
-            activitiesList.querySelectorAll('.activity-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const activityData = { Code: this.dataset.code, "Activity Name": this.dataset.name, Category: this.dataset.category, Group: this.dataset.group };
-                    this.checked ? selectActivity(activityData) : removeActivity(activityData.Code);
-                });
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (!activitiesList.contains(e.target) && !e.target.closest('.activity-group') && activitiesList.style.display !== 'none') {
-                    activitiesList.style.display = 'none';
-                }
-            });
-            
-            activitiesList.addEventListener('click', e => e.stopPropagation());
-            
-            const filterInput = activitiesList.querySelector('.activities-filter-input');
-            if (filterInput) {
-                setTimeout(() => filterInput.focus(), 100);
-                filterInput.addEventListener('input', function() {
-                    const filterValue = this.value.toLowerCase().trim();
-                    activitiesList.querySelectorAll('.activity-checkbox-item').forEach(item => {
-                        item.style.display = item.textContent.toLowerCase().includes(filterValue) ? '' : 'none';
-                    });
-                });
-            }
         }
         
         let debounceTimer;
+        if (searchInput) {
         searchInput.addEventListener('input', function(e) {
             const searchTerm = e.target.value.trim();
             clearTimeout(debounceTimer);
-            document.querySelectorAll('.activity-group').forEach(group => group.style.display = 'flex');
             
             if (searchTerm === '') {
                 searchResultsDropdown.style.display = 'none';
+                    // Show all cards when search is cleared
+                    document.querySelectorAll('.activity-card').forEach(card => card.style.display = 'flex');
                 return;
             }
             
             updateDropdownDimensions();
             debounceTimer = setTimeout(() => searchActivities(searchTerm), 300);
+            });
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const searchContainer = document.querySelector('.activity-search-container');
+            if (searchContainer && !searchContainer.contains(e.target)) {
+                searchResultsDropdown.style.display = 'none';
+            }
+        });
         });
         
         async function searchActivities(searchTerm) {
+        const searchResultsDropdown = document.querySelector('.search-results-dropdown');
+        if (!searchResultsDropdown) return;
+        
             try {
                 searchResultsDropdown.innerHTML = '<div class="loading-results">Searching...</div>';
                 searchResultsDropdown.style.display = 'block';
-                updateDropdownDimensions();
-                
-                const query = searchTerm === "*" ? supabase.from('Activity List').select('Code, "Activity Name", Category, Group').limit(40) : supabase.from('Activity List').select('Code, "Activity Name", Category, Group').or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`).limit(100);
+            
+            const query = searchTerm === "*" ? 
+                supabase.from('Activity List').select('Code, "Activity Name", Category, Group').limit(40) : 
+                supabase.from('Activity List').select('Code, "Activity Name", Category, Group')
+                    .or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`)
+                    .limit(100);
+            
                 const { data, error } = await query;
                 if (error) throw error;
+            
                 displaySearchResults(data);
             } catch (err) {
                 console.error('Error searching activities:', err);
@@ -1432,86 +1739,99 @@
         }
         
         function displaySearchResults(results) {
+        const searchResultsDropdown = document.querySelector('.search-results-dropdown');
+        if (!searchResultsDropdown) return;
+        
             searchResultsDropdown.innerHTML = '';
-            document.querySelectorAll('.activity-group').forEach(group => group.style.display = 'flex');
             
             if (results.length === 0) {
                 searchResultsDropdown.innerHTML = '<div class="no-results">No activities found</div>';
                 searchResultsDropdown.style.display = 'block';
-                updateDropdownDimensions();
                 return;
             }
             
             results.forEach(activity => {
                 const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-items';
-                resultItem.innerHTML = `<span class="activity-code">${activity.Code}</span><span class="activity-name">${activity["Activity Name"]}</span>`;
-                resultItem.addEventListener('click', () => selectActivity(activity));
+            resultItem.className = 'search-result-item';
+            resultItem.innerHTML = `
+                <span class="activity-code">${activity.Code}</span>
+                <span class="activity-name">${activity["Activity Name"]}</span>
+            `;
+            resultItem.addEventListener('click', () => selectActivityFromSearch(activity));
                 searchResultsDropdown.appendChild(resultItem);
             });
             
             searchResultsDropdown.style.display = 'block';
-            updateDropdownDimensions();
         }
         
-        function selectActivity(activity) {
+    function selectActivityFromSearch(activity) {
             const groupName = mapCategoryToGroup(activity.Category, activity.Group);
-            const groupElement = document.querySelector(`.activity-group[data-group="${groupName}"]`);
+        const groupCard = document.querySelector(`.activity-card[data-group="${groupName}"]`);
+        
+        if (groupCard) {
+            // Make sure group is selected
+            if (!groupCard.classList.contains('selected')) {
+                toggleActivityGroup(groupCard, true);
+            }
             
-            if (groupElement) {
-                groupElement.style.display = 'flex';
-                document.querySelectorAll('.activity-group').forEach(g => { if (g !== groupElement && !g.classList.contains('selected')) g.style.opacity = '0.7'; });
-                
-                if (!groupElement.classList.contains('selected')) {
-                    groupElement.classList.add('selected');
-                    groupElement.style.opacity = '1';
-                }
-                
-                if (window.selectedActivities.some(item => item.Code === activity.Code)) return;
-                
-                let currentCount = parseInt(groupElement.dataset.count || '0') + 1;
-                groupElement.dataset.count = currentCount;
-                
-                const countElement = groupElement.querySelector('.activity-count');
-                if (countElement) {
-                    countElement.textContent = `(${currentCount})`;
-                    countElement.style.display = 'inline';
-                }
-                
+            // Add activity to selected list
                 addActivityToSelected(activity, groupName);
-                updateSelectionSummary();
-                
-                const checkbox = document.querySelector(`.activity-checkbox[data-code="${activity.Code}"]`);
-                if (checkbox) checkbox.checked = true;
-                
-                if (!document.activeElement || !document.activeElement.classList.contains('activity-checkbox')) {
+            
+            // Update the group card count
+            updateActivityCountOnCard(groupName);
+            
+            // Update selection summary
+            updateSelectedGroupsCount();
+            
+            // Clear search
+            const searchInput = document.querySelector('.activity-search-input');
+            if (searchInput) {
                     searchInput.value = '';
+            }
+            const searchResultsDropdown = document.querySelector('.search-results-dropdown');
+            if (searchResultsDropdown) {
                     searchResultsDropdown.style.display = 'none';
                 }
-                document.querySelectorAll('.activity-group').forEach(group => group.style.display = 'flex');
+            
+            // Recalculate costs
+            calculateCosts();
             }
         }
         
         function mapCategoryToGroup(category, groupNumber) {
-            const categoryMapping = { 'Administrative': 'administrative', 'Agriculture': 'agriculture', 'Art': 'art', 'Education': 'education', 'ICT': 'ict', 'F&B,Rentals': 'fnb', 'Financial': 'financial', 'HealthCare': 'healthcare', 'Maintenance': 'maintenance', 'Services': 'services', 'Professional': 'professional', 'Realestate': 'realestate', 'Sewerage': 'sewerage', 'Trading': 'trading', 'Transportation': 'transportation', 'Waste Collection': 'waste', 'Manufacturing': 'manufacturing' };
+        const categoryMapping = {
+            'Administrative': 'administrative',
+            'Agriculture': 'agriculture', 
+            'Art': 'art',
+            'Education': 'education',
+            'ICT': 'ict',
+            'F&B,Rentals': 'fnb',
+            'Financial': 'financial',
+            'HealthCare': 'healthcare',
+            'Maintenance': 'maintenance',
+            'Services': 'services',
+            'Professional': 'professional',
+            'Realestate': 'realestate',
+            'Sewerage': 'sewerage',
+            'Trading': 'trading',
+            'Transportation': 'transportation',
+            'Waste Collection': 'waste',
+            'Manufacturing': 'manufacturing'
+        };
+        
             let cleanCategory = typeof category === 'string' ? category.trim() : '';
-            if (cleanCategory && categoryMapping[cleanCategory]) return categoryMapping[cleanCategory];
-            for (const [key, value] of Object.entries(categoryMapping)) {
-                if (cleanCategory && (cleanCategory.includes(key) || cleanCategory.toLowerCase().includes(key.toLowerCase()))) return value;
-            }
-            return 'services';
+        if (cleanCategory && categoryMapping[cleanCategory]) {
+            return categoryMapping[cleanCategory];
         }
         
-        function addActivityToSelected(activity, groupName) {
-            if (!window.selectedActivities.some(item => item.Code === activity.Code)) {
-                window.selectedActivities.push({ ...activity, groupName });
-                
-                // Clear any error messages when activity is added
-                const errorMessage = document.querySelector('.activity-error');
-                if (errorMessage) {
-                    errorMessage.remove();
-                }
+        // Fallback: check for partial matches
+            for (const [key, value] of Object.entries(categoryMapping)) {
+            if (cleanCategory && (cleanCategory.includes(key) || cleanCategory.toLowerCase().includes(key.toLowerCase()))) {
+                return value;
             }
+        }
+        
+        return 'services'; // Default fallback
         }
         
         function updateSelectionSummary() {
@@ -1523,45 +1843,14 @@
             const activeGroups = new Set(window.selectedActivities.map(a => a.groupName));
             const numActiveGroups = activeGroups.size;
             
-            // Update the counts
             groupsSelectedCount.textContent = numActiveGroups;
             activitiesSelectedCount.textContent = totalActivities;
             
-            // Show/hide fee warning based on number of activity groups
             const feeWarning = document.querySelector('.fee-warning');
             if (feeWarning) {
-                if (numActiveGroups > 3) {
-                    feeWarning.style.display = 'block';
-                } else {
-                    feeWarning.style.display = 'none';
-                }
-            }
+            feeWarning.style.display = numActiveGroups > 3 ? 'block' : 'none';
         }
-        
-        function removeActivity(code) {
-            const activityIndex = window.selectedActivities.findIndex(a => a.Code === code);
-            if (activityIndex === -1) return;
-            
-            const { groupName } = window.selectedActivities[activityIndex];
-            window.selectedActivities.splice(activityIndex, 1);
-            
-            const checkbox = document.querySelector(`.activity-checkbox[data-code="${code}"]`);
-            if (checkbox) checkbox.checked = false;
-            
-            const groupElement = document.querySelector(`.activity-group[data-group="${groupName}"]`);
-            if (groupElement) {
-                let currentCount = Math.max(0, (parseInt(groupElement.dataset.count) || 0) - 1);
-                groupElement.dataset.count = currentCount;
-                const countElement = groupElement.querySelector('.activity-count');
-                if (countElement) countElement.style.display = currentCount > 0 ? 'inline' : 'none';
-            }
-            
-            if (window.selectedActivities.length === 0) {
-                document.querySelectorAll('.activity-group').forEach(group => group.style.opacity = '1');
-            }
-            updateSelectionSummary();
-        }
-    });
+    }
 
     // Function to initialize accordion functionality
     function initAccordion() {
@@ -1782,3 +2071,4 @@
             button.textContent = 'Select';
         }
     }
+

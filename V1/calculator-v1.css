@@ -352,7 +352,7 @@ font-style: normal;
 font-weight: 400;
 margin-top: 8px !important;
 line-height: 16.8px; 
-background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+background: linear-gradient(102deg, #EB5F400 0%, #B5348B 100%);
 background-clip: text !important;
 -webkit-background-clip: text !important;
 -webkit-text-fill-color: transparent !important;
@@ -389,7 +389,7 @@ padding-bottom: 8px;
   top: 0;
   left: 0;
   height: 8px;
-  background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+  background: linear-gradient(102deg, #EB5F400 0%, #B5348B 100%);
   z-index: 1;
   border-radius: 0px 15px 15px 0px;
   transition: width 0.3s ease;
@@ -1322,7 +1322,7 @@ line-height: 32.359px;
 }
 
 #srix-NewCostCalForm .duration-value {
-    background: var(--Orange, linear-gradient(102deg, #EB5F40 0%, #B5348B 100%));
+    background: var(--Orange, linear-gradient(102deg, #EB5F400 0%, #B5348B 100%));
 background-clip: text;
 -webkit-background-clip: text;
 -webkit-text-fill-color: transparent;
@@ -1702,7 +1702,7 @@ line-height: 24px;
     font-style: normal;
     font-weight: 400;
     line-height: 24px; 
-    background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+    background: linear-gradient(102deg, #EB5F400 0%, #B5348B 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

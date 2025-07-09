@@ -12,7 +12,49 @@
         <div class="form-sections-container">
             <form id="multiStepForm">
 
+                <!-- Personal Details Section -->
+                <div class="form-section contact-form-section" id="personal-details-section">
+                    <div class="contact-form-container">
+                        <div class="contact-form-header">
+                            <div class="contact-avatars">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbeca07af928355615613_avatars.png" alt="Team member" class="avatar">
+                        
+                            </div>
+                            <h2 class="contact-title">Fill In And Let's Get One Step Closer</h2>
+                            <p class="contact-subtitle">Enter your details to receive your full setup process and the next steps to launch in Dubai.</p>
+    </div>
 
+                        <div class="contact-form-fields">
+                <div class="form-group">
+                    <label for="full-name">Enter your full name *</label>
+                    <input type="text" id="full-name" placeholder="Your name" required>
+                    <div class="error-message" id="full-name-error"></div>
+                        </div>
+
+                        <div class="form-group">
+                    <label for="phone">Enter phone number *</label>
+                    <div class="phone-input">
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone number" required>
+                    </div>
+                    <div class="error-message" id="phone-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Enter email address *</label>
+                <input type="email" id="email" placeholder="Email address" required>
+                <div class="error-message" id="email-error"></div>
+                    </div>
+
+                            <button type="button" id="submitBtn" class="submit-button">
+                                <span>Submit</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14"></path>
+                                    <path d="m12 5 7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                             </div>
+                </div>
                 <!-- Company Setup Section -->
                 <div class="form-section" id="company-setup-section">
                     <div class="section-header">
@@ -44,8 +86,8 @@
                                     </button>
         </div>
         </div>
-    </div>
-    
+            </div>
+
                         <div class="license-card" data-license="regular">
                             <div class="license-card-image">
                                 <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b602ab2cde8b87325e8_regular.webp" alt="Regular Business License">
@@ -95,7 +137,7 @@
                     </div>
                             <p class="option-note">* Free consultation for more than 6 visas</p>
             </div>
-                    </div>
+                </div>
 
                     <!-- Hidden inputs for form validation -->
                     <input type="hidden" id="license-type" name="license-type" value="fawri" required>
@@ -105,10 +147,13 @@
 
                 <!-- Business Activities Section -->
                 <div class="form-section" id="business-activities-section">
-                    <h3 class="form-section-title">Business Activities</h3>
+                    <div class="section-header">
+                        <h2>Please Select Your Business Activity Group 👜</h2>
+                        <p class="section-subtitle">Pick up to <strong>3 groups free</strong>. Each unlocks licensed activities from 2,500+ options.</p>
+                    </div>
                 
                 <div class="activity-search-container">
-                    <input type="text" class="activity-search-input" placeholder="Search for activity" aria-label="Search for business activities">
+                        <input type="text" class="activity-search-input" placeholder="Search business activity group" aria-label="Search for business activities">
                     <span class="search-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -117,85 +162,21 @@
                     </span>
                     </div>
                 
-                <div class="activity-groups-container">
-                    <div class="activity-group" data-group="administrative" data-count="0">
-                        Administrative <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
+                    <div class="activity-cards-wrapper">
+                        <div class="activity-cards-container">
+                            <!-- Activity cards will be dynamically generated by JavaScript -->
                         </div>
-                    <div class="activity-group" data-group="agriculture" data-count="0">
-                        Agriculture <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="art" data-count="0">
-                        Art <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
+                        <div class="scroll-indicator" id="scroll-indicator">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
                         </div>
-                    <div class="activity-group" data-group="education" data-count="0">
-                        Education <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                </div>
-                    <div class="activity-group" data-group="ict" data-count="0">
-                        ICT <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
                     </div>
-                    <div class="activity-group" data-group="fnb" data-count="0">
-                        F&B, Rentals <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="financial" data-count="0">
-                        Financial <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="healthcare" data-count="0">
-                        Health Care <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="maintenance" data-count="0">
-                        Maintenance <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="services" data-count="0">
-                        Services <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="professional" data-count="0">
-                        Professional <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="realestate" data-count="0">
-                        Real Estate <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="sewerage" data-count="0">
-                        Sewerage <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="trading" data-count="0">
-                        Trading <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="transportation" data-count="0">
-                        Transportation <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="waste" data-count="0">
-                        Waste Collection <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                    </div>
-                    <div class="activity-group" data-group="manufacturing" data-count="0">
-                        Manufacturing <span class="activity-count">(0)</span>
-                            <span class="plus-icon"></span>
-                        </div>
-            </div>
-                    
+                                
                 <div id="activities-list-placeholder"></div>
-                    
-                <div class="selection-summary">
-                    <p>Groups Selected: <span id="groups-selected-count">0</span></p>
-                    <p>Activities Selected: <span id="activities-selected-count">0</span></p>
-                    <p class="fee-warning">You will be charged +AED 1,000 for each Activity group above 3</p>
+                                
+
                 </div>
-            </div>
 
                 <!-- Visa Options Section -->
                 <div class="form-section" id="visa-options-section">
@@ -220,7 +201,7 @@
                                         <div class="visa-toggle-labels">
                                             <span class="visa-toggle-label no">No</span>
                                             <span class="visa-toggle-label yes">Yes</span>
-                                        </div>
+                        </div>
                                         <label class="visa-toggle-switch">
                                             <input type="checkbox" id="investor-visa-toggle" onchange="toggleVisaCard('investor')" aria-label="Toggle investor visa">
                                             <span class="visa-toggle-slider"></span>
@@ -418,49 +399,8 @@
                     </div>
                 </div>
 
-                <!-- Personal Details Section -->
-                <div class="form-section contact-form-section" id="personal-details-section">
-                    <div class="contact-form-container">
-                        <div class="contact-form-header">
-                            <div class="contact-avatars">
-                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbeca07af928355615613_avatars.png" alt="Team member" class="avatar">
-                        
-                            </div>
-                            <h2 class="contact-title">Fill In And Let's Get One Step Closer</h2>
-                            <p class="contact-subtitle">Enter your details to receive your full setup process and the next steps to launch in Dubai.</p>
-                        </div>
-                        
-                        <div class="contact-form-fields">
-                            <div class="form-group">
-                                <label for="full-name">Enter your full name *</label>
-                                <input type="text" id="full-name" placeholder="Your name" required>
-                                <div class="error-message" id="full-name-error"></div>
-                            </div>
 
-                            <div class="form-group">
-                                <label for="phone">Enter phone number *</label>
-                                <div class="phone-input">
-                                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone number" required>
-                                </div>
-                                <div class="error-message" id="phone-error"></div>
-                            </div>
 
-                            <div class="form-group">
-                                <label for="email">Enter email address *</label>
-                                <input type="email" id="email" placeholder="Email address" required>
-                                <div class="error-message" id="email-error"></div>
-                            </div>
-
-                            <button type="button" id="submitBtn" class="submit-button">
-                                <span>Submit</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M5 12h14"></path>
-                                    <path d="m12 5 7 7-7 7"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                        </div>
             </form>
         </div>
 
@@ -517,16 +457,16 @@
                             </svg>
                             
                     </button>
-                </div>
+                            </div>
                 
                 <div class="summary-content" id="business-activity-summary">
                     <div class="activity-tags" id="activity-tags-container"></div>
                     <div class="summary-total">
                         <span class="summary-label">Total Cost</span>
                         <span class="summary-price" id="business-activities-cost">AED 0</span>
-            </div>
-        </div>
-            </div>
+                                </div>
+                            </div>
+                        </div>
             
             <div class="summary-section">
                 <div class="summary-section-header">
@@ -555,9 +495,9 @@
                         <span class="summary-label">Dependency Visa <span id="summary-dependency-visa-display">(0)</span></span>
                         <span class="summary-value" id="dependency-visa-cost">AED 0</span>
                     </div>
-                </div>
-            </div>
-            
+                        </div>
+        </div>
+
             <div class="summary-section">
                 <div class="summary-section-header">
                     <h4>Additional Services</h4>
@@ -594,10 +534,53 @@
         </div>
     </div>
 
+    <!-- Activity Search Modal -->
+    <div id="activity-search-modal" class="activity-modal-overlay" style="display: none;">
+        <div class="activity-modal-content">
+            <div class="activity-modal-header">
+                <h3 id="modal-title">Explore The Full Business Activity List</h3>
+                <button id="close-modal-btn" class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <p class="modal-subtitle">Choose from 2,500+ business activities. Mix up to 3 groups at no extra cost.</p>
+            
+            <div class="modal-category-pills" id="modal-category-pills">
+                <!-- Category pills will be generated by JavaScript -->
+            </div>
+            
+            <div class="modal-search-container">
+                <input type="text" id="modal-search-input" class="modal-search-input" placeholder="Search all business activity lists" aria-label="Search for business activities">
+                <span class="modal-search-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            </div>
+            
+            <div id="modal-activities-list">
+                <!-- Activities will be loaded here -->
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-back-btn" id="modal-back-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button class="modal-continue-btn" id="modal-continue-btn">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Success message -->
-    <div id="theFinalSuccessMessage" class="d-none">
-        <h2>Thank you, <span id="success-first-name"></span>!</h2>
-        <p>Your enquiry has been submitted successfully. One of our Business Setup Advisors will contact you soon.</p>
+            <div id="theFinalSuccessMessage" class="d-none">
+                <h2>Thank you, <span id="success-first-name"></span>!</h2>
+                <p>Your enquiry has been submitted successfully. One of our Business Setup Advisors will contact you soon.</p>
                     </div>
 </div>
 </section>

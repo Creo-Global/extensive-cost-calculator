@@ -51,6 +51,12 @@
             
             initializeActivityGroups();
             
+            initializeAddonModals();
+            
+            initializeLicenseModals();
+            
+            initializeSummaryToggle();
+            
             calculateCosts();
             
         } catch (err) {
@@ -142,8 +148,8 @@
                 document.getElementById('license-duration').value = value;
                 
                 calculateCosts();
-            });
-        });
+                    });
+                });
         
         // Shareholders options
         const shareholdersOptions = document.querySelectorAll('#shareholders-options .pill-option');
@@ -181,7 +187,7 @@
                     if (checkIcon) {
                         checkIcon.remove();
             }
-        } else {
+                        } else {
                     this.classList.add('selected');
                     hiddenInput.checked = true;
                     
@@ -202,9 +208,9 @@
                 
                 // Trigger calculation
                 calculateCosts();
-            });
-        });
-    }
+                    });
+                });
+            }
 
     // Initialize Supabase client
     const supabaseUrl = 'https://bwommjnbmumvgtlyfddn.supabase.co';
@@ -216,12 +222,12 @@
     // Initialize activity groups functionality
     function initializeActivityGroups() {
         const groups = [
-            { name: "F&B, Rentals", group: "fnb,rentals", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e641d24b90c96dfafdc34_d431eb034e1a686ed0a5ae255ad6cf5a9bbd5f8bdf1b61ed4f6d01c555ea3d78.png" },
+            { name: "F&B, Rentals", group: "F&B,Rentals", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e641d24b90c96dfafdc34_d431eb034e1a686ed0a5ae255ad6cf5a9bbd5f8bdf1b61ed4f6d01c555ea3d78.png" },
             { name: "Financial", group: "financial", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e642316bbf305f8e487a3_38de45a3cb52fb4ab3afc9e833ae57e84444434efed8001b01a697990d7b35ea.png" },
             { name: "Education", group: "education", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e64260ad8af5c3d69f211_879ec5f9869afa804e916bb99888aad8ce26efbb286a02f5879c1941257397bb.png" },
             { name: "Transportation", group: "transportation", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e64208f117b22b75ec5ef_55c616434ce274d0e445905bfb2f80866fe3201a85ff5beeb6e469373fce2ede.png" },
             { name: "Maintenance", group: "maintenance", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e644dcfa0b9f15e914df6_89592b5bd60a9091d367ba0c123ab57389d3276ede8f8e9fc06f4540d5349b9a.png" },
-            { name: "Real Estate", group: "realestate", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e645f24b90c96dfb01ada_9d419d848a5d582d7fcbdd95afb68d2afea53b1583d707f615383ab652f39f29.png" },
+            { name: "Realestate", group: "realestate", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e645f24b90c96dfb01ada_9d419d848a5d582d7fcbdd95afb68d2afea53b1583d707f615383ab652f39f29.png" },
             { name: "Administrative", group: "administrative", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e6800108c99cf14ab7d92_289b192ec79ecb38926fdb5e00570aef3306f5026282f58165024e31f1507bc7.png" },
             { name: "Agriculture", group: "agriculture", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e6441d775866c5a428411_2259ef99aba05e1260ed45d53205346e30587661bb6e0ea857a59b12ee92bc61.png" },
             { name: "Art", group: "art", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e645710be6e1a2c9c8859_3433ab633670e596ff531f10e43b4b4c4a2117b0ba5e17363b3618a5aad911eb.png" },
@@ -269,15 +275,21 @@
 
             card.addEventListener('click', (e) => {
                 e.preventDefault();
-                // If the click is on the link, open the modal, otherwise toggle selection
-                if (e.target.closest('.select-activity-link')) {
-                    if (!card.classList.contains('selected')) {
-                        toggleActivityGroup(card, true); // Select the card first
-                    }
-                    openActivityModal(groupInfo);
-            } else {
-                    toggleActivityGroup(card);
+                
+                // Always select the card if not already selected
+                if (!card.classList.contains('selected')) {
+                    // Manually select the card without calling toggleActivityGroup
+                    card.classList.add('selected');
+                    const countElement = card.querySelector('.selected-activities-count');
+                    const linkElement = card.querySelector('.select-activity-link');
+                    countElement.style.display = 'block';
+                    linkElement.innerHTML = 'Select more activities <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979589 8.88906 1.05226 8.92198 1.13219C8.95483 1.21213 8.97163 1.29779 8.97135 1.3842Z" fill="url(#paint0_linear_4640_6386)"/><defs><linearGradient id="paint0_linear_4640_6386" x1="-2.20508" y1="5.4043" x2="8.75062" y2="-1.23878" gradientUnits="userSpaceOnUse"><stop stop-color="#EB5F40"/><stop offset="1" stop-color="#B5348B"/></linearGradient></defs></svg></span>';
+                    updateSelectedGroupsCount();
+                    calculateCosts();
                 }
+                
+                // Open modal immediately
+                openActivityModal(groupInfo);
             });
         });
 
@@ -321,45 +333,60 @@
     }
 
     function setupScrollIndicator() {
-        const wrapper = document.querySelector('.activity-cards-wrapper');
         const container = document.querySelector('.activity-cards-container');
-        const scrollIndicator = document.getElementById('scroll-indicator');
+        const leftIndicator = document.getElementById('scroll-indicator-left');
+        const rightIndicator = document.getElementById('scroll-indicator-right');
         
-        if (!wrapper || !container || !scrollIndicator) return;
+        if (!container || !leftIndicator || !rightIndicator) return;
 
-        function updateScrollIndicator() {
-            const scrollLeft = wrapper.scrollLeft;
-            const scrollWidth = wrapper.scrollWidth;
-            const clientWidth = wrapper.clientWidth;
+        function updateScrollIndicators() {
+            const scrollLeft = container.scrollLeft;
+            const scrollWidth = container.scrollWidth;
+            const clientWidth = container.clientWidth;
             
-            // Hide indicator if content doesn't overflow horizontally
+            // Hide both indicators if content doesn't overflow horizontally
             if (scrollWidth <= clientWidth + 5) {
-                scrollIndicator.classList.add('hidden');
+                leftIndicator.classList.add('hidden');
+                rightIndicator.classList.add('hidden');
                 return;
             }
             
-            // Hide indicator if scrolled to near the end
-            if (scrollLeft >= scrollWidth - clientWidth - 20) {
-                scrollIndicator.classList.add('hidden');
+            // Show/hide left indicator based on scroll position
+            if (scrollLeft <= 10) {
+                leftIndicator.classList.add('hidden');
             } else {
-                scrollIndicator.classList.remove('hidden');
+                leftIndicator.classList.remove('hidden');
+            }
+            
+            // Show/hide right indicator based on scroll position
+            if (scrollLeft >= scrollWidth - clientWidth - 10) {
+                rightIndicator.classList.add('hidden');
+            } else {
+                rightIndicator.classList.remove('hidden');
             }
         }
 
-        // Update indicator on scroll
-        wrapper.addEventListener('scroll', updateScrollIndicator);
+        // Update indicators on scroll
+        container.addEventListener('scroll', updateScrollIndicators);
         
-        // Update indicator on resize
-        window.addEventListener('resize', updateScrollIndicator);
+        // Update indicators on resize
+        window.addEventListener('resize', updateScrollIndicators);
         
         // Initial update
-        setTimeout(updateScrollIndicator, 100);
+        setTimeout(updateScrollIndicators, 100);
 
-        // Click handler for scroll indicator
-        scrollIndicator.addEventListener('click', () => {
+        // Click handler for left scroll indicator
+        leftIndicator.addEventListener('click', () => {
             const cardWidth = 216; // 200px card + 16px gap
             const scrollAmount = cardWidth * 2; // Scroll by 2 columns (1 column per row)
-            wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        });
+
+        // Click handler for right scroll indicator
+        rightIndicator.addEventListener('click', () => {
+            const cardWidth = 216; // 200px card + 16px gap
+            const scrollAmount = cardWidth * 2; // Scroll by 2 columns (1 column per row)
+            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         });
     }
 
@@ -373,6 +400,9 @@
 
         // Initialize category pills
         initializeModalCategoryPills();
+        
+        // Update all category pill counts
+        updateAllModalCategoryPillCounts();
         
         // Set the initial selected category
         setModalSelectedCategory(groupInfo.group);
@@ -397,19 +427,33 @@
     function initializeModalCategoryPills() {
         const pillsContainer = document.getElementById('modal-category-pills');
         const categories = [
+            { name: 'Administrative', group: 'administrative' },
             { name: 'Agriculture', group: 'agriculture' },
             { name: 'Art', group: 'art' },
-            { name: 'F&B, Rentals', group: 'fnb' },
             { name: 'Education', group: 'education' },
+            { name: 'ICT', group: 'ict' },
+            { name: 'F&B,Rentals', group: 'F&B,Rentals' },
+            { name: 'Financial', group: 'financial' },
+            { name: 'Health Care', group: 'healthcare' },
             { name: 'Maintenance', group: 'maintenance' },
             { name: 'Services', group: 'services' },
-            { name: 'ICT', group: 'ict' },
-            { name: 'Trading', group: 'trading' }
+            { name: 'Professional', group: 'professional' },
+            { name: 'Realestate', group: 'realestate' },
+            { name: 'Sewerage', group: 'sewerage' },
+            { name: 'Trading', group: 'trading' },
+            { name: 'Transportation', group: 'transportation' },
+            { name: 'Waste Collection', group: 'waste' },
+            { name: 'Manufacturing', group: 'manufacturing' }
         ];
 
         let pillsHtml = '';
         categories.forEach(category => {
-            pillsHtml += `<button class="modal-category-pill" data-group="${category.group}">${category.name}</button>`;
+            const selectedCount = getSelectedActivitiesCountForGroup(category.group);
+            pillsHtml += `
+                <button class="modal-category-pill" data-group="${category.group}">
+                <span class="activity-count">${selectedCount}</span>
+                    ${category.name}
+                </button>`;
         });
         pillsContainer.innerHTML = pillsHtml;
 
@@ -524,12 +568,12 @@
             const isSelected = selectedActivityCodes.includes(activity.Code);
             html += `
                 <div class="modal-activity-item" data-code="${activity.Code}" data-name="${activity["Activity Name"]}" data-category="${activity.Category}" data-group="${activity.Group}">
+                <div class="modal-activity-info">
+                    <div class="modal-activity-code">${activity.Code}</div>
+                    <div class="modal-activity-name">${activity["Activity Name"]}</div>
+                </div>
                     <div class="modal-activity-checkbox ${isSelected ? 'checked' : ''}">
                         <span class="check-icon">✓</span>
-                    </div>
-                    <div class="modal-activity-info">
-                        <div class="modal-activity-code">${activity.Code}</div>
-                        <div class="modal-activity-name">${activity["Activity Name"]}</div>
                     </div>
                 </div>`;
         });
@@ -553,7 +597,7 @@
                 if (isCurrentlySelected) {
                     checkbox.classList.remove('checked');
                     removeActivity(activityData.Code);
-                } else {
+        } else {
                     checkbox.classList.add('checked');
                     addActivityToSelected(activityData, groupName);
                     
@@ -565,6 +609,7 @@
                 }
                 
                 updateActivityCountOnCard(groupName);
+                updateAllModalCategoryPillCounts();
                 updateSelectedGroupsCount();
                 calculateCosts();
             });
@@ -610,12 +655,12 @@
             const isSelected = selectedActivityCodes.includes(activity.Code);
             html += `
                 <div class="modal-activity-item" data-code="${activity.Code}" data-name="${activity["Activity Name"]}" data-category="${activity.Category}" data-group="${activity.Group}">
+                <div class="modal-activity-info">
+                    <div class="modal-activity-code">${activity.Code}</div>
+                    <div class="modal-activity-name">${activity["Activity Name"]}</div>
+                </div>
                     <div class="modal-activity-checkbox ${isSelected ? 'checked' : ''}">
                         <span class="check-icon">✓</span>
-                    </div>
-                    <div class="modal-activity-info">
-                        <div class="modal-activity-code">${activity.Code}</div>
-                        <div class="modal-activity-name">${activity["Activity Name"]}</div>
                     </div>
                 </div>`;
         });
@@ -637,12 +682,13 @@
                 if (isCurrentlySelected) {
                     checkbox.classList.remove('checked');
                     removeActivity(activityData.Code);
-                } else {
+            } else {
                     checkbox.classList.add('checked');
                     addActivityToSelected(activityData, groupName);
                 }
                 
                 updateActivityCountOnCard(groupName);
+                updateAllModalCategoryPillCounts();
                 updateSelectedGroupsCount();
                 calculateCosts();
             });
@@ -651,7 +697,7 @@
     
     function addActivityToSelected(activity, groupName) {
         if (!window.selectedActivities.some(item => item.Code === activity.Code)) {
-            window.selectedActivities.push({ ...activity, groupName });
+            window.selectedActivities.push({ ...activity, groupName, Group: activity.Group });
         }
     }
 
@@ -659,12 +705,396 @@
         window.selectedActivities = window.selectedActivities.filter(a => a.Code !== code);
     }
     
+    function getSelectedActivitiesCountForGroup(groupName) {
+        if (!window.selectedActivities) return 0;
+        // Filter by both Group and groupName to handle different data sources
+        return window.selectedActivities.filter(activity => 
+            activity.Group === groupName || activity.groupName === groupName
+        ).length;
+    }
+
     function updateActivityCountOnCard(groupName) {
         const card = document.querySelector(`.activity-card[data-group="${groupName}"]`);
         if (card) {
             const count = window.selectedActivities.filter(a => a.groupName === groupName).length;
             const countElement = card.querySelector('.selected-activities-count');
             countElement.textContent = `Selected Activities: ${count}`;
+        }
+        
+        // Also update the modal category pill count if modal is open
+        updateModalCategoryPillCount(groupName);
+    }
+
+    function updateModalCategoryPillCount(groupName) {
+        const modalPill = document.querySelector(`.modal-category-pill[data-group="${groupName}"]`);
+        if (modalPill) {
+            const countElement = modalPill.querySelector('.activity-count');
+            if (countElement) {
+                const count = getSelectedActivitiesCountForGroup(groupName);
+                countElement.textContent = count;
+                
+                // Show/hide count based on value
+                if (count > 0) {
+                    countElement.classList.add('has-count');
+                 } else {
+                    countElement.classList.remove('has-count');
+                }
+            }
+        }
+    }
+
+    function updateAllModalCategoryPillCounts() {
+        document.querySelectorAll('.modal-category-pill').forEach(pill => {
+            const groupName = pill.dataset.group;
+            const countElement = pill.querySelector('.activity-count');
+            if (countElement) {
+                const count = getSelectedActivitiesCountForGroup(groupName);
+                countElement.textContent = count;
+                
+                // Show/hide count based on value
+                if (count > 0) {
+                    countElement.classList.add('has-count');
+                } else {
+                    countElement.classList.remove('has-count');
+                }
+                
+                console.log(`Group: ${groupName}, Count: ${count}`); // Debug log
+            }
+        });
+    }
+
+    // Initialize addon modal functionality
+    function initializeAddonModals() {
+        // Add click handlers to all learn-more buttons
+        document.querySelectorAll('.learn-more-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const addonCard = this.closest('.addon-category-card');
+                if (addonCard) {
+                    const categoryName = addonCard.querySelector('h3').textContent;
+                    const categoryDescription = addonCard.querySelector('.addon-category-description').textContent;
+                    openAddonModal(categoryName, categoryDescription);
+                }
+            });
+        });
+    }
+
+    function openAddonModal(categoryName, categoryDescription) {
+        const modal = document.getElementById('addons-modal');
+        const modalTitle = document.getElementById('addons-modal-title');
+        const modalSubtitle = document.getElementById('addons-modal-subtitle');
+        const modalHeader = document.querySelector('#addons-modal .activity-modal-header');
+        
+        // Category images
+        const categoryImages = {
+            'mCore': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0009c49b9f6e1a1b8b5_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.webp',
+            'mResidency': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6afd5ddb5f1622f99baf_775fd8f4871640146c1e5f5c6af9c273275f1e4d307c502d91bb9baf561163fc.webp',
+            'mAssist': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6aeaeb91eccdec925bcc_f03ef01cb46009b032f13938d1ce70d5c48295bb78648a5be0cff97a231d87de.webp',
+            'mAccounting': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6ae3a479cb1ee9225627_b6c212f84a314ee75c93701d8cc4a1745ef6957b2ea1458e7e33513166368c0d.webp'
+        };
+        
+        // Remove any existing category image
+        const existingImage = modalHeader.querySelector('.addon-category-image-container');
+        if (existingImage) {
+            existingImage.remove();
+        }
+        
+        // Add category image to the modal header content
+        const modalHeaderContent = modalHeader.querySelector('.modal-header-content');
+        if (categoryImages[categoryName] && modalHeaderContent) {
+            const imageHtml = `
+                <div class="addon-category-image-container">
+                    <img src="${categoryImages[categoryName]}" alt="${categoryName}" class="addon-category-image" />
+                </div>`;
+            modalHeaderContent.insertAdjacentHTML('afterbegin', imageHtml);
+        }
+        
+        modalTitle.textContent = categoryName;
+        modalSubtitle.textContent = categoryDescription;
+        
+        // Load services for this category
+        loadServicesForCategory(categoryName);
+        
+        // Setup modal event listeners
+        setupAddonModalEventListeners();
+        
+        // Show the modal
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAddonModal() {
+        const modal = document.getElementById('addons-modal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function setupAddonModalEventListeners() {
+        const closeBtn = document.getElementById('addons-close-modal-btn');
+        const modal = document.getElementById('addons-modal');
+        const backBtn = document.getElementById('addons-modal-back-btn');
+        const continueBtn = document.getElementById('addons-modal-continue-btn');
+        
+        // Remove existing listeners
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+        
+        const newBackBtn = backBtn.cloneNode(true);
+        backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+        
+        const newContinueBtn = continueBtn.cloneNode(true);
+        continueBtn.parentNode.replaceChild(newContinueBtn, continueBtn);
+        
+        // Add fresh listeners
+        document.getElementById('addons-close-modal-btn').addEventListener('click', closeAddonModal);
+        document.getElementById('addons-modal-back-btn').addEventListener('click', closeAddonModal);
+        document.getElementById('addons-modal-continue-btn').addEventListener('click', closeAddonModal);
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeAddonModal();
+            }
+        });
+    }
+
+    function loadServicesForCategory(categoryName) {
+        const servicesList = document.getElementById('addons-modal-services-list');
+        const services = getServicesForCategory(categoryName);
+        
+        let html = '';
+        
+        // Add services list without individual images
+        services.forEach(service => {
+            const isSelected = isServiceSelected(service.id);
+            html += `
+                <div class="addon-service-item" data-service="${service.id}">
+                    <div class="addon-service-content">
+                        <div class="addon-service-header">
+                            <div class="addon-service-name">${service.name}</div>
+                            <div class="addon-service-toggle-container">
+                                <span class="addon-service-toggle-label ${isSelected ? 'selected' : ''}">
+                                    ${isSelected ? 'Selected' : ''}
+                                </span>
+                                <div class="addon-service-toggle ${isSelected ? 'checked' : ''}" data-service="${service.id}">
+                                    <div class="addon-service-toggle-slider"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="addon-service-description">${service.description}</div>
+                    </div>
+                </div>`;
+        });
+        
+        servicesList.innerHTML = html;
+        
+        // Add click handlers for toggle switches
+        servicesList.querySelectorAll('.addon-service-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const serviceId = this.dataset.service;
+                const isCurrentlySelected = this.classList.contains('checked');
+                const item = this.closest('.addon-service-item');
+                const label = item.querySelector('.addon-service-toggle-label');
+                
+                if (isCurrentlySelected) {
+                    this.classList.remove('checked');
+                    label.classList.remove('selected');
+                    label.textContent = '';
+                    deselectService(serviceId);
+            } else {
+                    this.classList.add('checked');
+                    label.classList.add('selected');
+                    label.textContent = 'Selected';
+                    selectService(serviceId);
+                }
+                
+                // Update costs and UI
+                calculateCosts();
+            });
+        });
+    }
+
+    function getServicesForCategory(categoryName) {
+        const servicesData = {
+            'mCore': [
+                {
+                    id: 'bank-account',
+                    name: 'Bank Account',
+                    price: 1500,
+                    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Open your UAE business account with full documentation support and a dedicated relationship manager handling approvals.'
+                },
+                {
+                    id: 'business-card',
+                    name: 'Business Card',
+                    price: 240,
+                    image: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Get a professionally designed business card with logo, contact details, and ready-to-print digital formats included.'
+                },
+                {
+                    id: 'company-stamp',
+                    name: 'Company Stamp',
+                    price: 200,
+                    image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Receive an official company stamp required to authenticate contracts, invoices, and formal business correspondence in Dubai.'
+                },
+                {
+                    id: 'ecommerce-starter',
+                    name: 'E-commerce Starter',
+                    price: 1000,
+                    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Set up your seller profile on trusted e-commerce platforms and start selling with ease.'
+                }
+            ],
+            'mResidency': [
+                {
+                    id: 'medical-emirates-id',
+                    name: 'Medical & Emirates ID',
+                    price: 2250,
+                    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Complete medical examination and Emirates ID processing for residency requirements.'
+                },
+                {
+                    id: 'medical-insurance',
+                    name: 'Medical Insurance',
+                    price: 1080,
+                    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Comprehensive health insurance coverage meeting UAE residency requirements.'
+                },
+                {
+                    id: 'dependent-visa',
+                    name: 'Dependent Visa',
+                    price: 6000,
+                    image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Sponsor family members with dependent visa processing and documentation support.'
+                }
+            ],
+            'mAssist': [
+                {
+                    id: 'melite',
+                    name: 'mElite',
+                    price: 6000,
+                    image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Premium business support package with dedicated account management and priority services.'
+                },
+                {
+                    id: 'meeting-rooms',
+                    name: 'Meeting Rooms',
+                    price: 150,
+                    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Access to professional meeting rooms and business facilities when needed.'
+                },
+                {
+                    id: 'po-box',
+                    name: 'PO Box',
+                    price: 1700,
+                    image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Dedicated PO Box address for official business correspondence and mail handling.'
+                },
+                {
+                    id: 'document-translation',
+                    name: 'Document Translation',
+                    price: 250,
+                    image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Professional translation services for business documents and legal paperwork.'
+                },
+                {
+                    id: 'mail-management',
+                    name: 'Mail Management',
+                    price: 750,
+                    image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Complete mail handling and forwarding service for your business correspondence.'
+                },
+                {
+                    id: 'virtual-assistant',
+                    name: 'Virtual Assistant',
+                    price: 12000,
+                    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Dedicated virtual assistant for administrative tasks and business support.'
+                }
+            ],
+            'mAccounting': [
+                {
+                    id: 'corporate-tax',
+                    name: 'Corporate Tax',
+                    price: 1200,
+                    image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Corporate tax compliance and filing services to meet UAE regulatory requirements.'
+                },
+                {
+                    id: 'vat-registration',
+                    name: 'VAT Registration',
+                    price: 1500,
+                    image: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'VAT registration and ongoing compliance support for your business operations.'
+                },
+                {
+                    id: 'bookkeeping',
+                    name: 'Book Keeping',
+                    price: 1000,
+                    image: 'https://images.unsplash.com/photo-1554224154-26032fced8bd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Professional bookkeeping services to maintain accurate financial records.'
+                },
+                {
+                    id: 'liquidation-report',
+                    name: 'Liquidation Report',
+                    price: 1000,
+                    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Professional liquidation reporting services for business closure requirements.'
+                },
+                {
+                    id: 'financial-audit-report',
+                    name: 'Financial Audit Report',
+                    price: 250,
+                    image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Comprehensive financial audit reports for compliance and business analysis.'
+                },
+                {
+                    id: 'valuation-report',
+                    name: 'Valuation Report',
+                    price: 10000,
+                    image: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
+                    description: 'Professional business valuation reports for investment and strategic decisions.'
+                }
+            ]
+        };
+        
+        return servicesData[categoryName] || [];
+    }
+
+    function isServiceSelected(serviceId) {
+        const checkbox = document.getElementById(serviceId);
+        return checkbox && checkbox.checked;
+    }
+
+    function selectService(serviceId) {
+        const checkbox = document.getElementById(serviceId);
+        const servicePill = document.querySelector(`[data-service="${serviceId}"]`);
+        
+        if (checkbox) checkbox.checked = true;
+        if (servicePill && !servicePill.classList.contains('selected')) {
+            servicePill.classList.add('selected');
+            // Add check icon if it doesn't exist
+            if (!servicePill.querySelector('.check-icon')) {
+                const checkIcon = document.createElement('span');
+                checkIcon.className = 'check-icon';
+                checkIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                </svg>`;
+                servicePill.insertBefore(checkIcon, servicePill.firstChild);
+            }
+        }
+    }
+
+    function deselectService(serviceId) {
+        const checkbox = document.getElementById(serviceId);
+        const servicePill = document.querySelector(`[data-service="${serviceId}"]`);
+        
+        if (checkbox) checkbox.checked = false;
+        if (servicePill && servicePill.classList.contains('selected')) {
+            servicePill.classList.remove('selected');
+            const checkIcon = servicePill.querySelector('.check-icon');
+            if (checkIcon) checkIcon.remove();
         }
     }
 
@@ -675,7 +1105,7 @@
             'art': 'Art', 
             'education': 'Education', 
             'ict': 'ICT', 
-            'fnb': 'F&B', 
+            'F&B, Rentals': 'F&B,Rentals', 
             'financial': 'Financial', 
             'healthcare': 'HealthCare', 
             'maintenance': 'Maintenance', 
@@ -691,15 +1121,169 @@
         return groupToCategoryMap[groupName] || groupName;
     }
 
+    // License Modal Functions
+    function initializeLicenseModals() {
+        const learnMoreBtns = document.querySelectorAll('.license-card .learn-more-btn');
+        
+        learnMoreBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent card selection
+                const licenseCard = this.closest('.license-card');
+                const licenseType = licenseCard.dataset.license;
+                openLicenseModal(licenseType);
+            });
+        });
+    }
+
+    function openLicenseModal(licenseType) {
+        const modal = document.getElementById('license-modal');
+        const modalTitle = document.getElementById('license-modal-title');
+        const modalDescription = document.getElementById('license-modal-description');
+        const modalAdditional = document.getElementById('license-modal-additional');
+        const modalActionBtn = document.getElementById('license-modal-action-btn');
+        const modalHeader = document.querySelector('#license-modal .activity-modal-header');
+        
+        // License data
+        const licenseData = {
+            'fawri': {
+                title: 'What Is Fawri License? 🚀',
+                description: 'Fawri is your express route to a 60-minute, compliance-led LLC license. This 100% digital, fast-track license is designed exclusively for ambitious solo entrepreneurs and freelancers who want speed, control, and minimal setup friction.',
+                additional: 'With over 1,800 activities, Fawri gets you licensed, visa-ready, and enables bank account applications on the same day. It\'s the fastest, most reliable way to launch your business in Dubai.',
+                actionText: 'Select Fawri License',
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b601639b2df4bfdbec4_fawri.webp'
+            },
+            'regular': {
+                title: 'Regular Business License 📨',
+                description: 'The regular business license is built for founders who need flexibility, scalability, and full ownership. It\'s a customisable license that supports multi-partner setups, cross-industry models, and long-term growth.',
+                additional: 'Choose from 2,500+ activities across 3 groups with instant access to visa processing and banking. 100% digital, fully foreign-owned, and designed for serious entrepreneurs ready to build broad, future-ready businesses in Dubai.', 
+                actionText: 'Select Regular License',
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b602ab2cde8b87325e8_regular.webp'
+            }
+        };
+        
+        const license = licenseData[licenseType];
+        if (!license) return;
+        
+        // Remove any existing category image
+        const existingImage = modalHeader.querySelector('.addon-category-image-container');
+        if (existingImage) {
+            existingImage.remove();
+        }
+        
+        // Add license image to the modal header content
+        const modalHeaderContent = modalHeader.querySelector('.modal-header-content');
+        if (modalHeaderContent) {
+            const imageHtml = `
+                <div class="addon-category-image-container">
+                    <img src="${license.image}" alt="${license.title}" class="addon-category-image" />
+                </div>`;
+            modalHeaderContent.insertAdjacentHTML('afterbegin', imageHtml);
+        }
+        
+        modalTitle.textContent = license.title;
+        modalDescription.textContent = license.description;
+        modalAdditional.textContent = license.additional;
+        modalActionBtn.innerHTML = `
+            ${license.actionText}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+        `;
+        
+        // Update action button click handler
+        modalActionBtn.onclick = function() {
+            selectLicenseType(licenseType);
+            closeLicenseModal();
+        };
+        
+        // Setup modal event listeners
+        setupLicenseModalEventListeners();
+        
+        // Show the modal
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLicenseModal() {
+        const modal = document.getElementById('license-modal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function setupLicenseModalEventListeners() {
+        const closeBtn = document.getElementById('license-close-modal-btn');
+        const modal = document.getElementById('license-modal');
+        const backBtn = document.getElementById('license-modal-back-btn');
+        
+        // Remove existing listeners
+        const newCloseBtn = closeBtn.cloneNode(true);
+        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+        
+        const newBackBtn = backBtn.cloneNode(true);
+        backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+        
+        // Add fresh listeners
+        document.getElementById('license-close-modal-btn').addEventListener('click', closeLicenseModal);
+        document.getElementById('license-modal-back-btn').addEventListener('click', closeLicenseModal);
+        
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeLicenseModal();
+            }
+        });
+    }
+
+    // Summary Toggle Functions
+    function initializeSummaryToggle() {
+        const grandTotal = document.getElementById('grand-total-clickable');
+        
+        grandTotal.addEventListener('click', function() {
+            toggleSummaryView();
+        });
+    }
+
+    function toggleSummaryView() {
+        const simplifiedSummary = document.getElementById('simplified-summary');
+        const detailedSummary = document.getElementById('detailed-summary');
+        
+        if (detailedSummary.style.display === 'none') {
+            // Show detailed view
+            simplifiedSummary.style.display = 'none';
+            detailedSummary.style.display = 'block';
+            } else {
+            // Show simplified view
+            simplifiedSummary.style.display = 'block';
+            detailedSummary.style.display = 'none';
+        }
+    }
+
+    function updateBasicPackagePrice(totalCost) {
+        const basicPackagePrice = document.getElementById('basic-package-price');
+        const packageWarning = document.getElementById('package-warning');
+        
+        if (totalCost > 0) {
+            basicPackagePrice.textContent = `AED ${totalCost.toLocaleString()}`;
+            packageWarning.style.display = 'none';
+        } else {
+            basicPackagePrice.textContent = 'AED 12,500';
+            packageWarning.style.display = 'flex';
+        }
+    }
+
     function updateSelectedGroupsCount() {
         const selectedGroups = document.querySelectorAll('.activity-card.selected').length;
-        document.getElementById('groups-selected-count').textContent = selectedGroups;
+        const groupsCountElement = document.getElementById('groups-selected-count');
+        if (groupsCountElement) {
+            groupsCountElement.textContent = selectedGroups;
+        }
 
         const feeWarning = document.querySelector('.fee-warning');
-        if (selectedGroups > 3) {
-            feeWarning.style.display = 'block';
-        } else {
-            feeWarning.style.display = 'none';
+        if (feeWarning) {
+            if (selectedGroups > 3) {
+                feeWarning.style.display = 'block';
+            } else {
+                feeWarning.style.display = 'none';
+            }
         }
     }
 
@@ -775,7 +1359,7 @@
                     activityErrorElement.style.fontFamily = "Plus Jakarta Sans";
                     activityErrorElement.style.width = "100%";
                     
-                    activitiesContainer.appendChild(activityErrorElement);
+                        activitiesContainer.appendChild(activityErrorElement);
                 }
                 valid = false;
         }
@@ -1048,7 +1632,7 @@
                 'art': 'Art',
                 'education': 'Education',
                 'ict': 'ICT',
-                'fnb': 'F&B, Rentals',
+                'F&B,Rentals': 'F&B,Rentals',
                 'financial': 'Financial',
                 'healthcare': 'Health Care',
                 'maintenance': 'Maintenance',
@@ -1262,6 +1846,9 @@
         window.BusinessActivitiesCost = Math.round(businessActivitiesCost);
 
         updateSummaryUI(costs, snapshot);
+        
+        // Update basic package price
+        updateBasicPackagePrice(totalCost);
         
         // Save form data to localStorage for potential recovery
         try {
@@ -1507,7 +2094,6 @@
         
         updateButtonsDisplay(currentStep);
 
-        // License type event listeners removed - now handled by card interface
         
         // Ensure Fawri license is selected by default for calculations
         selectLicenseType('fawri');
@@ -1752,12 +2338,25 @@
             
             results.forEach(activity => {
                 const resultItem = document.createElement('div');
-            resultItem.className = 'search-result-item';
-            resultItem.innerHTML = `
-                <span class="activity-code">${activity.Code}</span>
-                <span class="activity-name">${activity["Activity Name"]}</span>
-            `;
-            resultItem.addEventListener('click', () => selectActivityFromSearch(activity));
+                resultItem.className = 'search-result-items';
+                
+                // Check if activity is already selected
+                const isSelected = window.selectedActivities && window.selectedActivities.some(selected => selected.code === activity.Code);
+                
+                resultItem.innerHTML = `
+                    <div class="modal-activity-checkbox ${isSelected ? 'checked' : ''}">
+                        <div class="check-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <path d="M11.6668 3.5L5.25016 9.91667L2.3335 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="modal-activity-info">
+                        <span class="modal-activity-code">${activity.Code}</span>
+                        <span class="modal-activity-name">${activity["Activity Name"]}</span>
+                    </div>
+                `;
+                resultItem.addEventListener('click', () => selectActivityFromSearch(activity));
                 searchResultsDropdown.appendChild(resultItem);
             });
             
@@ -1805,7 +2404,7 @@
             'Art': 'art',
             'Education': 'education',
             'ICT': 'ict',
-            'F&B,Rentals': 'fnb',
+            'F&B,Rentals': 'F&B,Rentals',
             'Financial': 'financial',
             'HealthCare': 'healthcare',
             'Maintenance': 'maintenance',

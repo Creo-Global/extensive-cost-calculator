@@ -55,7 +55,10 @@
             
             initializeLicenseModals();
             
+            initializeVisaModals();
+            
             initializeSummaryToggle();
+            initializeMobileSummary();
             
             calculateCosts();
             
@@ -392,26 +395,43 @@
 
     function openActivityModal(groupInfo) {
         const modal = document.getElementById('activity-search-modal');
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
-
+        const modalTitle = document.getElementById('modal-title');
+        
         // Store current group info for reference
         window.currentModalGroup = groupInfo;
-
+        
         // Initialize category pills
         initializeModalCategoryPills();
         
         // Update all category pill counts
         updateAllModalCategoryPillCounts();
         
-        // Set the initial selected category
-        setModalSelectedCategory(groupInfo.group);
+        if (groupInfo) {
+            modalTitle.textContent = `${groupInfo.name} Activities`;
+            // Set the initial selected category
+            setModalSelectedCategory(groupInfo.group);
+            // Fetch activities for the selected group
+            fetchActivitiesForModal(groupInfo.group);
+        } else {
+            modalTitle.textContent = 'Explore The Full Business Activity List';
+            setModalSelectedCategory(null);
+        }
         
         // Setup modal event listeners
         setupModalEventListeners();
-
-        // Fetch activities for the selected group
-        fetchActivitiesForModal(groupInfo.group);
+        
+        // Show the modal
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Add sheet-view-active class for mobile styling
+        if (window.innerWidth <= 1200) {
+            document.body.classList.add('sheet-view-active');
+            const overlay = document.getElementById('bottom-sheet-overlay');
+            if (overlay) {
+                overlay.classList.add('active');
+            }
+        }
     }
 
     function closeActivityModal() {
@@ -422,6 +442,13 @@
         // Clear search input
         const searchInput = document.getElementById('modal-search-input');
         if (searchInput) searchInput.value = '';
+        
+        // Remove sheet-view-active class
+        document.body.classList.remove('sheet-view-active');
+        const overlay = document.getElementById('bottom-sheet-overlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+        }
     }
 
     function initializeModalCategoryPills() {
@@ -821,12 +848,28 @@
         // Show the modal
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        
+        // Add sheet-view-active class for mobile styling
+        if (window.innerWidth <= 1200) {
+            document.body.classList.add('sheet-view-active');
+            const overlay = document.getElementById('bottom-sheet-overlay');
+            if (overlay) {
+                overlay.classList.add('active');
+            }
+        }
     }
 
     function closeAddonModal() {
         const modal = document.getElementById('addons-modal');
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
+        
+        // Remove sheet-view-active class
+        document.body.classList.remove('sheet-view-active');
+        const overlay = document.getElementById('bottom-sheet-overlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+        }
     }
 
     function setupAddonModalEventListeners() {
@@ -1135,6 +1178,174 @@
         });
     }
 
+    // Visa Modal Functions
+    function initializeVisaModals() {
+        const visaLearnMoreBtns = document.querySelectorAll('.visa-card .learn-more-btn');
+        
+        visaLearnMoreBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent card selection
+                const visaCard = this.closest('.visa-card');
+                const visaType = visaCard.dataset.visa;
+                openVisaModal(visaType);
+            });
+        });
+    }
+
+    function openVisaModal(visaType) {
+        // Reuse the license modal for visas
+        const modal = document.getElementById('license-modal');
+        const modalTitle = document.getElementById('license-modal-title');
+        const modalDescription = document.getElementById('license-modal-description');
+        const modalAdditional = document.getElementById('license-modal-additional');
+        const modalActionBtn = document.getElementById('license-modal-action-btn');
+        const modalHeader = document.querySelector('#license-modal .activity-modal-header');
+        
+        // Visa data
+        const visaData = {
+            'investor': {
+                title: 'Investor Visa',
+                description: 'The Dubai Investor Visa is designed for company owners who want to live and operate their business in the UAE. It provides a pathway to residency for business owners and investors.',
+                additional: 'With this visa, you can sponsor family members, access healthcare services, open bank accounts, and enjoy the benefits of living in Dubai while running your business.',
+                actionText: 'Select Investor Visa',
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbfae4fc11d7f87391fb4_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.png'
+            },
+            'employee': {
+                title: 'Employee Visa',
+                description: 'Dubai\'s employee visa system is essential for hiring, scaling, and maintaining compliance with UAE labor laws. It allows businesses to legally employ staff in the UAE.',
+                additional: 'Employee visas provide work authorization, residency status, and access to essential services for your staff. The process includes medical testing, Emirates ID application, and visa stamping.',
+                actionText: 'Select Employee Visa',
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0004d1341d4ccb5b150_2193782fa28109786e70758b4f8700cf49d9201e377abc3571b6302582c10d9b.webp'
+            },
+            'dependent': {
+                title: 'Dependent Visa',
+                description: 'The UAE Dependent Visa allows residents to sponsor their family members to live together in the UAE. This visa is available for spouses, children, and parents under certain conditions.',
+                additional: 'Dependent visa holders can access education, healthcare, and other services in the UAE. The sponsor must meet minimum salary requirements and provide proof of suitable accommodation.',
+                actionText: 'Select Dependent Visa',
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc001b0a226a76d71d00d_de8b99eed6930d3f9455605a063e0514bbbcb91427bf01dca897e5aa4b11d820.webp'
+            }
+        };
+        
+        const visa = visaData[visaType];
+        if (!visa) return;
+        
+        // Remove any existing category image
+        const existingImage = modalHeader.querySelector('.addon-category-image-container');
+        if (existingImage) {
+            existingImage.remove();
+        }
+        
+        // Add visa image to the modal header content
+        const modalHeaderContent = modalHeader.querySelector('.modal-header-content');
+        if (modalHeaderContent) {
+            const imageHtml = `
+                <div class="addon-category-image-container">
+                    <img src="${visa.image}" alt="${visa.title}" class="addon-category-image" />
+                </div>`;
+            modalHeaderContent.insertAdjacentHTML('afterbegin', imageHtml);
+        }
+        
+        modalTitle.textContent = visa.title;
+        modalDescription.textContent = visa.description;
+        modalAdditional.textContent = visa.additional;
+        modalActionBtn.innerHTML = `
+            ${visa.actionText}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+        `;
+        
+        // Remove any existing click handlers
+        const newActionBtn = modalActionBtn.cloneNode(true);
+        modalActionBtn.parentNode.replaceChild(newActionBtn, modalActionBtn);
+        
+        // Get fresh reference to the button
+        const freshActionBtn = document.getElementById('license-modal-action-btn');
+        
+        // Update action button click handler with direct DOM manipulation
+        if (visaType === 'investor') {
+            freshActionBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Investor visa selected');
+                
+                // Select the visa
+                document.getElementById('investor-visa-toggle').checked = true;
+                toggleVisaCard('investor');
+                
+                // Force close the modal
+                document.getElementById('license-modal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+                document.body.classList.remove('sheet-view-active');
+                
+                // Hide overlay
+                const overlay = document.getElementById('bottom-sheet-overlay');
+                if (overlay) overlay.classList.remove('active');
+                
+                console.log('Modal should be closed now');
+                return false;
+            });
+        } else if (visaType === 'employee') {
+            freshActionBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Employee visa selected');
+                
+                // Select the visa
+                selectVisaCard('employee');
+                
+                // Force close the modal
+                document.getElementById('license-modal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+                document.body.classList.remove('sheet-view-active');
+                
+                // Hide overlay
+                const overlay = document.getElementById('bottom-sheet-overlay');
+                if (overlay) overlay.classList.remove('active');
+                
+                console.log('Modal should be closed now');
+                return false;
+            });
+        } else if (visaType === 'dependent') {
+            freshActionBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Dependent visa selected');
+                
+                // Select the visa
+                selectVisaCard('dependent');
+                
+                // Force close the modal
+                document.getElementById('license-modal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+                document.body.classList.remove('sheet-view-active');
+                
+                // Hide overlay
+                const overlay = document.getElementById('bottom-sheet-overlay');
+                if (overlay) overlay.classList.remove('active');
+                
+                console.log('Modal should be closed now');
+                return false;
+            });
+        }
+        
+        // Setup modal event listeners
+        setupLicenseModalEventListeners();
+        
+        // Show the modal
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Add sheet-view-active class for mobile styling
+        if (window.innerWidth <= 1200) {
+            document.body.classList.add('sheet-view-active');
+            const overlay = document.getElementById('bottom-sheet-overlay');
+            if (overlay) {
+                overlay.classList.add('active');
+            }
+        }
+    }
+
     function openLicenseModal(licenseType) {
         const modal = document.getElementById('license-modal');
         const modalTitle = document.getElementById('license-modal-title');
@@ -1190,11 +1401,34 @@
             </svg>
         `;
         
-        // Update action button click handler
-        modalActionBtn.onclick = function() {
+        // Remove any existing click handlers
+        const newActionBtn = modalActionBtn.cloneNode(true);
+        modalActionBtn.parentNode.replaceChild(newActionBtn, modalActionBtn);
+        
+        // Get fresh reference to the button
+        const freshActionBtn = document.getElementById('license-modal-action-btn');
+        
+        // Update action button click handler with direct DOM manipulation
+        freshActionBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('License selected:', licenseType);
+            
+            // Select the license
             selectLicenseType(licenseType);
-            closeLicenseModal();
-        };
+            
+            // Force close the modal
+            document.getElementById('license-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.body.classList.remove('sheet-view-active');
+            
+            // Hide overlay
+            const overlay = document.getElementById('bottom-sheet-overlay');
+            if (overlay) overlay.classList.remove('active');
+            
+            console.log('Modal should be closed now');
+            return false;
+        });
         
         // Setup modal event listeners
         setupLicenseModalEventListeners();
@@ -1202,12 +1436,30 @@
         // Show the modal
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        
+        // Add sheet-view-active class for mobile styling
+        if (window.innerWidth <= 1200) {
+            document.body.classList.add('sheet-view-active');
+            const overlay = document.getElementById('bottom-sheet-overlay');
+            if (overlay) {
+                overlay.classList.add('active');
+            }
+        }
     }
 
     function closeLicenseModal() {
+        console.log('closeLicenseModal called');
         const modal = document.getElementById('license-modal');
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
+        
+        // Remove sheet-view-active class
+        document.body.classList.remove('sheet-view-active');
+        const overlay = document.getElementById('bottom-sheet-overlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+        }
+        console.log('Modal should be closed now');
     }
 
     function setupLicenseModalEventListeners() {
@@ -1222,13 +1474,63 @@
         const newBackBtn = backBtn.cloneNode(true);
         backBtn.parentNode.replaceChild(newBackBtn, backBtn);
         
-        // Add fresh listeners
-        document.getElementById('license-close-modal-btn').addEventListener('click', closeLicenseModal);
-        document.getElementById('license-modal-back-btn').addEventListener('click', closeLicenseModal);
+        // Add fresh listeners with direct DOM manipulation and event prevention
+        document.getElementById('license-close-modal-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Close button clicked');
+            
+            // Directly close the modal
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.body.classList.remove('sheet-view-active');
+            
+            const overlay = document.getElementById('bottom-sheet-overlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+            
+            console.log('Modal should be closed now');
+            return false;
+        });
+        
+        document.getElementById('license-modal-back-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Back button clicked');
+            
+            // Directly close the modal
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.body.classList.remove('sheet-view-active');
+            
+            const overlay = document.getElementById('bottom-sheet-overlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+            
+            console.log('Modal should be closed now');
+            return false;
+        });
         
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {
-                closeLicenseModal();
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Modal background clicked');
+                
+                // Directly close the modal
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                document.body.classList.remove('sheet-view-active');
+                
+                const overlay = document.getElementById('bottom-sheet-overlay');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                }
+                
+                console.log('Modal should be closed now');
+                return false;
             }
         });
     }
@@ -1520,13 +1822,23 @@
             companySetupPrice.innerText = `AED ${licenseCost.toLocaleString()}`;
         }
         
+        // Show/hide Company Setup section based on cost
+        const companySetupSection = document.querySelector('.summary-section:nth-child(1)');
+        if (companySetupSection) {
+            companySetupSection.style.display = licenseCost > 0 ? 'block' : 'none';
+        }
+        
         // Update business activities summary
+        const businessActivitySection = document.querySelector('.summary-section:nth-child(2)');
         const activityTagsContainer = document.getElementById("activity-tags-container");
-        if (activityTagsContainer) {
+        
+        if (activityTagsContainer && businessActivitySection) {
             activityTagsContainer.innerHTML = '';
             
-            // Check if we're using the new window.selectedActivities array
+            // Only show business activities section if activities are selected
             if (window.selectedActivities && window.selectedActivities.length > 0) {
+                businessActivitySection.style.display = 'block';
+                
                 // Group activities by category
                 const activityGroups = {};
                 
@@ -1539,14 +1851,25 @@
                     activityGroups[groupName].push(activity);
                 });
                 
+                // Create table-style rows instead of tags
                 Object.keys(activityGroups).forEach(groupName => {
                     const activities = activityGroups[groupName];
                     
-                    // Create a tag for the group with count
-                    const tag = document.createElement('span');
-                    tag.className = 'activity-tag';
-                    tag.innerText = `${mapGroupToDisplayName(groupName)} (${activities.length})`;
-                    activityTagsContainer.appendChild(tag);
+                    // Create a summary row instead of a tag
+                    const row = document.createElement('div');
+                    row.className = 'summary-row';
+                    
+                    const label = document.createElement('span');
+                    label.className = 'summary-label';
+                    label.innerText = `${mapGroupToDisplayName(groupName)} (${activities.length})`;
+                    
+                    const value = document.createElement('span');
+                    value.className = 'summary-value';
+                    value.innerText = '';
+                    
+                    row.appendChild(label);
+                    row.appendChild(value);
+                    activityTagsContainer.appendChild(row);
                 });
                 
                 // Update business activities cost
@@ -1556,9 +1879,6 @@
                     const extraGroups = Math.max(0, uniqueGroups - 3);
                     const activitiesCostValue = extraGroups * 1000;
                     businessActivitiesCost.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
-                    businessActivitiesCost.style.textAlign = "right";
-                    businessActivitiesCost.style.width = "100%";
-                    businessActivitiesCost.style.marginTop = "12px";
                     
                     // Update the price in the business activities header
                     const businessActivitiesHeader = document.getElementById('business-activities-header-price');
@@ -1577,50 +1897,8 @@
                     }
                 }
             } else {
-                const activityGroups = {};
-                selectedActivities.forEach(activity => {
-                    const groupMatch = activity.match(/(.*?) Activity/);
-                    if (groupMatch && groupMatch[1]) {
-                        const group = groupMatch[1].trim();
-                        if (!activityGroups[group]) {
-                            activityGroups[group] = 0;
-                        }
-                        activityGroups[group]++;
-                    }
-                });
-                
-                // Create tags for each group
-                Object.keys(activityGroups).forEach(group => {
-                    const tag = document.createElement('span');
-                    tag.className = 'activity-tag';
-                    tag.innerText = `${group} (${activityGroups[group]})`;
-                    activityTagsContainer.appendChild(tag);
-                });
-                
-                // Update business activities cost
-                const businessActivitiesCost = document.getElementById("business-activities-cost");
-                if (businessActivitiesCost) {
-                    const uniqueGroups = Object.keys(activityGroups).length;
-                    const extraGroups = Math.max(0, uniqueGroups - 3);
-                    const activitiesCostValue = extraGroups * 1000;
-                    businessActivitiesCost.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
-                    
-                    // Update the price in the accordion header
-                    const businessActivitiesHeader = document.querySelector('.summary-card:nth-child(2) .summary-price');
-                    if (businessActivitiesHeader) {
-                        businessActivitiesHeader.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
-                    }
-                    
-                    // Show/hide fee warning based on number of activity groups
-                    const feeWarning = document.querySelector('.fee-warning');
-                    if (feeWarning) {
-                        if (uniqueGroups > 3) {
-                            feeWarning.style.display = 'block';
-                        } else {
-                            feeWarning.style.display = 'none';
-                        }
-                    }
-                }
+                // Hide business activities section if no activities selected
+                businessActivitySection.style.display = 'none';
             }
         }
         
@@ -1648,19 +1926,60 @@
             return groupDisplayNames[groupName] || groupName;
         }
         
-        // Update visa information
-        document.getElementById("summary-investor-visa-display").innerText = investorVisas > 0 ? `(${investorVisas})` : "(0)";
-        document.getElementById("summary-employee-visa-display").innerText = employeeVisas > 0 ? `(${employeeVisas})` : "(0)";
-        document.getElementById("summary-dependency-visa-display").innerText = dependencyVisas > 0 ? `(${dependencyVisas})` : "(0)";
+        // Update visa information and show/hide section
+        const visaSection = document.querySelector('.summary-section:nth-child(3)');
+        const investorVisaCost = investorVisas > 0 ? 5850 * investorVisas : 0;
+        const employeeVisaCost = employeeVisas > 0 ? 5350 * employeeVisas : 0;
+        const dependencyVisaCost = dependencyVisas > 0 ? 7850 * dependencyVisas : 0;
+        const totalVisaCost = investorVisaCost + employeeVisaCost + dependencyVisaCost + window.immigrationCardFee;
         
-        // Calculate individual visa costs with fixed prices
-        const investorVisaCost = investorVisas > 0 ? 5850 * investorVisas : 0; // 5,850 AED per investor visa
-        const employeeVisaCost = employeeVisas > 0 ? 5350 * employeeVisas : 0; // 5,350 AED per employee visa
-        const dependencyVisaCost = dependencyVisas > 0 ? 7850 * dependencyVisas : 0; // 7,850 AED per dependency visa
-        
-        document.getElementById("investor-visa-cost").innerText = investorVisaCost > 0 ? `AED ${investorVisaCost.toLocaleString()}` : 'AED 0';
-        document.getElementById("employee-visa-cost").innerText = employeeVisaCost > 0 ? `AED ${employeeVisaCost.toLocaleString()}` : 'AED 0';
-        document.getElementById("dependency-visa-cost").innerText = dependencyVisaCost > 0 ? `AED ${dependencyVisaCost.toLocaleString()}` : 'AED 0';
+        if (visaSection) {
+            // Show visa section only if there are visas selected
+            if (totalVisaCost > 0) {
+                visaSection.style.display = 'block';
+                
+                // Update visa displays and show/hide individual rows
+                const investorRow = document.querySelector('.summary-row:has(#investor-visa-cost)');
+                const employeeRow = document.querySelector('.summary-row:has(#employee-visa-cost)');
+                const dependencyRow = document.querySelector('.summary-row:has(#dependency-visa-cost)');
+                
+                // Show/hide investor visa row
+                if (investorRow) {
+                    investorRow.style.display = investorVisas > 0 ? 'flex' : 'none';
+                    if (investorVisas > 0) {
+                        document.getElementById("summary-investor-visa-display").innerText = `(${investorVisas})`;
+                        document.getElementById("investor-visa-cost").innerText = `AED ${investorVisaCost.toLocaleString()}`;
+                    }
+                }
+                
+                // Show/hide employee visa row
+                if (employeeRow) {
+                    employeeRow.style.display = employeeVisas > 0 ? 'flex' : 'none';
+                    if (employeeVisas > 0) {
+                        document.getElementById("summary-employee-visa-display").innerText = `(${employeeVisas})`;
+                        document.getElementById("employee-visa-cost").innerText = `AED ${employeeVisaCost.toLocaleString()}`;
+                    }
+                }
+                
+                // Show/hide dependency visa row
+                if (dependencyRow) {
+                    dependencyRow.style.display = dependencyVisas > 0 ? 'flex' : 'none';
+                    if (dependencyVisas > 0) {
+                        document.getElementById("summary-dependency-visa-display").innerText = `(${dependencyVisas})`;
+                        document.getElementById("dependency-visa-cost").innerText = `AED ${dependencyVisaCost.toLocaleString()}`;
+                    }
+                }
+                
+                // Update the visa price in the summary header
+                const visaHeader = document.getElementById('visas-header-price');
+                if (visaHeader) {
+                    visaHeader.innerText = `AED ${totalVisaCost.toLocaleString()}`;
+                }
+            } else {
+                // Hide visa section if no visas selected
+                visaSection.style.display = 'none';
+            }
+        }
         
         // Update immigration card fee
         const immigrationCardElement = document.getElementById("immigration-card-cost");
@@ -1668,135 +1987,102 @@
             immigrationCardElement.innerText = window.immigrationCardFee > 0 ? `AED ${window.immigrationCardFee.toLocaleString()}` : 'AED 0';
         }
         
-        // Update the visa price in the summary header
-        const totalVisaCost = investorVisaCost + employeeVisaCost + dependencyVisaCost + window.immigrationCardFee;
-        const visaHeader = document.getElementById('visas-header-price');
-        if (visaHeader) {
-            visaHeader.innerText = `AED ${totalVisaCost.toLocaleString()}`;
-        }
-        
-     
+        // Update addons and show/hide section
+        const addonsSection = document.querySelector('.summary-section:nth-child(4)');
         const addonsContainer = document.getElementById("addons-summary-container");
-        addonsContainer.innerHTML = '';
+        
+        if (addonsContainer && addonsSection) {
+            addonsContainer.innerHTML = '';
 
-        const addonDetails = {
-            // Group 1: mCore
-            "bank-account": { name: "Bank Account", cost: 1500, group: "mCore" },
-            "business-card": { name: "Business Card", cost: 240, group: "mCore" },
-            "company-stamp": { name: "Company Stamp", cost: 200, group: "mCore" },
-            "ecommerce-starter": { name: "E-commerce Starter", cost: 1000, group: "mCore" },
-            
-            // Group 2: mResidency
-            "medical-emirates-id": { name: "Medical & Emirates ID", cost: 2250, group: "mResidency" },
-            "dependent-visa": { name: "Dependent Visa", cost: 6000, group: "mResidency" },
-            // "eid-card-delivery" service removed
-            "medical-insurance": { name: "Medical Insurance", cost: 1080, group: "mResidency" },
+            const addonDetails = {
+                // Group 1: mCore
+                "bank-account": { name: "Bank Account", cost: 1500, group: "mCore" },
+                "business-card": { name: "Business Card", cost: 240, group: "mCore" },
+                "company-stamp": { name: "Company Stamp", cost: 200, group: "mCore" },
+                "ecommerce-starter": { name: "E-commerce Starter", cost: 1000, group: "mCore" },
+                
+                // Group 2: mResidency
+                "medical-emirates-id": { name: "Medical & Emirates ID", cost: 2250, group: "mResidency" },
+                "dependent-visa": { name: "Dependent Visa", cost: 6000, group: "mResidency" },
+                "medical-insurance": { name: "Medical Insurance", cost: 1080, group: "mResidency" },
 
-            // Group 3: mAssist
-            "melite": { name: "mElite", cost: 6000, group: "mAssist" },
-            "meeting-rooms": { name: "Meeting Rooms", cost: 150, group: "mAssist" },
-            "po-box": { name: "P.O. Box", cost: 1700, group: "mAssist" },
-            "mail-management": { name: "Mail Management", cost: 750, group: "mAssist" },
-            "document-translation": { name: "Document Translation", cost: 250, group: "mAssist" },
-            "virtual-assistant": { name: "Virtual Assistant", cost: 12000, group: "mAssist" },
+                // Group 3: mAssist
+                "melite": { name: "mElite", cost: 6000, group: "mAssist" },
+                "meeting-rooms": { name: "Meeting Rooms", cost: 150, group: "mAssist" },
+                "po-box": { name: "P.O. Box", cost: 1700, group: "mAssist" },
+                "mail-management": { name: "Mail Management", cost: 750, group: "mAssist" },
+                "document-translation": { name: "Document Translation", cost: 250, group: "mAssist" },
+                "virtual-assistant": { name: "Virtual Assistant", cost: 12000, group: "mAssist" },
 
-            // Group 4: mAccounting
-            "corporate-tax": { name: "Corporate Tax", cost: 1200, group: "mAccounting" },
-            "vat-registration": { name: "VAT Registration", cost: 1500, group: "mAccounting" },
-            "liquidation-report": { name: "Liquidation Report", cost: 1000, group: "mAccounting" },
-            "financial-audit-report": { name: "Financial Audit Report", cost: 250, group: "mAccounting" },
-            "valuation-report": { name: "Valuation Report", cost: 10000, group: "mAccounting" },
-            "bookkeeping": { name: "Bookkeeping", cost: 1000, group: "mAccounting" }
-        };
+                // Group 4: mAccounting
+                "corporate-tax": { name: "Corporate Tax", cost: 1200, group: "mAccounting" },
+                "vat-registration": { name: "VAT Registration", cost: 1500, group: "mAccounting" },
+                "liquidation-report": { name: "Liquidation Report", cost: 1000, group: "mAccounting" },
+                "financial-audit-report": { name: "Financial Audit Report", cost: 250, group: "mAccounting" },
+                "valuation-report": { name: "Valuation Report", cost: 10000, group: "mAccounting" },
+                "bookkeeping": { name: "Bookkeeping", cost: 1000, group: "mAccounting" }
+            };
 
-        const groupedAddons = {};
-        selectedAddons.forEach(addonKey => {
-            const addon = addonDetails[addonKey];
-            if (addon) {
-                if (!groupedAddons[addon.group]) {
-                    groupedAddons[addon.group] = [];
+            // Group addons by category
+            const addonGroups = {};
+            let hasSelectedAddons = false;
+
+            selectedAddons.forEach(addonId => {
+                if (addonDetails[addonId]) {
+                    hasSelectedAddons = true;
+                    const addon = addonDetails[addonId];
+                    if (!addonGroups[addon.group]) {
+                        addonGroups[addon.group] = [];
+                    }
+                    addonGroups[addon.group].push(addon);
                 }
-                groupedAddons[addon.group].push(addon);
-            }
-        });
-
-        if (Object.keys(groupedAddons).length === 0) {
-            addonsContainer.innerHTML = '<span class="no-addons">No optional services selected</span>';
-            
-            // Update the addons price in the accordion header to 0
-            const addonsHeader = document.querySelector('.summary-card:nth-child(5) .summary-price');
-            if (addonsHeader) {
-                addonsHeader.innerText = 'AED 0';
-            }
-            
-            // Also update the Meydan Plus price with the ID
-            const meydanPlusPrice = document.getElementById('meydan-plus-price');
-            if (meydanPlusPrice) {
-                meydanPlusPrice.innerText = 'AED 0';
-            }
-        } else {
-            // Calculate total addons cost
-            let totalAddonsCost = 0;
-            
-            Object.keys(groupedAddons).forEach(groupName => {
-                const addons = groupedAddons[groupName];
-                
-                const groupSection = document.createElement('div');
-                groupSection.className = 'summary-section';
-
-                const groupHeader = document.createElement('h4');
-                groupHeader.innerText = groupName;
-                groupSection.appendChild(groupHeader);
-
-                const itemsContainer = document.createElement('div');
-                itemsContainer.className = 'addon-item-container';
-
-                // Add each add-on with its individual price
-                addons.forEach(addon => {
-                    const addonRow = document.createElement('div');
-                    addonRow.className = 'addon-item';
-                    addonRow.style.width = '100%';
-                    addonRow.style.display = 'flex';
-                    addonRow.style.justifyContent = 'space-between';
-                    addonRow.style.alignItems = 'center';
-
-                    
-                    const addonNameSpan = document.createElement('span');
-                    addonNameSpan.className = 'addon-name';
-                    addonNameSpan.textContent = addon.name;
-                    
-                    const addonCostSpan = document.createElement('span');
-                    addonCostSpan.className = 'addon-cost';
-                    addonCostSpan.textContent = `AED ${addon.cost.toLocaleString()}`;
-                    addonCostSpan.style.marginLeft = 'auto';
-                    addonCostSpan.style.flexShrink = '0';
-                    
-                    totalAddonsCost += addon.cost;
-                    
-                    addonRow.appendChild(addonNameSpan);
-                    addonRow.appendChild(addonCostSpan);
-                    itemsContainer.appendChild(addonRow);
-                });
-                
-                groupSection.appendChild(itemsContainer);
-                addonsContainer.appendChild(groupSection);
             });
-            
-            // Update the addons price in the accordion header
-            const addonsHeader = document.querySelector('.summary-card:nth-child(5) .summary-price');
-            if (addonsHeader) {
-                addonsHeader.innerText = `AED ${totalAddonsCost.toLocaleString()}`;
-            }
-            
-            // Also update the Meydan Plus price with the ID
-            const meydanPlusPrice = document.getElementById('meydan-plus-price');
-            if (meydanPlusPrice) {
-                meydanPlusPrice.innerText = `AED ${totalAddonsCost.toLocaleString()}`;
+
+            // Show/hide addons section based on selections
+            if (hasSelectedAddons) {
+                addonsSection.style.display = 'block';
+                
+                // Create sections for each group
+                Object.keys(addonGroups).forEach(groupName => {
+                    const groupSection = document.createElement('div');
+                    groupSection.className = 'summary-section';
+                    
+                    const groupHeader = document.createElement('div');
+                    groupHeader.className = 'summary-section-header';
+                    groupHeader.innerHTML = `<h4>${groupName}</h4>`;
+                    groupSection.appendChild(groupHeader);
+                    
+                    const groupContent = document.createElement('div');
+                    groupContent.className = 'summary-content';
+                    
+                    addonGroups[groupName].forEach(addon => {
+                        const row = document.createElement('div');
+                        row.className = 'summary-row';
+                        
+                        const label = document.createElement('span');
+                        label.className = 'summary-label';
+                        label.innerText = addon.name;
+                        
+                        const value = document.createElement('span');
+                        value.className = 'summary-value';
+                        value.innerText = `AED ${addon.cost.toLocaleString()}`;
+                        
+                        row.appendChild(label);
+                        row.appendChild(value);
+                        groupContent.appendChild(row);
+                    });
+                    
+                    groupSection.appendChild(groupContent);
+                    addonsContainer.appendChild(groupSection);
+                });
+            } else {
+                // Hide addons section if no addons selected
+                addonsSection.style.display = 'none';
             }
         }
         
-        // Update total cost
-        document.getElementById("total-cost-display").innerText = `AED ${Math.round(totalCost).toLocaleString()}`;
+        // Update grand total
+        updateGrandTotal(totalCost);
     }
 
     function calculateCosts() {
@@ -1850,12 +2136,17 @@
         // Update basic package price
         updateBasicPackagePrice(totalCost);
         
+        // Always update the grand total (including mobile)
+        updateGrandTotal(totalCost);
+        
         // Save form data to localStorage for potential recovery
         try {
             localStorage.setItem('costCalculatorData', JSON.stringify(snapshot));
         } catch (e) {
             console.log('Unable to save form data to localStorage', e);
         }
+
+        updateGrandTotal(totalCost);
     }
 
     function calculateTotalCost() {
@@ -2668,6 +2959,165 @@
         } else {
             button.classList.remove('selected');
             button.textContent = 'Select';
+        }
+    }
+
+    function updateGrandTotal(totalCost) {
+        const totalCostDisplay = document.getElementById('total-cost-display');
+        const mobileGrandTotalPrice = document.getElementById('mobile-grand-total-price');
+        const formattedTotal = `AED ${totalCost.toLocaleString()}`;
+
+        if (totalCostDisplay) {
+            totalCostDisplay.textContent = formattedTotal;
+        }
+        if (mobileGrandTotalPrice) {
+            mobileGrandTotalPrice.textContent = formattedTotal;
+        }
+    }
+
+    // Function specifically to update mobile price display
+    function updateMobilePrice() {
+        const mobileGrandTotalPrice = document.getElementById('mobile-grand-total-price');
+        if (mobileGrandTotalPrice) {
+            const totalCost = calculateTotalCost();
+            const formattedTotal = `AED ${totalCost.toLocaleString()}`;
+            mobileGrandTotalPrice.textContent = formattedTotal;
+        }
+    }
+
+    function initializeMobileSummary() {
+        const mobileStickyFooter = document.getElementById('mobile-sticky-footer');
+        const summarySheet = document.querySelector('.sticky-summary-container');
+        const overlay = document.getElementById('bottom-sheet-overlay');
+        const closeTrigger = document.querySelector('.sheet-close-handle');
+        const body = document.body;
+        const mobileGetCallBtn = document.getElementById('mobile-get-call-btn');
+
+        if (!mobileStickyFooter || !summarySheet || !overlay || !closeTrigger) {
+            console.warn('Mobile summary elements not found. Feature disabled.');
+            return;
+        }
+
+        let sheetIsOpen = false;
+
+        const openSheet = () => {
+            if (sheetIsOpen) return;
+            
+            // Force the total to update before opening
+            updateMobilePrice();
+            
+            // Show the detailed summary instead of simplified
+            const simplifiedSummary = document.getElementById('simplified-summary');
+            const detailedSummary = document.getElementById('detailed-summary');
+            if (simplifiedSummary && detailedSummary) {
+                simplifiedSummary.style.display = 'none';
+                detailedSummary.style.display = 'block';
+            }
+            
+            // Add classes to show the sheet
+            summarySheet.classList.add('sheet-open');
+            closeTrigger.classList.add('sheet-open');
+            overlay.classList.add('active');
+            body.classList.add('sheet-view-active');
+            
+            // Hide the footer when sheet is open
+            mobileStickyFooter.style.display = 'none';
+            
+            sheetIsOpen = true;
+        };
+
+        const closeSheet = () => {
+            if (!sheetIsOpen) return;
+            
+            // Remove classes to hide the sheet
+            summarySheet.classList.remove('sheet-open');
+            closeTrigger.classList.remove('sheet-open');
+            overlay.classList.remove('active');
+            body.classList.remove('sheet-view-active');
+            
+            // Show the footer when sheet is closed
+            mobileStickyFooter.style.display = 'block';
+            
+            sheetIsOpen = false;
+        };
+
+        mobileStickyFooter.addEventListener('click', openSheet);
+        mobileGetCallBtn.addEventListener('click', openSheet);
+        closeTrigger.addEventListener('click', closeSheet);
+        overlay.addEventListener('click', closeSheet);
+
+        // Swipe gestures
+        let touchStartY = 0;
+        let touchMoveY = 0;
+
+        const handleTouchStart = (e) => {
+            if (!sheetIsOpen) {
+                touchStartY = e.touches[0].clientY;
+            }
+        };
+
+        const handleTouchMove = (e) => {
+            if (!sheetIsOpen) {
+                touchMoveY = e.touches[0].clientY;
+            }
+        };
+
+        const handleTouchEnd = () => {
+            // Swipe up to open
+            if (!sheetIsOpen && touchStartY - touchMoveY > 75) { // 75px swipe threshold
+                openSheet();
+            }
+            // Reset values
+            touchStartY = 0;
+            touchMoveY = 0;
+        };
+
+        mobileStickyFooter.addEventListener('touchstart', handleTouchStart);
+        mobileStickyFooter.addEventListener('touchmove', handleTouchMove);
+        mobileStickyFooter.addEventListener('touchend', handleTouchEnd);
+
+        // Swipe down on the sheet handle/header to close
+        const handleSheetTouchStart = (e) => {
+            touchStartY = e.touches[0].clientY;
+        };
+
+        const handleSheetTouchMove = (e) => {
+            touchMoveY = e.touches[0].clientY;
+        };
+
+        const handleSheetTouchEnd = (e) => {
+            // Only trigger close if swiping down from the top of the sheet
+            if (sheetIsOpen && touchMoveY - touchStartY > 75 && summarySheet.scrollTop === 0) {
+                closeSheet();
+            }
+            touchStartY = 0;
+            touchMoveY = 0;
+        };
+
+        summarySheet.addEventListener('touchstart', handleSheetTouchStart);
+        summarySheet.addEventListener('touchmove', handleSheetTouchMove);
+        summarySheet.addEventListener('touchend', handleSheetTouchEnd);
+        
+        // Ensure the mobile grand total price is updated on page load
+        updateMobilePrice();
+        
+        // Set up a MutationObserver to watch for changes in the total-cost-display
+        // and update the mobile price accordingly
+        const totalCostDisplay = document.getElementById('total-cost-display');
+        if (totalCostDisplay) {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                        updateMobilePrice();
+                    }
+                });
+            });
+            
+            observer.observe(totalCostDisplay, { 
+                characterData: true, 
+                childList: true, 
+                subtree: true 
+            });
         }
     }
 

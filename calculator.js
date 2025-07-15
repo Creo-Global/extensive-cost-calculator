@@ -60,6 +60,9 @@
             initializeSummaryToggle();
             initializeMobileSummary();
             
+            // Initialize change status event listeners
+            initializeChangeStatusEventListeners();
+            
             calculateCosts();
             
         } catch (err) {
@@ -400,11 +403,11 @@
         // Store current group info for reference
         window.currentModalGroup = groupInfo;
         
-        // Initialize category pills
-        initializeModalCategoryPills();
+        // Initialize category select dropdown
+        initializeModalCategorySelect();
         
-        // Update all category pill counts
-        updateAllModalCategoryPillCounts();
+        // Update all category select counts
+        updateAllModalCategoryCounts();
         
         if (groupInfo) {
             modalTitle.textContent = `${groupInfo.name} Activities`;
@@ -451,21 +454,21 @@
         }
     }
 
-    function initializeModalCategoryPills() {
-        const pillsContainer = document.getElementById('modal-category-pills');
+    function initializeModalCategorySelect() {
+        const selectElement = document.getElementById('modal-category-select');
         const categories = [
             { name: 'Administrative', group: 'administrative' },
             { name: 'Agriculture', group: 'agriculture' },
             { name: 'Art', group: 'art' },
             { name: 'Education', group: 'education' },
             { name: 'ICT', group: 'ict' },
-            { name: 'F&B,Rentals', group: 'F&B,Rentals' },
+            { name: 'F&B, Rentals', group: 'F&B,Rentals' },
             { name: 'Financial', group: 'financial' },
             { name: 'Health Care', group: 'healthcare' },
             { name: 'Maintenance', group: 'maintenance' },
             { name: 'Services', group: 'services' },
             { name: 'Professional', group: 'professional' },
-            { name: 'Realestate', group: 'realestate' },
+            { name: 'Real Estate', group: 'realestate' },
             { name: 'Sewerage', group: 'sewerage' },
             { name: 'Trading', group: 'trading' },
             { name: 'Transportation', group: 'transportation' },
@@ -473,34 +476,26 @@
             { name: 'Manufacturing', group: 'manufacturing' }
         ];
 
-        let pillsHtml = '';
+        let optionsHtml = '';
         categories.forEach(category => {
             const selectedCount = getSelectedActivitiesCountForGroup(category.group);
-            pillsHtml += `
-                <button class="modal-category-pill" data-group="${category.group}">
-                <span class="activity-count">${selectedCount}</span>
-                    ${category.name}
-                </button>`;
+            const countText = selectedCount > 0 ? ` (${selectedCount} selected)` : '';
+            optionsHtml += `<option value="${category.group}">${category.name}${countText}</option>`;
         });
-        pillsContainer.innerHTML = pillsHtml;
+        selectElement.innerHTML = optionsHtml;
 
-        // Add click handlers for category pills
-        pillsContainer.querySelectorAll('.modal-category-pill').forEach(pill => {
-            pill.addEventListener('click', function() {
-                setModalSelectedCategory(this.dataset.group);
-                fetchActivitiesForModal(this.dataset.group);
-            });
+        // Add change handler for select dropdown
+        selectElement.addEventListener('change', function() {
+            setModalSelectedCategory(this.value);
+            fetchActivitiesForModal(this.value);
         });
     }
 
     function setModalSelectedCategory(groupName) {
-        // Update selected category pill
-        document.querySelectorAll('.modal-category-pill').forEach(pill => {
-            pill.classList.remove('selected');
-        });
-        const selectedPill = document.querySelector(`.modal-category-pill[data-group="${groupName}"]`);
-        if (selectedPill) {
-            selectedPill.classList.add('selected');
+        // Update selected category in dropdown
+        const selectElement = document.getElementById('modal-category-select');
+        if (selectElement && groupName) {
+            selectElement.value = groupName;
         }
         
         // Store current group for reference
@@ -577,7 +572,7 @@
 
             if (data && data.length > 0) {
                 displaySearchResultsInModal(data);
-            } else {
+                        } else {
                 modalList.innerHTML = '<div class="no-results">No activities found matching your search.</div>';
             }
         } catch (error) {
@@ -639,9 +634,9 @@
                 updateAllModalCategoryPillCounts();
                 updateSelectedGroupsCount();
                 calculateCosts();
-            });
-        });
-    }
+                    });
+                });
+            }
 
     async function fetchActivitiesForModal(groupName) {
         const modalList = document.getElementById('modal-activities-list');
@@ -748,46 +743,38 @@
             countElement.textContent = `Selected Activities: ${count}`;
         }
         
-        // Also update the modal category pill count if modal is open
-        updateModalCategoryPillCount(groupName);
+        // Also update the modal category select count if modal is open
+        updateModalCategorySelectCount(groupName);
     }
 
-    function updateModalCategoryPillCount(groupName) {
-        const modalPill = document.querySelector(`.modal-category-pill[data-group="${groupName}"]`);
-        if (modalPill) {
-            const countElement = modalPill.querySelector('.activity-count');
-            if (countElement) {
+    function updateModalCategorySelectCount(groupName) {
+        const selectElement = document.getElementById('modal-category-select');
+        if (selectElement) {
+            // Update the specific option text
+            const option = selectElement.querySelector(`option[value="${groupName}"]`);
+            if (option) {
                 const count = getSelectedActivitiesCountForGroup(groupName);
-                countElement.textContent = count;
-                
-                // Show/hide count based on value
-                if (count > 0) {
-                    countElement.classList.add('has-count');
-                 } else {
-                    countElement.classList.remove('has-count');
-                }
+                const baseText = option.textContent.split(' (')[0]; // Get name without count
+                const countText = count > 0 ? ` (${count} selected)` : '';
+                option.textContent = baseText + countText;
             }
         }
     }
 
-    function updateAllModalCategoryPillCounts() {
-        document.querySelectorAll('.modal-category-pill').forEach(pill => {
-            const groupName = pill.dataset.group;
-            const countElement = pill.querySelector('.activity-count');
-            if (countElement) {
+    function updateAllModalCategoryCounts() {
+        const selectElement = document.getElementById('modal-category-select');
+        if (selectElement) {
+            const options = selectElement.querySelectorAll('option');
+            options.forEach(option => {
+                const groupName = option.value;
                 const count = getSelectedActivitiesCountForGroup(groupName);
-                countElement.textContent = count;
-                
-                // Show/hide count based on value
-                if (count > 0) {
-                    countElement.classList.add('has-count');
-                } else {
-                    countElement.classList.remove('has-count');
-                }
+                const baseText = option.textContent.split(' (')[0]; // Get name without count
+                const countText = count > 0 ? ` (${count} selected)` : '';
+                option.textContent = baseText + countText;
                 
                 console.log(`Group: ${groupName}, Count: ${count}`); // Debug log
-            }
-        });
+            });
+        }
     }
 
     // Initialize addon modal functionality
@@ -995,21 +982,21 @@
                     name: 'Medical & Emirates ID',
                     price: 2250,
                     image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Complete medical examination and Emirates ID processing for residency requirements.'
+                    description: 'Get step-by-step help from a manager for medical test and Emirates ID processing.'
                 },
                 {
                     id: 'medical-insurance',
                     name: 'Medical Insurance',
                     price: 1080,
                     image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Comprehensive health insurance coverage meeting UAE residency requirements.'
+                    description: 'Access UAE-compliant health coverage options tailored for you, your team, or dependents.'
                 },
                 {
                     id: 'dependent-visa',
                     name: 'Dependent Visa',
                     price: 6000,
                     image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Sponsor family members with dependent visa processing and documentation support.'
+                    description: 'Easily sponsor family members with full assistance on documents, applications, and legal compliance.'
                 }
             ],
             'mAssist': [
@@ -1018,28 +1005,28 @@
                     name: 'mElite',
                     price: 6000,
                     image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Premium business support package with dedicated account management and priority services.'
+                    description: 'Premium service with a dedicated manager for guided submissions via Meydan Free Zone portal.'
                 },
                 {
                     id: 'meeting-rooms',
                     name: 'Meeting Rooms',
                     price: 150,
                     image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Access to professional meeting rooms and business facilities when needed.'
+                    description: 'Book private rooms at Meydan Free Zone for business meetings, calls, and presentations.'
                 },
                 {
                     id: 'po-box',
                     name: 'PO Box',
                     price: 1700,
                     image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Dedicated PO Box address for official business correspondence and mail handling.'
+                    description: 'Get a personal PO Box and keys for secure mail collection at Meydan Free Zone.'
                 },
                 {
                     id: 'document-translation',
                     name: 'Document Translation',
                     price: 250,
                     image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Professional translation services for business documents and legal paperwork.'
+                    description: 'Assigned PO Box and handling support to collect, store, or forward your official mail.'
                 },
                 {
                     id: 'mail-management',
@@ -1069,35 +1056,35 @@
                     name: 'VAT Registration',
                     price: 1500,
                     image: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'VAT registration and ongoing compliance support for your business operations.'
+                    description: 'Register with the FTA and get your VAT certificate aligned with UAE compliance laws.'
                 },
                 {
                     id: 'bookkeeping',
                     name: 'Book Keeping',
                     price: 1000,
                     image: 'https://images.unsplash.com/photo-1554224154-26032fced8bd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Professional bookkeeping services to maintain accurate financial records.'
+                    description: 'Track and maintain your finances with expert bookkeeping that records and organises all transactions'
                 },
                 {
                     id: 'liquidation-report',
                     name: 'Liquidation Report',
                     price: 1000,
                     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Professional liquidation reporting services for business closure requirements.'
+                    description: 'Access reports and support for financial closure, regulatory filings, and full business liquidation requirements.'
                 },
                 {
                     id: 'financial-audit-report',
                     name: 'Financial Audit Report',
                     price: 250,
                     image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Comprehensive financial audit reports for compliance and business analysis.'
+                    description: 'Get a certified audit report to meet regulatory standards and ensure financial transparency.'
                 },
                 {
                     id: 'valuation-report',
                     name: 'Valuation Report',
                     price: 10000,
                     image: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Professional business valuation reports for investment and strategic decisions.'
+                    description: 'Receive a professional valuation with insights into your business’s market worth and investment potential.'
                 }
             ]
         };
@@ -1205,24 +1192,31 @@
         const visaData = {
             'investor': {
                 title: 'Investor Visa',
-                description: 'The Dubai Investor Visa is designed for company owners who want to live and operate their business in the UAE. It provides a pathway to residency for business owners and investors.',
-                additional: 'With this visa, you can sponsor family members, access healthcare services, open bank accounts, and enjoy the benefits of living in Dubai while running your business.',
+                description: 'An Investor Visa in Dubai is a type of long-term residence visa designed for foreign nationals who wish to invest in or establish a business in Dubai. It allows you to live, work, and sponsor your family in Dubai, with renewals available as long as your investment remains valid.<br><br>Unlike a standard employment visa, this is a self-sponsored visa, directly tied to your ownership or role in the company. It’s ideal for founders, co-founders, and partners who want full control over their immigration status.',
+                additional: 'At Meydan Free Zone, we streamline the process to be fast, compliant, and stress-free, allowing you to secure your visa and focus on growing your business.',
                 actionText: 'Select Investor Visa',
                 image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbfae4fc11d7f87391fb4_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.png'
             },
             'employee': {
                 title: 'Employee Visa',
-                description: 'Dubai\'s employee visa system is essential for hiring, scaling, and maintaining compliance with UAE labor laws. It allows businesses to legally employ staff in the UAE.',
-                additional: 'Employee visas provide work authorization, residency status, and access to essential services for your staff. The process includes medical testing, Emirates ID application, and visa stamping.',
+                description: 'An employee visa, also known as an employment visa or work visa, is a government-issued permit that allows foreign nationals to live and work legally in Dubai. It is a mandatory requirement for companies hiring expatriate staff and is directly linked to the business license and immigration file of the company.<br><br>The employer is responsible for managing the full application process, including document preparation, government approvals, medical testing, Emirates ID registration, and timely renewals.',
+                additional: 'At Meydan Free Zone, we simplify the entire process for you. Our dedicated support team ensures your employee visas are processed quickly, compliantly, and without delays, so your team can get to work without any administrative hassle.',
                 actionText: 'Select Employee Visa',
                 image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0004d1341d4ccb5b150_2193782fa28109786e70758b4f8700cf49d9201e377abc3571b6302582c10d9b.webp'
             },
             'dependent': {
                 title: 'Dependent Visa',
-                description: 'The UAE Dependent Visa allows residents to sponsor their family members to live together in the UAE. This visa is available for spouses, children, and parents under certain conditions.',
-                additional: 'Dependent visa holders can access education, healthcare, and other services in the UAE. The sponsor must meet minimum salary requirements and provide proof of suitable accommodation.',
+                description: 'A Dependent Visa in Dubai allows UAE residents to sponsor their immediate family members, including spouses, children, and parents, to legally live in the UAE. It’s a residency visa linked to the sponsor’s visa status and remains valid as long as the sponsor’s visa is active and compliant.<br> <br>This visa is ideal for those who want their loved ones to join them in the UAE, ensuring legal residency, access to essential services, and peace of mind for families relocating together.',
+                additional: 'At Meydan Free Zone, we simplify the dependent visa process to ensure fast, accurate submissions and full compliance, so you can bring your family over without delays or stress.',
                 actionText: 'Select Dependent Visa',
                 image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc001b0a226a76d71d00d_de8b99eed6930d3f9455605a063e0514bbbcb91427bf01dca897e5aa4b11d820.webp'
+            },
+            'change-status': {
+                title: 'Change Of Status',
+                description: 'If you\'re already in the UAE, whether on a tourist visa, family visa, or a previous employment visa, you\'ll need to apply for a Change of Status to switch to a residence visa under your new business.<br><br><strong>This applies to:</strong><br><br><span class="numbered-item">1.</span> <strong>You</strong> as a founder or shareholder moving to an Investor or Shareholder visa<br><br><span class="numbered-item">2.</span> <strong>Employees</strong> you\'re hiring who are switching jobs and changing sponsorship<br><br><span class="numbered-item">3.</span> <strong>Family members</strong> you\'re sponsoring (after obtaining your own visa) who are already in the UAE',
+                additional: 'Meydan Free Zone manages the full Change of Status process for you, so you don\'t need to exit the country or restart your visa journey. It\'s a fast, compliant way to update your visa status, whether you\'re launching or growing your team from inside the UAE.<br><br>Just let us know who\'s already here, and we\'ll handle the rest.',
+                actionText: 'Got It',
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68763d4feb6dc26436a8d668_831cebae91bcfa5c27afa8ba08a0e68f314db7dbbb164f9bacbfcc9f88edc4bc.webp'
             }
         };
         
@@ -1246,8 +1240,8 @@
         }
         
         modalTitle.textContent = visa.title;
-        modalDescription.textContent = visa.description;
-        modalAdditional.textContent = visa.additional;
+        modalDescription.innerHTML = visa.description;
+        modalAdditional.innerHTML = visa.additional;
         modalActionBtn.innerHTML = `
             ${visa.actionText}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1327,6 +1321,24 @@
                 console.log('Modal should be closed now');
                 return false;
             });
+        } else if (visaType === 'change-status') {
+            freshActionBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Change status info acknowledged');
+                
+                // Just close the modal - no action needed since this is informational
+                document.getElementById('license-modal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+                document.body.classList.remove('sheet-view-active');
+                
+                // Hide overlay
+                const overlay = document.getElementById('bottom-sheet-overlay');
+                if (overlay) overlay.classList.remove('active');
+                
+                console.log('Modal should be closed now');
+                return false;
+            });
         }
         
         // Setup modal event listeners
@@ -1359,14 +1371,14 @@
             'fawri': {
                 title: 'What Is Fawri License? 🚀',
                 description: 'Fawri is your express route to a 60-minute, compliance-led LLC license. This 100% digital, fast-track license is designed exclusively for ambitious solo entrepreneurs and freelancers who want speed, control, and minimal setup friction.',
-                additional: 'With over 1,800 activities, Fawri gets you licensed, visa-ready, and enables bank account applications on the same day. It\'s the fastest, most reliable way to launch your business in Dubai.',
+                additional: 'With over 1,800 activities, Fawri gets you licensed, visa-ready, and enables bank account applications on the same day. It’s the fastest, most reliable way to launch your business in Dubai.',
                 actionText: 'Select Fawri License',
                 image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b601639b2df4bfdbec4_fawri.webp'
             },
             'regular': {
                 title: 'Regular Business License 📨',
-                description: 'The regular business license is built for founders who need flexibility, scalability, and full ownership. It\'s a customisable license that supports multi-partner setups, cross-industry models, and long-term growth.',
-                additional: 'Choose from 2,500+ activities across 3 groups with instant access to visa processing and banking. 100% digital, fully foreign-owned, and designed for serious entrepreneurs ready to build broad, future-ready businesses in Dubai.', 
+                description: 'The regular business license is built for founders who need flexibility, scalability, and full ownership. It’s a customisable license that supports multi-partner setups, cross-industry models, and long-term growth.',
+                additional: 'Choose from 2,500+ business activities across 3 groups with instant access to visa processing and banking. 100% digital, fully foreign-owned, and designed for serious entrepreneurs ready to build broad, future-ready businesses in Dubai.', 
                 actionText: 'Select Regular License',
                 image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b602ab2cde8b87325e8_regular.webp'
             }
@@ -1392,8 +1404,8 @@
         }
         
         modalTitle.textContent = license.title;
-        modalDescription.textContent = license.description;
-        modalAdditional.textContent = license.additional;
+        modalDescription.innerHTML = license.description;
+        modalAdditional.innerHTML = license.additional;
         modalActionBtn.innerHTML = `
             ${license.actionText}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1563,12 +1575,15 @@
         const basicPackagePrice = document.getElementById('basic-package-price');
         const packageWarning = document.getElementById('package-warning');
         
-        if (totalCost > 0) {
-            basicPackagePrice.textContent = `AED ${totalCost.toLocaleString()}`;
-            packageWarning.style.display = 'none';
-        } else {
-            basicPackagePrice.textContent = 'AED 12,500';
-            packageWarning.style.display = 'flex';
+        // Only update if elements exist
+        if (basicPackagePrice) {
+            if (totalCost > 0) {
+                basicPackagePrice.textContent = `AED ${totalCost.toLocaleString()}`;
+                if (packageWarning) packageWarning.style.display = 'none';
+            } else {
+                basicPackagePrice.textContent = 'AED 12,500';
+                if (packageWarning) packageWarning.style.display = 'flex';
+            }
         }
     }
 
@@ -1694,6 +1709,8 @@
             dependencyVisas: dependencyVisaCount,
             // officeType removed as step 5 was removed
             selectedAddons: selectedAddonsList,
+            applicantsInsideUAE: parseInt(document.getElementById("applicants-inside-uae")?.value) || 0,
+            applicantsOutsideUAE: parseInt(document.getElementById("applicants-outside-uae")?.value) || 0,
         };
     }
 
@@ -1740,6 +1757,11 @@
     // Office cost calculation removed as step 5 was removed
     function calculateOfficeCost() {
         return 0;
+    }
+
+    function calculateChangeStatusCost(snapshot) {
+        const insideCount = parseInt(document.getElementById('applicants-inside-uae')?.value) || 0;
+        return insideCount * 1500; // 1500 AED per applicant inside UAE
     }
 
     function calculateVisaCost(snapshot) {
@@ -1987,41 +2009,66 @@
             immigrationCardElement.innerText = window.immigrationCardFee > 0 ? `AED ${window.immigrationCardFee.toLocaleString()}` : 'AED 0';
         }
         
+        // Update change status section and show/hide
+        const changeStatusSection = document.querySelector('.summary-section:nth-child(4)');
+        const insideCount = parseInt(document.getElementById('applicants-inside-uae')?.value) || 0;
+        const outsideCount = parseInt(document.getElementById('applicants-outside-uae')?.value) || 0;
+        const changeStatusCost = insideCount * 1500;
+        
+        if (changeStatusSection) {
+            if (insideCount > 0 || outsideCount > 0) {
+                changeStatusSection.style.display = 'block';
+                
+                // Update summary counts
+                document.getElementById('summary-inside-count').innerText = `(${insideCount})`;
+                document.getElementById('summary-outside-count').innerText = `(${outsideCount})`;
+                document.getElementById('inside-status-cost').innerText = `AED ${changeStatusCost.toLocaleString()}`;
+                
+                // Update header price
+                const changeStatusHeaderPrice = document.getElementById('change-status-header-price');
+                if (changeStatusHeaderPrice) {
+                    changeStatusHeaderPrice.innerText = `AED ${changeStatusCost.toLocaleString()}`;
+                }
+            } else {
+                changeStatusSection.style.display = 'none';
+            }
+        }
+
         // Update addons and show/hide section
-        const addonsSection = document.querySelector('.summary-section:nth-child(4)');
+        const addonsSection = document.querySelector('.summary-section:nth-child(5)');
         const addonsContainer = document.getElementById("addons-summary-container");
         
         if (addonsContainer && addonsSection) {
-            addonsContainer.innerHTML = '';
+        addonsContainer.innerHTML = '';
 
-            const addonDetails = {
-                // Group 1: mCore
-                "bank-account": { name: "Bank Account", cost: 1500, group: "mCore" },
-                "business-card": { name: "Business Card", cost: 240, group: "mCore" },
-                "company-stamp": { name: "Company Stamp", cost: 200, group: "mCore" },
-                "ecommerce-starter": { name: "E-commerce Starter", cost: 1000, group: "mCore" },
-                
-                // Group 2: mResidency
-                "medical-emirates-id": { name: "Medical & Emirates ID", cost: 2250, group: "mResidency" },
-                "dependent-visa": { name: "Dependent Visa", cost: 6000, group: "mResidency" },
-                "medical-insurance": { name: "Medical Insurance", cost: 1080, group: "mResidency" },
+        const addonDetails = {
+            // Group 1: mCore
+            "bank-account": { name: "Bank Account", cost: 1500, group: "mCore" },
+            "business-card": { name: "Business Card", cost: 240, group: "mCore" },
+            "company-stamp": { name: "Company Stamp", cost: 200, group: "mCore" },
+            "ecommerce-starter": { name: "E-commerce Starter", cost: 1000, group: "mCore" },
+            
+            // Group 2: mResidency
+            "medical-emirates-id": { name: "Medical & Emirates ID", cost: 2250, group: "mResidency" },
+            "dependent-visa": { name: "Dependent Visa", cost: 6000, group: "mResidency" },
+            "medical-insurance": { name: "Medical Insurance", cost: 1080, group: "mResidency" },
 
-                // Group 3: mAssist
-                "melite": { name: "mElite", cost: 6000, group: "mAssist" },
-                "meeting-rooms": { name: "Meeting Rooms", cost: 150, group: "mAssist" },
-                "po-box": { name: "P.O. Box", cost: 1700, group: "mAssist" },
-                "mail-management": { name: "Mail Management", cost: 750, group: "mAssist" },
-                "document-translation": { name: "Document Translation", cost: 250, group: "mAssist" },
-                "virtual-assistant": { name: "Virtual Assistant", cost: 12000, group: "mAssist" },
+            // Group 3: mAssist
+            "melite": { name: "mElite", cost: 6000, group: "mAssist" },
+            "meeting-rooms": { name: "Meeting Rooms", cost: 150, group: "mAssist" },
+            "po-box": { name: "P.O. Box", cost: 1700, group: "mAssist" },
+            "mail-management": { name: "Mail Management", cost: 750, group: "mAssist" },
+            "document-translation": { name: "Document Translation", cost: 250, group: "mAssist" },
+            "virtual-assistant": { name: "Virtual Assistant", cost: 12000, group: "mAssist" },
 
-                // Group 4: mAccounting
-                "corporate-tax": { name: "Corporate Tax", cost: 1200, group: "mAccounting" },
-                "vat-registration": { name: "VAT Registration", cost: 1500, group: "mAccounting" },
-                "liquidation-report": { name: "Liquidation Report", cost: 1000, group: "mAccounting" },
-                "financial-audit-report": { name: "Financial Audit Report", cost: 250, group: "mAccounting" },
-                "valuation-report": { name: "Valuation Report", cost: 10000, group: "mAccounting" },
-                "bookkeeping": { name: "Bookkeeping", cost: 1000, group: "mAccounting" }
-            };
+            // Group 4: mAccounting
+            "corporate-tax": { name: "Corporate Tax", cost: 1200, group: "mAccounting" },
+            "vat-registration": { name: "VAT Registration", cost: 1500, group: "mAccounting" },
+            "liquidation-report": { name: "Liquidation Report", cost: 1000, group: "mAccounting" },
+            "financial-audit-report": { name: "Financial Audit Report", cost: 250, group: "mAccounting" },
+            "valuation-report": { name: "Valuation Report", cost: 10000, group: "mAccounting" },
+            "bookkeeping": { name: "Bookkeeping", cost: 1000, group: "mAccounting" }
+        };
 
             // Group addons by category
             const addonGroups = {};
@@ -2044,14 +2091,14 @@
                 
                 // Create sections for each group
                 Object.keys(addonGroups).forEach(groupName => {
-                    const groupSection = document.createElement('div');
-                    groupSection.className = 'summary-section';
-                    
+                const groupSection = document.createElement('div');
+                groupSection.className = 'summary-section';
+
                     const groupHeader = document.createElement('div');
                     groupHeader.className = 'summary-section-header';
                     groupHeader.innerHTML = `<h4>${groupName}</h4>`;
-                    groupSection.appendChild(groupHeader);
-                    
+                groupSection.appendChild(groupHeader);
+
                     const groupContent = document.createElement('div');
                     groupContent.className = 'summary-content';
                     
@@ -2073,8 +2120,8 @@
                     });
                     
                     groupSection.appendChild(groupContent);
-                    addonsContainer.appendChild(groupSection);
-                });
+                addonsContainer.appendChild(groupSection);
+            });
             } else {
                 // Hide addons section if no addons selected
                 addonsSection.style.display = 'none';
@@ -2092,6 +2139,7 @@
         const visaComponent = calculateVisaCost(snapshot);
         const officeComponent = calculateOfficeCost(snapshot);
         const addonsComponent = calculateAddonsCost(snapshot);
+        const changeStatusComponent = calculateChangeStatusCost(snapshot);
         
         // Calculate business activities cost
         let businessActivitiesCost = 0;
@@ -2113,7 +2161,7 @@
         }
         
         // Bank account cost is now included in add-ons, so we don't add it separately
-        const totalCost = licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost;
+        const totalCost = licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost + changeStatusComponent;
         
         const costs = {
             licenseCost: licenseComponent,
@@ -2122,6 +2170,7 @@
             officeCost: officeComponent,
             addonsCost: addonsComponent,
             businessActivitiesCost: businessActivitiesCost,
+            changeStatusCost: changeStatusComponent,
             totalCost: totalCost
         };
         
@@ -2130,6 +2179,10 @@
         VisaCost = Math.round(visaComponent);
         window.AddonsComponent = Math.round(addonsComponent);
         window.BusinessActivitiesCost = Math.round(businessActivitiesCost);
+        window.ChangeStatusCost = Math.round(changeStatusComponent);
+
+        // Update change status section visibility
+        updateChangeStatusVisibility();
 
         updateSummaryUI(costs, snapshot);
         
@@ -2161,6 +2214,7 @@
             const visaComponent = calculateVisaCost(snapshot);
             const officeComponent = calculateOfficeCost(snapshot);
             const addonsComponent = calculateAddonsCost(snapshot);
+            const changeStatusComponent = calculateChangeStatusCost(snapshot);
             
             // Calculate business activities cost
             let businessActivitiesCost = 0;
@@ -2187,18 +2241,20 @@
             console.log("Office: " + officeComponent);
             console.log("Add-ons: " + addonsComponent);
             console.log("Business Activities: " + businessActivitiesCost);
+            console.log("Change Status: " + changeStatusComponent);
             
             // Return the total cost
-            return Math.round(licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost);
+            return Math.round(licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost + changeStatusComponent);
         } else {
             console.log("Using Global Variables for Total Cost:");
             console.log("License: " + LicenseCost);
             console.log("Visa: " + VisaCost);
             console.log("Add-ons: " + window.AddonsComponent);
             console.log("Business Activities: " + window.BusinessActivitiesCost);
+            console.log("Change Status: " + (window.ChangeStatusCost || 0));
             
             // Return the total cost using global variables
-            return LicenseCost + VisaCost + (window.AddonsComponent || 0) + (window.BusinessActivitiesCost || 0);
+            return LicenseCost + VisaCost + (window.AddonsComponent || 0) + (window.BusinessActivitiesCost || 0) + (window.ChangeStatusCost || 0);
         }
     }
 
@@ -2226,6 +2282,8 @@
             dependency_visas: document.getElementById("dependency-visa-toggle").checked ? (document.getElementById("dependency-visas")?.value || '0') : '0',
             office_type: "none", // Office type removed as step 5 was removed
             selected_addons: selectedAddons.join(','),
+            applicants_inside_uae: document.getElementById("applicants-inside-uae")?.value || '0',
+            applicants_outside_uae: document.getElementById("applicants-outside-uae")?.value || '0',
             bank_account: document.getElementById("bank-account")?.checked ? 'yes' : 'no',
             business_bank_account: document.getElementById("business-bank-account")?.value || '',
             current_step: step,
@@ -2419,6 +2477,7 @@
         }
         
         calculateCosts();
+        updateChangeStatusVisibility();
     }
     
 
@@ -2873,6 +2932,7 @@
             
             // Trigger calculation
             calculateCosts();
+            updateChangeStatusVisibility();
         }
     }
 
@@ -2900,12 +2960,16 @@
         }
         
         calculateCosts();
+        updateChangeStatusVisibility();
     }
 
     // Make functions globally available
     window.selectVisaCard = selectVisaCard;
     window.deselectVisaCard = deselectVisaCard;
     window.adjustVisaQuantity = adjustVisaQuantity;
+    window.adjustStatusCount = adjustStatusCount;
+    
+
 
     // Deselect visa card function - unified approach
     function deselectVisaCard(visaType) {
@@ -2940,7 +3004,169 @@
             
             // Trigger calculation
             calculateCosts();
+            updateChangeStatusVisibility();
         }
+    }
+
+    // Change Status functionality
+    function adjustStatusCount(type, change) {
+        console.log('adjustStatusCount called:', type, change);
+        
+        if (type !== 'inside') return; // Only handle inside UAE adjustments
+        
+        const quantityElement = document.getElementById('inside-quantity');
+        
+        if (!quantityElement) {
+            console.error('inside-quantity element not found!');
+            return;
+        }
+        
+        const currentCount = parseInt(quantityElement.textContent) || 0;
+        console.log('Current count:', currentCount);
+        
+        // Get total visa count to set maximum
+        const totalVisaCount = getTotalVisaCount();
+        console.log('Total visa count:', totalVisaCount);
+        
+        // For inside UAE, can't exceed total visas and can't go below 0
+        const newCount = Math.max(0, Math.min(totalVisaCount, currentCount + change));
+        console.log('New count:', newCount);
+        
+        // Calculate outside count automatically
+        const outsideCount = totalVisaCount - newCount;
+        const outsideCountElement = document.getElementById('outside-count');
+        
+        console.log('Before DOM update:');
+        console.log('- quantityElement.textContent:', quantityElement.textContent);
+        console.log('- outsideCountElement.textContent:', outsideCountElement ? outsideCountElement.textContent : 'not found');
+        
+        // Update the display with multiple approaches to ensure it works
+        quantityElement.textContent = newCount.toString();
+        quantityElement.innerHTML = newCount.toString();
+        
+        if (outsideCountElement) {
+            outsideCountElement.textContent = outsideCount.toString();
+            outsideCountElement.innerHTML = outsideCount.toString();
+        }
+        
+        // Update hidden inputs
+        document.getElementById('applicants-inside-uae').value = newCount;
+        document.getElementById('applicants-outside-uae').value = outsideCount;
+        
+        // Force immediate DOM update
+        quantityElement.offsetHeight; // Force reflow
+        if (outsideCountElement) {
+            outsideCountElement.offsetHeight; // Force reflow
+        }
+        
+        console.log('After DOM update:');
+        console.log('- quantityElement.textContent:', quantityElement.textContent);
+        console.log('- quantityElement.innerHTML:', quantityElement.innerHTML);
+        console.log('- outsideCountElement.textContent:', outsideCountElement ? outsideCountElement.textContent : 'not found');
+        console.log('- Updated - Inside:', newCount, 'Outside:', outsideCount);
+        
+        // Update button states
+        updateStatusButtonStates();
+        
+        // Trigger calculation
+        calculateCosts();
+    }
+
+    function getTotalVisaCount() {
+        const investorVisas = parseInt(document.getElementById('investor-visa-count').value) || 0;
+        const employeeVisas = parseInt(document.getElementById('employee-visa-count').value) || 0;
+        const dependencyVisas = parseInt(document.getElementById('dependency-visas').value) || 0;
+        return investorVisas + employeeVisas + dependencyVisas;
+    }
+
+    function updateStatusButtonStates() {
+        const insideQuantityElement = document.getElementById('inside-quantity');
+        if (!insideQuantityElement) return;
+        
+        const insideCount = parseInt(insideQuantityElement.textContent) || 0;
+        const totalVisaCount = getTotalVisaCount();
+        
+        // Update minus button state
+        const minusBtn = document.querySelector('#inside-selected-controls .quantity-btn.minus');
+        if (minusBtn) {
+            minusBtn.disabled = insideCount <= 0;
+            minusBtn.classList.toggle('disabled', insideCount <= 0);
+        }
+        
+        // Update plus button state
+        const plusBtn = document.querySelector('#inside-selected-controls .quantity-btn.plus');
+        if (plusBtn) {
+            plusBtn.disabled = insideCount >= totalVisaCount;
+            plusBtn.classList.toggle('disabled', insideCount >= totalVisaCount);
+        }
+        
+        console.log('Button states updated - Inside count:', insideCount, 'Total visa count:', totalVisaCount);
+        console.log('Plus button disabled:', plusBtn ? plusBtn.disabled : 'not found');
+        console.log('Minus button disabled:', minusBtn ? minusBtn.disabled : 'not found');
+    }
+
+    function updateChangeStatusVisibility() {
+        const totalVisaCount = getTotalVisaCount();
+        const changeStatusSection = document.getElementById('change-status-section');
+        
+        console.log('updateChangeStatusVisibility called - totalVisaCount:', totalVisaCount);
+        
+        if (totalVisaCount > 0) {
+            const wasHidden = changeStatusSection.style.display === 'none';
+            console.log('Section was hidden:', wasHidden);
+            changeStatusSection.style.display = 'flex';
+            
+            // Only reset counts when showing for the first time or when total visa count changes
+            if (wasHidden) {
+                console.log('Resetting counts because section was hidden');
+                document.getElementById('inside-quantity').textContent = '0';
+                document.getElementById('outside-count').textContent = totalVisaCount;
+                document.getElementById('applicants-inside-uae').value = '0';
+                document.getElementById('applicants-outside-uae').value = totalVisaCount;
+                updateStatusButtonStates();
+                
+                // Setup event listeners for change status buttons
+                setupChangeStatusEventListeners();
+            } else {
+                // Just update the outside count to match current total if section already visible
+                const currentInside = parseInt(document.getElementById('inside-quantity').textContent) || 0;
+                const newOutside = totalVisaCount - currentInside;
+                console.log('Section already visible - updating outside count. Current inside:', currentInside, 'New outside:', newOutside);
+                document.getElementById('outside-count').textContent = newOutside;
+                document.getElementById('applicants-outside-uae').value = newOutside;
+            }
+        } else {
+            console.log('Hiding section and resetting counts');
+            changeStatusSection.style.display = 'none';
+            // Reset counts when hiding
+            document.getElementById('inside-quantity').textContent = '0';
+            document.getElementById('outside-count').textContent = '0';
+            document.getElementById('applicants-inside-uae').value = '0';
+            document.getElementById('applicants-outside-uae').value = '0';
+        }
+    }
+
+    function initializeChangeStatusEventListeners() {
+        // Use event delegation to handle clicks on change status buttons
+        document.addEventListener('click', function(e) {
+            // Check if clicked element is a change status quantity button
+            if (e.target.matches('#inside-selected-controls .quantity-btn.minus')) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Change status minus button clicked');
+                adjustStatusCount('inside', -1);
+            } else if (e.target.matches('#inside-selected-controls .quantity-btn.plus')) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Change status plus button clicked');
+                adjustStatusCount('inside', 1);
+            }
+        });
+    }
+
+    function setupChangeStatusEventListeners() {
+        // This function is now just for updating button states
+        updateStatusButtonStates();
     }
 
     // Make function globally available

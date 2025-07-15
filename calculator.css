@@ -144,14 +144,16 @@ background: #FFF;
     font-family: "Plus Jakarta Sans";
     transition: border-color 0.3s ease;
 }
-
+#srix-NewCostCalForm select {
+    box-shadow: 0px 4px 4px 0px rgba(98, 44, 5, 0.05);
+}
 #srix-NewCostCalForm input[type="text"]:focus,
 #srix-NewCostCalForm input[type="email"]:focus,
 #srix-NewCostCalForm input[type="tel"]:focus,
 #srix-NewCostCalForm input[type="number"]:focus,
 #srix-NewCostCalForm select:focus {
 outline: none;
-    border: 1px solid #AB81C5;
+    border: 1px solid #EB5F40;
 }
 
 #srix-NewCostCalForm select {
@@ -159,7 +161,6 @@ outline: none;
 -moz-appearance: none;
 appearance: none;
 color: black;
-background: url(https://cdn.prod.website-files.com/6746fa16829349829922b7c4/681296908fac04978eeaa8ad_45dfcaee6036e0619a664f55eb31e562_Icon1.svg) no-repeat;
 background-position: 99% center;
 background-size: 10px;
 background-color: white;
@@ -208,7 +209,7 @@ cursor: pointer;
 }
 
 #srix-NewCostCalForm .license-option input[type="radio"]:checked {
-    border-color: #AB81C5;
+    border-color: #EB5F40;
     background: white;
 }
 
@@ -220,7 +221,7 @@ cursor: pointer;
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: linear-gradient(163deg, #AB81C5 10.55%, #42B8C6 118.78%);
+    background: linear-gradient(163deg, #EB5F40 10.55%, #42B8C6 118.78%);
     transform: translate(-50%, -50%);
 }
 
@@ -400,9 +401,7 @@ line-height: 24px;
     border: none;
 }
 
-.select-btn:hover:not(.selected) {
-    background: #d1d5db;
-}
+
 
 /* Check icon styling */
 .check-icon {
@@ -442,9 +441,11 @@ font-weight: 600;
 }
 
 .pill-option {
-    background: #FDD4CB;
-
-    border: 2px solid transparent;
+    background:  linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border: 1px solid #EDEDED;
     border-radius: 60px;
     padding:12px !important;
     font-size: 14px;
@@ -458,13 +459,20 @@ font-weight: 600;
 
 
 .pill-option:hover {
-    background: #e5e7eb;
+    background:  linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border: 1px solid #EDEDED;
+    border-radius: 60px;
+    padding:12px !important;
 }
 
 .pill-option.selected {
     background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
     color: white;
-    border:none;
+    -webkit-text-fill-color: white;
+    border: none;
 }
 
 .option-note {
@@ -496,7 +504,7 @@ border-radius: 8px;
 
 .activity-search-input:focus {
 outline: none;
-    border-color: #AB81C5;
+    border-color: #EB5F40;
 }
 
 .search-icon {
@@ -790,7 +798,7 @@ position: absolute;
     width: 26px;
     right: 4px;
     bottom: 3px;
-    background: linear-gradient(163deg, #AB81C5 10.55%, #42B8C6 118.78%);
+    background: linear-gradient(163deg, #EB5F40 10.55%, #42B8C6 118.78%);
     transition: .4s;
 border-radius: 50%;
     z-index: 1;
@@ -846,7 +854,7 @@ position: absolute;
 
 .visa-number-input:focus {
     outline: none;
-    border: 1px solid #AB81C5;
+    border: 1px solid #EB5F40;
 }
 
 .services-category {
@@ -854,7 +862,7 @@ position: absolute;
 }
 
 .services-category h4 {
-    background: linear-gradient(163deg, #AB81C5 10.55%, #42B8C6 118.78%);
+    background: linear-gradient(163deg, #EB5F40 10.55%, #42B8C6 118.78%);
 background-clip: text;
 -webkit-background-clip: text;
 -webkit-text-fill-color: transparent;
@@ -898,7 +906,7 @@ font-family: "Plus Jakarta Sans";
 .service-checkbox:checked + .service-label {
     background: linear-gradient(163deg, rgba(171, 129, 197, 0.20) 10.55%, rgba(66, 184, 198, 0.20) 118.78%);
     color: #1C1C1C;
-    border: 1px solid #AB81C5;
+    border: 1px solid #EB5F40;
     font-weight: 700;
 }
 
@@ -1090,7 +1098,7 @@ font-size: 18px;
     justify-content: center;
     gap: 8px;
     border-radius: 40px;
-    background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+    background: linear-gradient(102deg, #61A60E 1.79%, #004A98 100%);
     color: white;
     border: none;
     padding: 16px 24px !important;
@@ -1125,7 +1133,7 @@ cursor: pointer;
 .activity-tag {
     background: linear-gradient(163deg, rgba(171, 129, 197, 0.20) 10.55%, rgba(66, 184, 198, 0.20) 118.78%);
     color: #1C1C1C;
-    border: 1px solid #AB81C5;
+    border: 1px solid #EB5F40;
     font-weight: 600;
     padding: 4px 8px;
 border-radius: 16px;
@@ -1181,7 +1189,7 @@ font-family: "Plus Jakarta Sans";
     border-radius: 16px;
     padding: 24px;
     text-align: center;
-    border: 2px solid #AB81C5;
+    border: 2px solid #EB5F40;
 }
 
 .submit-button {
@@ -1263,7 +1271,7 @@ background-color: white;
 }
 
 .activities-filter-input:focus {
-    border-color: #AB81C5;
+    border-color: #EB5F40;
     box-shadow: 0 0 0 2px rgba(171, 129, 197, 0.2);
 }
 
@@ -1313,7 +1321,7 @@ justify-content: space-between;
 }
 
 .activity-checkbox:checked {
-    background: linear-gradient(163deg, #AB81C5 10.55%, #42B8C6 118.78%);
+    background: linear-gradient(163deg, #EB5F40 10.55%, #42B8C6 118.78%);
     border: none;
 }
 
@@ -1337,7 +1345,7 @@ align-items: center;
 }
 
 .activity-code {
-    color: #AB81C5;
+    color: #EB5F40;
     font-weight: 600;
     font-size: 12px;
 }
@@ -1926,8 +1934,8 @@ display: flex;
 }
 
 .contact-form-fields {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
     gap: 16px;
 }
 
@@ -2024,6 +2032,64 @@ line-height: 24px;
     backdrop-filter: blur(24px);
 }
 
+/* Change Status Section - using visa card styling */
+.change-status-details {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.status-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-family: "Plus Jakarta Sans";
+    font-size: 14px;
+    color: #1C1C1C;
+    font-weight: 500;
+}
+
+.status-info-row:first-child {
+    margin-bottom: 12px;
+}
+
+.status-label {
+    color: #1C1C1C;
+    font-family: "Plus Jakarta Sans";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+    opacity: 0.8;
+}
+
+.status-count {
+    font-family: "Plus Jakarta Sans";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px; /* 200% */
+    color: #1C1C1C;
+    opacity: 0.8;
+}
+
+.inside-label {
+    background: var(--Orange, linear-gradient(102deg, #EB5F40 0%, #B5348B 100%));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-right: 8px;
+    opacity: 1;
+}
+.uae-flag {
+    /* Removed gradient background */
+    background-clip: initial;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    color: inherit; /* Use the parent text color */
+}
 /* Visa header layout */
 .visa-header {
     display: flex;
@@ -2058,12 +2124,12 @@ line-height: 24px;
 .quantity-selector {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 4px;
 }
 
 .quantity-btn {
     background: #ffffff;
-    border: none;
+    border: 1px solid #DADBE1;
     border-radius: 50%;
     width: 34px;
     height: 34px;
@@ -2357,7 +2423,7 @@ background-clip: text;
         max-width: 100%;
         height: 85vh;
         max-height: 90vh;
-        margin: 0;
+    margin: 0;
         border-radius: 20px 20px 0 0;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
     }
@@ -2421,7 +2487,7 @@ background-clip: text;
 
 .activity-modal-header h3 {
     font-size: 20px;
-font-weight: 700;
+    font-weight: 700;
     margin: 0;
     color: #1a202c;
 }
@@ -2460,80 +2526,69 @@ font-weight: 700;
     padding: 0 24px;
 }
 
-.modal-category-pills {
-    display: flex
-;
-    gap: 4px;
+.modal-category-selector {
     padding: 0 24px 16px 24px;
-    flex-wrap: nowrap;
-    flex-direction: row;
-    overflow-y: scroll;
 }
 
-.modal-category-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px !important;
-    border-radius: 40px;
-    background: #ffffff;
-    border: 1px solid #eb5f40;
+.category-selector-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.custom-select-wrapper {
+    position: relative;
+    padding: 8px;
+    background: #F7F7F7;
+    border-radius: 10px;
+}
+
+.modal-category-select {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    background: #FFFFFF;
     font-size: 14px;
     font-weight: 500;
+    color: #374151;
     cursor: pointer;
-    text-wrap-mode: nowrap;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     transition: all 0.2s ease;
-    text-decoration: none;
-    background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-family: "Plus Jakarta Sans", sans-serif;
 }
 
-.modal-category-pill:hover {
-    border-color: #ffffff;
-    background: #eb5f40;
-    color: white !important;
-    -webkit-text-fill-color: white;
-    -webkit-background-clip: initial;
-    background-clip: initial;
+.modal-category-select:focus {
+    outline: none;
+    border-color: #EB5F40;
+    box-shadow: 0 0 0 3px rgba(235, 95, 64, 0.1);
 }
 
-.modal-category-pill.selected {
-    background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
-    color: white !important;
-    -webkit-text-fill-color: white;
-    -webkit-background-clip: initial;
-    background-clip: initial;
+.modal-category-select:hover {
+    border-color: #9CA3AF;
 }
 
-.modal-category-pill .activity-count {
-    background: rgba(235, 95, 64, 0.1);
-    border: 1px solid rgba(235, 95, 64, 0.3);
-    color: #EB5F40 ;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
+.select-arrow {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6B7280;
+    pointer-events: none;
+    transition: transform 0.2s ease;
 }
 
-.modal-category-pill .activity-count.has-count {
-    display: flex;
+.custom-select-wrapper:hover .select-arrow {
+    color: #374151;
 }
 
-.modal-category-pill.selected .activity-count {
-    background-color: white;
-    color: #B5348B !important;
-    border: none;
-font-weight: 700;
-}
-
-.modal-category-pill.selected .activity-count.has-count {
-    display: flex;
+.modal-category-select:focus + .select-arrow {
+    transform: translateY(-50%) rotate(180deg);
+    color: #EB5F40;
 }
 
 .modal-search-container {
@@ -2842,6 +2897,13 @@ font-weight: 700;
     margin-bottom: 16px;
 }
 
+#license-modal-content strong {
+    font-weight: 600;
+    color: #2D3748;
+}
+
+
+
 #license-modal-content p:last-child {
     margin-bottom: 0;
 }
@@ -2960,7 +3022,7 @@ font-weight: 700;
 }
 
 #mobile-get-call-btn {
-    background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+    background: linear-gradient(102deg, #61A60E 1.79%, #004A98 100%);
     color: white;
     border: none;
     border-radius: 40px;
@@ -2993,7 +3055,7 @@ font-weight: 700;
 /* Bottom Sheet Overlay */
 #bottom-sheet-overlay {
     position: fixed;
-    top: 0;
+        top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -3176,7 +3238,7 @@ font-weight: 700;
         padding: 16px;
         font-size: 16px;
         justify-content: center;
-        background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+        background: linear-gradient(102deg, #61A60E 1.79%, #004A98 100%);
         border-radius: 40px;
     }
     
@@ -3264,8 +3326,8 @@ font-weight: 700;
 
 @media (max-width: 1200px) {
     #mobile-sticky-footer {
-        display: block;
-    }
+    display: block;
+}
     .main-content-wrapper {
         grid-template-columns: 1fr;
     }

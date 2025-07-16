@@ -7,6 +7,11 @@
     let hasStartedForm = false;
     let hasSubmittedIncomplete = false;
     let isContactFormCompleted = false;
+    
+    // Pricing visibility management - SIMPLE APPROACH
+    let pricingRevealed = false;
+    
+
 
     document.addEventListener('DOMContentLoaded', function() {
         try {
@@ -69,6 +74,9 @@
             
             // Initialize Get a Call buttons
             initializeGetCallButtons();
+            
+            // Initialize pricing visibility
+            initializePricingVisibility();
             
             calculateCosts();
             
@@ -297,19 +305,8 @@
             card.addEventListener('click', (e) => {
                 e.preventDefault();
                 
-                // Always select the card if not already selected
-                if (!card.classList.contains('selected')) {
-                    // Manually select the card without calling toggleActivityGroup
-                    card.classList.add('selected');
-                    const countElement = card.querySelector('.selected-activities-count');
-                    const linkElement = card.querySelector('.select-activity-link');
-                    countElement.style.display = 'block';
-                    linkElement.innerHTML = 'Select more activities <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979589 8.88906 1.05226 8.92198 1.13219C8.95483 1.21213 8.97163 1.29779 8.97135 1.3842Z" fill="url(#paint0_linear_4640_6386)"/><defs><linearGradient id="paint0_linear_4640_6386" x1="-2.20508" y1="5.4043" x2="8.75062" y2="-1.23878" gradientUnits="userSpaceOnUse"><stop stop-color="#EB5F40"/><stop offset="1" stop-color="#B5348B"/></linearGradient></defs></svg></span>';
-                    updateSelectedGroupsCount();
-                    calculateCosts();
-                }
-                
-                // Open modal immediately
+                // Just open modal - don't select the group yet
+                // Group will be selected only when activities are actually chosen
                 openActivityModal(groupInfo);
             });
         });
@@ -457,6 +454,51 @@
 
     function closeActivityModal() {
         const modal = document.getElementById('activity-search-modal');
+        
+        // Check if the current group has any selected activities
+        if (window.currentModalGroup) {
+            const groupName = window.currentModalGroup.group;
+            const groupCard = document.querySelector(`.activity-card[data-group="${groupName}"]`);
+            
+            // Count activities selected for this group
+            const activitiesInGroup = window.selectedActivities ? 
+                window.selectedActivities.filter(activity => {
+                    const activityGroupName = activity.groupName || mapCategoryToGroup(activity.Category, activity.Group);
+                    return activityGroupName === groupName;
+                }).length : 0;
+            
+            if (groupCard) {
+                if (activitiesInGroup > 0) {
+                    // Ensure group is selected and show count
+                    groupCard.classList.add('selected');
+                    const countElement = groupCard.querySelector('.selected-activities-count');
+                    const linkElement = groupCard.querySelector('.select-activity-link');
+                    if (countElement) {
+                        countElement.style.display = 'block';
+                        countElement.textContent = `Selected Activities: ${activitiesInGroup}`;
+                    }
+                    if (linkElement) {
+                        linkElement.innerHTML = 'Select more activities <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979589 8.88906 1.05226 8.92198 1.13219C8.95483 1.21213 8.97163 1.29779 8.97135 1.3842Z" fill="url(#paint0_linear_4640_6386)"/><defs><linearGradient id="paint0_linear_4640_6386" x1="-2.20508" y1="5.4043" x2="8.75062" y2="-1.23878" gradientUnits="userSpaceOnUse"><stop stop-color="#EB5F40"/><stop offset="1" stop-color="#B5348B"/></linearGradient></defs></svg></span>';
+                    }
+                } else {
+                    // No activities selected, ensure group is deselected
+                    groupCard.classList.remove('selected');
+                    const countElement = groupCard.querySelector('.selected-activities-count');
+                    const linkElement = groupCard.querySelector('.select-activity-link');
+                    if (countElement) {
+                        countElement.style.display = 'none';
+                    }
+                    if (linkElement) {
+                        linkElement.innerHTML = 'Select activities <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979589 8.88906 1.05226 8.92198 1.13219C8.95483 1.21213 8.97163 1.29779 8.97135 1.3842Z" fill="url(#paint0_linear_4640_6386)"/><defs><linearGradient id="paint0_linear_4640_6386" x1="-2.20508" y1="5.4043" x2="8.75062" y2="-1.23878" gradientUnits="userSpaceOnUse"><stop stop-color="#EB5F40"/><stop offset="1" stop-color="#B5348B"/></linearGradient></defs></svg></span>';
+                    }
+                }
+            }
+            
+            // Update counts and costs
+            updateSelectedGroupsCount();
+            calculateCosts();
+        }
+        
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
         
@@ -477,6 +519,9 @@
                 window.scrollTo(0, window.scrollPositionBeforeModal);
             }, 10);
         }
+        
+        // Clear the current modal group reference
+        window.currentModalGroup = null;
     }
 
     function initializeModalCategorySelect() {
@@ -1034,7 +1079,7 @@
                     name: 'Bank Account',
                     price: 1500,
                     image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Open your UAE business account with full documentation support and a dedicated relationship manager handling approvals.'
+                    description: 'Open your UAE'
                 },
                 {
                     id: 'business-card',
@@ -1048,7 +1093,7 @@
                     name: 'Company Stamp',
                     price: 200,
                     image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Receive an official company stamp required to authenticate contracts, invoices, and formal business correspondence in Dubai.'
+                    description: 'Receive an official company stamp, required to authenticate contracts, invoices, and formal business correspondence in Dubai.'
                 },
                 {
                     id: 'ecommerce-starter',
@@ -1281,20 +1326,20 @@
             },
             'employee': {
                 title: 'Employee Visa',
-                description: 'An employee visa, also known as an employment visa or work visa, is a government-issued permit that allows foreign nationals to live and work legally in Dubai. It is a mandatory requirement for companies hiring expatriate staff and is directly linked to the business license and immigration file of the company.<br><br>The employer is responsible for managing the full application process, including document preparation, government approvals, medical testing, Emirates ID registration, and timely renewals.',
-                additional: 'At Meydan Free Zone, we simplify the entire process for you. Our dedicated support team ensures your employee visas are processed quickly, compliantly, and without delays, so your team can get to work without any administrative hassle.',
+                description: 'An Employee Visa, also known as an Employment Visa or Work Visa, is a government-issued permit that allows foreign nationals to live and work legally in Dubai.<br><br>The employer is responsible for managing the full application process, including document preparation, government approvals, medical testing, Emirates ID registration, and timely renewals.',
+                additional: 'At Meydan Free Zone, we simplify the entire process for you. Our dedicated support team ensures your Employee Visas are processed quickly, compliantly, and without delays, so your team can get to work without any administrative hassle.',
                 actionText: 'Select Employee Visa',
                 image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0004d1341d4ccb5b150_2193782fa28109786e70758b4f8700cf49d9201e377abc3571b6302582c10d9b.webp'
             },
             'dependent': {
                 title: 'Dependent Visa',
                 description: 'A Dependent Visa in Dubai allows UAE residents to sponsor their immediate family members, including spouses, children, and parents, to legally live in the UAE. It’s a residency visa linked to the sponsor’s visa status and remains valid as long as the sponsor’s visa is active and compliant.<br> <br>This visa is ideal for those who want their loved ones to join them in the UAE, ensuring legal residency, access to essential services, and peace of mind for families relocating together.',
-                additional: 'At Meydan Free Zone, we simplify the dependent visa process to ensure fast, accurate submissions and full compliance, so you can bring your family over without delays or stress.',
+                additional: 'At Meydan Free Zone, we simplify the Dependent Visa process to ensure fast, accurate submissions and full compliance, so you can bring your family over without delays or stress.',
                 actionText: 'Select Dependent Visa',
                 image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc001b0a226a76d71d00d_de8b99eed6930d3f9455605a063e0514bbbcb91427bf01dca897e5aa4b11d820.webp'
             },
             'change-status': {
-                title: 'Change Of Status',
+                title: 'Change of Status',
                 description: 'If you\'re already in the UAE, whether on a tourist visa, family visa, or a previous employment visa, you\'ll need to apply for a Change of Status to switch to a residence visa under your new business.<br><br><strong>This applies to:</strong><br><br><span class="numbered-item">1.</span> <strong>You</strong> as a founder or shareholder moving to an Investor or Shareholder visa<br><br><span class="numbered-item">2.</span> <strong>Employees</strong> you\'re hiring who are switching jobs and changing sponsorship<br><br><span class="numbered-item">3.</span> <strong>Family members</strong> you\'re sponsoring (after obtaining your own visa) who are already in the UAE',
                 additional: 'Meydan Free Zone manages the full Change of Status process for you, so you don\'t need to exit the country or restart your visa journey. It\'s a fast, compliant way to update your visa status, whether you\'re launching or growing your team from inside the UAE.<br><br>Just let us know who\'s already here, and we\'ll handle the rest.',
                 actionText: 'Got It',
@@ -2622,10 +2667,10 @@
         
         getCallButtons.forEach(button => {
             button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const submitBtn = this;
+        e.preventDefault();
+        const submitBtn = this;
 
-                if (submitBtn.classList.contains('button-loading')) return;
+        if (submitBtn.classList.contains('button-loading')) return;
 
                 // Check if contact form is valid before submitting
                 if (!validateContactForm()) {
@@ -2662,61 +2707,61 @@
                     return; // Don't proceed with form submission
                 }
 
-                clearTimeout(inactivityTimer);
-                hasSubmittedIncomplete = true; 
+        clearTimeout(inactivityTimer);
+        hasSubmittedIncomplete = true; 
 
-                submitBtn.classList.add('button-loading');
-                submitBtn.disabled = true;
+        submitBtn.classList.add('button-loading');
+        submitBtn.disabled = true;
 
-                calculateCosts();
+        calculateCosts();
 
-                const fullName = document.getElementById("full-name").value;
-                const phone = phoneInput.getNumber();
-                const email = document.getElementById("email").value;
+        const fullName = document.getElementById("full-name").value;
+        const phone = phoneInput.getNumber();
+        const email = document.getElementById("email").value;
                 const licenseType = document.getElementById("license-type")?.value || "fawri";
-                
-                const shareholdersCount = parseInt(document.getElementById("shareholders-range").value) || 0;
-                // Use default nationality value instead of collecting from removed fields
-                const shareholderNationalities = Array(shareholdersCount).fill('Default');
+        
+        const shareholdersCount = parseInt(document.getElementById("shareholders-range").value) || 0;
+        // Use default nationality value instead of collecting from removed fields
+        const shareholderNationalities = Array(shareholdersCount).fill('Default');
 
-                const elementorForm = $('#my-calculator-elementor-form');
-                if (elementorForm.length > 0) {
-                    elementorForm.find('input[name="form_fields[fullName]"]').val(fullName);
-                    elementorForm.find('input[name="form_fields[phone]"]').val(phone);
-                    elementorForm.find('input[name="form_fields[email]"]').val(email);
-                    elementorForm.find('input[name="form_fields[license_type]"]').val(licenseType);
-                    elementorForm.find('input[name="form_fields[shareholders_range]"]').val(document.getElementById("shareholders-range").value);
-                    elementorForm.find('input[name="form_fields[nationalities]"]').val("Default Nationality");
-                    elementorForm.find('input[name="form_fields[shareholder_nationalities]"]').val(shareholderNationalities.join(','));
-                    elementorForm.find('input[name="form_fields[business_activities]"]').val(selectedActivities.join(', '));
-                    elementorForm.find('input[name="form_fields[total_cost]"]').val(calculateTotalCost());
-                    elementorForm.find('input[name="form_fields[license_cost]"]').val(LicenseCost);
-                    elementorForm.find('input[name="form_fields[visa_cost]"]').val(VisaCost);
-                    elementorForm.find('input[name="form_fields[bank_cost]"]').val(0); // Bank cost is included in add-ons
-                    elementorForm.find('input[name="form_fields[form_status]"]').val('complete');
+        const elementorForm = $('#my-calculator-elementor-form');
+        if (elementorForm.length > 0) {
+            elementorForm.find('input[name="form_fields[fullName]"]').val(fullName);
+            elementorForm.find('input[name="form_fields[phone]"]').val(phone);
+            elementorForm.find('input[name="form_fields[email]"]').val(email);
+            elementorForm.find('input[name="form_fields[license_type]"]').val(licenseType);
+            elementorForm.find('input[name="form_fields[shareholders_range]"]').val(document.getElementById("shareholders-range").value);
+            elementorForm.find('input[name="form_fields[nationalities]"]').val("Default Nationality");
+            elementorForm.find('input[name="form_fields[shareholder_nationalities]"]').val(shareholderNationalities.join(','));
+            elementorForm.find('input[name="form_fields[business_activities]"]').val(selectedActivities.join(', '));
+            elementorForm.find('input[name="form_fields[total_cost]"]').val(calculateTotalCost());
+            elementorForm.find('input[name="form_fields[license_cost]"]').val(LicenseCost);
+            elementorForm.find('input[name="form_fields[visa_cost]"]').val(VisaCost);
+            elementorForm.find('input[name="form_fields[bank_cost]"]').val(0); // Bank cost is included in add-ons
+            elementorForm.find('input[name="form_fields[form_status]"]').val('complete');
 
-                    setTimeout(function() {
-                        const submitButton = elementorForm.find('.elementor-button[type="submit"]');
-                        if (submitButton.length > 0) {
-                            submitButton.click();
-                            
+            setTimeout(function() {
+                const submitButton = elementorForm.find('.elementor-button[type="submit"]');
+                if (submitButton.length > 0) {
+                    submitButton.click();
+                    
                             document.querySelector('#srix-NewCostCalForm').style.display = 'none';
-                            const successMessage = document.getElementById('theFinalSuccessMessage');
-                            document.getElementById('success-first-name').textContent = fullName.split(' ')[0] || '';
-                            successMessage.classList.remove('d-none');
-                            successMessage.classList.add('visible');
-                        } else {
-                            submitBtn.classList.remove('button-loading');
-                            submitBtn.disabled = false;
-                            alert("There was an issue submitting the form. Please try again.");
-                        }
-                    }, 1000);
+                    const successMessage = document.getElementById('theFinalSuccessMessage');
+                    document.getElementById('success-first-name').textContent = fullName.split(' ')[0] || '';
+                    successMessage.classList.remove('d-none');
+                    successMessage.classList.add('visible');
                 } else {
                     submitBtn.classList.remove('button-loading');
                     submitBtn.disabled = false;
-                    alert("There was an issue submitting the form. Please try again later.");
+                    alert("There was an issue submitting the form. Please try again.");
                 }
-            });
+            }, 1000);
+        } else {
+            submitBtn.classList.remove('button-loading');
+            submitBtn.disabled = false;
+            alert("There was an issue submitting the form. Please try again later.");
+        }
+    });
         });
     }
 
@@ -2749,25 +2794,30 @@
             const email = document.getElementById('email')?.value?.trim();
             const phoneField = document.getElementById('phone');
             
-            // Basic validation
-            const isNameValid = fullName && fullName.length >= 2;
-            const isEmailValid = email && email.includes('@') && email.includes('.');
+            // Strict validation - ALL fields must be valid
+            const isNameValid = fullName && fullName.length >= 2 && /^[A-Za-z\s]+$/.test(fullName);
+            const isEmailValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             
             // Phone validation using existing phoneInput if available
             let isPhoneValid = false;
             if (phoneField && typeof phoneInput !== 'undefined') {
-                const phoneValue = phoneField.value?.trim();
-                isPhoneValid = phoneValue && phoneValue.length >= 8; // Basic check
-                
-                // Use phoneInput validation if available
                 try {
                     if (phoneInput.isValidNumber && phoneInput.getNumber) {
                         isPhoneValid = phoneInput.isValidNumber();
+                    } else {
+                        // Fallback to basic validation
+                        const phoneValue = phoneField.value?.trim();
+                        isPhoneValid = phoneValue && phoneValue.length >= 8;
                     }
                 } catch (err) {
                     // Fallback to basic validation
-                    console.log("Using basic phone validation");
+                    const phoneValue = phoneField.value?.trim();
+                    isPhoneValid = phoneValue && phoneValue.length >= 8;
                 }
+            } else {
+                // If phoneInput not available, use basic validation
+                const phoneValue = phoneField?.value?.trim();
+                isPhoneValid = phoneValue && phoneValue.length >= 8;
             }
             
             return isNameValid && isEmailValid && isPhoneValid;
@@ -2919,6 +2969,26 @@
                 isContactFormCompleted = true;
                 unlockSections();
                 
+                // REVEAL PRICING - when form is validated
+                if (!pricingRevealed) {
+                    pricingRevealed = true;
+                    const summaryContainer = document.querySelector('.sticky-summary-container');
+                    const mobileFooter = document.getElementById('mobile-sticky-footer');
+                    
+                    if (summaryContainer) {
+                        summaryContainer.classList.remove('summary-pricing-hidden');
+                        summaryContainer.classList.add('summary-pricing-revealed');
+                    }
+                    
+                    if (mobileFooter) {
+                        mobileFooter.classList.remove('summary-pricing-hidden');
+                        mobileFooter.classList.add('summary-pricing-revealed');
+                    }
+                    
+                    console.log('✅ Pricing revealed after contact form validation');
+                }
+
+                
                 // Update contact section styling
                 if (contactSection) {
                     contactSection.classList.add('completed');
@@ -2941,7 +3011,7 @@
                                     <polyline points="20,6 9,17 4,12"/>
                                 </svg>
                             </span>
-                            Continue exploring your business setup options.
+                            You’re all set. Let’s explore your business setup options.
                         `;
                     }
                 }
@@ -3874,6 +3944,9 @@
         const openSheet = () => {
             if (sheetIsOpen) return;
             
+            // Store current scroll position before opening sheet
+            window.scrollPositionBeforeModal = window.pageYOffset || document.documentElement.scrollTop;
+            
             // Force the total to update before opening
             updateMobilePrice();
             
@@ -3891,6 +3964,9 @@
             overlay.classList.add('active');
             body.classList.add('sheet-view-active');
             
+            // Prevent body scroll
+            body.style.overflow = 'hidden';
+            
             // Hide the footer when sheet is open
             mobileStickyFooter.style.display = 'none';
             
@@ -3906,8 +3982,18 @@
             overlay.classList.remove('active');
             body.classList.remove('sheet-view-active');
             
+            // Restore body scroll
+            body.style.overflow = 'auto';
+            
             // Show the footer when sheet is closed
             mobileStickyFooter.style.display = 'block';
+            
+            // Restore scroll position after a brief delay
+            if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+                setTimeout(() => {
+                    window.scrollTo(0, window.scrollPositionBeforeModal);
+                }, 10);
+            }
             
             sheetIsOpen = false;
         };
@@ -3990,5 +4076,312 @@
                 subtree: true 
             });
         }
+    
+
     }
+
+    // Mobile Auto-Scroll Functionality
+    function initializeMobileAutoScroll() {
+        // Only run on mobile devices
+        if (window.innerWidth > 768) return;
+        
+        // Function to scroll to next card by ID
+        const scrollToNextCard = (currentElement, cardSelector) => {
+            const allCards = Array.from(document.querySelectorAll(cardSelector));
+            const currentIndex = allCards.indexOf(currentElement);
+            
+            if (currentIndex >= 0 && currentIndex < allCards.length - 1) {
+                const nextCard = allCards[currentIndex + 1];
+                if (nextCard) {
+                    setTimeout(() => {
+                        const headerOffset = 80;
+                        const elementPosition = nextCard.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }, 300);
+                }
+            }
+        };
+        
+        // Special scroll for form completion - go to next section
+        const scrollToNextSection = () => {
+            const companySetupSection = document.getElementById('company-setup-section');
+            if (companySetupSection && !companySetupSection.classList.contains('locked')) {
+                setTimeout(() => {
+                    const headerOffset = 20;
+                    const elementPosition = companySetupSection.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }, 500);
+            }
+        };
+        
+        // Personal Details Section - scroll to next section after form validation
+        const personalDetailsSection = document.getElementById('personal-details-section');
+        if (personalDetailsSection) {
+            const inputs = personalDetailsSection.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => {
+                    if (validateContactForm() && isContactFormCompleted) {
+                        scrollToNextSection();
+                    }
+                });
+            });
+        }
+        
+        // Company Setup Section - License Cards
+        const licenseCards = document.querySelectorAll('.license-card');
+        licenseCards.forEach(card => {
+            card.addEventListener('click', () => {
+                console.log('Mobile auto-scroll: License card clicked', card.dataset.license);
+                scrollToNextCard(card, '.license-card');
+            });
+        });
+        
+        // License Select Buttons
+        const selectButtons = document.querySelectorAll('.select-btn');
+        selectButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Scroll to duration options after selecting a license
+                const durationOptions = document.getElementById('duration-options');
+                if (durationOptions) {
+                    setTimeout(() => {
+                        const headerOffset = 80;
+                        const elementPosition = durationOptions.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }, 300);
+                }
+            });
+        });
+        
+        // Function to check if both duration and shareholders are selected
+        const checkBothPillSectionsSelected = () => {
+            const durationSelected = document.querySelector('#duration-options .pill-option.selected');
+            const shareholdersSelected = document.querySelector('#shareholders-options .pill-option.selected');
+            
+            if (durationSelected && shareholdersSelected) {
+                const businessActivitiesSection = document.getElementById('business-activities-section');
+                if (businessActivitiesSection && !businessActivitiesSection.classList.contains('locked')) {
+                    setTimeout(() => {
+                        const headerOffset = 80;
+                        const elementPosition = businessActivitiesSection.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }, 300);
+                }
+            }
+        };
+        
+        // Duration Buttons - check both sections before scrolling
+        const durationButtons = document.querySelectorAll('#duration-options .pill-option');
+        durationButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                checkBothPillSectionsSelected();
+            });
+        });
+        
+        // Shareholders Buttons - check both sections before scrolling
+        const shareholdersButtons = document.querySelectorAll('#shareholders-options .pill-option');
+        shareholdersButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                checkBothPillSectionsSelected();
+            });
+        });
+        
+        // Business Activities Section - scroll to visa section after activity selection
+        // Note: Activity cards are dynamically generated, so we need to use event delegation
+        const businessActivitiesSection = document.getElementById('business-activities-section');
+        if (businessActivitiesSection) {
+            businessActivitiesSection.addEventListener('click', (e) => {
+                // Check if clicked element is an activity card
+                const activityCard = e.target.closest('.activity-card');
+                if (activityCard) {
+                    // Check if any activities are selected after a short delay (to allow selection to complete)
+                    setTimeout(() => {
+                        if (window.selectedActivities && window.selectedActivities.length > 0) {
+                            const visaOptionsSection = document.getElementById('visa-options-section');
+                            if (visaOptionsSection && !visaOptionsSection.classList.contains('locked')) {
+                                setTimeout(() => {
+                                    const headerOffset = 80;
+                                    const elementPosition = visaOptionsSection.getBoundingClientRect().top;
+                                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                                    window.scrollTo({
+                                        top: offsetPosition,
+                                        behavior: 'smooth'
+                                    });
+                                }, 300);
+                            }
+                        }
+                    }, 100);
+                }
+            });
+        }
+        
+        // Activity modal close - scroll to visa section after modal interaction
+        const activityModal = document.getElementById('activity-search-modal');
+        if (activityModal) {
+            const modalCloseHandler = () => {
+                console.log('Mobile auto-scroll: Activity modal closed');
+                // Check if any activities are selected after modal closes
+                setTimeout(() => {
+                    console.log('Mobile auto-scroll: Checking selected activities:', window.selectedActivities ? window.selectedActivities.length : 0);
+                    if (window.selectedActivities && window.selectedActivities.length > 0) {
+                        const visaOptionsSection = document.getElementById('visa-options-section');
+                        if (visaOptionsSection && !visaOptionsSection.classList.contains('locked')) {
+                            console.log('Mobile auto-scroll: Scrolling to visa options section after modal close');
+                            setTimeout(() => {
+                                const headerOffset = 80;
+                                const elementPosition = visaOptionsSection.getBoundingClientRect().top;
+                                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
+                                });
+                            }, 300);
+                        }
+                    }
+                }, 200);
+            };
+            
+            // Add event listeners for modal close
+            const closeButton = activityModal.querySelector('.close-btn, .close');
+            const doneButton = activityModal.querySelector('#activity-done-btn');
+            if (closeButton) closeButton.addEventListener('click', modalCloseHandler);
+            if (doneButton) doneButton.addEventListener('click', modalCloseHandler);
+        }
+        
+        // Visa Options Section - scroll to next visa card or change status section
+        const visaCards = document.querySelectorAll('.visa-card:not(.change-status-card)');
+        console.log('Mobile auto-scroll: Found visa cards:', visaCards.length);
+        visaCards.forEach(card => {
+            card.addEventListener('click', () => {
+                console.log('Mobile auto-scroll: Visa card clicked', card.dataset.visa);
+                const allVisaCards = Array.from(document.querySelectorAll('.visa-card:not(.change-status-card)'));
+                const currentIndex = allVisaCards.indexOf(card);
+                console.log('Mobile auto-scroll: Current index:', currentIndex, 'Total cards:', allVisaCards.length);
+                
+                // If this is the last visa card, scroll to change status section
+                if (currentIndex === allVisaCards.length - 1) {
+                    console.log('Mobile auto-scroll: Last visa card, scrolling to change status');
+                    const changeStatusSection = document.getElementById('change-status-section');
+                    if (changeStatusSection && !changeStatusSection.classList.contains('locked')) {
+                        setTimeout(() => {
+                            const headerOffset = 80;
+                            const elementPosition = changeStatusSection.getBoundingClientRect().top;
+                            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                            window.scrollTo({
+                                top: offsetPosition,
+                                behavior: 'smooth'
+                            });
+                        }, 300);
+                    }
+                } else {
+                    // Not the last card, scroll to next visa card
+                    console.log('Mobile auto-scroll: Not last card, scrolling to next visa card');
+                    scrollToNextCard(card, '.visa-card:not(.change-status-card)');
+                }
+            });
+        });
+        
+        // Visa Toggle Switches
+        const visaToggles = document.querySelectorAll('.visa-toggle-switch input');
+        visaToggles.forEach(toggle => {
+            toggle.addEventListener('change', () => {
+                const visaCard = toggle.closest('.visa-card');
+                if (visaCard) {
+                    const allVisaCards = Array.from(document.querySelectorAll('.visa-card:not(.change-status-card)'));
+                    const currentIndex = allVisaCards.indexOf(visaCard);
+                    
+                    // If this is the last visa card, scroll to change status section
+                    if (currentIndex === allVisaCards.length - 1) {
+                        const changeStatusSection = document.getElementById('change-status-section');
+                        if (changeStatusSection && !changeStatusSection.classList.contains('locked')) {
+                            setTimeout(() => {
+                                const headerOffset = 80;
+                                const elementPosition = changeStatusSection.getBoundingClientRect().top;
+                                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
+                            });
+                            }, 300);
+                        }
+                    } else {
+                        // Not the last card, scroll to next visa card
+                        scrollToNextCard(visaCard, '.visa-card:not(.change-status-card)');
+                    }
+                }
+            });
+        });
+        
+        // Change Status Section - quantity buttons
+        const quantityButtons = document.querySelectorAll('.quantity-btn');
+        quantityButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const addonsSection = document.getElementById('addons-section');
+                if (addonsSection && !addonsSection.classList.contains('locked')) {
+                    setTimeout(() => {
+                        const headerOffset = 80;
+                        const elementPosition = addonsSection.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }, 300);
+                }
+            });
+        });
+        
+        // Add-ons Section - scroll to next addon category
+        const addonCategories = document.querySelectorAll('.addon-category-card');
+        addonCategories.forEach(category => {
+            category.addEventListener('click', () => {
+                scrollToNextCard(category, '.addon-category-card');
+            });
+        });
+        
+        // Service selection within addons
+        const serviceCheckboxes = document.querySelectorAll('.addons-container input[type="checkbox"]');
+        serviceCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const categoryCard = checkbox.closest('.addon-category-card');
+                if (categoryCard) {
+                    scrollToNextCard(categoryCard, '.addon-category-card');
+                }
+            });
+        });
+    }
+
+    // Initialize mobile auto-scroll when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeMobileAutoScroll();
+        
+        // Re-initialize on window resize if switching to/from mobile
+        window.addEventListener('resize', function() {
+            initializeMobileAutoScroll();
+        });
+    });
 

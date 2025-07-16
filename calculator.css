@@ -275,7 +275,7 @@ font-weight: 600;
 }
 
 employee-visa-limit-info{
-    
+
 }
 /* License cards styling */
 .license-cards-container {
@@ -2170,8 +2170,7 @@ line-height: 24px;
     width: 34px;
     height: 34px;
     color: #EB5F40;
-    font-size: 20px;
-font-weight: 400;
+    font-size: 15px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -2323,7 +2322,7 @@ font-weight: 400;
     justify-content: space-between;
     gap: 16px;
     width: 192px;
-    height: 140px;
+    height: 100%;
 }
 
 .activity-card:hover {
@@ -3549,4 +3548,10 @@ background-clip: text;
 
 .contact-form-progress.completed .progress-icon {
     background: #10B981;
+}
+.error-message{
+    opacity: 0 !important;
+    margin-top: 0px !important;
+    color: transparent !important;
+    border: none !important;
 }

@@ -2897,13 +2897,6 @@ background-clip: text;
     margin-bottom: 16px;
 }
 
-#license-modal-content strong {
-    font-weight: 600;
-    color: #2D3748;
-}
-
-
-
 #license-modal-content p:last-child {
     margin-bottom: 0;
 }
@@ -3338,4 +3331,178 @@ background-clip: text;
     .activity-cards-container {
         max-width: 93vw;
     }
+}
+
+/* Form section locking styles */
+.form-section.locked {
+    position: relative;
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.form-section.locked::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    z-index: 10;
+    border-radius: 16px;
+}
+
+.section-lock-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    text-align: center;
+    z-index: 11;
+    border: 1px solid #E5E7EB;
+    max-width: 300px;
+    width: 90%;
+}
+
+.section-lock-overlay .lock-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    background: linear-gradient(135deg, #EB5F40 0%, #B5348B 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.section-lock-overlay .lock-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: white;
+}
+
+.section-lock-overlay h3 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 16px;
+    font-weight: 600;
+    color: #1C1C1C;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+}
+
+.section-lock-overlay p {
+    font-family: "Plus Jakarta Sans";
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.section-lock-overlay:hover {
+    transform: translate(-50%, -50%) scale(1.02);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+.section-lock-overlay:hover .lock-icon {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.form-section:not(.locked) {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.form-section.unlocking {
+    animation: unlockSection 0.5s ease forwards;
+}
+
+@keyframes unlockSection {
+    0% {
+        opacity: 0.5;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Contact form completion indicator */
+.contact-form-section.completed .contact-form-header::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    border-radius: 50%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20,6 9,17 4,12'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.contact-form-section .contact-form-header {
+    position: relative;
+}
+
+/* Enhanced submit button states */
+.submit-button.validated {
+    background: linear-gradient(100deg, #61A60E 7.85%, #004A98 94.23%);
+}
+
+.submit-button.validated:hover {
+    background: linear-gradient(135deg, #004A98 0%, #61A60E 100%);
+}
+
+/* Progress indicator enhancement */
+.contact-form-progress {
+    margin-top: 16px;
+    padding: 12px;
+    background: #F3F4F6;
+    border-radius: 8px;
+    border-left: 4px solid #E5E7EB;
+    transition: all 0.3s ease;
+}
+
+.contact-form-progress.completed {
+    background: #ECFDF5;
+    border-left-color: #10B981;
+}
+
+.contact-form-progress p {
+    font-family: "Plus Jakarta Sans";
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact-form-progress.completed p {
+    color: #059669;
+}
+
+.contact-form-progress .progress-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #E5E7EB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.contact-form-progress.completed .progress-icon {
+    background: #10B981;
 }

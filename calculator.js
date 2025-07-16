@@ -6,6 +6,7 @@
     let firstStepData = null;
     let hasStartedForm = false;
     let hasSubmittedIncomplete = false;
+    let isContactFormCompleted = false;
 
     document.addEventListener('DOMContentLoaded', function() {
         try {
@@ -62,6 +63,9 @@
             
             // Initialize change status event listeners
             initializeChangeStatusEventListeners();
+            
+            // Initialize section locking
+            initializeSectionLocking();
             
             calculateCosts();
             
@@ -631,9 +635,10 @@
                 }
                 
                 updateActivityCountOnCard(groupName);
-                updateAllModalCategoryPillCounts();
+                updateAllModalCategoryCounts();
                 updateSelectedGroupsCount();
                 calculateCosts();
+                console.log('Activity selected, recalculated costs, selectedActivities:', window.selectedActivities);
                     });
                 });
             }
@@ -710,9 +715,10 @@
                 }
                 
                 updateActivityCountOnCard(groupName);
-                updateAllModalCategoryPillCounts();
+                updateAllModalCategoryCounts();
                 updateSelectedGroupsCount();
                 calculateCosts();
+                console.log('Activity selected from modal, recalculated costs, selectedActivities:', window.selectedActivities);
             });
         });
     }
@@ -724,7 +730,13 @@
     }
 
     function removeActivity(code) {
+        const activityToRemove = window.selectedActivities.find(a => a.Code === code);
         window.selectedActivities = window.selectedActivities.filter(a => a.Code !== code);
+        
+        // If activity was removed, update the card count and reorder
+        if (activityToRemove) {
+            updateActivityCountOnCard(activityToRemove.groupName);
+        }
     }
     
     function getSelectedActivitiesCountForGroup(groupName) {
@@ -745,6 +757,45 @@
         
         // Also update the modal category select count if modal is open
         updateModalCategorySelectCount(groupName);
+        
+        // Reorder the cards to show selected ones first
+        reorderActivityCards();
+    }
+
+    function reorderActivityCards() {
+        const container = document.querySelector('.activity-cards-container');
+        if (!container) return;
+        
+        const cards = Array.from(container.querySelectorAll('.activity-card'));
+        
+        // Sort cards: selected cards with activities first (by activity count desc), then selected cards without activities, then unselected cards
+        cards.sort((a, b) => {
+            const aGroupName = a.dataset.group;
+            const bGroupName = b.dataset.group;
+            
+            const aCount = window.selectedActivities.filter(activity => activity.groupName === aGroupName).length;
+            const bCount = window.selectedActivities.filter(activity => activity.groupName === bGroupName).length;
+            
+            const aSelected = a.classList.contains('selected');
+            const bSelected = b.classList.contains('selected');
+            
+            // First: Cards with selected activities (sorted by count descending)
+            if (aCount > 0 && bCount > 0) {
+                return bCount - aCount;
+            }
+            if (aCount > 0 && bCount === 0) return -1;
+            if (aCount === 0 && bCount > 0) return 1;
+            
+            // Second: Selected cards without activities
+            if (aSelected && !bSelected) return -1;
+            if (!aSelected && bSelected) return 1;
+            
+            // Third: Maintain original order for unselected cards
+            return 0;
+        });
+        
+        // Reattach cards in the new order
+        cards.forEach(card => container.appendChild(card));
     }
 
     function updateModalCategorySelectCount(groupName) {
@@ -1857,8 +1908,11 @@
         if (activityTagsContainer && businessActivitySection) {
             activityTagsContainer.innerHTML = '';
             
+            console.log('updateSummaryUI: Processing business activities, selectedActivities length:', window.selectedActivities ? window.selectedActivities.length : 0);
+            
             // Only show business activities section if activities are selected
             if (window.selectedActivities && window.selectedActivities.length > 0) {
+                console.log('updateSummaryUI: Showing business activities section');
                 businessActivitySection.style.display = 'block';
                 
                 // Group activities by category
@@ -1874,7 +1928,12 @@
                 });
                 
                 // Create table-style rows instead of tags
-                Object.keys(activityGroups).forEach(groupName => {
+                // Sort groups by activity count (descending) to show most selected first
+                const sortedGroupNames = Object.keys(activityGroups).sort((a, b) => {
+                    return activityGroups[b].length - activityGroups[a].length;
+                });
+                
+                sortedGroupNames.forEach(groupName => {
                     const activities = activityGroups[groupName];
                     
                     // Create a summary row instead of a tag
@@ -1919,6 +1978,7 @@
                     }
                 }
             } else {
+                console.log('updateSummaryUI: Hiding business activities section - no activities selected');
                 // Hide business activities section if no activities selected
                 businessActivitySection.style.display = 'none';
             }
@@ -2360,6 +2420,43 @@
 
         if (submitBtn.classList.contains('button-loading')) return;
 
+        // Check if contact form is valid before proceeding
+        if (!validateContactForm()) {
+            // Show validation errors or highlight empty fields
+            const fields = [
+                { id: 'full-name', name: 'Full Name' },
+                { id: 'email', name: 'Email' },
+                { id: 'phone', name: 'Phone' }
+            ];
+            
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                const errorElement = document.getElementById(field.id + '-error');
+                
+                if (element && !element.value?.trim()) {
+                    element.classList.add('error');
+                    if (errorElement) {
+                        errorElement.textContent = `${field.name} is required`;
+                        errorElement.style.display = 'block';
+                    }
+                } else {
+                    element?.classList.remove('error');
+                    if (errorElement) {
+                        errorElement.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Scroll to first error field
+            const firstError = document.querySelector('.form-group input.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+            
+            return; // Don't proceed with form submission
+        }
+
         clearTimeout(inactivityTimer);
         hasSubmittedIncomplete = true; 
 
@@ -2415,6 +2512,257 @@
             alert("There was an issue submitting the form. Please try again later.");
         }
     });
+
+    // Section Locking System
+    function initializeSectionLocking() {
+        try {
+            // Lock all sections except contact form on page load
+            lockSections();
+            
+            // Add real-time validation listeners to contact form fields
+            const contactFields = ['full-name', 'phone', 'email'];
+            contactFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', updateSectionLockState);
+                    field.addEventListener('change', updateSectionLockState);
+                }
+            });
+            
+            // Initial validation check
+            updateSectionLockState();
+        } catch (err) {
+            console.error("Error initializing section locking:", err);
+        }
+    }
+
+    function validateContactForm() {
+        try {
+            const fullName = document.getElementById('full-name')?.value?.trim();
+            const email = document.getElementById('email')?.value?.trim();
+            const phoneField = document.getElementById('phone');
+            
+            // Basic validation
+            const isNameValid = fullName && fullName.length >= 2;
+            const isEmailValid = email && email.includes('@') && email.includes('.');
+            
+            // Phone validation using existing phoneInput if available
+            let isPhoneValid = false;
+            if (phoneField && typeof phoneInput !== 'undefined') {
+                const phoneValue = phoneField.value?.trim();
+                isPhoneValid = phoneValue && phoneValue.length >= 8; // Basic check
+                
+                // Use phoneInput validation if available
+                try {
+                    if (phoneInput.isValidNumber && phoneInput.getNumber) {
+                        isPhoneValid = phoneInput.isValidNumber();
+                    }
+                } catch (err) {
+                    // Fallback to basic validation
+                    console.log("Using basic phone validation");
+                }
+            }
+            
+            return isNameValid && isEmailValid && isPhoneValid;
+        } catch (err) {
+            console.error("Error validating contact form:", err);
+            return false;
+        }
+    }
+
+    function lockSections() {
+        try {
+            const sectionsToLock = [
+                'company-setup-section',
+                'business-activities-section', 
+                'visa-options-section',
+                'change-status-section',
+                'addons-section'
+            ];
+            
+            sectionsToLock.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section && !section.classList.contains('locked')) {
+                    section.classList.add('locked');
+                    
+                    // Add lock overlay if it doesn't exist
+                    if (!section.querySelector('.section-lock-overlay')) {
+                        const overlay = createLockOverlay(sectionId);
+                        section.appendChild(overlay);
+                        
+                        // Add click handler to overlay to scroll to contact form
+                        overlay.addEventListener('click', () => {
+                            const contactSection = document.getElementById('personal-details-section');
+                            if (contactSection) {
+                                contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                // Focus on first empty field
+                                const firstEmptyField = contactSection.querySelector('input:not([value]), input[value=""]');
+                                if (firstEmptyField) {
+                                    setTimeout(() => firstEmptyField.focus(), 500);
+                                }
+                            }
+                        });
+                        
+                        // Add hover effect
+                        overlay.style.cursor = 'pointer';
+                        overlay.title = 'Click to go to contact form';
+                    }
+                }
+            });
+        } catch (err) {
+            console.error("Error locking sections:", err);
+        }
+    }
+
+    function unlockSections() {
+        try {
+            const sectionsToUnlock = [
+                'company-setup-section',
+                'business-activities-section',
+                'visa-options-section', 
+                'change-status-section',
+                'addons-section'
+            ];
+            
+            sectionsToUnlock.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section && section.classList.contains('locked')) {
+                    section.classList.add('unlocking');
+                    section.classList.remove('locked');
+                    
+                    // Remove lock overlay
+                    const overlay = section.querySelector('.section-lock-overlay');
+                    if (overlay) {
+                        overlay.remove();
+                    }
+                    
+                    // Remove unlocking class after animation
+                    setTimeout(() => {
+                        section.classList.remove('unlocking');
+                    }, 500);
+                }
+            });
+        } catch (err) {
+            console.error("Error unlocking sections:", err);
+        }
+    }
+
+    function createLockOverlay(sectionId) {
+        const overlay = document.createElement('div');
+        overlay.className = 'section-lock-overlay';
+        
+        let title = 'Complete Contact Information';
+        let message = 'Fill out your contact details above to unlock this section';
+        
+        // Customize message based on section
+        switch(sectionId) {
+            case 'company-setup-section':
+                title = 'Choose Your Business License';
+                message = 'Complete your contact information to select your business license type';
+                break;
+            case 'business-activities-section':
+                title = 'Select Business Activities';
+                message = 'Complete your contact information to choose your business activities';
+                break;
+            case 'visa-options-section':
+                title = 'Configure Visa Options';
+                message = 'Complete your contact information to set up visa requirements';
+                break;
+            case 'change-status-section':
+                title = 'Change Status Options';
+                message = 'Complete your contact information to access change status services';
+                break;
+            case 'addons-section':
+                title = 'Additional Services';
+                message = 'Complete your contact information to explore additional services';
+                break;
+        }
+        
+        overlay.innerHTML = `
+            <div class="lock-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/>
+                </svg>
+            </div>
+            <h3>${title}</h3>
+            <p>${message}</p>
+        `;
+        
+        return overlay;
+    }
+
+    function updateSectionLockState() {
+        try {
+            const isValid = validateContactForm();
+            const contactSection = document.querySelector('.contact-form-section');
+            const submitBtn = document.getElementById('submitBtn');
+            const progressIndicator = document.getElementById('contact-progress');
+            const progressIcon = document.getElementById('progress-icon');
+            
+            if (isValid && !isContactFormCompleted) {
+                // Form is now valid - unlock sections
+                isContactFormCompleted = true;
+                unlockSections();
+                
+                // Update contact section styling
+                if (contactSection) {
+                    contactSection.classList.add('completed');
+                }
+                
+                // Update submit button
+                if (submitBtn) {
+                    submitBtn.classList.add('validated');
+                    submitBtn.querySelector('span').textContent = 'Continue to Calculator';
+                }
+                
+                // Update progress indicator
+                if (progressIndicator) {
+                    progressIndicator.classList.add('completed');
+                    const progressText = progressIndicator.querySelector('p');
+                    if (progressText) {
+                        progressText.innerHTML = `
+                            <span class="progress-icon" id="progress-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20,6 9,17 4,12"/>
+                                </svg>
+                            </span>
+                            Continue exploring your business setup options.
+                        `;
+                    }
+                }
+                
+            } else if (!isValid && isContactFormCompleted) {
+                // Form was valid but now invalid - lock sections again
+                isContactFormCompleted = false;
+                lockSections();
+                
+                // Update contact section styling
+                if (contactSection) {
+                    contactSection.classList.remove('completed');
+                }
+                
+                // Update submit button
+                if (submitBtn) {
+                    submitBtn.classList.remove('validated');
+                    submitBtn.querySelector('span').textContent = 'Next';
+                }
+                
+                // Update progress indicator
+                if (progressIndicator) {
+                    progressIndicator.classList.remove('completed');
+                    const progressText = progressIndicator.querySelector('p');
+                    if (progressText) {
+                        progressText.innerHTML = `
+                            <span class="progress-icon" id="progress-icon"></span>
+                            Share your details above to continue to the next steps.
+                        `;
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Error updating section lock state:", err);
+        }
+    }
 
     // Countries array removed as we no longer need nationality selection
 

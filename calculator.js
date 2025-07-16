@@ -22,7 +22,7 @@
             }
             
             // Ensure default services are checked and pills are properly synced
-            const defaultServices = ['bank-account', 'company-stamp', 'melite', 'corporate-tax'];
+            const defaultServices = ['bank-account', 'company-stamp', 'corporate-tax', 'vat-registration'];
             defaultServices.forEach(serviceId => {
                 const input = document.getElementById(serviceId);
                 const pill = document.querySelector(`.service-pill[data-service="${serviceId}"]`);
@@ -66,6 +66,9 @@
             
             // Initialize section locking
             initializeSectionLocking();
+            
+            // Initialize Get a Call buttons
+            initializeGetCallButtons();
             
             calculateCosts();
             
@@ -404,6 +407,9 @@
         const modal = document.getElementById('activity-search-modal');
         const modalTitle = document.getElementById('modal-title');
         
+        // Store current scroll position before opening modal
+        window.scrollPositionBeforeModal = window.pageYOffset || document.documentElement.scrollTop;
+        
         // Store current group info for reference
         window.currentModalGroup = groupInfo;
         
@@ -455,6 +461,13 @@
         const overlay = document.getElementById('bottom-sheet-overlay');
         if (overlay) {
             overlay.classList.remove('active');
+        }
+        
+        // Restore scroll position after a brief delay to ensure body is properly unlocked
+        if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+            setTimeout(() => {
+                window.scrollTo(0, window.scrollPositionBeforeModal);
+            }, 10);
         }
     }
 
@@ -880,6 +893,9 @@
         // Load services for this category
         loadServicesForCategory(categoryName);
         
+        // Store current scroll position before opening modal
+        window.scrollPositionBeforeModal = window.pageYOffset || document.documentElement.scrollTop;
+        
         // Setup modal event listeners
         setupAddonModalEventListeners();
         
@@ -907,6 +923,13 @@
         const overlay = document.getElementById('bottom-sheet-overlay');
         if (overlay) {
             overlay.classList.remove('active');
+        }
+        
+        // Restore scroll position after a brief delay to ensure body is properly unlocked
+        if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+            setTimeout(() => {
+                window.scrollTo(0, window.scrollPositionBeforeModal);
+            }, 10);
         }
     }
 
@@ -1348,6 +1371,13 @@
                 const overlay = document.getElementById('bottom-sheet-overlay');
                 if (overlay) overlay.classList.remove('active');
                 
+                // Restore scroll position
+                if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+                    setTimeout(() => {
+                        window.scrollTo(0, window.scrollPositionBeforeModal);
+                    }, 10);
+                }
+                
                 console.log('Modal should be closed now');
                 return false;
             });
@@ -1369,6 +1399,13 @@
                 const overlay = document.getElementById('bottom-sheet-overlay');
                 if (overlay) overlay.classList.remove('active');
                 
+                // Restore scroll position
+                if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+                    setTimeout(() => {
+                        window.scrollTo(0, window.scrollPositionBeforeModal);
+                    }, 10);
+                }
+                
                 console.log('Modal should be closed now');
                 return false;
             });
@@ -1387,10 +1424,20 @@
                 const overlay = document.getElementById('bottom-sheet-overlay');
                 if (overlay) overlay.classList.remove('active');
                 
+                // Restore scroll position
+                if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+                    setTimeout(() => {
+                        window.scrollTo(0, window.scrollPositionBeforeModal);
+                    }, 10);
+                }
+                
                 console.log('Modal should be closed now');
                 return false;
             });
         }
+        
+        // Store current scroll position before opening modal
+        window.scrollPositionBeforeModal = window.pageYOffset || document.documentElement.scrollTop;
         
         // Setup modal event listeners
         setupLicenseModalEventListeners();
@@ -1489,12 +1536,22 @@
             const overlay = document.getElementById('bottom-sheet-overlay');
             if (overlay) overlay.classList.remove('active');
             
-            console.log('Modal should be closed now');
-            return false;
-        });
-        
-        // Setup modal event listeners
-        setupLicenseModalEventListeners();
+            // Restore scroll position
+            if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+                setTimeout(() => {
+                    window.scrollTo(0, window.scrollPositionBeforeModal);
+                }, 10);
+            }
+            
+                    console.log('Modal should be closed now');
+        return false;
+    });
+    
+    // Store current scroll position before opening modal
+    window.scrollPositionBeforeModal = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Setup modal event listeners
+    setupLicenseModalEventListeners();
         
         // Show the modal
         modal.style.display = 'flex';
@@ -1522,6 +1579,14 @@
         if (overlay) {
             overlay.classList.remove('active');
         }
+        
+        // Restore scroll position after a brief delay to ensure body is properly unlocked
+        if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+            setTimeout(() => {
+                window.scrollTo(0, window.scrollPositionBeforeModal);
+            }, 10);
+        }
+        
         console.log('Modal should be closed now');
     }
 
@@ -1553,6 +1618,13 @@
                 overlay.classList.remove('active');
             }
             
+            // Restore scroll position
+            if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+                setTimeout(() => {
+                    window.scrollTo(0, window.scrollPositionBeforeModal);
+                }, 10);
+            }
+            
             console.log('Modal should be closed now');
             return false;
         });
@@ -1570,6 +1642,13 @@
             const overlay = document.getElementById('bottom-sheet-overlay');
             if (overlay) {
                 overlay.classList.remove('active');
+            }
+            
+            // Restore scroll position
+            if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+                setTimeout(() => {
+                    window.scrollTo(0, window.scrollPositionBeforeModal);
+                }, 10);
             }
             
             console.log('Modal should be closed now');
@@ -1590,6 +1669,13 @@
                 const overlay = document.getElementById('bottom-sheet-overlay');
                 if (overlay) {
                     overlay.classList.remove('active');
+                }
+                
+                // Restore scroll position
+                if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+                    setTimeout(() => {
+                        window.scrollTo(0, window.scrollPositionBeforeModal);
+                    }, 10);
                 }
                 
                 console.log('Modal should be closed now');
@@ -2414,11 +2500,10 @@
         phoneInputField.classList.toggle("error", phoneInputField.value.trim() && !phoneInput.isValidNumber());
     });
 
+    // Contact form Next/Continue button - only scrolls to next section
     document.getElementById('submitBtn').addEventListener('click', function(e) {
         e.preventDefault();
         const submitBtn = this;
-
-        if (submitBtn.classList.contains('button-loading')) return;
 
         // Check if contact form is valid before proceeding
         if (!validateContactForm()) {
@@ -2454,64 +2539,126 @@
                 firstError.focus();
             }
             
-            return; // Don't proceed with form submission
+            return; // Don't proceed with scrolling
         }
 
-        clearTimeout(inactivityTimer);
-        hasSubmittedIncomplete = true; 
+        // If contact form is valid, scroll to the next section (company setup)
+        const nextSection = document.getElementById('company-setup-section');
+        if (nextSection) {
+            const headerOffset = 80; // Account for any fixed headers
+            const elementPosition = nextSection.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-        submitBtn.classList.add('button-loading');
-        submitBtn.disabled = true;
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    });
 
-        calculateCosts();
-
-        const fullName = document.getElementById("full-name").value;
-        const phone = phoneInput.getNumber();
-        const email = document.getElementById("email").value;
-        const licenseType = document.getElementById("license-type")?.value || "fawri";
+    // Get a Call buttons - handles form submission
+    function initializeGetCallButtons() {
+        const getCallButtons = document.querySelectorAll('.get-call-btn');
         
-        const shareholdersCount = parseInt(document.getElementById("shareholders-range").value) || 0;
-        // Use default nationality value instead of collecting from removed fields
-        const shareholderNationalities = Array(shareholdersCount).fill('Default');
+        getCallButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const submitBtn = this;
 
-        const elementorForm = $('#my-calculator-elementor-form');
-        if (elementorForm.length > 0) {
-            elementorForm.find('input[name="form_fields[fullName]"]').val(fullName);
-            elementorForm.find('input[name="form_fields[phone]"]').val(phone);
-            elementorForm.find('input[name="form_fields[email]"]').val(email);
-            elementorForm.find('input[name="form_fields[license_type]"]').val(licenseType);
-            elementorForm.find('input[name="form_fields[shareholders_range]"]').val(document.getElementById("shareholders-range").value);
-            elementorForm.find('input[name="form_fields[nationalities]"]').val("Default Nationality");
-            elementorForm.find('input[name="form_fields[shareholder_nationalities]"]').val(shareholderNationalities.join(','));
-            elementorForm.find('input[name="form_fields[business_activities]"]').val(selectedActivities.join(', '));
-            elementorForm.find('input[name="form_fields[total_cost]"]').val(calculateTotalCost());
-            elementorForm.find('input[name="form_fields[license_cost]"]').val(LicenseCost);
-            elementorForm.find('input[name="form_fields[visa_cost]"]').val(VisaCost);
-            elementorForm.find('input[name="form_fields[bank_cost]"]').val(0); // Bank cost is included in add-ons
-            elementorForm.find('input[name="form_fields[form_status]"]').val('complete');
+                if (submitBtn.classList.contains('button-loading')) return;
 
-            setTimeout(function() {
-                const submitButton = elementorForm.find('.elementor-button[type="submit"]');
-                if (submitButton.length > 0) {
-                    submitButton.click();
+                // Check if contact form is valid before submitting
+                if (!validateContactForm()) {
+                    // Scroll to contact form and show errors
+                    const contactSection = document.getElementById('personal-details-section');
+                    if (contactSection) {
+                        contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
                     
-                    document.querySelector('#srix-NewCostCalForm .form-container').style.display = 'none';
-                    const successMessage = document.getElementById('theFinalSuccessMessage');
-                    document.getElementById('success-first-name').textContent = fullName.split(' ')[0] || '';
-                    successMessage.classList.remove('d-none');
-                    successMessage.classList.add('visible');
+                    const fields = [
+                        { id: 'full-name', name: 'Full Name' },
+                        { id: 'email', name: 'Email' },
+                        { id: 'phone', name: 'Phone' }
+                    ];
+                    
+                    fields.forEach(field => {
+                        const element = document.getElementById(field.id);
+                        const errorElement = document.getElementById(field.id + '-error');
+                        
+                        if (element && !element.value?.trim()) {
+                            element.classList.add('error');
+                            if (errorElement) {
+                                errorElement.textContent = `${field.name} is required`;
+                                errorElement.style.display = 'block';
+                            }
+                        } else {
+                            element?.classList.remove('error');
+                            if (errorElement) {
+                                errorElement.style.display = 'none';
+                            }
+                        }
+                    });
+                    
+                    return; // Don't proceed with form submission
+                }
+
+                clearTimeout(inactivityTimer);
+                hasSubmittedIncomplete = true; 
+
+                submitBtn.classList.add('button-loading');
+                submitBtn.disabled = true;
+
+                calculateCosts();
+
+                const fullName = document.getElementById("full-name").value;
+                const phone = phoneInput.getNumber();
+                const email = document.getElementById("email").value;
+                const licenseType = document.getElementById("license-type")?.value || "fawri";
+                
+                const shareholdersCount = parseInt(document.getElementById("shareholders-range").value) || 0;
+                // Use default nationality value instead of collecting from removed fields
+                const shareholderNationalities = Array(shareholdersCount).fill('Default');
+
+                const elementorForm = $('#my-calculator-elementor-form');
+                if (elementorForm.length > 0) {
+                    elementorForm.find('input[name="form_fields[fullName]"]').val(fullName);
+                    elementorForm.find('input[name="form_fields[phone]"]').val(phone);
+                    elementorForm.find('input[name="form_fields[email]"]').val(email);
+                    elementorForm.find('input[name="form_fields[license_type]"]').val(licenseType);
+                    elementorForm.find('input[name="form_fields[shareholders_range]"]').val(document.getElementById("shareholders-range").value);
+                    elementorForm.find('input[name="form_fields[nationalities]"]').val("Default Nationality");
+                    elementorForm.find('input[name="form_fields[shareholder_nationalities]"]').val(shareholderNationalities.join(','));
+                    elementorForm.find('input[name="form_fields[business_activities]"]').val(selectedActivities.join(', '));
+                    elementorForm.find('input[name="form_fields[total_cost]"]').val(calculateTotalCost());
+                    elementorForm.find('input[name="form_fields[license_cost]"]').val(LicenseCost);
+                    elementorForm.find('input[name="form_fields[visa_cost]"]').val(VisaCost);
+                    elementorForm.find('input[name="form_fields[bank_cost]"]').val(0); // Bank cost is included in add-ons
+                    elementorForm.find('input[name="form_fields[form_status]"]').val('complete');
+
+                    setTimeout(function() {
+                        const submitButton = elementorForm.find('.elementor-button[type="submit"]');
+                        if (submitButton.length > 0) {
+                            submitButton.click();
+                            
+                            document.querySelector('#srix-NewCostCalForm .form-container').style.display = 'none';
+                            const successMessage = document.getElementById('theFinalSuccessMessage');
+                            document.getElementById('success-first-name').textContent = fullName.split(' ')[0] || '';
+                            successMessage.classList.remove('d-none');
+                            successMessage.classList.add('visible');
+                        } else {
+                            submitBtn.classList.remove('button-loading');
+                            submitBtn.disabled = false;
+                            alert("There was an issue submitting the form. Please try again.");
+                        }
+                    }, 1000);
                 } else {
                     submitBtn.classList.remove('button-loading');
                     submitBtn.disabled = false;
-                    alert("There was an issue submitting the form. Please try again.");
+                    alert("There was an issue submitting the form. Please try again later.");
                 }
-            }, 1000);
-        } else {
-            submitBtn.classList.remove('button-loading');
-            submitBtn.disabled = false;
-            alert("There was an issue submitting the form. Please try again later.");
-        }
-    });
+            });
+        });
+    }
 
     // Section Locking System
     function initializeSectionLocking() {
@@ -2594,7 +2741,15 @@
                         overlay.addEventListener('click', () => {
                             const contactSection = document.getElementById('personal-details-section');
                             if (contactSection) {
-                                contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                const headerOffset = 20;
+                                const elementPosition = contactSection.getBoundingClientRect().top;
+                                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
+                                });
+                                
                                 // Focus on first empty field
                                 const firstEmptyField = contactSection.querySelector('input:not([value]), input[value=""]');
                                 if (firstEmptyField) {
@@ -3274,6 +3429,12 @@
             // Update hidden input with initial quantity
             if (visaType === 'employee') {
                 document.getElementById('employee-visa-count').value = 1;
+                // Ensure plus button is enabled and info card is hidden when starting at 1
+                const plusBtn = selectedControls.querySelector('.quantity-btn.plus');
+                if (plusBtn) {
+                    plusBtn.disabled = false;
+                }
+                hideEmployeeVisaLimitInfo();
             } else if (visaType === 'dependent') {
                 document.getElementById('dependency-visas').value = 1;
             }
@@ -3288,7 +3449,14 @@
     function adjustVisaQuantity(visaType, change) {
         const quantityElement = document.getElementById(`${visaType}-quantity`);
         const currentQuantity = parseInt(quantityElement.textContent) || 1;
-        const newQuantity = Math.max(1, currentQuantity + change);
+        
+        // Set maximum limits for different visa types
+        let maxQuantity = Infinity;
+        if (visaType === 'employee') {
+            maxQuantity = 6; // Limit employee visas to 6
+        }
+        
+        const newQuantity = Math.max(1, Math.min(maxQuantity, currentQuantity + change));
         
         quantityElement.textContent = newQuantity;
         
@@ -3307,8 +3475,75 @@
             minusBtn.disabled = false;
         }
         
+        // Update plus button state for employee visas when limit is reached
+        const plusBtn = quantityElement.parentElement.querySelector('.quantity-btn.plus');
+        if (visaType === 'employee') {
+            if (newQuantity >= 6) {
+                plusBtn.disabled = true;
+                showEmployeeVisaLimitInfo();
+            } else {
+                plusBtn.disabled = false;
+                hideEmployeeVisaLimitInfo();
+            }
+        }
+        
         calculateCosts();
         updateChangeStatusVisibility();
+    }
+
+    // Employee visa limit info functions
+    function showEmployeeVisaLimitInfo() {
+        // Check if info card already exists
+        let infoCard = document.getElementById('employee-visa-limit-info');
+        
+        if (!infoCard) {
+            // Create the info card
+            infoCard = document.createElement('div');
+            infoCard.id = 'employee-visa-limit-info';
+            infoCard.className = 'info-section employee-visa-limit-info';
+            infoCard.innerHTML = `
+                <div class="info-icon">
+                    <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0.433594 8C0.433594 5.83933 0.433594 4.75899 0.723797 3.88643C1.28872 2.18788 2.62147 0.855126 4.32003 0.290203C5.19258 0 6.27292 0 8.43359 0C10.5943 0 11.6746 0 12.5472 0.290203C14.2457 0.855126 15.5785 2.18788 16.1434 3.88643C16.4336 4.75899 16.4336 5.83933 16.4336 8C16.4336 10.1607 16.4336 11.241 16.1434 12.1136C15.5785 13.8121 14.2457 15.1449 12.5472 15.7098C11.6746 16 10.5943 16 8.43359 16C6.27292 16 5.19258 16 4.32003 15.7098C2.62147 15.1449 1.28872 13.8121 0.723797 12.1136C0.433594 11.241 0.433594 10.1607 0.433594 8Z" fill="#2A3AC6"/>
+                        <path d="M8.43349 3.55447C5.98904 3.55447 3.98904 5.55447 3.98904 7.99891C3.98904 10.4434 5.98904 12.4434 8.43349 12.4434C10.8779 12.4434 12.8779 10.4434 12.8779 7.99892C12.8779 5.55447 10.8779 3.55447 8.43349 3.55447Z" stroke="#FAFAFA" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8.43359 9.77734L8.43359 7.55512" stroke="#FAFAFA" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8.43604 6.22266L8.43204 6.22266" stroke="#FAFAFA" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <p class="info-text">To apply for more than 6 visas, contact our team.</p>
+            `;
+            
+            // Insert the info card after the visa description within the employee visa card
+            const employeeCard = document.querySelector('[data-visa="employee"]');
+            const visaDescription = employeeCard ? employeeCard.querySelector('.visa-description') : null;
+            if (visaDescription) {
+                visaDescription.parentNode.insertBefore(infoCard, visaDescription.nextSibling);
+            }
+        }
+        
+        // Show the info card with animation
+        infoCard.style.display = 'flex';
+        infoCard.style.opacity = '0';
+        infoCard.style.transform = 'translateY(-10px)';
+        
+        requestAnimationFrame(() => {
+            infoCard.style.transition = 'all 0.3s ease';
+            infoCard.style.opacity = '1';
+            infoCard.style.transform = 'translateY(0)';
+        });
+    }
+
+    function hideEmployeeVisaLimitInfo() {
+        const infoCard = document.getElementById('employee-visa-limit-info');
+        if (infoCard) {
+            infoCard.style.transition = 'all 0.3s ease';
+            infoCard.style.opacity = '0';
+            infoCard.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                infoCard.style.display = 'none';
+            }, 300);
+        }
     }
 
     // Make functions globally available
@@ -3346,6 +3581,8 @@
             // Update hidden input
             if (visaType === 'employee') {
                 document.getElementById('employee-visa-count').value = 0;
+                // Hide employee visa limit info when deselected
+                hideEmployeeVisaLimitInfo();
             } else if (visaType === 'dependent') {
                 document.getElementById('dependency-visas').value = 0;
             }

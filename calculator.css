@@ -246,6 +246,37 @@ font-weight: 600;
     opacity: 0.8;
 }
 
+/* Info Section Styling */
+.info-section {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(0, 74, 152, 0.04);
+    margin-bottom: 20px;
+}
+
+.info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+
+}
+
+.info-text {
+    color: #004A98;
+    font-family: "Plus Jakarta Sans";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px; 
+}
+
+employee-visa-limit-info{
+    
+}
 /* License cards styling */
 .license-cards-container {
     display: grid;
@@ -2040,6 +2071,11 @@ line-height: 24px;
     justify-content: space-between;
 }
 
+@media (max-width: 768px) {
+    .change-status-details {
+        flex-direction: column-reverse;
+    }
+}
 .status-info-row {
     display: flex;
     justify-content: space-between;
@@ -2143,9 +2179,17 @@ font-weight: 400;
     transition: all 0.2s ease;
 }
 
-.quantity-btn:hover {
+.quantity-btn:hover:not(:disabled) {
     background: linear-gradient(102deg, #B5348B 0%, #EB5F40 100%);
     color: white;
+}
+
+.quantity-btn:disabled {
+    background: #F5F5F5;
+    color: #A0A0A0;
+    cursor: not-allowed;
+    border-color: #E0E0E0;
+    opacity: 0.6;
 }
 
 .quantity-value {
@@ -3078,7 +3122,7 @@ background-clip: text;
         right: 0;
         display: flex;
         justify-content: center;
-        align-items: center;
+    align-items: center;
         background: transparent;
         cursor: pointer;
         z-index: 1001;

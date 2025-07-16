@@ -2640,7 +2640,7 @@
                         if (submitButton.length > 0) {
                             submitButton.click();
                             
-                            document.querySelector('#srix-NewCostCalForm .form-container').style.display = 'none';
+                            document.querySelector('#srix-NewCostCalForm').style.display = 'none';
                             const successMessage = document.getElementById('theFinalSuccessMessage');
                             document.getElementById('success-first-name').textContent = fullName.split(' ')[0] || '';
                             successMessage.classList.remove('d-none');
@@ -3077,7 +3077,7 @@
             updateButtonsDisplay(stepNumber);
             
             // Scroll to top of form
-            const formContainer = document.querySelector('.form-container');
+            const formContainer = document.querySelector('#srix-NewCostCalForm');
             if (formContainer) {
                 formContainer.scrollIntoView({ behavior: 'smooth' });
             }

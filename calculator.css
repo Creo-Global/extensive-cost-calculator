@@ -29,14 +29,7 @@ box-sizing: border-box;
 padding: 0; */
 }
 
-#srix-NewCostCalForm .form-container {
-max-width: 1380px;
-margin: 0 auto;
-padding: 0;
-border-radius: 20px;
-position: relative;
-    min-height: 100vh;
-}
+/* Main container styles removed for Webflow integration */
 
 #srix-NewCostCalForm .header {
 display: flex;
@@ -73,27 +66,17 @@ font-weight: 700;
   height: 48px;
 }
 
-.main-content-wrapper {
-    display: grid;
-    grid-template-columns: 800px 400px;
-    min-height: calc(100vh - 100px);
-    justify-content: space-between;
-    width: 100%;
-}
+/* Main wrapper grid removed for Webflow integration */
 
 
 
 .sticky-summary-container {
-    position: sticky;
-    top: 30px;
-    height: fit-content;
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
-    border-left: none;
-    max-height: none;
-    padding: 24px !important;
+    width: 100%;
+    padding: 24px;
     border-radius: 20px;
-background: #F9FAFB;
+    background: #F9FAFB;
+    height: fit-content;
+    /* Webflow will handle positioning and sticky behavior */
 }
 
 .form-section {
@@ -367,6 +350,7 @@ font-size: 14px;
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    font-size: 14px;
 }
 
 .duration-icon {
@@ -374,7 +358,7 @@ font-size: 14px;
 }
 
 .license-description {
-    font-size: 12px;
+    font-size: 14px;
     color: #1C1C1C;
     line-height: 1.5;
     margin-bottom: 16px !important;
@@ -699,7 +683,6 @@ font-family: "Plus Jakarta Sans";
 display: flex;
 justify-content: space-between;
 align-items: center;
-    margin-bottom: 16px;
 }
 
 .visa-toggle-container {
@@ -1052,7 +1035,7 @@ align-items: center;
 
 .summary-label {
     font-size: 14px;
-    color: #6b7280;
+    color: #1C1C1C;
     font-weight: 400;
 }
 
@@ -1491,9 +1474,7 @@ align-items: center;
     color: #E74C3C;
 }
 
-.form-sections-container {
-    margin-right: 24px !important;
-}
+
 
 @media (max-width: 768px) {
     .mobile-header {
@@ -1510,14 +1491,11 @@ align-items: center;
         position: static;
     }
     
-    .main-content-wrapper {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
+    /* Mobile responsive adjustments for Webflow integration */
     
     .sticky-summary-container {
+        max-width: 100%;
         position: static;
-        border-left: none;
         border-top: 1px solid rgba(0, 0, 0, 0.1);
         max-height: none;
         padding: 32px 16px 16px 16px !important;
@@ -1826,7 +1804,7 @@ border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .addon-category-description {
-    color: #6B7280;
+    color: #1C1C1C;
     font-size: 14px;
     line-height: 1.5;
     margin: 0 0 16px 0 !important;
@@ -1951,7 +1929,6 @@ display: flex;
     font-size: 24px;
     font-weight: 600;
     line-height: 130%;
-    text-transform: capitalize;
     margin-bottom: 16px !important;
 }
 
@@ -2464,7 +2441,7 @@ background-clip: text;
     .activity-modal-content {
         width: 100%;
         max-width: 100%;
-        height: 85vh;
+        height: 76vh;
         max-height: 90vh;
     margin: 0;
         border-radius: 20px 20px 0 0;
@@ -2620,7 +2597,7 @@ background-clip: text;
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
-    color: #6B7280;
+    color: #1C1C1C;
     pointer-events: none;
     transition: transform 0.2s ease;
 }
@@ -2876,7 +2853,7 @@ background-clip: text;
 .addon-service-toggle-label {
     font-size: 14px;
     font-weight: 500;
-    color: #6b7280;
+    color: #1C1C1C;
     font-family: "Plus Jakarta Sans";
 }
 
@@ -3148,12 +3125,11 @@ background-clip: text;
         background: #F9FAFB;
         border-radius: 20px 20px 0 0;
         overflow-x: hidden;
-        padding: 0;
         transform: translate3d(0, 0, 0);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         -webkit-overflow-scrolling: touch;
         will-change: transform;
-        height: 95vh;
+        height: 85vh;
         animation: slideUpSheet 0.3s forwards;
         box-shadow: 0px -5px 25.9px 0px rgba(0, 0, 0, 0.15);
     }
@@ -3201,7 +3177,7 @@ background-clip: text;
     .sticky-summary-container.sheet-open .summary-subtitle {
         font-size: 14px;
         line-height: 20px;
-        color: #6B7280;
+        color: #1C1C1C;
         margin: 0;
     }
     
@@ -3287,7 +3263,7 @@ background-clip: text;
     .sticky-summary-container.sheet-open .detailed-summary {
         display: block !important;
         height: auto;
-        max-height: calc(78vh - 60px - 100px);
+        max-height: calc(65vh - 60px - 100px);
         overflow-y: auto;
         padding-right: 0;
     }
@@ -3356,17 +3332,15 @@ background-clip: text;
     }
     
     .sheet-close-handle:active .handle-bar {
-        background: #6B7280;
+        background: #1C1C1C;
     }
 }
 
 @media (max-width: 1200px) {
     #mobile-sticky-footer {
-    display: block;
-}
-    .main-content-wrapper {
-        grid-template-columns: 1fr;
+        display: block;
     }
+    /* Mobile responsive adjustments for Webflow */
     /* Hide desktop summary on mobile by default */
     .sticky-summary-container {
         display: none !important;
@@ -3443,7 +3417,7 @@ background-clip: text;
 .section-lock-overlay p {
     font-family: "Plus Jakarta Sans";
     font-size: 14px;
-    color: #6B7280;
+    color: #1C1C1C;
     margin: 0;
     line-height: 1.4;
 }
@@ -3524,7 +3498,7 @@ background-clip: text;
 .contact-form-progress p {
     font-family: "Plus Jakarta Sans";
     font-size: 14px;
-    color: #6B7280;
+    color: #1C1C1C;
     margin: 0;
     display: flex;
     align-items: center;

@@ -154,10 +154,18 @@
         const durationOptions = document.querySelectorAll('#duration-options .pill-option');
         durationOptions.forEach(option => {
             option.addEventListener('click', function() {
-                durationOptions.forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
+                // Remove selected class and reset text to just numbers
+                durationOptions.forEach(opt => {
+                    opt.classList.remove('selected');
+                    const optValue = opt.getAttribute('data-value');
+                    opt.textContent = optValue;
+                });
                 
+                // Add selected class and show "Year/Years" text
+                this.classList.add('selected');
                 const value = this.getAttribute('data-value');
+                this.textContent = `${value} ${value === '1' ? 'Year' : 'Years'}`;
+                
                 document.getElementById('license-duration').value = value;
                 
                 calculateCosts();
@@ -1963,7 +1971,7 @@
         // Update package type and license duration
         let packageText = licenseType === 'fawri' ? "Fawri" : "Regular";
         document.getElementById("summary-package-type").innerText = packageText;
-        document.getElementById("summary-license-duration").innerText = `${licenseDuration} year${licenseDuration > 1 ? "s" : ""}`;
+        document.getElementById("summary-license-duration").innerText = `${licenseDuration} Year${licenseDuration > 1 ? "s" : ""}`;
         
         // Update shareholders count
         const shareholdersCount = parseInt(document.getElementById("shareholders-range")?.value) || 1;
@@ -2042,9 +2050,29 @@
                 // Update business activities cost
                 const businessActivitiesCost = document.getElementById("business-activities-cost");
                 if (businessActivitiesCost) {
-                    const uniqueGroups = Object.keys(activityGroups).length;
-                    const extraGroups = Math.max(0, uniqueGroups - 3);
-                    const activitiesCostValue = extraGroups * 1000;
+                    // Calculate cost based on individual activities in additional groups
+                    const groupNames = Object.keys(activityGroups);
+                    let activitiesCostValue = 0;
+                    
+                    if (groupNames.length > 3) {
+                        // Keep track of which groups were selected first (maintain selection order)
+                        const groupSelectionOrder = [];
+                        window.selectedActivities.forEach(activity => {
+                            const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
+                            if (!groupSelectionOrder.includes(groupName)) {
+                                groupSelectionOrder.push(groupName);
+                            }
+                        });
+                        
+                        // First 3 groups in selection order are free, charge for activities in remaining groups
+                        for (let i = 3; i < groupSelectionOrder.length; i++) {
+                            const groupName = groupSelectionOrder[i];
+                            if (activityGroups[groupName]) {
+                                activitiesCostValue += activityGroups[groupName].length * 1000;
+                            }
+                        }
+                    }
+                    
                     businessActivitiesCost.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
                     
                     // Update the price in the business activities header
@@ -2056,7 +2084,7 @@
                     // Show/hide fee warning based on number of activity groups
                     const feeWarning = document.querySelector('.fee-warning');
                     if (feeWarning) {
-                        if (uniqueGroups > 3) {
+                        if (groupNames.length > 3) {
                             feeWarning.style.display = 'block';
                         } else {
                             feeWarning.style.display = 'none';
@@ -2300,10 +2328,26 @@
                 activityGroups[groupName].push(activity);
             });
             
-            // First 3 groups are free, then 1000 AED per additional group
-            const uniqueGroups = Object.keys(activityGroups).length;
-            const extraGroups = Math.max(0, uniqueGroups - 3);
-            businessActivitiesCost = extraGroups * 1000;
+            // First 3 groups are free, then 1000 AED per individual activity in additional groups
+            const groupNames = Object.keys(activityGroups);
+            if (groupNames.length > 3) {
+                // Keep track of which groups were selected first (maintain selection order)
+                const groupSelectionOrder = [];
+                window.selectedActivities.forEach(activity => {
+                    const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
+                    if (!groupSelectionOrder.includes(groupName)) {
+                        groupSelectionOrder.push(groupName);
+                    }
+                });
+                
+                // First 3 groups in selection order are free, charge for activities in remaining groups
+                for (let i = 3; i < groupSelectionOrder.length; i++) {
+                    const groupName = groupSelectionOrder[i];
+                    if (activityGroups[groupName]) {
+                        businessActivitiesCost += activityGroups[groupName].length * 1000;
+                    }
+                }
+            }
         }
         
         // Bank account cost is now included in add-ons, so we don't add it separately
@@ -2375,10 +2419,26 @@
                     activityGroups[groupName].push(activity);
                 });
                 
-                // First 3 groups are free, then 1000 AED per additional group
-                const uniqueGroups = Object.keys(activityGroups).length;
-                const extraGroups = Math.max(0, uniqueGroups - 3);
-                businessActivitiesCost = extraGroups * 1000;
+                        // First 3 groups are free, then 1000 AED per individual activity in additional groups
+        const groupNames = Object.keys(activityGroups);
+        if (groupNames.length > 3) {
+            // Keep track of which groups were selected first (maintain selection order)
+            const groupSelectionOrder = [];
+            window.selectedActivities.forEach(activity => {
+                const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
+                if (!groupSelectionOrder.includes(groupName)) {
+                    groupSelectionOrder.push(groupName);
+                }
+            });
+            
+            // First 3 groups in selection order are free, charge for activities in remaining groups
+            for (let i = 3; i < groupSelectionOrder.length; i++) {
+                const groupName = groupSelectionOrder[i];
+                if (activityGroups[groupName]) {
+                    businessActivitiesCost += activityGroups[groupName].length * 1000;
+                }
+            }
+        }
             }
             
             console.log("Calculated Total Cost Components:");
@@ -2909,7 +2969,7 @@
                     if (progressText) {
                         progressText.innerHTML = `
                             <span class="progress-icon" id="progress-icon"></span>
-                            Share your details above to continue to the next steps.
+                            This is a required step to calculate your business setup cost.
                         `;
                     }
                 }

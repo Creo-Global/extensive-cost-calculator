@@ -236,7 +236,6 @@ font-weight: 600;
     padding: 8px 12px;
     border-radius: 8px;
     background: rgba(0, 74, 152, 0.04);
-    margin-bottom: 20px;
 }
 
 .info-icon {
@@ -497,7 +496,6 @@ font-weight: 600;
     font-style: normal;
     font-weight: 500;
     line-height: 22px; 
-    text-transform: capitalize;
     opacity: 0.8;
 }
 
@@ -2949,7 +2947,7 @@ background-clip: text;
 .detailed-summary {
     display: none;
     overflow: scroll;
-    height: 500px;
+    height: 400px;
     padding-right: 20px;
 }
 /*width*/
@@ -3523,9 +3521,41 @@ background-clip: text;
 .contact-form-progress.completed .progress-icon {
     background: #10B981;
 }
-.error-message{
-    opacity: 0 !important;
-    margin-top: 0px !important;
-    color: transparent !important;
-    border: none !important;
+.error-message {
+    display: none;
+    margin-top: 4px;
+    color: #EB5F40;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: "Plus Jakarta Sans";
+    line-height: 1.4;
+    border: none;
+}
+
+.error-message:not(:empty) {
+    display: block;
+}
+
+/* Input field error state */
+.contact-form-section input.error {
+    border-color: #EB5F40;
+    background-color: #FEF2F2;
+    box-shadow: 0 0 0 3px rgba(235, 95, 64, 0.1);
+}
+
+.contact-form-section input.error:focus {
+    outline: none;
+    border-color: #EB5F40;
+    box-shadow: 0 0 0 3px rgba(235, 95, 64, 0.2);
+}
+
+/* Phone input error state */
+.phone-input input.error {
+    border-color: #EB5F40 !important;
+    background-color: #FEF2F2 !important;
+}
+
+.phone-input input.error:focus {
+    border-color: #EB5F40 !important;
+    box-shadow: 0 0 0 3px rgba(235, 95, 64, 0.2) !important;
 }

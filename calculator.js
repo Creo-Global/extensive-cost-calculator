@@ -230,6 +230,14 @@
                     }
                 }
                 
+                // Clear any existing error messages when services are selected
+                const existingErrors = document.querySelectorAll('.tax-compliance-warning, .error-message');
+                existingErrors.forEach(error => {
+                    if (error.style.display !== 'none') {
+                        error.style.display = 'none';
+                    }
+                });
+                
                 // Special handling for tax compliance pills
                 if (this.classList.contains('tax-compliance-pill')) {
                     checkTaxCompliance();
@@ -407,7 +415,6 @@
             container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         });
     }
-
     function openActivityModal(groupInfo) {
         const modal = document.getElementById('activity-search-modal');
         const modalTitle = document.getElementById('modal-title');
@@ -424,14 +431,15 @@
         // Update all category select counts
         updateAllModalCategoryCounts();
         
+        // Set the title statically instead of dynamically
+        modalTitle.textContent = 'Explore The Full Business Activity List';
+        
         if (groupInfo) {
-            modalTitle.textContent = `${groupInfo.name} Activities`;
             // Set the initial selected category
             setModalSelectedCategory(groupInfo.group);
             // Fetch activities for the selected group
             fetchActivitiesForModal(groupInfo.group);
         } else {
-            modalTitle.textContent = 'Explore The Full Business Activity List';
             setModalSelectedCategory(null);
         }
         
@@ -946,6 +954,9 @@
         // Load services for this category
         loadServicesForCategory(categoryName);
         
+        // Check tax compliance to update modal warning
+        checkTaxCompliance();
+        
         // Store current scroll position before opening modal
         window.scrollPositionBeforeModal = window.pageYOffset || document.documentElement.scrollTop;
         
@@ -1064,6 +1075,14 @@
                     label.textContent = 'Selected';
                     selectService(serviceId);
                 }
+                
+                // Clear any existing error messages when services are selected
+                const existingErrors = document.querySelectorAll('.tax-compliance-warning, .error-message');
+                existingErrors.forEach(error => {
+                    if (error.style.display !== 'none') {
+                        error.style.display = 'none';
+                    }
+                });
                 
                 // Update costs and UI
                 calculateCosts();
@@ -3128,8 +3147,19 @@
         const corporateTaxChecked = document.getElementById('corporate-tax').checked;
         const vatRegistrationChecked = document.getElementById('vat-registration').checked;
         const warningElement = document.getElementById('tax-compliance-warning');
+        const modalWarningElement = document.getElementById('modal-tax-compliance-warning');
         
-        warningElement.style.display = (!corporateTaxChecked || !vatRegistrationChecked) ? 'block' : 'none';
+        const shouldShowWarning = !corporateTaxChecked || !vatRegistrationChecked;
+        
+        // Update main page warning
+        if (warningElement) {
+            warningElement.style.display = shouldShowWarning ? 'block' : 'none';
+        }
+        
+        // Update modal warning
+        if (modalWarningElement) {
+            modalWarningElement.style.display = shouldShowWarning ? 'block' : 'none';
+        }
         
         calculateCosts();
     }
@@ -4167,12 +4197,13 @@
             });
         });
         
-        // Function to check if both duration and shareholders are selected
-        const checkBothPillSectionsSelected = () => {
-            const durationSelected = document.querySelector('#duration-options .pill-option.selected');
-            const shareholdersSelected = document.querySelector('#shareholders-options .pill-option.selected');
-            
-            if (durationSelected && shareholdersSelected) {
+        // Track user interactions with duration and shareholders
+        let durationInteracted = false;
+        let shareholdersInteracted = false;
+        
+        // Function to check if both sections have been interacted with
+        const checkBothSectionsInteracted = () => {
+            if (durationInteracted && shareholdersInteracted) {
                 const businessActivitiesSection = document.getElementById('business-activities-section');
                 if (businessActivitiesSection && !businessActivitiesSection.classList.contains('locked')) {
                     setTimeout(() => {
@@ -4189,19 +4220,40 @@
             }
         };
         
-        // Duration Buttons - check both sections before scrolling
+        // Duration Buttons - mark as interacted and check if ready to scroll
         const durationButtons = document.querySelectorAll('#duration-options .pill-option');
         durationButtons.forEach(button => {
             button.addEventListener('click', () => {
-                checkBothPillSectionsSelected();
+                durationInteracted = true;
+                console.log('Mobile auto-scroll: Duration interacted, checking if ready to scroll');
+                // Don't immediately scroll, just scroll to shareholders section
+                const shareholdersSection = document.getElementById('shareholders-options');
+                if (shareholdersSection && !shareholdersInteracted) {
+                    setTimeout(() => {
+                        const headerOffset = 80;
+                        const elementPosition = shareholdersSection.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }, 300);
+                } else {
+                    // If shareholders already interacted, check if ready for business activities
+                    checkBothSectionsInteracted();
+                }
             });
         });
         
-        // Shareholders Buttons - check both sections before scrolling
+        // Shareholders Buttons - mark as interacted and check if ready to scroll
         const shareholdersButtons = document.querySelectorAll('#shareholders-options .pill-option');
         shareholdersButtons.forEach(button => {
             button.addEventListener('click', () => {
-                checkBothPillSectionsSelected();
+                shareholdersInteracted = true;
+                console.log('Mobile auto-scroll: Shareholders interacted, checking if ready to scroll');
+                // Check if both sections have been interacted with
+                checkBothSectionsInteracted();
             });
         });
         

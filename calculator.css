@@ -3671,3 +3671,27 @@ background-clip: text;
 #mobile-sticky-footer {
     position: fixed;
 }
+/* Collapsible addons section in sticky summary */
+#addons-summary-section {
+    transition: all 0.3s ease;
+}
+
+#addons-summary-section:not(.expanded) .summary-content {
+    display: none;
+}
+
+#addons-summary-section.expanded .summary-content {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 500px;
+    }
+}

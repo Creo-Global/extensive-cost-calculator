@@ -2329,7 +2329,7 @@
         }
 
         // Update addons and show/hide section
-        const addonsSection = document.querySelector('.summary-section:nth-child(5)');
+        const addonsSection = document.getElementById('addons-summary-section');
         const addonsContainer = document.getElementById("addons-summary-container");
         
         if (addonsContainer && addonsSection) {
@@ -2379,9 +2379,11 @@
                 }
             });
 
-            // Show/hide addons section based on selections
-            if (hasSelectedAddons) {
+            // Show/hide addons section based on selections AND viewport/interaction
+            if (hasSelectedAddons && sectionInteractions.addonsSection) {
+                // Expand the section when addons are available and interaction occurred
                 addonsSection.style.display = 'block';
+                addonsSection.classList.add('expanded');
                 
                 // Create sections for each group
                 Object.keys(addonGroups).forEach(groupName => {
@@ -2417,8 +2419,10 @@
                 addonsContainer.appendChild(groupSection);
             });
             } else {
-                // Hide addons section if no addons selected
-                addonsSection.style.display = 'none';
+                // Collapse addons section if no addons selected or no interaction
+                addonsSection.classList.remove('expanded');
+                // Keep section visible but collapsed (just the header)
+                addonsSection.style.display = 'block';
             }
         }
         
@@ -3530,6 +3534,12 @@
             visaSection: false,
             addonsSection: false
         };
+        
+        // Initialize addons section as collapsed
+        const addonsSection = document.getElementById('addons-summary-section');
+        if (addonsSection) {
+            addonsSection.classList.remove('expanded');
+        }
 
         if (localStorage.getItem('formHasPartialData') === 'true') {
             try {

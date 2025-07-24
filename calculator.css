@@ -313,10 +313,7 @@ background-color: #f9fafb;
 /* Selected license card styles */
 .license-card.selected {
     border: 3px solid #EB5F40;
-    background: linear-gradient(0deg, #FEF4F2 0%, #FEF4F2 100%), rgba(217, 217, 217, 0.25);
-
-
-
+    background: linear-gradient(0deg, #FFF 0%, #FFF 100%), rgba(217, 217, 217, 0.25);
 }
 
 .license-header {
@@ -759,7 +756,7 @@ font-weight: 600;
 }
 
 .visa-toggle-switch input:checked + .visa-toggle-slider {
-    background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+  background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
 }
 
 .visa-toggle-switch input:checked + .visa-toggle-slider:before {
@@ -1832,7 +1829,7 @@ border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     padding: 12px 16px !important;
     border-radius: 40px;
     background: #ffffff;
-    border: 1px solid #eb5f40;
+    border: 1px solid #EDEDED;    
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -2043,7 +2040,7 @@ line-height: 24px;
 .visa-card.selected {
     border-radius: 10px;
     border: 3px solid #EB5F40;
-    background: linear-gradient(0deg, #FEF4F2 0%, #FEF4F2 100%), rgba(217, 217, 217, 0.25);
+    background: linear-gradient(0deg, #FFF 0%, #FFF 100%), rgba(217, 217, 217, 0.25);
 
     -webkit-backdrop-filter: blur(24px);
     backdrop-filter: blur(24px);

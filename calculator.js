@@ -11,7 +11,57 @@
     // Pricing visibility management - SIMPLE APPROACH
     let pricingRevealed = false;
     
+    // Section interaction tracking
+    let sectionInteractions = {
+        licenseSection: false,
+        durationSection: false,
+        shareholdersSection: false,
+        businessActivitiesSection: false,
+        visaSection: false,
+        addonsSection: false
+    };
 
+    // Addon viewport detection function
+    window.checkAddonViewport = function() {
+        // Only check if pricing is revealed and addon section hasn't been interacted with yet
+        if (!pricingRevealed || sectionInteractions.addonsSection) {
+            return;
+        }
+        
+        const addonsSection = document.getElementById('addons-section');
+        if (!addonsSection) {
+            return;
+        }
+        
+        const rect = addonsSection.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        const isVisible = rect.top < windowHeight && rect.bottom > 0;
+        
+        if (isVisible) {
+            sectionInteractions.addonsSection = true;
+            calculateCosts();
+        }
+    };
+    
+    // Add missing functions to prevent JavaScript errors
+    function updateProgressBar(step) {
+        // This function may not be needed anymore but prevents errors
+    }
+    
+    function initializePricingVisibility() {
+        // This function may not be needed anymore but prevents errors
+    }
+    
+    // Set up scroll event listener for addon viewport detection
+    let scrollTimer;
+    window.addEventListener('scroll', function() {
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(function() {
+            window.checkAddonViewport();
+        }, 100);
+    });
+
+    // Old viewport function removed - using simple detection now
 
     document.addEventListener('DOMContentLoaded', function() {
         try {
@@ -124,6 +174,7 @@
         licenseCards.forEach(card => {
             card.addEventListener('click', function() {
                 const licenseType = this.getAttribute('data-license');
+                sectionInteractions.licenseSection = true;
                 selectLicenseType(licenseType);
                 });
             });
@@ -132,6 +183,7 @@
             btn.addEventListener('click', function(e) {
                 e.stopPropagation(); // Prevent card click
                 const licenseType = this.getAttribute('data-license');
+                sectionInteractions.licenseSection = true;
                 selectLicenseType(licenseType);
                     });
                 });
@@ -176,10 +228,12 @@
                 
                 document.getElementById('license-duration').value = value;
                 
+                // Mark duration section as interacted
+                sectionInteractions.durationSection = true;
                 calculateCosts();
-                    });
                 });
-        
+            });
+            
         // Shareholders options
         const shareholdersOptions = document.querySelectorAll('#shareholders-options .pill-option');
         shareholdersOptions.forEach(option => {
@@ -190,10 +244,12 @@
                 const value = this.getAttribute('data-value');
                 document.getElementById('shareholders-range').value = value;
                 
+                // Mark shareholders section as interacted
+                sectionInteractions.shareholdersSection = true;
                 calculateCosts();
-            });
-        });
-    }
+                    });
+                });
+            }
     
     // Setup service pill selections
     function setupServicePills() {
@@ -242,6 +298,9 @@
                 if (this.classList.contains('tax-compliance-pill')) {
                     checkTaxCompliance();
                 }
+                
+                // Mark addons section as interacted when any service pill is clicked
+                sectionInteractions.addonsSection = true;
                 
                 // Trigger calculation
                 calculateCosts();
@@ -650,7 +709,7 @@
 
             if (data && data.length > 0) {
                 displaySearchResultsInModal(data);
-                        } else {
+        } else {
                 modalList.innerHTML = '<div class="no-results">No activities found matching your search.</div>';
             }
         } catch (error) {
@@ -697,7 +756,7 @@
                 if (isCurrentlySelected) {
                     checkbox.classList.remove('checked');
                     removeActivity(activityData.Code);
-        } else {
+            } else {
                     checkbox.classList.add('checked');
                     addActivityToSelected(activityData, groupName);
                     
@@ -712,7 +771,7 @@
                 updateAllModalCategoryCounts();
                 updateSelectedGroupsCount();
                 calculateCosts();
-                console.log('Activity selected, recalculated costs, selectedActivities:', window.selectedActivities);
+        
                     });
                 });
             }
@@ -783,7 +842,7 @@
                 if (isCurrentlySelected) {
                     checkbox.classList.remove('checked');
                     removeActivity(activityData.Code);
-            } else {
+                 } else {
                     checkbox.classList.add('checked');
                     addActivityToSelected(activityData, groupName);
                 }
@@ -792,7 +851,7 @@
                 updateAllModalCategoryCounts();
                 updateSelectedGroupsCount();
                 calculateCosts();
-                console.log('Activity selected from modal, recalculated costs, selectedActivities:', window.selectedActivities);
+
             });
         });
     }
@@ -800,6 +859,8 @@
     function addActivityToSelected(activity, groupName) {
         if (!window.selectedActivities.some(item => item.Code === activity.Code)) {
             window.selectedActivities.push({ ...activity, groupName, Group: activity.Group });
+            // Mark business activities section as interacted when an activity is added
+            sectionInteractions.businessActivitiesSection = true;
         }
     }
 
@@ -897,7 +958,7 @@
                 const countText = count > 0 ? ` (${count} selected)` : '';
                 option.textContent = baseText + countText;
                 
-                console.log(`Group: ${groupName}, Count: ${count}`); // Debug log
+        
             });
         }
     }
@@ -1069,7 +1130,7 @@
                     label.classList.remove('selected');
                     label.textContent = '';
                     deselectService(serviceId);
-            } else {
+                } else {
                     this.classList.add('checked');
                     label.classList.add('selected');
                     label.textContent = 'Selected';
@@ -1260,6 +1321,9 @@
                 servicePill.insertBefore(checkIcon, servicePill.firstChild);
             }
         }
+        
+        // Don't automatically mark addons section as interacted
+        // This should only happen through user clicks or viewport detection
     }
 
     function deselectService(serviceId) {
@@ -1407,7 +1471,6 @@
             freshActionBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Investor visa selected');
                 
                 // Select the visa
                 document.getElementById('investor-visa-toggle').checked = true;
@@ -1422,14 +1485,12 @@
                 const overlay = document.getElementById('bottom-sheet-overlay');
                 if (overlay) overlay.classList.remove('active');
                 
-                console.log('Modal should be closed now');
                 return false;
             });
         } else if (visaType === 'employee') {
             freshActionBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Employee visa selected');
                 
                 // Select the visa
                 selectVisaCard('employee');
@@ -1450,14 +1511,12 @@
                     }, 10);
                 }
                 
-                console.log('Modal should be closed now');
                 return false;
             });
         } else if (visaType === 'dependent') {
             freshActionBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Dependent visa selected');
                 
                 // Select the visa
                 selectVisaCard('dependent');
@@ -1478,14 +1537,12 @@
                     }, 10);
                 }
                 
-                console.log('Modal should be closed now');
                 return false;
             });
         } else if (visaType === 'change-status') {
             freshActionBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Change status info acknowledged');
                 
                 // Just close the modal - no action needed since this is informational
                 document.getElementById('license-modal').style.display = 'none';
@@ -1503,7 +1560,6 @@
                     }, 10);
                 }
                 
-                console.log('Modal should be closed now');
                 return false;
             });
         }
@@ -1594,7 +1650,6 @@
         freshActionBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('License selected:', licenseType);
             
             // Select the license
             selectLicenseType(licenseType);
@@ -1615,7 +1670,6 @@
                 }, 10);
             }
             
-                    console.log('Modal should be closed now');
         return false;
     });
     
@@ -1640,7 +1694,6 @@
     }
 
     function closeLicenseModal() {
-        console.log('closeLicenseModal called');
         const modal = document.getElementById('license-modal');
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
@@ -1659,7 +1712,6 @@
             }, 10);
         }
         
-        console.log('Modal should be closed now');
     }
 
     function setupLicenseModalEventListeners() {
@@ -1678,7 +1730,6 @@
         document.getElementById('license-close-modal-btn').addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Close button clicked');
             
             // Directly close the modal
             modal.style.display = 'none';
@@ -1697,14 +1748,12 @@
                 }, 10);
             }
             
-            console.log('Modal should be closed now');
             return false;
         });
         
         document.getElementById('license-modal-back-btn').addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Back button clicked');
             
             // Directly close the modal
             modal.style.display = 'none';
@@ -1723,7 +1772,6 @@
                 }, 10);
             }
             
-            console.log('Modal should be closed now');
             return false;
         });
         
@@ -1731,7 +1779,6 @@
             if (e.target === modal) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Modal background clicked');
                 
                 // Directly close the modal
                 modal.style.display = 'none';
@@ -1750,7 +1797,6 @@
                     }, 10);
                 }
                 
-                console.log('Modal should be closed now');
                 return false;
             }
         });
@@ -1840,13 +1886,26 @@
 
             if (input.type === "tel" && input.value && !phoneInput.isValidNumber()) {
                 input.classList.add('error');
-                if (errorElement) errorElement.textContent = "Please enter a valid phone number";
+                if (errorElement) {
+                    const countryData = phoneInput.getSelectedCountryData();
+                    if (!phoneInput.isPossibleNumber()) {
+                        errorElement.textContent = `Invalid phone number format for ${countryData.name}`;
+                    } else {
+                        errorElement.textContent = `Phone number is too short or too long for ${countryData.name}`;
+                    }
+                }
                 valid = false;
             }
 
-            if (input.id === "full-name" && input.value && !/^[A-Za-z\s]+$/.test(input.value)) {
+            if (input.id === "full-name" && input.value && !/^[A-Za-z\s\-\']{2,}$/.test(input.value)) {
                 input.classList.add('error');
-                if (errorElement) errorElement.textContent = "Name should contain only letters and spaces";
+                if (errorElement) {
+                    if (input.value.trim().length < 2) {
+                        errorElement.textContent = "Name must be at least 2 characters long";
+                    } else {
+                        errorElement.textContent = "Name should contain only letters, spaces, hyphens, and apostrophes";
+                    }
+                }
                 valid = false;
             }
         });
@@ -1957,9 +2016,9 @@
         };
 
         selectedAddons.forEach(addon => {
-            cost += addonCosts[addon] || 0;
+            const addonCost = addonCosts[addon] || 0;
+            cost += addonCost;
         });
-
         return cost;
     }
 
@@ -2066,11 +2125,9 @@
         if (activityTagsContainer && businessActivitySection) {
             activityTagsContainer.innerHTML = '';
             
-            console.log('updateSummaryUI: Processing business activities, selectedActivities length:', window.selectedActivities ? window.selectedActivities.length : 0);
             
             // Only show business activities section if activities are selected
             if (window.selectedActivities && window.selectedActivities.length > 0) {
-                console.log('updateSummaryUI: Showing business activities section');
                 businessActivitySection.style.display = 'block';
                 
                 // Group activities by category
@@ -2156,7 +2213,6 @@
                     }
                 }
             } else {
-                console.log('updateSummaryUI: Hiding business activities section - no activities selected');
                 // Hide business activities section if no activities selected
                 businessActivitySection.style.display = 'none';
             }
@@ -2373,15 +2429,20 @@
     function calculateCosts() {
         const snapshot = getFormSnapshot();
         
-        const licenseComponent = calculateLicenseCost(snapshot);
-        const visaComponent = calculateVisaCost(snapshot);
-        const officeComponent = calculateOfficeCost(snapshot);
-        const addonsComponent = calculateAddonsCost(snapshot);
-        const changeStatusComponent = calculateChangeStatusCost(snapshot);
+        // Calculate costs for sections that have been interacted with
+        
+        // Only calculate costs for sections that have been interacted with
+        // Form being unlocked is no longer a condition for showing prices
+        const licenseComponent = sectionInteractions.licenseSection ? calculateLicenseCost(snapshot) : 0;
+        const visaComponent = sectionInteractions.visaSection ? calculateVisaCost(snapshot) : 0;
+        const officeComponent = calculateOfficeCost(snapshot); // Office component is always 0 now
+        const addonsComponent = sectionInteractions.addonsSection ? calculateAddonsCost(snapshot) : 0;
+        const changeStatusComponent = sectionInteractions.visaSection ? calculateChangeStatusCost(snapshot) : 0;
         
         // Calculate business activities cost
         let businessActivitiesCost = 0;
-        if (window.selectedActivities && window.selectedActivities.length > 0) {
+        if (sectionInteractions.businessActivitiesSection && 
+            window.selectedActivities && window.selectedActivities.length > 0) {
             // Group activities by category
             const activityGroups = {};
             window.selectedActivities.forEach(activity => {
@@ -2450,7 +2511,6 @@
         try {
             localStorage.setItem('costCalculatorData', JSON.stringify(snapshot));
         } catch (e) {
-            console.log('Unable to save form data to localStorage', e);
         }
 
         updateGrandTotal(totalCost);
@@ -2505,23 +2565,10 @@
         }
             }
             
-            console.log("Calculated Total Cost Components:");
-            console.log("License: " + licenseComponent);
-            console.log("Visa: " + visaComponent);
-            console.log("Office: " + officeComponent);
-            console.log("Add-ons: " + addonsComponent);
-            console.log("Business Activities: " + businessActivitiesCost);
-            console.log("Change Status: " + changeStatusComponent);
             
             // Return the total cost
             return Math.round(licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost + changeStatusComponent);
         } else {
-            console.log("Using Global Variables for Total Cost:");
-            console.log("License: " + LicenseCost);
-            console.log("Visa: " + VisaCost);
-            console.log("Add-ons: " + window.AddonsComponent);
-            console.log("Business Activities: " + window.BusinessActivitiesCost);
-            console.log("Change Status: " + (window.ChangeStatusCost || 0));
             
             // Return the total cost using global variables
             return LicenseCost + VisaCost + (window.AddonsComponent || 0) + (window.BusinessActivitiesCost || 0) + (window.ChangeStatusCost || 0);
@@ -2614,21 +2661,394 @@
     const phoneInputField = document.querySelector("#phone");
     const phoneInput = window.intlTelInput(phoneInputField, {
         preferredCountries: ["ae", "sa", "kw", "bh", "om", "qa"],
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-        separateDialCode: true,
+        initialCountry: "ae", // Set UAE as default
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.2.1/js/utils.js",
+        separateDialCode:true,
         formatOnDisplay: true,
-        autoPlaceholder: "polite"
+        autoPlaceholder: "polite",
+        formatAsYouType: true,
+        strictMode: true
     });
 
-    phoneInputField.addEventListener("blur", function() {
-        phoneInputField.classList.toggle("error", phoneInputField.value.trim() && !phoneInput.isValidNumber());
+    // Set custom placeholder for UAE (default country)
+    phoneInputField.placeholder = "50 123 4567";
+
+    // Strict phone input validation with physical restriction
+    let userHasInteracted = false;
+    let phoneFieldHasBeenFocused = false;
+    
+    // Track when phone field gets focus for the first time
+    phoneInputField.addEventListener("focus", function() {
+        phoneFieldHasBeenFocused = true;
     });
+    
+    // Restrict input to numbers only and enforce country-specific length limits
+    phoneInputField.addEventListener("keydown", function(e) {
+        userHasInteracted = true;
+        
+        // Allow: backspace, delete, tab, escape, enter, home, end, left, right, up, down
+        if ([8, 9, 27, 13, 35, 36, 37, 38, 39, 40, 46].indexOf(e.keyCode) !== -1 ||
+            // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+            (e.keyCode === 65 && e.ctrlKey === true) ||
+            (e.keyCode === 67 && e.ctrlKey === true) ||
+            (e.keyCode === 86 && e.ctrlKey === true) ||
+            (e.keyCode === 88 && e.ctrlKey === true)) {
+            return;
+        }
+        
+        // Get current country data
+        const countryData = phoneInput.getSelectedCountryData();
+        const currentValue = e.target.value.replace(/\D/g, ''); // Remove non-digits for length check
+        
+        // Country-specific max lengths (national significant number length)
+        const maxLengths = {
+            'ae': 9,  // UAE: 9 digits
+            'sa': 9,  // Saudi Arabia: 9 digits  
+            'kw': 8,  // Kuwait: 8 digits
+            'bh': 8,  // Bahrain: 8 digits
+            'om': 8,  // Oman: 8 digits
+            'qa': 8,  // Qatar: 8 digits
+            'us': 10, // USA: 10 digits
+            'gb': 11, // UK: 11 digits
+        };
+        
+        const maxLength = maxLengths[countryData.iso2] || 15; // Default max 15 digits
+        
+        // If it's a number and would exceed max length, prevent it
+        if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
+            if (currentValue.length >= maxLength) {
+                e.preventDefault();
+                return;
+            }
+        }
+        
+        // Ensure that it is a number and stop other keypresses
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    });
+
+    phoneInputField.addEventListener("input", function(e) {
+        userHasInteracted = true;
+        
+        // Clear any existing error styling during typing (but don't validate yet)
+        phoneInputField.classList.remove('error');
+        const errorElement = document.getElementById('phone-error');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+        
+        // Remove any non-digit characters except formatting
+        const value = e.target.value;
+        const digitsOnly = value.replace(/\D/g, '');
+        
+        // Get country-specific max length
+        const countryData = phoneInput.getSelectedCountryData();
+        const maxLengths = {
+            'ae': 9, 'sa': 9, 'kw': 8, 'bh': 8, 'om': 8, 'qa': 8,
+            'us': 10, 'gb': 11
+        };
+        const maxLength = maxLengths[countryData.iso2] || 15;
+        
+        // If too many digits, truncate
+        if (digitsOnly.length > maxLength) {
+            const truncatedDigits = digitsOnly.slice(0, maxLength);
+            // Set the value and let intlTelInput format it
+            phoneInput.setNumber('+' + countryData.dialCode + truncatedDigits);
+        }
+        
+        // Don't validate during typing - only on blur or form submission
+    });
+
+    // Also clear errors on paste but don't validate immediately
+    phoneInputField.addEventListener("paste", function(e) {
+        userHasInteracted = true;
+        phoneInputField.classList.remove('error');
+        const errorElement = document.getElementById('phone-error');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+    });
+
+    // Handle country change to clear validation and update placeholder
+    phoneInputField.addEventListener("countrychange", function() {
+        // Clear any existing validation when country changes
+        phoneInputField.classList.remove('error');
+        const errorElement = document.getElementById('phone-error');
+        if (errorElement) {
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+        }
+        
+        // Update placeholder based on selected country
+        const countryData = phoneInput.getSelectedCountryData();
+        const countryPlaceholders = {
+            'ae': '50 123 4567',
+            'sa': '50 123 4567', 
+            'kw': '9999 9999',
+            'bh': '9999 9999',
+            'om': '9999 9999',
+            'qa': '9999 9999',
+            'us': '(201) 555-0123',
+            'gb': '07400 123456'
+        };
+        phoneInputField.placeholder = countryPlaceholders[countryData.iso2] || "Phone number";
+        
+        // Don't re-validate immediately - wait for blur or form submission
+    });
+
+    // Always validate on blur if there's content (more aggressive validation)
+    phoneInputField.addEventListener("blur", function() {
+        if (phoneInputField.value.trim()) {
+            phoneFieldHasBeenFocused = true; // Mark as focused when blur happens
+            validatePhoneField();
+        }
+    });
+
+    // Strict phone validation function
+    function validatePhoneField() {
+        const phoneValue = phoneInputField.value.trim();
+        const errorElement = document.getElementById('phone-error');
+        
+        // Clear previous errors
+        phoneInputField.classList.remove('error');
+        if (errorElement) {
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+        }
+        
+        if (!phoneValue) return; // Don't validate empty field
+        
+        // Get selected country data
+        const countryData = phoneInput.getSelectedCountryData();
+        
+        // Check if the number is valid using Google's libphonenumber
+        const isValid = phoneInput.isValidNumber();
+        const isPossible = phoneInput.isPossibleNumber();
+        const validationType = phoneInput.getValidationError();
+        
+        // Get number of digits entered
+        const digitsOnly = phoneValue.replace(/\D/g, '');
+        
+        // Country-specific expected lengths
+        const expectedLengths = {
+            'ae': 9,  // UAE: 9 digits
+            'sa': 9,  // Saudi Arabia: 9 digits  
+            'kw': 8,  // Kuwait: 8 digits
+            'bh': 8,  // Bahrain: 8 digits
+            'om': 8,  // Oman: 8 digits
+            'qa': 8,  // Qatar: 8 digits
+            'us': 10, // USA: 10 digits
+            'gb': 11, // UK: 11 digits
+        };
+        
+        const expectedLength = expectedLengths[countryData.iso2] || 10;
+
+        
+        if (!isValid) {
+            phoneInputField.classList.add('error');
+            if (errorElement) {
+                let errorMessage = '';
+                
+                if (digitsOnly.length < expectedLength) {
+                    errorMessage = `Phone number is too short for ${countryData.name}. Expected ${expectedLength} digits, got ${digitsOnly.length}.`;
+                } else if (digitsOnly.length > expectedLength) {
+                    errorMessage = `Phone number is too long for ${countryData.name}. Expected ${expectedLength} digits, got ${digitsOnly.length}.`;
+                } else if (!isPossible) {
+                    errorMessage = `Invalid phone number format for ${countryData.name}`;
+                } else {
+                    errorMessage = `Please enter a valid phone number for ${countryData.name}`;
+                }
+                
+                errorElement.textContent = errorMessage;
+                errorElement.style.display = 'block';
+                errorElement.style.color = '#EB5F40';
+                errorElement.style.fontSize = '14px';
+                errorElement.style.marginTop = '5px';
+                
+            }
+        }
+    }
+
+    // Real-time name validation with input restriction
+    const nameField = document.getElementById('full-name');
+    let nameUserHasInteracted = false;
+    let nameFieldHasBeenFocused = false;
+    
+    // Track when name field gets focus for the first time
+    nameField.addEventListener("focus", function() {
+        nameFieldHasBeenFocused = true;
+    });
+    
+    nameField.addEventListener("keydown", function(e) {
+        nameUserHasInteracted = true;
+        
+        // Allow: backspace, delete, tab, escape, enter, home, end, left, right, up, down
+        if ([8, 9, 27, 13, 35, 36, 37, 38, 39, 40, 46].indexOf(e.keyCode) !== -1 ||
+            // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+            (e.keyCode === 65 && e.ctrlKey === true) ||
+            (e.keyCode === 67 && e.ctrlKey === true) ||
+            (e.keyCode === 86 && e.ctrlKey === true) ||
+            (e.keyCode === 88 && e.ctrlKey === true)) {
+            return;
+        }
+        
+        // Allow letters (A-Z, a-z), space, hyphen, apostrophe
+        const key = String.fromCharCode(e.keyCode);
+        if (!/[A-Za-z\s\-\']/.test(key)) {
+            e.preventDefault();
+        }
+    });
+
+    nameField.addEventListener("input", function(e) {
+        nameUserHasInteracted = true;
+        
+        // Clear any existing error styling during typing (but don't validate yet)
+        nameField.classList.remove('error');
+        const errorElement = document.getElementById('full-name-error');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+        
+        // Allow only letters, spaces, hyphens, and apostrophes (backup cleanup)
+        const allowedChars = /[A-Za-z\s\-\']/g;
+        const value = e.target.value;
+        const cleanValue = value.match(allowedChars)?.join('') || '';
+        
+        if (value !== cleanValue) {
+            e.target.value = cleanValue;
+        }
+        
+        // Don't validate during typing - only on blur or form submission
+    });
+
+    // Also clear errors on paste but don't validate immediately for name
+    nameField.addEventListener("paste", function(e) {
+        nameUserHasInteracted = true;
+        nameField.classList.remove('error');
+        const errorElement = document.getElementById('full-name-error');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+    });
+
+    nameField.addEventListener("blur", function() {
+        if (nameField.value.trim()) {
+            nameFieldHasBeenFocused = true; // Mark as focused when blur happens
+            validateNameField();
+        }
+    });
+
+    function validateNameField() {
+        const nameValue = nameField.value.trim();
+        const errorElement = document.getElementById('full-name-error');
+        
+        // Clear previous errors
+        nameField.classList.remove('error');
+        if (errorElement) {
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+        }
+        
+        if (!nameValue) return; // Don't validate empty field
+        
+        // Validate name: only letters, spaces, hyphens, apostrophes, minimum 2 characters
+        const namePattern = /^[A-Za-z\s\-\']{2,}$/;
+
+        
+        if (!namePattern.test(nameValue)) {
+            nameField.classList.add('error');
+            if (errorElement) {
+                let errorMessage = '';
+                if (nameValue.length < 2) {
+                    errorMessage = "Name must be at least 2 characters long";
+                } else {
+                    errorMessage = "Name should contain only letters, spaces, hyphens, and apostrophes";
+                }
+                
+                errorElement.textContent = errorMessage;
+                errorElement.style.display = 'block';
+                errorElement.style.color = '#EB5F40';
+                errorElement.style.fontSize = '14px';
+                errorElement.style.marginTop = '5px';
+                
+            }
+        }
+    }
+
+    // Real-time email validation with input restriction
+    const emailField = document.getElementById('email');
+    let emailUserHasInteracted = false;
+    let emailFieldHasBeenFocused = false;
+    
+    // Track when email field gets focus for the first time
+    emailField.addEventListener("focus", function() {
+        emailFieldHasBeenFocused = true;
+    });
+
+    emailField.addEventListener("input", function(e) {
+        emailUserHasInteracted = true;
+        
+        // Clear any existing error styling during typing (but don't validate yet)
+        emailField.classList.remove('error');
+        const errorElement = document.getElementById('email-error');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+        
+        // Don't validate during typing - only on blur or form submission
+    });
+
+    emailField.addEventListener("blur", function() {
+        if (emailField.value.trim()) {
+            emailFieldHasBeenFocused = true; // Mark as focused when blur happens
+            validateEmailField();
+        }
+    });
+
+    // Email validation function
+    function validateEmailField() {
+        const emailValue = emailField.value.trim();
+        const errorElement = document.getElementById('email-error');
+        
+        // Clear previous errors
+        emailField.classList.remove('error');
+        if (errorElement) {
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+        }
+        
+        if (!emailValue) return; // Don't validate empty field
+        
+        // Email validation regex
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        
+        if (!emailPattern.test(emailValue)) {
+            emailField.classList.add('error');
+            if (errorElement) {
+                const errorMessage = "Please enter a valid email address";
+                
+                errorElement.textContent = errorMessage;
+                errorElement.style.display = 'block';
+                errorElement.style.color = '#EB5F40';
+                errorElement.style.fontSize = '14px';
+                errorElement.style.marginTop = '5px';
+                
+            }
+        }
+    }
 
     // Contact form Next/Continue button - only scrolls to next section
     document.getElementById('submitBtn').addEventListener('click', function(e) {
         e.preventDefault();
         const submitBtn = this;
 
+        // Trigger validation for all fields when Next button is clicked
+        validateNameField();
+        validateEmailField();
+        validatePhoneField();
+        
         // Check if contact form is valid before proceeding
         if (!validateContactForm()) {
             // Show validation errors or highlight empty fields
@@ -2642,17 +3062,22 @@
                 const element = document.getElementById(field.id);
                 const errorElement = document.getElementById(field.id + '-error');
                 
+                // Only show "required" error if field is empty AND no other error is already showing
                 if (element && !element.value?.trim()) {
-                    element.classList.add('error');
-                    if (errorElement) {
-                        errorElement.textContent = `${field.name} is required`;
-                        errorElement.style.display = 'block';
+                    // Check if there's already a validation error showing
+                    if (!errorElement || errorElement.style.display === 'none' || !errorElement.textContent.trim()) {
+                        element.classList.add('error');
+                        if (errorElement) {
+                            errorElement.textContent = `${field.name} is required`;
+                            errorElement.style.display = 'block';
+                            errorElement.style.color = '#EB5F40';
+                            errorElement.style.fontSize = '14px';
+                            errorElement.style.marginTop = '5px';
+                        }
                     }
                 } else {
-                    element?.classList.remove('error');
-                    if (errorElement) {
-                        errorElement.style.display = 'none';
-                    }
+                    // Don't clear errors here - let individual validation functions handle it
+                    // This ensures specific validation errors (like "invalid email format") are preserved
                 }
             });
             
@@ -2814,14 +3239,15 @@
             const phoneField = document.getElementById('phone');
             
             // Strict validation - ALL fields must be valid
-            const isNameValid = fullName && fullName.length >= 2 && /^[A-Za-z\s]+$/.test(fullName);
+            const isNameValid = fullName && fullName.length >= 2 && /^[A-Za-z\s\-\']+$/.test(fullName);
             const isEmailValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             
-            // Phone validation using existing phoneInput if available
+            // Phone validation using Google's libphonenumber for strict validation
             let isPhoneValid = false;
             if (phoneField && typeof phoneInput !== 'undefined') {
                 try {
                     if (phoneInput.isValidNumber && phoneInput.getNumber) {
+                        // Use strict Google libphonenumber validation
                         isPhoneValid = phoneInput.isValidNumber();
                     } else {
                         // Fallback to basic validation
@@ -2926,6 +3352,13 @@
                     }, 500);
                 }
             });
+            
+            // Do NOT mark sections as interacted when unlocking
+            // Let user interaction or visibility determine when to show prices
+            
+            // Recalculate costs with current section interaction states
+            calculateCosts();
+            
         } catch (err) {
             console.error("Error unlocking sections:", err);
         }
@@ -2988,7 +3421,8 @@
                 isContactFormCompleted = true;
                 unlockSections();
                 
-                // REVEAL PRICING - when form is validated
+                // REVEAL PRICING CONTAINER - when form is validated
+                // But don't calculate actual prices until user interacts with sections
                 if (!pricingRevealed) {
                     pricingRevealed = true;
                     const summaryContainer = document.querySelector('.sticky-summary-container');
@@ -3004,7 +3438,22 @@
                         mobileFooter.classList.add('summary-pricing-revealed');
                     }
                     
-                    console.log('✅ Pricing revealed after contact form validation');
+                    // Reset all section interactions to ensure prices start at 0
+                    sectionInteractions = {
+                        licenseSection: false,
+                        durationSection: false,
+                        shareholdersSection: false,
+                        businessActivitiesSection: false,
+                        visaSection: false,
+                        addonsSection: false
+                    };
+                    
+                    // Don't automatically mark addon section as interacted for pre-selected items
+                    // User must either scroll to section or click an addon pill to see pricing
+                    
+                    // Recalculate costs with all sections marked as not interacted
+                    calculateCosts();
+                    
                 }
 
                 
@@ -3030,7 +3479,7 @@
                                     <polyline points="20,6 9,17 4,12"/>
                                 </svg>
                             </span>
-                            You’re all set. Let’s explore your business setup options.
+                            You're all set. Let's explore your business setup options.
                         `;
                     }
                 }
@@ -3071,6 +3520,17 @@
     // Countries array removed as we no longer need nationality selection
 
     document.addEventListener('DOMContentLoaded', function() {
+        
+        // Reset all section interactions to false on page load
+        sectionInteractions = {
+            licenseSection: false,
+            durationSection: false,
+            shareholdersSection: false,
+            businessActivitiesSection: false,
+            visaSection: false,
+            addonsSection: false
+        };
+
         if (localStorage.getItem('formHasPartialData') === 'true') {
             try {
                 localStorage.removeItem('formHasPartialData');
@@ -3095,12 +3555,31 @@
         
         updateButtonsDisplay(currentStep);
 
+        // Scroll event listener for addon viewport detection is set up at script load
         
         // Ensure Fawri license is selected by default for calculations
-        selectLicenseType('fawri');
+        // But don't mark the section as interacted yet
+        const licenseType = 'fawri';
+        document.querySelectorAll('.license-card').forEach(card => {
+            const isSelected = card.getAttribute('data-license') === licenseType;
+            card.classList.toggle('selected', isSelected);
+        });
+        
+        document.querySelectorAll('.select-btn[data-license]').forEach(btn => {
+            const isSelected = btn.getAttribute('data-license') === licenseType;
+            updateButtonState(btn, isSelected);
+        });
+        
+        // Update hidden input without marking section as interacted
+        document.getElementById('license-type').value = licenseType;
+        
+        // Calculate costs with all sections marked as not interacted
+        calculateCosts();
         
         // Trigger initial calculation to populate summary
         calculateCosts();
+        
+        // DOMContentLoaded initialization complete
         
         checkTaxCompliance();
     });
@@ -3127,6 +3606,9 @@
                 document.getElementById('investor-visa-count').value = '0';
             }
         }
+        
+        // Mark visa section as interacted
+        sectionInteractions.visaSection = true;
         
         calculateCosts();
         updateChangeStatusVisibility();
@@ -3755,7 +4237,6 @@
 
     // Change Status functionality
     function adjustStatusCount(type, change) {
-        console.log('adjustStatusCount called:', type, change);
         
         if (type !== 'inside') return; // Only handle inside UAE adjustments
         
@@ -3767,23 +4248,17 @@
         }
         
         const currentCount = parseInt(quantityElement.textContent) || 0;
-        console.log('Current count:', currentCount);
         
         // Get total visa count to set maximum
         const totalVisaCount = getTotalVisaCount();
-        console.log('Total visa count:', totalVisaCount);
         
         // For inside UAE, can't exceed total visas and can't go below 0
         const newCount = Math.max(0, Math.min(totalVisaCount, currentCount + change));
-        console.log('New count:', newCount);
         
         // Calculate outside count automatically
         const outsideCount = totalVisaCount - newCount;
         const outsideCountElement = document.getElementById('outside-count');
         
-        console.log('Before DOM update:');
-        console.log('- quantityElement.textContent:', quantityElement.textContent);
-        console.log('- outsideCountElement.textContent:', outsideCountElement ? outsideCountElement.textContent : 'not found');
         
         // Update the display with multiple approaches to ensure it works
         quantityElement.textContent = newCount.toString();
@@ -3804,11 +4279,6 @@
             outsideCountElement.offsetHeight; // Force reflow
         }
         
-        console.log('After DOM update:');
-        console.log('- quantityElement.textContent:', quantityElement.textContent);
-        console.log('- quantityElement.innerHTML:', quantityElement.innerHTML);
-        console.log('- outsideCountElement.textContent:', outsideCountElement ? outsideCountElement.textContent : 'not found');
-        console.log('- Updated - Inside:', newCount, 'Outside:', outsideCount);
         
         // Update button states
         updateStatusButtonStates();
@@ -3845,25 +4315,19 @@
             plusBtn.classList.toggle('disabled', insideCount >= totalVisaCount);
         }
         
-        console.log('Button states updated - Inside count:', insideCount, 'Total visa count:', totalVisaCount);
-        console.log('Plus button disabled:', plusBtn ? plusBtn.disabled : 'not found');
-        console.log('Minus button disabled:', minusBtn ? minusBtn.disabled : 'not found');
     }
 
     function updateChangeStatusVisibility() {
         const totalVisaCount = getTotalVisaCount();
         const changeStatusSection = document.getElementById('change-status-section');
         
-        console.log('updateChangeStatusVisibility called - totalVisaCount:', totalVisaCount);
         
         if (totalVisaCount > 0) {
             const wasHidden = changeStatusSection.style.display === 'none';
-            console.log('Section was hidden:', wasHidden);
             changeStatusSection.style.display = 'flex';
             
             // Only reset counts when showing for the first time or when total visa count changes
             if (wasHidden) {
-                console.log('Resetting counts because section was hidden');
                 document.getElementById('inside-quantity').textContent = '0';
                 document.getElementById('outside-count').textContent = totalVisaCount;
                 document.getElementById('applicants-inside-uae').value = '0';
@@ -3876,12 +4340,10 @@
                 // Just update the outside count to match current total if section already visible
                 const currentInside = parseInt(document.getElementById('inside-quantity').textContent) || 0;
                 const newOutside = totalVisaCount - currentInside;
-                console.log('Section already visible - updating outside count. Current inside:', currentInside, 'New outside:', newOutside);
                 document.getElementById('outside-count').textContent = newOutside;
                 document.getElementById('applicants-outside-uae').value = newOutside;
             }
         } else {
-            console.log('Hiding section and resetting counts');
             changeStatusSection.style.display = 'none';
             // Reset counts when hiding
             document.getElementById('inside-quantity').textContent = '0';
@@ -3898,12 +4360,10 @@
             if (e.target.matches('#inside-selected-controls .quantity-btn.minus')) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Change status minus button clicked');
                 adjustStatusCount('inside', -1);
             } else if (e.target.matches('#inside-selected-controls .quantity-btn.plus')) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Change status plus button clicked');
                 adjustStatusCount('inside', 1);
             }
         });
@@ -4171,7 +4631,6 @@
         const licenseCards = document.querySelectorAll('.license-card');
         licenseCards.forEach(card => {
             card.addEventListener('click', () => {
-                console.log('Mobile auto-scroll: License card clicked', card.dataset.license);
                 scrollToNextCard(card, '.license-card');
             });
         });
@@ -4225,7 +4684,6 @@
         durationButtons.forEach(button => {
             button.addEventListener('click', () => {
                 durationInteracted = true;
-                console.log('Mobile auto-scroll: Duration interacted, checking if ready to scroll');
                 // Don't immediately scroll, just scroll to shareholders section
                 const shareholdersSection = document.getElementById('shareholders-options');
                 if (shareholdersSection && !shareholdersInteracted) {
@@ -4251,7 +4709,6 @@
         shareholdersButtons.forEach(button => {
             button.addEventListener('click', () => {
                 shareholdersInteracted = true;
-                console.log('Mobile auto-scroll: Shareholders interacted, checking if ready to scroll');
                 // Check if both sections have been interacted with
                 checkBothSectionsInteracted();
             });
@@ -4291,14 +4748,11 @@
         const activityModal = document.getElementById('activity-search-modal');
         if (activityModal) {
             const modalCloseHandler = () => {
-                console.log('Mobile auto-scroll: Activity modal closed');
                 // Check if any activities are selected after modal closes
                 setTimeout(() => {
-                    console.log('Mobile auto-scroll: Checking selected activities:', window.selectedActivities ? window.selectedActivities.length : 0);
                     if (window.selectedActivities && window.selectedActivities.length > 0) {
                         const visaOptionsSection = document.getElementById('visa-options-section');
                         if (visaOptionsSection && !visaOptionsSection.classList.contains('locked')) {
-                            console.log('Mobile auto-scroll: Scrolling to visa options section after modal close');
                             setTimeout(() => {
                                 const headerOffset = 80;
                                 const elementPosition = visaOptionsSection.getBoundingClientRect().top;
@@ -4323,17 +4777,13 @@
         
         // Visa Options Section - scroll to next visa card or change status section
         const visaCards = document.querySelectorAll('.visa-card:not(.change-status-card)');
-        console.log('Mobile auto-scroll: Found visa cards:', visaCards.length);
         visaCards.forEach(card => {
             card.addEventListener('click', () => {
-                console.log('Mobile auto-scroll: Visa card clicked', card.dataset.visa);
                 const allVisaCards = Array.from(document.querySelectorAll('.visa-card:not(.change-status-card)'));
                 const currentIndex = allVisaCards.indexOf(card);
-                console.log('Mobile auto-scroll: Current index:', currentIndex, 'Total cards:', allVisaCards.length);
                 
                 // If this is the last visa card, scroll to change status section
                 if (currentIndex === allVisaCards.length - 1) {
-                    console.log('Mobile auto-scroll: Last visa card, scrolling to change status');
                     const changeStatusSection = document.getElementById('change-status-section');
                     if (changeStatusSection && !changeStatusSection.classList.contains('locked')) {
                         setTimeout(() => {
@@ -4349,7 +4799,6 @@
                     }
                 } else {
                     // Not the last card, scroll to next visa card
-                    console.log('Mobile auto-scroll: Not last card, scrolling to next visa card');
                     scrollToNextCard(card, '.visa-card:not(.change-status-card)');
                 }
             });

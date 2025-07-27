@@ -82,7 +82,7 @@ font-weight: 700;
 .form-section {
 display: flex;
     flex-direction: column;
-    gap: 32px !important;
+    gap: 24px !important;
     border-radius: 16px;
 
     margin-bottom: 64px !important;
@@ -237,7 +237,6 @@ align-items: center;
     border-radius: 8px;
     gap: 8px;
     background: rgba(0, 74, 152, 0.04);
-    margin-bottom: 16px !important;
 }
 
 .info-icon {
@@ -2023,6 +2022,7 @@ line-height: 24px;
 
     #business-activities-section {
         padding: 24px 20px !important;
+        gap: 16px !important;
     }
 
     .scroll-indicator-left {
@@ -2257,7 +2257,6 @@ line-height: 24px;
     grid-auto-flow: column;
     grid-auto-columns: 192px;
     gap: 10px;
-    margin-top: 24px;
     max-width: 800px;
     padding-bottom: 10px;
     overflow-x: auto;
@@ -3694,4 +3693,140 @@ background-clip: text;
         opacity: 1;
         max-height: 500px;
     }
+}
+
+/* Calculator-specific error messages to avoid Webflow conflicts */
+.calc-error-message {
+    color: #EB5F40 !important;
+    font-size: 14px !important;
+    margin-top: 5px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 9999 !important;
+    font-family: "Plus Jakarta Sans", sans-serif !important;
+    line-height: 1.3 !important;
+    pointer-events: none !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    box-sizing: border-box !important;
+}
+
+/* Force error message visibility - override any external styles */
+.calc-error-message:not(:empty) {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Calculator-specific error field styling */
+input.calc-error,
+.calc-error {
+    border-color: #EB5F40 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    background-color: rgba(235, 95, 64, 0.05) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(235, 95, 64, 0.2) !important;
+}
+
+/* Focus state for error fields */
+input.calc-error:focus,
+.calc-error:focus {
+    border-color: #EB5F40 !important;
+    box-shadow: 0 0 0 3px rgba(235, 95, 64, 0.3) !important;
+    outline: none !important;
+}
+
+/* Specific targeting for phone input errors */
+.phone-input input.calc-error {
+    border-color: #EB5F40 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+}
+
+.phone-input input.calc-error:focus {
+    border-color: #EB5F40 !important;
+    box-shadow: 0 0 0 2px rgba(235, 95, 64, 0.2) !important;
+    outline: none !important;
+}
+
+/* Webflow form override protection */
+form[data-name] .calc-error-message,
+.w-form .calc-error-message,
+[class*="w-"] .calc-error-message {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #EB5F40 !important;
+    font-size: 14px !important;
+    margin-top: 5px !important;
+    position: relative !important;
+    z-index: 9999 !important;
+}
+
+/* Anti-interference protection */
+.calc-error-message * {
+    color: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    font-family: inherit !important;
+}
+
+/* Mobile-specific error message fixes */
+@media (max-width: 768px) {
+    .calc-error-message {
+        font-size: 13px !important;
+        margin-top: 4px !important;
+        line-height: 1.2 !important;
+    }
+    
+    input.calc-error,
+    .calc-error {
+        border-width: 2px !important;
+    }
+}
+
+/* Animation for error appearance */
+@keyframes errorFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.calc-error-message:not(:empty) {
+    animation: errorFadeIn 0.3s ease-out !important;
+}
+
+/* Validation states for submit button */
+.submit-button.validated {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    color: white !important;
+    border-color: #16a34a !important;
+}
+
+.submit-button.validated:hover {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Loading state for buttons */
+.submit-button:disabled {
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
 }

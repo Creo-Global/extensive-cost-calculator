@@ -22,7 +22,7 @@
                 <div class="form-group">
                     <label for="full-name">Enter your full name *</label>
                     <input type="text" id="full-name" placeholder="Your name" required>
-                    <div class="error-message" id="full-name-error"></div>
+                                            <div class="calc-error-message" id="calc-full-name-error"></div>
                         </div>
 
                         <div class="form-group" style="z-index: 1;">
@@ -30,13 +30,13 @@
                     <div class="phone-input">
                         <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone number" required>
                     </div>
-                    <div class="error-message" id="phone-error"></div>
+                                            <div class="calc-error-message" id="calc-phone-error"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="email">Enter email address *</label>
                 <input type="email" id="email" placeholder="Email address" required>
-                <div class="error-message" id="email-error"></div>
+                                        <div class="calc-error-message" id="calc-email-error"></div>
                     </div>
 
                             <button type="button" id="submitBtn" class="submit-button">
@@ -636,6 +636,10 @@
                             <span class="summary-label">Dependency Visa <span id="summary-dependency-visa-display">(0)</span></span>
                             <span class="summary-value" id="dependency-visa-cost">AED 0</span>
                         </div>
+                        <div class="summary-row" id="immigration-card-row" style="display: none;">
+                            <span class="summary-label">Immigration Card Fee</span>
+                            <span class="summary-value" id="immigration-card-cost">AED 0</span>
+                        </div>
                     </div>
                 </div>
 
@@ -861,33 +865,24 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.2.1/css/intlTelInput.css">
 <style>
-/* Fix flag sprite paths for intlTelInput v18+ */
-.iti__flag {
-    background-image: url("https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.2.1/img/flags.png") !important;
 
-}
-
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .iti__flag {
-        background-image: url("https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.2.1/img/flags@2x.png") !important;
-
-    }
-}
-
-/* Ensure proper flag dimensions */
-
-/* Ensure error messages are always visible and properly styled */
-.error-message {
+/* Calculator-specific error messages to avoid Webflow conflicts */
+.calc-error-message {
     color: #EB5F40 !important;
     font-size: 14px !important;
     margin-top: 5px !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 9999 !important;
     font-family: "Plus Jakarta Sans", sans-serif !important;
     line-height: 1.3 !important;
+    pointer-events: none !important;
 }
 
-/* Make sure error fields have proper styling */
-input.error {
+/* Calculator-specific error field styling */
+input.calc-error {
     border-color: #EB5F40 !important;
     border-width: 1px !important;
     border-style: solid !important;
@@ -895,7 +890,7 @@ input.error {
 
 /* Mobile-specific error message fixes */
 @media (max-width: 768px) {
-    .error-message {
+    .calc-error-message {
         font-size: 13px !important;
         margin-top: 4px !important;
     }

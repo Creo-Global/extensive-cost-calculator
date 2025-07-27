@@ -21,6 +21,695 @@
         addonsSection: false
     };
 
+    // Helper function to mark all previous sections as interacted
+    function markPreviousSectionsAsInteracted(currentSection) {
+        const sectionOrder = [
+            'licenseSection',
+            'durationSection', 
+            'shareholdersSection',
+            'businessActivitiesSection',
+            'visaSection',
+            'addonsSection'
+        ];
+        
+        const currentIndex = sectionOrder.indexOf(currentSection);
+        if (currentIndex === -1) return;
+        
+        // Mark all sections up to and including the current one as interacted
+        for (let i = 0; i <= currentIndex; i++) {
+            sectionInteractions[sectionOrder[i]] = true;
+        }
+    }
+
+    // CENTRALIZED VALIDATION SYSTEM
+    class FormValidator {
+        constructor() {
+            this.errorPrefix = 'calc-';
+            this.phoneInput = null;
+            this.validationRules = this.initializeValidationRules();
+            this.errorMessages = this.initializeErrorMessages();
+            this.countryData = this.initializeCountryData();
+            this.init();
+        }
+
+        initializeValidationRules() {
+            return {
+                name: {
+                    required: true,
+                    minLength: 2,
+                    maxLength: 50,
+                    pattern: /^[a-zA-Z\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\u0370-\u03FF\u0400-\u04FF\u1E00-\u1EFF\u1F00-\u1FFF\u2100-\u214F\u0100-\u017F\u1EA0-\u1EF9\u00C0-\u024F\u1E00-\u1EFF.-]+$/,
+                    forbiddenChars: /[0-9!@#$%^&*()_+=\[\]{};':"\\|,.<>?/~`]/
+                },
+                email: {
+                    required: true,
+                    pattern: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+                    maxLength: 254
+                },
+                phone: {
+                    required: true,
+                    minDigits: 6,
+                    maxDigits: 15
+                }
+            };
+        }
+
+        initializeErrorMessages() {
+            return {
+                name: {
+                    required: 'Full name is required',
+                    minLength: 'Name must be at least 2 characters long',
+                    maxLength: 'Name cannot exceed 50 characters',
+                    pattern: 'Name can only contain letters, spaces, hyphens, and apostrophes',
+                    forbiddenChars: 'Numbers and special characters are not allowed in names'
+                },
+                email: {
+                    required: 'Email address is required',
+                    pattern: 'Please enter a valid email address',
+                    maxLength: 'Email address is too long'
+                },
+                phone: {
+                    required: 'Phone number is required',
+                    invalid: 'Please enter a valid phone number',
+                    tooShort: 'Phone number is too short for {country}. Expected {expected} digits, got {actual}.',
+                    tooLong: 'Phone number is too long for {country}. Expected {expected} digits, got {actual}.',
+                    invalidFormat: 'Invalid phone number format for {country}',
+                    invalidChars: 'Phone number can only contain digits, spaces, hyphens, and parentheses'
+                }
+            };
+        }
+
+        initializeCountryData() {
+            return {
+                'ae': { name: 'United Arab Emirates', digits: 9, placeholder: '50 123 4567' },
+                'sa': { name: 'Saudi Arabia', digits: 9, placeholder: '50 123 4567' },
+                'kw': { name: 'Kuwait', digits: 8, placeholder: '9999 9999' },
+                'bh': { name: 'Bahrain', digits: 8, placeholder: '9999 9999' },
+                'om': { name: 'Oman', digits: 8, placeholder: '9999 9999' },
+                'qa': { name: 'Qatar', digits: 8, placeholder: '9999 9999' },
+                'us': { name: 'United States', digits: 10, placeholder: '(201) 555-0123' },
+                'ca': { name: 'Canada', digits: 10, placeholder: '(416) 555-0123' },
+                'gb': { name: 'United Kingdom', digits: 11, placeholder: '07400 123456' },
+                'au': { name: 'Australia', digits: 9, placeholder: '0400 123 456' },
+                'nz': { name: 'New Zealand', digits: 9, placeholder: '021 123 456' },
+                'ie': { name: 'Ireland', digits: 9, placeholder: '085 123 4567' },
+                'za': { name: 'South Africa', digits: 9, placeholder: '082 123 4567' },
+                'de': { name: 'Germany', digits: 11, placeholder: '0151 12345678' },
+                'fr': { name: 'France', digits: 10, placeholder: '06 12 34 56 78' },
+                'it': { name: 'Italy', digits: 10, placeholder: '320 123 4567' },
+                'es': { name: 'Spain', digits: 9, placeholder: '612 34 56 78' },
+                'pt': { name: 'Portugal', digits: 9, placeholder: '912 345 678' },
+                'nl': { name: 'Netherlands', digits: 9, placeholder: '06 12345678' },
+                'be': { name: 'Belgium', digits: 9, placeholder: '0470 12 34 56' },
+                'at': { name: 'Austria', digits: 11, placeholder: '0664 1234567' },
+                'ch': { name: 'Switzerland', digits: 9, placeholder: '078 123 45 67' },
+                'se': { name: 'Sweden', digits: 9, placeholder: '070 123 45 67' },
+                'no': { name: 'Norway', digits: 8, placeholder: '406 12 345' },
+                'dk': { name: 'Denmark', digits: 8, placeholder: '20 12 34 56' },
+                'fi': { name: 'Finland', digits: 9, placeholder: '040 123 4567' },
+                'pl': { name: 'Poland', digits: 9, placeholder: '512 345 678' },
+                'cz': { name: 'Czech Republic', digits: 9, placeholder: '601 123 456' },
+                'hu': { name: 'Hungary', digits: 9, placeholder: '06 20 123 4567' },
+                'ro': { name: 'Romania', digits: 9, placeholder: '0712 345 678' },
+                'bg': { name: 'Bulgaria', digits: 9, placeholder: '087 123 4567' },
+                'hr': { name: 'Croatia', digits: 9, placeholder: '091 234 5678' },
+                'si': { name: 'Slovenia', digits: 8, placeholder: '031 234 567' },
+                'sk': { name: 'Slovakia', digits: 9, placeholder: '0901 123 456' },
+                'lt': { name: 'Lithuania', digits: 8, placeholder: '8612 34567' },
+                'lv': { name: 'Latvia', digits: 8, placeholder: '2012 3456' },
+                'ee': { name: 'Estonia', digits: 8, placeholder: '5123 4567' },
+                'gr': { name: 'Greece', digits: 10, placeholder: '694 123 4567' },
+                'cy': { name: 'Cyprus', digits: 8, placeholder: '9612 3456' },
+                'mt': { name: 'Malta', digits: 8, placeholder: '9912 3456' },
+                'lu': { name: 'Luxembourg', digits: 9, placeholder: '621 123 456' },
+                'jp': { name: 'Japan', digits: 11, placeholder: '090 1234 5678' },
+                'kr': { name: 'South Korea', digits: 11, placeholder: '010 1234 5678' },
+                'cn': { name: 'China', digits: 11, placeholder: '138 0013 8000' },
+                'hk': { name: 'Hong Kong', digits: 8, placeholder: '9123 4567' },
+                'tw': { name: 'Taiwan', digits: 9, placeholder: '0912 345 678' },
+                'sg': { name: 'Singapore', digits: 8, placeholder: '8123 4567' },
+                'my': { name: 'Malaysia', digits: 10, placeholder: '012 345 6789' },
+                'th': { name: 'Thailand', digits: 9, placeholder: '081 234 5678' },
+                'ph': { name: 'Philippines', digits: 10, placeholder: '0917 123 4567' },
+                'id': { name: 'Indonesia', digits: 12, placeholder: '0812 3456 7890' },
+                'vn': { name: 'Vietnam', digits: 9, placeholder: '091 234 56 78' },
+                'in': { name: 'India', digits: 10, placeholder: '91234 56789' },
+                'pk': { name: 'Pakistan', digits: 10, placeholder: '0301 2345678' },
+                'bd': { name: 'Bangladesh', digits: 10, placeholder: '01712 345678' },
+                'lk': { name: 'Sri Lanka', digits: 9, placeholder: '071 234 5678' },
+                'tr': { name: 'Turkey', digits: 10, placeholder: '0532 123 45 67' },
+                'il': { name: 'Israel', digits: 9, placeholder: '050 123 4567' },
+                'eg': { name: 'Egypt', digits: 10, placeholder: '0100 123 4567' },
+                'ng': { name: 'Nigeria', digits: 10, placeholder: '0803 123 4567' },
+                'mx': { name: 'Mexico', digits: 10, placeholder: '55 1234 5678' },
+                'br': { name: 'Brazil', digits: 11, placeholder: '11 91234 5678' },
+                'ar': { name: 'Argentina', digits: 10, placeholder: '11 1234 5678' },
+                'ru': { name: 'Russia', digits: 10, placeholder: '8 912 345 6789' }
+            };
+        }
+
+        init() {
+            this.setupGlobalErrorHandling();
+            this.initializePhoneInput();
+            this.setupFormValidation();
+            this.setupWebflowConflictPrevention();
+        }
+
+        setupGlobalErrorHandling() {
+            document.addEventListener('DOMContentLoaded', () => {
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => {
+                    form.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        return false;
+                    });
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && (e.target.type === 'text' || e.target.type === 'email' || e.target.type === 'tel')) {
+                        e.preventDefault();
+                        const submitBtn = document.getElementById('submitBtn');
+                        if (submitBtn && this.isContactFormVisible()) {
+                            submitBtn.click();
+                        }
+                    }
+                });
+
+                // Override any existing validation functions that might be called
+                this.overrideOldValidationCalls();
+            });
+        }
+
+        overrideOldValidationCalls() {
+            // Create global functions that redirect to the new validation system
+            window.validateContactForm = () => this.validateContactForm();
+            window.validatePhoneField = () => this.validateField('phone');
+            window.validateNameField = () => this.validateField('full-name');
+            window.validateEmailField = () => this.validateField('email');
+            
+            // Handle successful contact form submission globally
+            window.handleContactFormSubmit = () => this.handleSuccessfulSubmission();
+        }
+
+        isContactFormVisible() {
+            const contactSection = document.getElementById('personal-details-section');
+            return contactSection && contactSection.offsetParent !== null;
+        }
+
+        initializePhoneInput() {
+            const phoneField = document.getElementById('phone');
+            if (!phoneField || this.phoneInput) return;
+
+            try {
+                this.phoneInput = window.intlTelInput(phoneField, {
+                    preferredCountries: ["ae", "sa", "kw", "bh", "om", "qa"],
+                    initialCountry: "ae",
+                    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.2.1/js/utils.js",
+                    separateDialCode: true,
+                    formatOnDisplay: true,
+                    autoPlaceholder: "polite",
+                    formatAsYouType: true,
+                    strictMode: true
+                });
+
+                this.setupPhoneEventListeners(phoneField);
+                this.setInitialPlaceholder();
+            } catch (error) {
+                this.setupBasicPhoneValidation(phoneField);
+            }
+        }
+
+        setupPhoneEventListeners(phoneField) {
+            phoneField.addEventListener('keydown', (e) => {
+                this.handlePhoneKeydown(e);
+            });
+
+            phoneField.addEventListener('input', (e) => {
+                this.clearFieldError('phone');
+                this.restrictPhoneInput(e.target);
+            });
+
+            phoneField.addEventListener('blur', () => {
+                this.validateField('phone');
+            });
+
+            if (this.phoneInput) {
+                phoneField.addEventListener("countrychange", () => {
+                    this.clearFieldError('phone');
+                    this.updatePhonePlaceholder();
+                });
+            }
+        }
+
+        handlePhoneKeydown(e) {
+            const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'];
+            const isNumber = /[0-9]/.test(e.key);
+            const isAllowedSpecial = /[\s\-\(\)\+]/.test(e.key);
+            const isModifierKey = e.ctrlKey || e.metaKey || e.altKey;
+
+            if (!allowedKeys.includes(e.key) && !isNumber && !isAllowedSpecial && !isModifierKey) {
+                e.preventDefault();
+            }
+        }
+
+        restrictPhoneInput(input) {
+            const cleaned = input.value.replace(/[^\d\s\-\(\)\+]/g, '');
+            if (cleaned !== input.value) {
+                input.value = cleaned;
+            }
+
+            const countryData = this.getCurrentCountryData();
+            const digitsOnly = cleaned.replace(/\D/g, '');
+            if (digitsOnly.length > countryData.digits + 2) {
+                const truncated = cleaned.substring(0, cleaned.length - 1);
+                input.value = truncated;
+            }
+        }
+
+        getCurrentCountryData() {
+            if (this.phoneInput) {
+                const selectedCountry = this.phoneInput.getSelectedCountryData();
+                return this.countryData[selectedCountry.iso2] || { name: 'Unknown', digits: 10, placeholder: 'Phone number' };
+            }
+            return this.countryData['ae'];
+        }
+
+        setInitialPlaceholder() {
+            const phoneField = document.getElementById('phone');
+            const countryData = this.getCurrentCountryData();
+            if (phoneField) {
+                phoneField.placeholder = countryData.placeholder;
+            }
+        }
+
+        updatePhonePlaceholder() {
+            const phoneField = document.getElementById('phone');
+            const countryData = this.getCurrentCountryData();
+            if (phoneField) {
+                phoneField.placeholder = countryData.placeholder;
+            }
+        }
+
+        setupBasicPhoneValidation(phoneField) {
+            phoneField.addEventListener('input', (e) => {
+                this.clearFieldError('phone');
+                this.restrictPhoneInput(e.target);
+            });
+
+            phoneField.addEventListener('blur', () => {
+                this.validateField('phone');
+            });
+        }
+
+        setupFormValidation() {
+            const nameField = document.getElementById('full-name');
+            if (nameField) {
+                nameField.addEventListener('keydown', (e) => {
+                    this.handleNameKeydown(e);
+                });
+
+                nameField.addEventListener('input', () => {
+                    this.clearFieldError('full-name');
+                });
+
+                nameField.addEventListener('blur', () => {
+                    this.validateField('full-name');
+                });
+            }
+
+            const emailField = document.getElementById('email');
+            if (emailField) {
+                emailField.addEventListener('input', () => {
+                    this.clearFieldError('email');
+                });
+
+                emailField.addEventListener('blur', () => {
+                    this.validateField('email');
+                });
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', (e) => {
+                    this.handleFormSubmit(e);
+                });
+            }
+        }
+
+        handleNameKeydown(e) {
+            const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'];
+            const isLetter = /[a-zA-Z\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\u0370-\u03FF\u0400-\u04FF\u1E00-\u1EFF\u1F00-\u1FFF\u2100-\u214F\u0100-\u017F\u1EA0-\u1EF9\u00C0-\u024F\u1E00-\u1EFF]/.test(e.key);
+            const isAllowedSpecial = /[\s\-\.']/.test(e.key);
+            const isModifierKey = e.ctrlKey || e.metaKey || e.altKey;
+
+            if (!allowedKeys.includes(e.key) && !isLetter && !isAllowedSpecial && !isModifierKey) {
+                e.preventDefault();
+            }
+        }
+
+        setupWebflowConflictPrevention() {
+            setTimeout(() => {
+                const errorElements = document.querySelectorAll(`.${this.errorPrefix}error-message`);
+                errorElements.forEach(el => {
+                    el.style.cssText = `
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: relative !important;
+                        z-index: 9999 !important;
+                        pointer-events: none !important;
+                        color: #EB5F40 !important;
+                        font-size: 14px !important;
+                        margin-top: 5px !important;
+                        font-family: "Plus Jakarta Sans", sans-serif !important;
+                        line-height: 1.3 !important;
+                    `;
+                });
+            }, 100);
+        }
+
+        validateField(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (!field) return true;
+
+            const fieldType = this.getFieldType(fieldId);
+            const value = field.value.trim();
+            const rules = this.validationRules[fieldType];
+
+            this.clearFieldError(fieldId);
+
+            if (rules.required && !value) {
+                this.showFieldError(fieldId, fieldType, 'required');
+                return false;
+            }
+
+            if (!value && !rules.required) return true;
+
+            switch (fieldType) {
+                case 'name':
+                    return this.validateName(field, value);
+                case 'email':
+                    return this.validateEmail(field, value);
+                case 'phone':
+                    return this.validatePhone(field, value);
+                default:
+                    return true;
+            }
+        }
+
+        getFieldType(fieldId) {
+            if (fieldId === 'full-name') return 'name';
+            if (fieldId === 'email') return 'email';
+            if (fieldId === 'phone') return 'phone';
+            return 'text';
+        }
+
+        validateName(field, value) {
+            const rules = this.validationRules.name;
+
+            if (value.length < rules.minLength) {
+                this.showFieldError(field.id, 'name', 'minLength');
+                return false;
+            }
+
+            if (value.length > rules.maxLength) {
+                this.showFieldError(field.id, 'name', 'maxLength');
+                return false;
+            }
+
+            if (rules.forbiddenChars.test(value)) {
+                this.showFieldError(field.id, 'name', 'forbiddenChars');
+                return false;
+            }
+
+            if (!rules.pattern.test(value)) {
+                this.showFieldError(field.id, 'name', 'pattern');
+                return false;
+            }
+
+            return true;
+        }
+
+        validateEmail(field, value) {
+            const rules = this.validationRules.email;
+
+            if (value.length > rules.maxLength) {
+                this.showFieldError(field.id, 'email', 'maxLength');
+                return false;
+            }
+
+            if (!rules.pattern.test(value)) {
+                this.showFieldError(field.id, 'email', 'pattern');
+                return false;
+            }
+
+            return true;
+        }
+
+        validatePhone(field, value) {
+            if (!value) {
+                this.showFieldError(field.id, 'phone', 'required');
+                return false;
+            }
+
+            const digitsOnly = value.replace(/\D/g, '');
+            const countryData = this.getCurrentCountryData();
+
+            if (this.phoneInput && typeof this.phoneInput.isValidNumber === 'function') {
+                try {
+                    const isValid = this.phoneInput.isValidNumber();
+                    const isPossible = this.phoneInput.isPossibleNumber ? this.phoneInput.isPossibleNumber() : true;
+
+                    if (!isValid) {
+                        if (digitsOnly.length < countryData.digits) {
+                            this.showPhoneError(field.id, 'tooShort', countryData, digitsOnly.length);
+                        } else if (digitsOnly.length > countryData.digits) {
+                            this.showPhoneError(field.id, 'tooLong', countryData, digitsOnly.length);
+                        } else if (!isPossible) {
+                            this.showPhoneError(field.id, 'invalidFormat', countryData);
+                        } else {
+                            this.showPhoneError(field.id, 'invalid', countryData);
+                        }
+                        return false;
+                    }
+                    return true;
+                } catch (error) {
+                    // Fall back to basic validation
+                }
+            }
+
+            if (digitsOnly.length < this.validationRules.phone.minDigits) {
+                this.showFieldError(field.id, 'phone', 'invalid');
+                return false;
+            }
+
+            if (digitsOnly.length > this.validationRules.phone.maxDigits) {
+                this.showFieldError(field.id, 'phone', 'invalid');
+                return false;
+            }
+
+            if (digitsOnly.length !== countryData.digits) {
+                if (digitsOnly.length < countryData.digits) {
+                    this.showPhoneError(field.id, 'tooShort', countryData, digitsOnly.length);
+                } else {
+                    this.showPhoneError(field.id, 'tooLong', countryData, digitsOnly.length);
+                }
+                return false;
+            }
+
+            return true;
+        }
+
+        showPhoneError(fieldId, errorType, countryData, actualLength = null) {
+            const message = this.errorMessages.phone[errorType]
+                .replace('{country}', countryData.name)
+                .replace('{expected}', countryData.digits)
+                .replace('{actual}', actualLength);
+            
+            this.displayError(fieldId, message);
+        }
+
+        showFieldError(fieldId, fieldType, errorType) {
+            const message = this.errorMessages[fieldType][errorType];
+            this.displayError(fieldId, message);
+        }
+
+        displayError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorId = `${this.errorPrefix}${fieldId}-error`;
+            const errorElement = document.getElementById(errorId);
+
+            if (field) {
+                field.classList.add(`${this.errorPrefix}error`);
+            }
+
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.cssText = `
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    position: relative !important;
+                    z-index: 9999 !important;
+                    pointer-events: none !important;
+                    color: #EB5F40 !important;
+                    font-size: 14px !important;
+                    margin-top: 5px !important;
+                    font-family: "Plus Jakarta Sans", sans-serif !important;
+                    line-height: 1.3 !important;
+                `;
+
+                setTimeout(() => {
+                    errorElement.style.cssText = `
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: relative !important;
+                        z-index: 9999 !important;
+                        pointer-events: none !important;
+                        color: #EB5F40 !important;
+                        font-size: 14px !important;
+                        margin-top: 5px !important;
+                        font-family: "Plus Jakarta Sans", sans-serif !important;
+                        line-height: 1.3 !important;
+                    `;
+                }, 50);
+            }
+        }
+
+        clearFieldError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const errorId = `${this.errorPrefix}${fieldId}-error`;
+            const errorElement = document.getElementById(errorId);
+
+            if (field) {
+                field.classList.remove(`${this.errorPrefix}error`);
+            }
+
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+            }
+        }
+
+        clearAllErrors() {
+            const errorElements = document.querySelectorAll(`.${this.errorPrefix}error-message`);
+            errorElements.forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
+
+            const errorFields = document.querySelectorAll(`.${this.errorPrefix}error`);
+            errorFields.forEach(field => {
+                field.classList.remove(`${this.errorPrefix}error`);
+            });
+        }
+
+        validateContactForm() {
+            this.clearAllErrors();
+            
+            const fields = ['full-name', 'email', 'phone'];
+            let isValid = true;
+
+            fields.forEach(fieldId => {
+                if (!this.validateField(fieldId)) {
+                    isValid = false;
+                }
+            });
+
+            return isValid;
+        }
+
+        handleFormSubmit(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const submitBtn = e.target;
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Validating...';
+
+            setTimeout(() => {
+                const isValid = this.validateContactForm();
+                
+                if (isValid) {
+                    submitBtn.innerHTML = '✓ Valid';
+                    submitBtn.classList.add('validated');
+                    
+                    if (typeof window.handleContactFormSubmit === 'function') {
+                        window.handleContactFormSubmit();
+                    } else {
+                        this.handleSuccessfulSubmission();
+                    }
+                } else {
+                    submitBtn.innerHTML = 'Please fix errors';
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }, 2000);
+                }
+            }, 100);
+        }
+
+        handleSuccessfulSubmission() {
+            // Scroll to the next section (company setup)
+            const nextSection = document.getElementById('company-setup-section');
+            if (nextSection) {
+                const headerOffset = 80; // Account for any fixed headers
+                const elementPosition = nextSection.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+
+            // Also trigger the custom event for other parts of the application
+            const nextStepEvent = new CustomEvent('contactFormValid', {
+                detail: {
+                    name: document.getElementById('full-name').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value
+                }
+            });
+            document.dispatchEvent(nextStepEvent);
+        }
+
+        getFormData() {
+            return {
+                name: document.getElementById('full-name')?.value?.trim() || '',
+                email: document.getElementById('email')?.value?.trim() || '',
+                phone: document.getElementById('phone')?.value?.trim() || ''
+            };
+        }
+
+        resetForm() {
+            this.clearAllErrors();
+            const fields = ['full-name', 'email', 'phone'];
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.value = '';
+                }
+            });
+        }
+
+        validateSpecificField(fieldId) {
+            return this.validateField(fieldId);
+        }
+    }
+
+    // Initialize the validator
+    let formValidator;
+    document.addEventListener('DOMContentLoaded', () => {
+        formValidator = new FormValidator();
+        window.formValidator = formValidator;
+    });
+
     // Addon viewport detection function
     window.checkAddonViewport = function() {
         // Only check if pricing is revealed and addon section hasn't been interacted with yet
@@ -38,7 +727,7 @@
         const isVisible = rect.top < windowHeight && rect.bottom > 0;
         
         if (isVisible) {
-            sectionInteractions.addonsSection = true;
+            markPreviousSectionsAsInteracted('addonsSection');
             calculateCosts();
         }
     };
@@ -174,7 +863,7 @@
         licenseCards.forEach(card => {
             card.addEventListener('click', function() {
                 const licenseType = this.getAttribute('data-license');
-                sectionInteractions.licenseSection = true;
+                markPreviousSectionsAsInteracted('licenseSection');
                 selectLicenseType(licenseType);
                 });
             });
@@ -183,7 +872,7 @@
             btn.addEventListener('click', function(e) {
                 e.stopPropagation(); // Prevent card click
                 const licenseType = this.getAttribute('data-license');
-                sectionInteractions.licenseSection = true;
+                markPreviousSectionsAsInteracted('licenseSection');
                 selectLicenseType(licenseType);
                     });
                 });
@@ -228,8 +917,8 @@
                 
                 document.getElementById('license-duration').value = value;
                 
-                // Mark duration section as interacted
-                sectionInteractions.durationSection = true;
+                // Mark duration section and all previous sections as interacted
+                markPreviousSectionsAsInteracted('durationSection');
                 calculateCosts();
                 });
             });
@@ -244,8 +933,8 @@
                 const value = this.getAttribute('data-value');
                 document.getElementById('shareholders-range').value = value;
                 
-                // Mark shareholders section as interacted
-                sectionInteractions.shareholdersSection = true;
+                // Mark shareholders section and all previous sections as interacted
+                markPreviousSectionsAsInteracted('shareholdersSection');
                 calculateCosts();
                     });
                 });
@@ -287,7 +976,7 @@
                 }
                 
                 // Clear any existing error messages when services are selected
-                const existingErrors = document.querySelectorAll('.tax-compliance-warning, .error-message');
+                const existingErrors = document.querySelectorAll('.tax-compliance-warning, .calc-error-message');
                 existingErrors.forEach(error => {
                     if (error.style.display !== 'none') {
                         error.style.display = 'none';
@@ -299,8 +988,8 @@
                     checkTaxCompliance();
                 }
                 
-                // Mark addons section as interacted when any service pill is clicked
-                sectionInteractions.addonsSection = true;
+                // Mark addons section and all previous sections as interacted when any service pill is clicked
+                markPreviousSectionsAsInteracted('addonsSection');
                 
                 // Trigger calculation
                 calculateCosts();
@@ -859,8 +1548,8 @@
     function addActivityToSelected(activity, groupName) {
         if (!window.selectedActivities.some(item => item.Code === activity.Code)) {
             window.selectedActivities.push({ ...activity, groupName, Group: activity.Group });
-            // Mark business activities section as interacted when an activity is added
-            sectionInteractions.businessActivitiesSection = true;
+            // Mark business activities section and all previous sections as interacted
+            markPreviousSectionsAsInteracted('businessActivitiesSection');
         }
     }
 
@@ -1138,7 +1827,7 @@
                 }
                 
                 // Clear any existing error messages when services are selected
-                const existingErrors = document.querySelectorAll('.tax-compliance-warning, .error-message');
+                const existingErrors = document.querySelectorAll('.tax-compliance-warning, .calc-error-message');
                 existingErrors.forEach(error => {
                     if (error.style.display !== 'none') {
                         error.style.display = 'none';
@@ -1858,53 +2547,186 @@
             }
         }
     }
-
-    // Validate entire form before submission
+    // Validate entire form before submission - now uses centralized FormValidator
     function validateForm() {
+        // Use the new centralized validation system
+        if (window.formValidator) {
+            return window.formValidator.validateContactForm();
+        }
+        
+        // Fallback for backwards compatibility
+        return window.validateContactForm ? window.validateContactForm() : true;
+    }
+
+    function validateContactForm() {
         let valid = true;
-
+        
         // Clear previous error messages
-        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-        document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-
+        document.querySelectorAll('.calc-error-message').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        document.querySelectorAll('.calc-error').forEach(el => {
+            el.classList.remove('calc-error');
+        });
+        
         // Validate required fields
-        const requiredInputs = document.querySelectorAll("input[required], select[required]");
-        requiredInputs.forEach(input => {
-            const errorElement = document.getElementById(`${input.id}-error`);
-
-            if (!input.value) {
-                input.classList.add('error');
-                if (errorElement) errorElement.textContent = "This field is required";
-                valid = false;
-            }
-
-            if (input.type === "email" && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) {
-                input.classList.add('error');
-                if (errorElement) errorElement.textContent = "Please enter a valid email address";
-                valid = false;
-            }
-
-            if (input.type === "tel" && input.value && !phoneInput.isValidNumber()) {
-                input.classList.add('error');
+        document.querySelectorAll('.calc-required').forEach(input => {
+            const errorElement = input.nextElementSibling;
+            
+            if (!input.value.trim()) {
+                input.classList.add('calc-error');
                 if (errorElement) {
-                    const countryData = phoneInput.getSelectedCountryData();
-                    if (!phoneInput.isPossibleNumber()) {
-                        errorElement.textContent = `Invalid phone number format for ${countryData.name}`;
-                    } else {
-                        errorElement.textContent = `Phone number is too short or too long for ${countryData.name}`;
-                    }
+                    errorElement.textContent = "This field is required";
+                    errorElement.style.display = 'block !important';
+                    errorElement.style.visibility = 'visible !important';
+                    errorElement.style.opacity = '1 !important';
                 }
                 valid = false;
             }
 
-            if (input.id === "full-name" && input.value && !/^[A-Za-z\s\-\']{2,}$/.test(input.value)) {
-                input.classList.add('error');
-                if (errorElement) {
-                    if (input.value.trim().length < 2) {
-                        errorElement.textContent = "Name must be at least 2 characters long";
+            if (input.type === "tel" && input.value) {
+                let isPhoneValid = false;
+                let errorMessage = '';
+                
+                try {
+                    if (typeof phoneInput !== 'undefined' && 
+                        typeof phoneInput.isValidNumber === 'function') {
+                        isPhoneValid = phoneInput.isValidNumber();
+                        
+                        if (!isPhoneValid) {
+                            const countryData = phoneInput.getSelectedCountryData();
+                            const digitsOnly = input.value.replace(/\D/g, '');
+                            
+                            // Country-specific expected lengths
+                            const expectedLengths = {
+                                'ae': 9,  // UAE: 9 digits
+                                'sa': 9,  // Saudi Arabia: 9 digits  
+                                'kw': 8,  // Kuwait: 8 digits
+                                'bh': 8,  // Bahrain: 8 digits
+                                'om': 8,  // Oman: 8 digits
+                                'qa': 8,  // Qatar: 8 digits
+                                'us': 10, // USA: 10 digits
+                                'gb': 11, // UK: 11 digits
+                            };
+                            
+                            const expectedLength = expectedLengths[countryData.iso2] || 10;
+                            
+                            if (digitsOnly.length < expectedLength) {
+                                errorMessage = `Phone number is too short for ${countryData.name}. Expected ${expectedLength} digits, got ${digitsOnly.length}.`;
+                            } else if (digitsOnly.length > expectedLength) {
+                                errorMessage = `Phone number is too long for ${countryData.name}. Expected ${expectedLength} digits, got ${digitsOnly.length}.`;
+                            } else {
+                                try {
+                                    if (typeof phoneInput.isPossibleNumber === 'function' && 
+                                        !phoneInput.isPossibleNumber()) {
+                                        errorMessage = `Invalid phone number format for ${countryData.name}`;
+                                    } else {
+                                        errorMessage = `Please enter a valid phone number for ${countryData.name}`;
+                                    }
+                                } catch (err) {
+                                    errorMessage = `Invalid phone number format for ${countryData.name}`;
+                                }
+                            }
+                        }
                     } else {
-                        errorElement.textContent = "Name should contain only letters, spaces, hyphens, and apostrophes";
+                        // Fallback validation if phoneInput not available
+                        const countryData = phoneInput.getSelectedCountryData();
+                        const phoneValue = input.value.replace(/\D/g, '');
+                        const expectedLengths = {
+                            'ae': 9, 'sa': 9, 'kw': 8, 'bh': 8, 'om': 8, 'qa': 8, 'us': 10, 'ca': 10, 'gb': 11, 'au': 9, 'nz': 9, 'ie': 9, 'za': 9,
+                            'de': 11, 'fr': 10, 'it': 10, 'es': 9, 'pt': 9, 'nl': 9, 'be': 9, 'at': 11, 'ch': 9, 'se': 9, 'no': 8, 'dk': 8, 'fi': 9,
+                            'pl': 9, 'cz': 9, 'hu': 9, 'ro': 9, 'bg': 9, 'hr': 9, 'si': 8, 'sk': 9, 'lt': 8, 'lv': 8, 'ee': 8, 'gr': 10, 'cy': 8, 'mt': 8, 'lu': 9,
+                            'jp': 11, 'kr': 11, 'cn': 11, 'hk': 8, 'tw': 9, 'sg': 8, 'my': 10, 'th': 9, 'ph': 10, 'id': 12, 'vn': 9, 'in': 10, 'pk': 10, 'bd': 10,
+                            'lk': 9, 'np': 10, 'mm': 9, 'kh': 9, 'la': 9, 'bn': 7, 'mv': 7, 'tr': 10, 'il': 9, 'ps': 9, 'jo': 9, 'lb': 8, 'sy': 9, 'iq': 10,
+                            'ir': 10, 'af': 9, 'eg': 10, 'ly': 9, 'tn': 8, 'dz': 9, 'ma': 9, 'sd': 9, 'ye': 9, 'ng': 10, 'gh': 9, 'ke': 9, 'tz': 9, 'ug': 9,
+                            'rw': 9, 'et': 9, 'zm': 9, 'zw': 9, 'bw': 8, 'mz': 9, 'ao': 9, 'cm': 9, 'ci': 10, 'sn': 9, 'ml': 8, 'bf': 8, 'mx': 10, 'br': 11,
+                            'ar': 10, 'cl': 9, 'co': 10, 'pe': 9, 've': 10, 'ec': 9, 'uy': 8, 'py': 9, 'bo': 8, 'cr': 8, 'pa': 8, 'gt': 8, 'hn': 8, 'sv': 8,
+                            'ni': 8, 'bz': 7, 'jm': 10, 'tt': 10, 'bb': 10, 'bs': 10, 'do': 10, 'pr': 10, 'cu': 8, 'ht': 8, 'ru': 10, 'ua': 9, 'by': 9,
+                            'md': 8, 'ge': 9, 'am': 8, 'az': 9, 'kz': 10, 'kg': 9, 'tj': 9, 'tm': 8, 'uz': 9, 'mn': 8, 'is': 7, 'fo': 6, 'gl': 6
+                        };
+                        const expectedLength = expectedLengths[countryData.iso2] || 10;
+                        
+                        if (phoneValue.length === expectedLength) {
+                            isPhoneValid = true;
+                        } else if (phoneValue.length < expectedLength) {
+                            isPhoneValid = false;
+                            errorMessage = `Phone number is too short for ${countryData.name}. Expected ${expectedLength} digits, got ${phoneValue.length}.`;
+                        } else if (phoneValue.length > expectedLength) {
+                            isPhoneValid = false;
+                            errorMessage = `Phone number is too long for ${countryData.name}. Expected ${expectedLength} digits, got ${phoneValue.length}.`;
+                        } else {
+                            isPhoneValid = false;
+                            errorMessage = `Invalid phone number format for ${countryData.name}`;
+                        }
                     }
+                } catch (err) {
+                    // Fallback validation
+                    try {
+                        const countryData = phoneInput.getSelectedCountryData();
+                        const phoneValue = input.value.replace(/\D/g, '');
+                        const expectedLengths = {
+                            'ae': 9, 'sa': 9, 'kw': 8, 'bh': 8, 'om': 8, 'qa': 8, 'us': 10, 'ca': 10, 'gb': 11, 'au': 9, 'nz': 9, 'ie': 9, 'za': 9,
+                            'de': 11, 'fr': 10, 'it': 10, 'es': 9, 'pt': 9, 'nl': 9, 'be': 9, 'at': 11, 'ch': 9, 'se': 9, 'no': 8, 'dk': 8, 'fi': 9,
+                            'pl': 9, 'cz': 9, 'hu': 9, 'ro': 9, 'bg': 9, 'hr': 9, 'si': 8, 'sk': 9, 'lt': 8, 'lv': 8, 'ee': 8, 'gr': 10, 'cy': 8, 'mt': 8, 'lu': 9,
+                            'jp': 11, 'kr': 11, 'cn': 11, 'hk': 8, 'tw': 9, 'sg': 8, 'my': 10, 'th': 9, 'ph': 10, 'id': 12, 'vn': 9, 'in': 10, 'pk': 10, 'bd': 10,
+                            'lk': 9, 'np': 10, 'mm': 9, 'kh': 9, 'la': 9, 'bn': 7, 'mv': 7, 'tr': 10, 'il': 9, 'ps': 9, 'jo': 9, 'lb': 8, 'sy': 9, 'iq': 10,
+                            'ir': 10, 'af': 9, 'eg': 10, 'ly': 9, 'tn': 8, 'dz': 9, 'ma': 9, 'sd': 9, 'ye': 9, 'ng': 10, 'gh': 9, 'ke': 9, 'tz': 9, 'ug': 9,
+                            'rw': 9, 'et': 9, 'zm': 9, 'zw': 9, 'bw': 8, 'mz': 9, 'ao': 9, 'cm': 9, 'ci': 10, 'sn': 9, 'ml': 8, 'bf': 8, 'mx': 10, 'br': 11,
+                            'ar': 10, 'cl': 9, 'co': 10, 'pe': 9, 've': 10, 'ec': 9, 'uy': 8, 'py': 9, 'bo': 8, 'cr': 8, 'pa': 8, 'gt': 8, 'hn': 8, 'sv': 8,
+                            'ni': 8, 'bz': 7, 'jm': 10, 'tt': 10, 'bb': 10, 'bs': 10, 'do': 10, 'pr': 10, 'cu': 8, 'ht': 8, 'ru': 10, 'ua': 9, 'by': 9,
+                            'md': 8, 'ge': 9, 'am': 8, 'az': 9, 'kz': 10, 'kg': 9, 'tj': 9, 'tm': 8, 'uz': 9, 'mn': 8, 'is': 7, 'fo': 6, 'gl': 6
+                        };
+                        const expectedLength = expectedLengths[countryData.iso2] || 10;
+                        
+                        if (phoneValue.length === expectedLength) {
+                            isPhoneValid = true;
+                        } else if (phoneValue.length < expectedLength) {
+                            isPhoneValid = false;
+                            errorMessage = `Phone number is too short. Expected ${expectedLength} digits, got ${phoneValue.length}.`;
+                        } else if (phoneValue.length > expectedLength) {
+                            isPhoneValid = false;
+                            errorMessage = `Phone number is too long. Expected ${expectedLength} digits, got ${phoneValue.length}.`;
+                        } else {
+                            isPhoneValid = false;
+                            errorMessage = "Invalid phone number format";
+                        }
+                    } catch (innerErr) {
+                        // Final fallback
+                        const phoneValue = input.value.replace(/\D/g, '');
+                        isPhoneValid = phoneValue.length >= 8 && phoneValue.length <= 15;
+                        if (!isPhoneValid) {
+                            errorMessage = "Please enter a valid phone number";
+                        }
+                    }
+                }
+                
+                if (!isPhoneValid) {
+                    input.classList.add('calc-error');
+                    if (errorElement) {
+                        errorElement.textContent = errorMessage;
+                        errorElement.style.display = 'block !important';
+                        errorElement.style.visibility = 'visible !important';
+                        errorElement.style.opacity = '1 !important';
+                    }
+                    valid = false;
+                }
+            }
+
+            if (input.id === "full-name" && input.value && !/^[A-Za-z\s\-\']{2,}$/.test(input.value)) {
+                input.classList.add('calc-error');
+                if (errorElement) {
+                    let errorMessage = '';
+                    if (input.value.trim().length < 2) {
+                        errorMessage = "Name must be at least 2 characters long";
+                    } else {
+                        errorMessage = "Name should contain only letters, spaces, hyphens, and apostrophes";
+                    }
+                    
+                    errorElement.textContent = errorMessage;
+                    errorElement.style.display = 'block !important';
+                    errorElement.style.visibility = 'visible !important';
+                    errorElement.style.opacity = '1 !important';
                 }
                 valid = false;
             }
@@ -1914,39 +2736,39 @@
         const licenseTypeInput = document.getElementById("license-type");
         if (!licenseTypeInput.value) {
             const licenseCardsContainer = document.querySelector('.license-cards-container');
-            if (licenseCardsContainer && !licenseCardsContainer.querySelector('.error-message')) {
-                    const licenseErrorElement = document.createElement('div');
-                    licenseErrorElement.className = 'error-message';
-                    licenseErrorElement.textContent = "Please select a license type";
+            if (licenseCardsContainer && !licenseCardsContainer.querySelector('.calc-error-message')) {
+                const licenseErrorElement = document.createElement('div');
+                licenseErrorElement.className = 'calc-error-message';
+                licenseErrorElement.textContent = "Please select a license type";
                 licenseErrorElement.style.textAlign = "center";
                 licenseErrorElement.style.marginTop = "15px";
                 licenseErrorElement.style.color = "#EB5F40";
                 licenseCardsContainer.appendChild(licenseErrorElement);
-                }
-                valid = false;
+            }
+            valid = false;
         }
         
         // Validate business activities
-            if (window.selectedActivities.length === 0) {
+        if (window.selectedActivities.length === 0) {
             const activitiesContainer = document.getElementById('business-activities-section');
-                if (activitiesContainer && !activitiesContainer.querySelector('.activity-error')) {
-                    const activityErrorElement = document.createElement('div');
-                    activityErrorElement.className = 'error-message activity-error';
-                    activityErrorElement.textContent = "Please select at least one business activity";
-                    activityErrorElement.style.textAlign = "center";
-                    activityErrorElement.style.marginTop = "15px";
-                    activityErrorElement.style.padding = "10px";
-                    activityErrorElement.style.borderRadius = "8px";
-                    activityErrorElement.style.backgroundColor = "rgba(235, 95, 64, 0.1)";
-                    activityErrorElement.style.color = "#EB5F40";
-                    activityErrorElement.style.fontWeight = "500";
-                    activityErrorElement.style.fontSize = "14px";
-                    activityErrorElement.style.fontFamily = "Plus Jakarta Sans";
-                    activityErrorElement.style.width = "100%";
-                    
-                        activitiesContainer.appendChild(activityErrorElement);
-                }
-                valid = false;
+            if (activitiesContainer && !activitiesContainer.querySelector('.activity-error')) {
+                const activityErrorElement = document.createElement('div');
+                activityErrorElement.className = 'calc-error-message activity-error';
+                activityErrorElement.textContent = "Please select at least one business activity";
+                activityErrorElement.style.textAlign = "center";
+                activityErrorElement.style.marginTop = "15px";
+                activityErrorElement.style.padding = "10px";
+                activityErrorElement.style.borderRadius = "8px";
+                activityErrorElement.style.backgroundColor = "rgba(235, 95, 64, 0.1)";
+                activityErrorElement.style.color = "#EB5F40";
+                activityErrorElement.style.fontWeight = "500";
+                activityErrorElement.style.fontSize = "14px";
+                activityErrorElement.style.fontFamily = "Plus Jakarta Sans";
+                activityErrorElement.style.width = "100%";
+                
+                activitiesContainer.appendChild(activityErrorElement);
+            }
+            valid = false;
         }
 
         return valid;
@@ -2297,10 +3119,17 @@
             }
         }
         
-        // Update immigration card fee
+        // Update immigration card fee and show/hide row
         const immigrationCardElement = document.getElementById("immigration-card-cost");
-        if (immigrationCardElement) {
-            immigrationCardElement.innerText = window.immigrationCardFee > 0 ? `AED ${window.immigrationCardFee.toLocaleString()}` : 'AED 0';
+        const immigrationCardRow = document.getElementById("immigration-card-row");
+        if (immigrationCardElement && immigrationCardRow) {
+            if (window.immigrationCardFee > 0) {
+                immigrationCardElement.innerText = `AED ${window.immigrationCardFee.toLocaleString()}`;
+                immigrationCardRow.style.display = 'flex';
+            } else {
+                immigrationCardElement.innerText = 'AED 0';
+                immigrationCardRow.style.display = 'none';
+            }
         }
         
         // Update change status section and show/hide
@@ -2736,8 +3565,8 @@
         userHasInteracted = true;
         
         // Clear any existing error styling during typing (but don't validate yet)
-        phoneInputField.classList.remove('error');
-        const errorElement = document.getElementById('phone-error');
+        phoneInputField.classList.remove('calc-error');
+        const errorElement = document.getElementById('calc-phone-error');
         if (errorElement) {
             errorElement.style.display = 'none';
         }
@@ -2777,8 +3606,8 @@
     // Handle country change to clear validation and update placeholder
     phoneInputField.addEventListener("countrychange", function() {
         // Clear any existing validation when country changes
-        phoneInputField.classList.remove('error');
-        const errorElement = document.getElementById('phone-error');
+        phoneInputField.classList.remove('calc-error');
+        const errorElement = document.getElementById('calc-phone-error');
         if (errorElement) {
             errorElement.textContent = '';
             errorElement.style.display = 'none';
@@ -2787,14 +3616,176 @@
         // Update placeholder based on selected country
         const countryData = phoneInput.getSelectedCountryData();
         const countryPlaceholders = {
-            'ae': '50 123 4567',
-            'sa': '50 123 4567', 
-            'kw': '9999 9999',
-            'bh': '9999 9999',
-            'om': '9999 9999',
-            'qa': '9999 9999',
-            'us': '(201) 555-0123',
-            'gb': '07400 123456'
+            // GCC Countries
+            'ae': '50 123 4567',       // UAE
+            'sa': '50 123 4567',       // Saudi Arabia
+            'kw': '9999 9999',         // Kuwait
+            'bh': '9999 9999',         // Bahrain
+            'om': '9999 9999',         // Oman
+            'qa': '9999 9999',         // Qatar
+            
+            // Major English-speaking countries
+            'us': '(201) 555-0123',    // USA
+            'ca': '(416) 555-0123',    // Canada
+            'gb': '07400 123456',      // UK
+            'au': '0400 123 456',      // Australia
+            'nz': '021 123 456',       // New Zealand
+            'ie': '085 123 4567',      // Ireland
+            'za': '082 123 4567',      // South Africa
+            
+            // European Union
+            'de': '0151 12345678',     // Germany
+            'fr': '06 12 34 56 78',    // France
+            'it': '320 123 4567',      // Italy
+            'es': '612 34 56 78',      // Spain
+            'pt': '912 345 678',       // Portugal
+            'nl': '06 12345678',       // Netherlands
+            'be': '0470 12 34 56',     // Belgium
+            'at': '0664 1234567',      // Austria
+            'ch': '078 123 45 67',     // Switzerland
+            'se': '070 123 45 67',     // Sweden
+            'no': '406 12 345',        // Norway
+            'dk': '20 12 34 56',       // Denmark
+            'fi': '040 123 4567',      // Finland
+            'pl': '512 345 678',       // Poland
+            'cz': '601 123 456',       // Czech Republic
+            'hu': '06 20 123 4567',    // Hungary
+            'ro': '0712 345 678',      // Romania
+            'bg': '087 123 4567',      // Bulgaria
+            'hr': '091 234 5678',      // Croatia
+            'si': '031 234 567',       // Slovenia
+            'sk': '0901 123 456',      // Slovakia
+            'lt': '8612 34567',        // Lithuania
+            'lv': '2012 3456',         // Latvia
+            'ee': '5123 4567',         // Estonia
+            'gr': '694 123 4567',      // Greece
+            'cy': '9612 3456',         // Cyprus
+            'mt': '9912 3456',         // Malta
+            'lu': '621 123 456',       // Luxembourg
+            
+            // Asia-Pacific
+            'jp': '090 1234 5678',     // Japan
+            'kr': '010 1234 5678',     // South Korea
+            'cn': '138 0013 8000',     // China
+            'hk': '9123 4567',         // Hong Kong
+            'tw': '0912 345 678',      // Taiwan
+            'sg': '8123 4567',         // Singapore
+            'my': '012 345 6789',      // Malaysia
+            'th': '081 234 5678',      // Thailand
+            'ph': '0917 123 4567',     // Philippines
+            'id': '0812 3456 7890',    // Indonesia
+            'vn': '091 234 56 78',     // Vietnam
+            'in': '91234 56789',       // India
+            'pk': '0301 2345678',      // Pakistan
+            'bd': '01712 345678',      // Bangladesh
+            'lk': '071 234 5678',      // Sri Lanka
+            'np': '984 123 4567',      // Nepal
+            'mm': '09 123 456 789',    // Myanmar
+            'kh': '012 345 678',       // Cambodia
+            'la': '020 123 4567',      // Laos
+            'bn': '712 3456',          // Brunei
+            'mv': '791 2345',          // Maldives
+            
+            // Middle East & North Africa
+            'tr': '0532 123 45 67',    // Turkey
+            'il': '050 123 4567',      // Israel
+            'ps': '059 123 4567',      // Palestine
+            'jo': '079 123 4567',      // Jordan
+            'lb': '71 123 456',        // Lebanon
+            'sy': '0944 123 456',      // Syria
+            'iq': '0790 123 4567',     // Iraq
+            'ir': '0912 345 6789',     // Iran
+            'af': '070 123 4567',      // Afghanistan
+            'eg': '0100 123 4567',     // Egypt
+            'ly': '091 234 5678',      // Libya
+            'tn': '20 123 456',        // Tunisia
+            'dz': '0551 23 45 67',     // Algeria
+            'ma': '0612 345678',       // Morocco
+            'sd': '091 123 4567',      // Sudan
+            'ye': '070 123 456',       // Yemen
+            
+            // Africa
+            'ng': '0803 123 4567',     // Nigeria
+            'gh': '024 123 4567',      // Ghana
+            'ke': '0712 345678',       // Kenya
+            'tz': '0754 123456',       // Tanzania
+            'ug': '0772 123456',       // Uganda
+            'rw': '078 123 4567',      // Rwanda
+            'et': '091 123 4567',      // Ethiopia
+            'zm': '097 123 4567',      // Zambia
+            'zw': '077 123 4567',      // Zimbabwe
+            'bw': '71 123 456',        // Botswana
+            'mz': '82 123 4567',       // Mozambique
+            'ao': '923 123 456',       // Angola
+            'cm': '6123 4567',         // Cameroon
+            'ci': '0123 456789',       // Côte d'Ivoire
+            'sn': '70 123 45 67',      // Senegal
+            'ml': '65 12 34 56',       // Mali
+            'bf': '70 12 34 56',       // Burkina Faso
+            
+            // Latin America
+            'mx': '55 1234 5678',      // Mexico
+            'br': '11 91234 5678',     // Brazil
+            'ar': '11 1234 5678',      // Argentina
+            'cl': '9 1234 5678',       // Chile
+            'co': '321 123 4567',      // Colombia
+            'pe': '912 345 678',       // Peru
+            've': '0412 1234567',      // Venezuela
+            'ec': '099 123 4567',      // Ecuador
+            'uy': '094 123 456',       // Uruguay
+            'py': '0981 123456',       // Paraguay
+            'bo': '6123 4567',         // Bolivia
+            'cr': '8312 3456',         // Costa Rica
+            'pa': '6123 4567',         // Panama
+            'gt': '5123 4567',         // Guatemala
+            'hn': '9123 4567',         // Honduras
+            'sv': '7123 4567',         // El Salvador
+            'ni': '8123 4567',         // Nicaragua
+            'bz': '612 3456',          // Belize
+            'jm': '876 123 4567',      // Jamaica
+            'tt': '868 123 4567',      // Trinidad and Tobago
+            'bb': '246 123 4567',      // Barbados
+            'bs': '242 123 4567',      // Bahamas
+            'do': '809 123 4567',      // Dominican Republic
+            'pr': '787 123 4567',      // Puerto Rico
+            'cu': '5123 4567',         // Cuba
+            'ht': '3123 4567',         // Haiti
+            
+            // Eastern Europe & Russia
+            'ru': '8 912 345 6789',    // Russia
+            'ua': '050 123 45 67',     // Ukraine
+            'by': '029 123 45 67',     // Belarus
+            'md': '0621 12345',        // Moldova
+            'ge': '555 123 456',       // Georgia
+            'am': '077 123 456',       // Armenia
+            'az': '050 123 45 67',     // Azerbaijan
+            'kz': '701 123 4567',      // Kazakhstan
+            'kg': '0555 123 456',      // Kyrgyzstan
+            'tj': '93 123 45 67',      // Tajikistan
+            'tm': '65 123 456',        // Turkmenistan
+            'uz': '90 123 45 67',      // Uzbekistan
+            'mn': '8812 3456',         // Mongolia
+            
+            // Nordic & Baltic (additional)
+            'is': '611 1234',          // Iceland
+            'fo': '211234',            // Faroe Islands
+            'gl': '221234',            // Greenland
+            
+            // Pacific Islands
+            'fj': '701 2345',          // Fiji
+            'pg': '7012 3456',         // Papua New Guinea
+            'vu': '591 2345',          // Vanuatu
+            'sb': '7412345',           // Solomon Islands
+            'nc': '123456',            // New Caledonia
+            'pf': '87 12 34 56',       // French Polynesia
+            'ws': '72 12345',          // Samoa
+            'to': '771 2345',          // Tonga
+            'ki': '7312 3456',         // Kiribati
+            'tv': '901 2345',          // Tuvalu
+            'nr': '555 1234',          // Nauru
+            'pw': '620 1234',          // Palau
+            'fm': '350 1234',          // Micronesia
+            'mh': '235 1234',          // Marshall Islands
         };
         phoneInputField.placeholder = countryPlaceholders[countryData.iso2] || "Phone number";
         
@@ -2812,10 +3803,10 @@
     // Strict phone validation function
     function validatePhoneField() {
         const phoneValue = phoneInputField.value.trim();
-        const errorElement = document.getElementById('phone-error');
+        const errorElement = document.getElementById('calc-phone-error');
         
         // Clear previous errors
-        phoneInputField.classList.remove('error');
+        phoneInputField.classList.remove('calc-error');
         if (errorElement) {
             errorElement.textContent = '';
             errorElement.style.display = 'none';
@@ -2826,31 +3817,239 @@
         // Get selected country data
         const countryData = phoneInput.getSelectedCountryData();
         
-        // Check if the number is valid using Google's libphonenumber
-        const isValid = phoneInput.isValidNumber();
-        const isPossible = phoneInput.isPossibleNumber();
-        const validationType = phoneInput.getValidationError();
-        
-        // Get number of digits entered
-        const digitsOnly = phoneValue.replace(/\D/g, '');
-        
-        // Country-specific expected lengths
+        // Country-specific expected lengths (defined early for fallback validation)
         const expectedLengths = {
+            // GCC Countries
             'ae': 9,  // UAE: 9 digits
             'sa': 9,  // Saudi Arabia: 9 digits  
             'kw': 8,  // Kuwait: 8 digits
             'bh': 8,  // Bahrain: 8 digits
             'om': 8,  // Oman: 8 digits
             'qa': 8,  // Qatar: 8 digits
+            
+            // Major English-speaking countries
             'us': 10, // USA: 10 digits
+            'ca': 10, // Canada: 10 digits
             'gb': 11, // UK: 11 digits
+            'au': 9,  // Australia: 9 digits
+            'nz': 9,  // New Zealand: 9 digits
+            'ie': 9,  // Ireland: 9 digits
+            'za': 9,  // South Africa: 9 digits
+            
+            // European Union
+            'de': 11, // Germany: 11 digits
+            'fr': 10, // France: 10 digits
+            'it': 10, // Italy: 10 digits
+            'es': 9,  // Spain: 9 digits
+            'pt': 9,  // Portugal: 9 digits
+            'nl': 9,  // Netherlands: 9 digits
+            'be': 9,  // Belgium: 9 digits
+            'at': 11, // Austria: 11 digits
+            'ch': 9,  // Switzerland: 9 digits
+            'se': 9,  // Sweden: 9 digits
+            'no': 8,  // Norway: 8 digits
+            'dk': 8,  // Denmark: 8 digits
+            'fi': 9,  // Finland: 9 digits
+            'pl': 9,  // Poland: 9 digits
+            'cz': 9,  // Czech Republic: 9 digits
+            'hu': 9,  // Hungary: 9 digits
+            'ro': 9,  // Romania: 9 digits
+            'bg': 9,  // Bulgaria: 9 digits
+            'hr': 9,  // Croatia: 9 digits
+            'si': 8,  // Slovenia: 8 digits
+            'sk': 9,  // Slovakia: 9 digits
+            'lt': 8,  // Lithuania: 8 digits
+            'lv': 8,  // Latvia: 8 digits
+            'ee': 8,  // Estonia: 8 digits
+            'gr': 10, // Greece: 10 digits
+            'cy': 8,  // Cyprus: 8 digits
+            'mt': 8,  // Malta: 8 digits
+            'lu': 9,  // Luxembourg: 9 digits
+            
+            // Asia-Pacific
+            'jp': 11, // Japan: 11 digits
+            'kr': 11, // South Korea: 11 digits
+            'cn': 11, // China: 11 digits
+            'hk': 8,  // Hong Kong: 8 digits
+            'tw': 9,  // Taiwan: 9 digits
+            'sg': 8,  // Singapore: 8 digits
+            'my': 10, // Malaysia: 10 digits
+            'th': 9,  // Thailand: 9 digits
+            'ph': 10, // Philippines: 10 digits
+            'id': 12, // Indonesia: 12 digits
+            'vn': 9,  // Vietnam: 9 digits
+            'in': 10, // India: 10 digits
+            'pk': 10, // Pakistan: 10 digits
+            'bd': 10, // Bangladesh: 10 digits
+            'lk': 9,  // Sri Lanka: 9 digits
+            'np': 10, // Nepal: 10 digits
+            'mm': 9,  // Myanmar: 9 digits
+            'kh': 9,  // Cambodia: 9 digits
+            'la': 9,  // Laos: 9 digits
+            'bn': 7,  // Brunei: 7 digits
+            'mv': 7,  // Maldives: 7 digits
+            
+            // Middle East & North Africa
+            'tr': 10, // Turkey: 10 digits
+            'il': 9,  // Israel: 9 digits
+            'ps': 9,  // Palestine: 9 digits
+            'jo': 9,  // Jordan: 9 digits
+            'lb': 8,  // Lebanon: 8 digits
+            'sy': 9,  // Syria: 9 digits
+            'iq': 10, // Iraq: 10 digits
+            'ir': 10, // Iran: 10 digits
+            'af': 9,  // Afghanistan: 9 digits
+            'eg': 10, // Egypt: 10 digits
+            'ly': 9,  // Libya: 9 digits
+            'tn': 8,  // Tunisia: 8 digits
+            'dz': 9,  // Algeria: 9 digits
+            'ma': 9,  // Morocco: 9 digits
+            'sd': 9,  // Sudan: 9 digits
+            'ye': 9,  // Yemen: 9 digits
+            
+            // Africa
+            'ng': 10, // Nigeria: 10 digits
+            'gh': 9,  // Ghana: 9 digits
+            'ke': 9,  // Kenya: 9 digits
+            'tz': 9,  // Tanzania: 9 digits
+            'ug': 9,  // Uganda: 9 digits
+            'rw': 9,  // Rwanda: 9 digits
+            'et': 9,  // Ethiopia: 9 digits
+            'ma': 9,  // Morocco: 9 digits
+            'dz': 9,  // Algeria: 9 digits
+            'tn': 8,  // Tunisia: 8 digits
+            'eg': 10, // Egypt: 10 digits
+            'zm': 9,  // Zambia: 9 digits
+            'zw': 9,  // Zimbabwe: 9 digits
+            'bw': 8,  // Botswana: 8 digits
+            'mz': 9,  // Mozambique: 9 digits
+            'ao': 9,  // Angola: 9 digits
+            'cm': 9,  // Cameroon: 9 digits
+            'ci': 10, // Côte d'Ivoire: 10 digits
+            'sn': 9,  // Senegal: 9 digits
+            'ml': 8,  // Mali: 8 digits
+            'bf': 8,  // Burkina Faso: 8 digits
+            
+            // Latin America
+            'mx': 10, // Mexico: 10 digits
+            'br': 11, // Brazil: 11 digits
+            'ar': 10, // Argentina: 10 digits
+            'cl': 9,  // Chile: 9 digits
+            'co': 10, // Colombia: 10 digits
+            'pe': 9,  // Peru: 9 digits
+            've': 10, // Venezuela: 10 digits
+            'ec': 9,  // Ecuador: 9 digits
+            'uy': 8,  // Uruguay: 8 digits
+            'py': 9,  // Paraguay: 9 digits
+            'bo': 8,  // Bolivia: 8 digits
+            'cr': 8,  // Costa Rica: 8 digits
+            'pa': 8,  // Panama: 8 digits
+            'gt': 8,  // Guatemala: 8 digits
+            'hn': 8,  // Honduras: 8 digits
+            'sv': 8,  // El Salvador: 8 digits
+            'ni': 8,  // Nicaragua: 8 digits
+            'bz': 7,  // Belize: 7 digits
+            'jm': 10, // Jamaica: 10 digits
+            'tt': 10, // Trinidad and Tobago: 10 digits
+            'bb': 10, // Barbados: 10 digits
+            'bs': 10, // Bahamas: 10 digits
+            'do': 10, // Dominican Republic: 10 digits
+            'pr': 10, // Puerto Rico: 10 digits
+            'cu': 8,  // Cuba: 8 digits
+            'ht': 8,  // Haiti: 8 digits
+            
+            // Eastern Europe & Russia
+            'ru': 10, // Russia: 10 digits
+            'ua': 9,  // Ukraine: 9 digits
+            'by': 9,  // Belarus: 9 digits
+            'md': 8,  // Moldova: 8 digits
+            'ge': 9,  // Georgia: 9 digits
+            'am': 8,  // Armenia: 8 digits
+            'az': 9,  // Azerbaijan: 9 digits
+            'kz': 10, // Kazakhstan: 10 digits
+            'kg': 9,  // Kyrgyzstan: 9 digits
+            'tj': 9,  // Tajikistan: 9 digits
+            'tm': 8,  // Turkmenistan: 8 digits
+            'uz': 9,  // Uzbekistan: 9 digits
+            'mn': 8,  // Mongolia: 8 digits
+            
+            // Nordic & Baltic (additional)
+            'is': 7,  // Iceland: 7 digits
+            'fo': 6,  // Faroe Islands: 6 digits
+            'gl': 6,  // Greenland: 6 digits
+            
+            // Pacific Islands
+            'fj': 7,  // Fiji: 7 digits
+            'pg': 8,  // Papua New Guinea: 8 digits
+            'vu': 7,  // Vanuatu: 7 digits
+            'sb': 7,  // Solomon Islands: 7 digits
+            'nc': 6,  // New Caledonia: 6 digits
+            'pf': 8,  // French Polynesia: 8 digits
+            'ws': 7,  // Samoa: 7 digits
+            'to': 7,  // Tonga: 7 digits
+            'ki': 8,  // Kiribati: 8 digits
+            'tv': 7,  // Tuvalu: 7 digits
+            'nr': 7,  // Nauru: 7 digits
+            'pw': 7,  // Palau: 7 digits
+            'fm': 7,  // Micronesia: 7 digits
+            'mh': 7,  // Marshall Islands: 7 digits
         };
         
+        // Check if the number is valid using Google's libphonenumber
+        let isValid = false;
+        let isPossible = false;
+        let validationType = null;
+        
+        try {
+            // Check if utils methods are available
+            if (typeof phoneInput.isValidNumber === 'function' && 
+                typeof phoneInput.isPossibleNumber === 'function') {
+                isValid = phoneInput.isValidNumber();
+                isPossible = phoneInput.isPossibleNumber();
+                if (typeof phoneInput.getValidationError === 'function') {
+                    validationType = phoneInput.getValidationError();
+                }
+            } else {
+                // Utils script not loaded yet, use country-specific validation
+                const digitsOnly = phoneValue.replace(/\D/g, '');
+                const expectedLength = expectedLengths[countryData.iso2] || 10;
+                
+                // More specific fallback validation
+                if (digitsOnly.length === expectedLength) {
+                    isValid = true;
+                    isPossible = true;
+                } else if (digitsOnly.length >= 8 && digitsOnly.length <= 15) {
+                    isValid = false;
+                    isPossible = true; // Length is possible, but not correct for country
+                } else {
+                    isValid = false;
+                    isPossible = false; // Length is completely invalid
+                }
+            }
+        } catch (err) {
+            // If any error occurs, use basic validation
+            const digitsOnly = phoneValue.replace(/\D/g, '');
+            const expectedLength = expectedLengths[countryData.iso2] || 10;
+            
+            if (digitsOnly.length === expectedLength) {
+                isValid = true;
+                isPossible = true;
+            } else if (digitsOnly.length >= 8 && digitsOnly.length <= 15) {
+                isValid = false;
+                isPossible = true;
+            } else {
+                isValid = false;
+                isPossible = false;
+            }
+        }
+        
+        // Get number of digits entered
+        const digitsOnly = phoneValue.replace(/\D/g, '');
         const expectedLength = expectedLengths[countryData.iso2] || 10;
 
         
         if (!isValid) {
-            phoneInputField.classList.add('error');
+            phoneInputField.classList.add('calc-error');
             if (errorElement) {
                 let errorMessage = '';
                 
@@ -2865,10 +4064,21 @@
                 }
                 
                 errorElement.textContent = errorMessage;
-                errorElement.style.display = 'block';
+                errorElement.style.display = 'block !important';
+                errorElement.style.visibility = 'visible !important';
+                errorElement.style.opacity = '1 !important';
                 errorElement.style.color = '#EB5F40';
                 errorElement.style.fontSize = '14px';
                 errorElement.style.marginTop = '5px';
+                
+                // Force error to stay visible by setting it again after a delay
+                setTimeout(() => {
+                    if (errorElement) {
+                        errorElement.style.display = 'block !important';
+                        errorElement.style.visibility = 'visible !important';
+                        errorElement.style.opacity = '1 !important';
+                    }
+                }, 50);
                 
             }
         }
@@ -2908,8 +4118,8 @@
         nameUserHasInteracted = true;
         
         // Clear any existing error styling during typing (but don't validate yet)
-        nameField.classList.remove('error');
-        const errorElement = document.getElementById('full-name-error');
+        nameField.classList.remove('calc-error');
+        const errorElement = document.getElementById('calc-full-name-error');
         if (errorElement) {
             errorElement.style.display = 'none';
         }
@@ -2945,10 +4155,10 @@
 
     function validateNameField() {
         const nameValue = nameField.value.trim();
-        const errorElement = document.getElementById('full-name-error');
+        const errorElement = document.getElementById('calc-full-name-error');
         
         // Clear previous errors
-        nameField.classList.remove('error');
+        nameField.classList.remove('calc-error');
         if (errorElement) {
             errorElement.textContent = '';
             errorElement.style.display = 'none';
@@ -2961,7 +4171,7 @@
 
         
         if (!namePattern.test(nameValue)) {
-            nameField.classList.add('error');
+            nameField.classList.add('calc-error');
             if (errorElement) {
                 let errorMessage = '';
                 if (nameValue.length < 2) {
@@ -2971,10 +4181,21 @@
                 }
                 
                 errorElement.textContent = errorMessage;
-                errorElement.style.display = 'block';
+                errorElement.style.display = 'block !important';
+                errorElement.style.visibility = 'visible !important';
+                errorElement.style.opacity = '1 !important';
                 errorElement.style.color = '#EB5F40';
                 errorElement.style.fontSize = '14px';
                 errorElement.style.marginTop = '5px';
+                
+                // Force error to stay visible by setting it again after a delay
+                setTimeout(() => {
+                    if (errorElement) {
+                        errorElement.style.display = 'block !important';
+                        errorElement.style.visibility = 'visible !important';
+                        errorElement.style.opacity = '1 !important';
+                    }
+                }, 50);
                 
             }
         }
@@ -2994,8 +4215,8 @@
         emailUserHasInteracted = true;
         
         // Clear any existing error styling during typing (but don't validate yet)
-        emailField.classList.remove('error');
-        const errorElement = document.getElementById('email-error');
+        emailField.classList.remove('calc-error');
+        const errorElement = document.getElementById('calc-email-error');
         if (errorElement) {
             errorElement.style.display = 'none';
         }
@@ -3013,10 +4234,10 @@
     // Email validation function
     function validateEmailField() {
         const emailValue = emailField.value.trim();
-        const errorElement = document.getElementById('email-error');
+        const errorElement = document.getElementById('calc-email-error');
         
         // Clear previous errors
-        emailField.classList.remove('error');
+        emailField.classList.remove('calc-error');
         if (errorElement) {
             errorElement.textContent = '';
             errorElement.style.display = 'none';
@@ -3029,85 +4250,32 @@
 
         
         if (!emailPattern.test(emailValue)) {
-            emailField.classList.add('error');
+            emailField.classList.add('calc-error');
             if (errorElement) {
                 const errorMessage = "Please enter a valid email address";
                 
                 errorElement.textContent = errorMessage;
-                errorElement.style.display = 'block';
+                errorElement.style.display = 'block !important';
+                errorElement.style.visibility = 'visible !important';
+                errorElement.style.opacity = '1 !important';
                 errorElement.style.color = '#EB5F40';
                 errorElement.style.fontSize = '14px';
                 errorElement.style.marginTop = '5px';
+                
+                // Force error to stay visible by setting it again after a delay
+                setTimeout(() => {
+                    if (errorElement) {
+                        errorElement.style.display = 'block !important';
+                        errorElement.style.visibility = 'visible !important';
+                        errorElement.style.opacity = '1 !important';
+                    }
+                }, 50);
                 
             }
         }
     }
 
-    // Contact form Next/Continue button - only scrolls to next section
-    document.getElementById('submitBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-        const submitBtn = this;
-
-        // Trigger validation for all fields when Next button is clicked
-        validateNameField();
-        validateEmailField();
-        validatePhoneField();
-        
-        // Check if contact form is valid before proceeding
-        if (!validateContactForm()) {
-            // Show validation errors or highlight empty fields
-            const fields = [
-                { id: 'full-name', name: 'Full Name' },
-                { id: 'email', name: 'Email' },
-                { id: 'phone', name: 'Phone' }
-            ];
-            
-            fields.forEach(field => {
-                const element = document.getElementById(field.id);
-                const errorElement = document.getElementById(field.id + '-error');
-                
-                // Only show "required" error if field is empty AND no other error is already showing
-                if (element && !element.value?.trim()) {
-                    // Check if there's already a validation error showing
-                    if (!errorElement || errorElement.style.display === 'none' || !errorElement.textContent.trim()) {
-                        element.classList.add('error');
-                        if (errorElement) {
-                            errorElement.textContent = `${field.name} is required`;
-                            errorElement.style.display = 'block';
-                            errorElement.style.color = '#EB5F40';
-                            errorElement.style.fontSize = '14px';
-                            errorElement.style.marginTop = '5px';
-                        }
-                    }
-                } else {
-                    // Don't clear errors here - let individual validation functions handle it
-                    // This ensures specific validation errors (like "invalid email format") are preserved
-                }
-            });
-            
-            // Scroll to first error field
-            const firstError = document.querySelector('.form-group input.error');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstError.focus();
-            }
-            
-            return; // Don't proceed with scrolling
-        }
-
-        // If contact form is valid, scroll to the next section (company setup)
-        const nextSection = document.getElementById('company-setup-section');
-        if (nextSection) {
-            const headerOffset = 80; // Account for any fixed headers
-            const elementPosition = nextSection.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: 'smooth'
-            });
-        }
-    });
+        // Old validation code removed - using centralized FormValidator
 
     // Get a Call buttons - handles form submission
     function initializeGetCallButtons() {
@@ -3540,6 +4708,30 @@
         if (addonsSection) {
             addonsSection.classList.remove('expanded');
         }
+        
+        // Prevent Webflow form submission on any form elements
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            });
+        });
+        
+        // Also prevent form submission on Enter key in input fields
+        const inputs = document.querySelectorAll('#full-name, #email, #phone');
+        inputs.forEach(input => {
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Trigger our custom validation instead
+                    document.getElementById('submitBtn').click();
+                    return false;
+                }
+            });
+        });
 
         if (localStorage.getItem('formHasPartialData') === 'true') {
             try {
@@ -3617,8 +4809,8 @@
             }
         }
         
-        // Mark visa section as interacted
-        sectionInteractions.visaSection = true;
+        // Mark visa section and all previous sections as interacted
+        markPreviousSectionsAsInteracted('visaSection');
         
         calculateCosts();
         updateChangeStatusVisibility();
@@ -4091,6 +5283,9 @@
                 document.getElementById('dependency-visas').value = 1;
             }
             
+            // Mark visa section and all previous sections as interacted
+            markPreviousSectionsAsInteracted('visaSection');
+            
             // Trigger calculation
             calculateCosts();
             updateChangeStatusVisibility();
@@ -4138,6 +5333,9 @@
                 hideEmployeeVisaLimitInfo();
             }
         }
+        
+        // Mark visa section and all previous sections as interacted
+        markPreviousSectionsAsInteracted('visaSection');
         
         calculateCosts();
         updateChangeStatusVisibility();

@@ -5,19 +5,16 @@
         <!-- Form sections -->
         <div class="form-sections-container">
             <form id="multiStepForm">
-
                 <!-- Personal Details Section -->
                 <div class="form-section contact-form-section" id="personal-details-section">
                     <div class="contact-form-container">
                         <div class="contact-form-header">
                             <div class="contact-avatars">
-                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbeca07af928355615613_avatars.png" alt="Team member" class="avatar">
-                        
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbeca07af928355615613_avatars.png" alt="Team member" class="avatar">   
         </div>
                             <h2 class="contact-title">Tell Us a Few Details to Get Started</h2>
                             <p class="contact-subtitle">The more we know about your business goals, the more accurate your setup path.</p>
     </div>
-    
                         <div class="contact-form-fields">
                 <div class="form-group">
                     <label for="full-name">Enter your full name *</label>
@@ -25,7 +22,7 @@
                                             <div class="calc-error-message" id="calc-full-name-error"></div>
                         </div>
 
-                        <div class="form-group" style="z-index: 1;">
+                        <div class="form-group" style="z-index: 2;">
                     <label for="phone">Enter phone number *</label>
                     <div class="phone-input">
                         <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone number" required>
@@ -33,7 +30,7 @@
                                             <div class="calc-error-message" id="calc-phone-error"></div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" style="z-index: 0;">
                     <label for="email">Enter email address *</label>
                 <input type="email" id="email" placeholder="Email address" required>
                                         <div class="calc-error-message" id="calc-email-error"></div>
@@ -702,6 +699,19 @@
                     <path d="m12 5 7 7-7 7"></path>
                 </svg>
             </button>
+            
+            <!-- Success message positioned in sticky summary -->
+            <div id="theFinalSuccessMessage" class="success-message-container d-none">
+                <div class="success-message-content">
+                    <div class="success-text">
+                        <h2 class="success-title">Thank You, <span id="success-first-name"></span>!</h2>
+                        <p class="success-description">A member of our team will contact you within 60 minutes to get you started.</p>
+                    </div>
+                    <div class="success-image">
+                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68874640ab4845b1ab8b20d5_thanks.webp" alt="Team member" class="team-member-photo">
+                    </div>
+                </div>
+            </div>
         </div>
 
     <div id="mobile-sticky-footer" class="summary-pricing-hidden">
@@ -709,9 +719,12 @@
             <div class="handle-bar"></div>
         </div>
         <div class="footer-content">
-            <div class="price-section">
+            <div class="price-section clickable-area" title="Tap to view breakdown">
                 <span id="mobile-grand-total-price">AED 0</span>
                 <span class="total-label">Grand Total</span>
+                <svg class="expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
             </div>
             <button class="get-call-btn" id="mobile-get-call-btn">
                 Get a Call
@@ -720,10 +733,39 @@
                     <path d="m12 5 7 7-7 7"></path>
                 </svg>
             </button>
+            
+            <!-- Mobile success message -->
+            <div id="mobile-success-message" class="mobile-success-container d-none">
+                <div class="mobile-success-content">
+                    <div class="mobile-success-text">
+                        <h3 class="mobile-success-title">Thank You, <span id="mobile-success-first-name"></span>!</h3>
+                        <p class="mobile-success-description">We'll contact you within 60 minutes.</p>
+                    </div>
+                    <div class="mobile-success-image">
+                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68874640ab4845b1ab8b20d5_thanks.webp" alt="Team member" class="mobile-team-photo">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="bottom-sheet-overlay"></div>
+
+    <!-- Success Message Popup Modal -->
+    <div id="success-popup-modal" class="success-popup-overlay" style="display: none;">
+        <div class="success-popup-content">
+            <button class="success-popup-close" aria-label="Close success message">&times;</button>
+            <div class="success-popup-inner">
+                <div class="success-popup-text">
+                    <h2 class="success-popup-title">Thank You, <span id="popup-success-first-name"></span>!</h2>
+                    <p class="success-popup-description">A member of our team will contact you within 60 minutes to get you started.</p>
+                </div>
+                <div class="success-popup-image">
+                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68874640ab4845b1ab8b20d5_thanks.webp" alt="Team member" class="popup-team-photo">
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Activity Search Modal -->
     <div id="activity-search-modal" class="activity-modal-overlay" style="display: none;">
@@ -863,11 +905,6 @@
             </div>
         </div>
     </div>
-    <!-- Success message -->
-            <div id="theFinalSuccessMessage" class="d-none">
-                <h2>Thank you, <span id="success-first-name"></span>!</h2>
-                <p>Your enquiry has been submitted successfully. One of our Business Setup Advisors will contact you soon.</p>
-                    </div>
 </div>
 </section>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -883,7 +920,7 @@
     visibility: visible !important;
     opacity: 1 !important;
     position: relative !important;
-    z-index: 9999 !important;
+    z-index: 1;
     font-family: "Plus Jakarta Sans", sans-serif !important;
     line-height: 1.3 !important;
     pointer-events: none !important;

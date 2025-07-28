@@ -497,6 +497,8 @@ font-weight: 600;
     opacity: 0.8;
 }
 
+
+
 .activity-search-container {
     position: relative;
     box-sizing: border-box;
@@ -675,11 +677,7 @@ font-family: "Plus Jakarta Sans";
     opacity: 0.8;
 }
 
-.visa-footer {
-display: flex;
-justify-content: space-between;
-align-items: center;
-}
+
 
 .visa-toggle-container {
   display: flex;

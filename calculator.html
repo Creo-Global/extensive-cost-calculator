@@ -144,15 +144,23 @@
 
                         <div class="license-option-group">
                             <h4>Number of Shareholders</h4>
-                            <div class="pill-options" id="shareholders-options">
-                                <button type="button" class="pill-option selected" data-value="1">1</button>
-                                <button type="button" class="pill-option" data-value="2">2</button>
-                                <button type="button" class="pill-option" data-value="3">3</button>
-                                <button type="button" class="pill-option" data-value="4">4</button>
-                                <button type="button" class="pill-option" data-value="5">5</button>
-                                <button type="button" class="pill-option" data-value="6">6</button>
-                    </div>
-                            <p class="option-note">* Planning for over 6 shareholders? Speak to us directly so we can guide you better.</p>
+                            <div class="visa-footer" style="width: 100%;">
+                                <button type="button" class="select-btn" data-visa="shareholders" onclick="selectVisaCard('shareholders')">
+                                    Select
+                                </button>
+                                <div class="visa-selected-controls" id="shareholders-selected-controls" style="display: none; ">
+                                    <div class="quantity-selector">
+                                        <button type="button" class="quantity-btn minus" onclick="adjustShareholderQuantity(-1)">−</button>
+                                        <span class="quantity-value" id="shareholders-quantity">1</span>
+                                        <button type="button" class="quantity-btn plus" onclick="adjustShareholderQuantity(1)">+</button>
+                                    </div>
+                                    <button type="button" class="select-btn" onclick="deselectVisaCard('shareholders')">
+                                        Selected
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="option-note">* Includes 6 shareholders; AED 2,000 for each additional.</p>
+                            
             </div>
                 </div>
 
@@ -276,7 +284,7 @@
                                             <button type="button" class="quantity-btn minus" onclick="adjustVisaQuantity('employee', -1)">−</button>
                                             <span class="quantity-value" id="employee-quantity">1</span>
                                             <button type="button" class="quantity-btn plus" onclick="adjustVisaQuantity('employee', 1)">+</button>
-                        </div>
+                                                </div>
                                         <button type="button" class="select-btn selected" onclick="deselectVisaCard('employee')">
                                             Selected
                                         </button>

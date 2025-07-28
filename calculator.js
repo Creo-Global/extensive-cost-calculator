@@ -817,6 +817,12 @@
             // Initialize pricing visibility
             initializePricingVisibility();
             
+            // Initialize shareholder selector
+            initializeShareholderSelector();
+            
+            // Initialize edit button functionality
+            initializeEditButtons();
+            
             calculateCosts();
             
         } catch (err) {
@@ -923,21 +929,7 @@
                 });
             });
             
-        // Shareholders options
-        const shareholdersOptions = document.querySelectorAll('#shareholders-options .pill-option');
-        shareholdersOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                shareholdersOptions.forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-                
-                const value = this.getAttribute('data-value');
-                document.getElementById('shareholders-range').value = value;
-                
-                // Mark shareholders section and all previous sections as interacted
-                markPreviousSectionsAsInteracted('shareholdersSection');
-                calculateCosts();
-                    });
-                });
+        // Shareholders quantity selector is handled by separate functions
             }
     
     // Setup service pill selections
@@ -2091,7 +2083,7 @@
         const visaData = {
             'investor': {
                 title: 'Investor Visa',
-                description: 'An Investor Visa in Dubai is a type of long-term residence visa designed for foreign nationals who wish to invest in or establish a business in Dubai. It allows you to live, work, and sponsor your family in Dubai, with renewals available as long as your investment remains valid.<br><br>Unlike a standard employment visa, this is a self-sponsored visa, directly tied to your ownership or role in the company. It’s ideal for founders, co-founders, and partners who want full control over their immigration status.',
+                description: 'An Investor Visa in Dubai is a type of long-term residence visa designed for foreign nationals who wish to invest in or establish a business in Dubai. It allows you to live, work, and sponsor your family in Dubai, with renewals available as long as your investment remains valid. Only one investor visa is issued per business setup, even if multiple shareholders are involved.<br><br>Unlike a standard employment visa, this is a self-sponsored visa, directly tied to your ownership or role in the company. It’s ideal for founders, co-founders, and partners who want full control over their immigration status.',
                 additional: 'At Meydan Free Zone, we streamline the process to be fast, compliant, and stress-free, allowing you to secure your visa and focus on growing your business.',
                 actionText: 'Select Investor Visa',
                 image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbfae4fc11d7f87391fb4_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.png'
@@ -2794,6 +2786,7 @@
             licenseType: document.getElementById("license-type")?.value || "fawri",
             packageType: "standard",
             licenseDuration: parseInt(document.getElementById("license-duration")?.value) || 1,
+            shareholdersCount: parseInt(document.getElementById("shareholders-range")?.value) || 1,
             investorVisas: investorVisaCount,
             employeeVisas: employeeVisaCount,
             dependencyVisas: dependencyVisaCount,
@@ -2880,7 +2873,7 @@
     }
 
     function calculateLicenseCost(snapshot) {
-        const { licenseType, packageType, licenseDuration, investorVisas, employeeVisas, dependencyVisas } = snapshot;
+        const { licenseType, packageType, licenseDuration, investorVisas, employeeVisas, dependencyVisas, shareholdersCount } = snapshot;
         
         let baseLicenseCost = 0;
         if (licenseType === "fawri") {
@@ -2893,11 +2886,19 @@
 
         let businessLicenseCost = baseLicenseCost * licenseDuration;
 
-        let totalBeforeDiscount = businessLicenseCost;
+        // Calculate additional shareholder costs
+        // First 6 shareholders are free, each additional costs AED 2,000
+        let additionalShareholdersCost = 0;
+        if (shareholdersCount > 6) {
+            additionalShareholdersCost = (shareholdersCount - 6) * 2000;
+        }
+
+        let totalBeforeDiscount = businessLicenseCost + additionalShareholdersCost;
         let discountAmount = totalBeforeDiscount * (discountPercentage / 100);
         let licenseAfterDiscount = totalBeforeDiscount - discountAmount;
         
         window.baseLicenseCostValue = baseLicenseCost;
+        window.additionalShareholdersCost = additionalShareholdersCost;
         
        
         let immigrationCardTotal = (investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0) ? 2000 : 0;
@@ -2921,6 +2922,32 @@
         // Update shareholders count
         const shareholdersCount = parseInt(document.getElementById("shareholders-range")?.value) || 1;
         document.getElementById("summary-shareholders").innerText = shareholdersCount;
+        
+        // Add/update additional shareholder cost row if needed
+        const companySetupContent = document.querySelector('.summary-section:nth-child(1) .summary-content');
+        let additionalShareholderRow = document.getElementById('additional-shareholders-row');
+        
+        if (shareholdersCount > 6 && window.additionalShareholdersCost > 0) {
+            if (!additionalShareholderRow) {
+                // Create the row if it doesn't exist
+                additionalShareholderRow = document.createElement('div');
+                additionalShareholderRow.className = 'summary-row';
+                additionalShareholderRow.id = 'additional-shareholders-row';
+                
+                // Insert after the shareholders row
+                const shareholdersRow = companySetupContent.querySelector('.summary-row:nth-child(3)');
+                shareholdersRow.insertAdjacentElement('afterend', additionalShareholderRow);
+            }
+            
+            const additionalCount = shareholdersCount - 6;
+            additionalShareholderRow.innerHTML = `
+                <span class="summary-label">Additional Shareholders (${additionalCount})</span>
+                <span class="summary-value">AED ${window.additionalShareholdersCost.toLocaleString()}</span>
+            `;
+        } else if (additionalShareholderRow) {
+            // Remove the row if it exists but is no longer needed
+            additionalShareholderRow.remove();
+        }
         
         // Update license base cost
         const licenseCostElement = document.getElementById("license-base-cost");
@@ -5248,8 +5275,41 @@
 
     // Select visa card function (for employee and dependent visas) - unified approach
     function selectVisaCard(visaType) {
+        if (visaType === 'shareholders') {
+            // Special handling for shareholders since it's not a visa card
+            const visaFooter = document.querySelector('.license-option-group:has(#shareholders-selected-controls) .visa-footer');
+            const selectBtn = visaFooter?.querySelector('.select-btn');
+            const selectedControls = document.getElementById('shareholders-selected-controls');
+            const quantityValue = document.getElementById('shareholders-quantity');
+            const selectedBtn = selectedControls?.querySelector('.select-btn');
+            
+            if (selectBtn && selectedControls) {
+                selectBtn.style.display = 'none';
+                selectedControls.style.display = 'flex';
+                
+                // Update the selected button to use unified styling
+                if (selectedBtn) {
+                    updateButtonState(selectedBtn, true);
+                }
+                
+                // Set initial quantity to 1
+                if (quantityValue) {
+                    quantityValue.textContent = '1';
+                }
+                
+                document.getElementById('shareholders-range').value = 1;
+                
+                // Mark shareholders section as interacted
+                markPreviousSectionsAsInteracted('shareholdersSection');
+                
+                // Trigger calculation
+                calculateCosts();
+            }
+            return;
+        }
+        
         const card = document.querySelector(`[data-visa="${visaType}"]`);
-        const selectBtn = card.querySelector('.select-btn');
+        const selectBtn = card?.querySelector('.select-btn');
         const selectedControls = document.getElementById(`${visaType}-selected-controls`);
         const quantityValue = document.getElementById(`${visaType}-quantity`);
         const selectedBtn = selectedControls?.querySelector('.select-btn');
@@ -5341,6 +5401,136 @@
         updateChangeStatusVisibility();
     }
 
+    // Shareholder quantity selector functions
+    function toggleShareholderSelector() {
+        // This function can be used if we want to add toggle functionality later
+        // For now, shareholders are always selected (similar to default services)
+    }
+
+    function initializeShareholderSelector() {
+        // Initialize the minus button state - shareholders start unselected
+        const minusBtn = document.querySelector('#shareholders-selected-controls .quantity-btn.minus');
+        const quantityElement = document.getElementById('shareholders-quantity');
+        const selectedBtn = document.querySelector('#shareholders-selected-controls .select-btn');
+        
+        if (minusBtn && quantityElement) {
+            const currentQuantity = parseInt(quantityElement.textContent) || 1;
+            minusBtn.disabled = currentQuantity <= 1;
+        }
+        
+        // Ensure shareholders start in unselected state
+        if (selectedBtn) {
+            updateButtonState(selectedBtn, false);
+        }
+    }
+
+    function initializeEditButtons() {
+        // Map edit button aria-labels to their corresponding section IDs
+        const editButtonMap = {
+            'Edit company setup': 'company-setup-section',
+            'Edit business activities': 'business-activities-section', 
+            'Edit visa selections': 'visa-options-section',
+            'Edit additional services': 'addons-section'
+        };
+
+        // Add click listeners to all edit buttons
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const ariaLabel = this.getAttribute('aria-label');
+                const targetSectionId = editButtonMap[ariaLabel];
+                
+                if (targetSectionId) {
+                    scrollToSection(targetSectionId);
+                } else {
+                    console.warn('No section mapping found for edit button:', ariaLabel);
+                }
+            });
+        });
+    }
+
+    function scrollToSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        
+        if (!section) {
+            console.warn('Section not found:', sectionId);
+            return;
+        }
+
+        // Close mobile sheet if it's open
+        const summarySheet = document.querySelector('.sticky-summary-container');
+        const overlay = document.getElementById('bottom-sheet-overlay');
+        const mobileStickyFooter = document.getElementById('mobile-sticky-footer');
+        const body = document.body;
+
+        if (summarySheet && summarySheet.classList.contains('sheet-open')) {
+            // Close the sheet
+            summarySheet.classList.remove('sheet-open');
+            document.querySelector('.sheet-close-handle')?.classList.remove('sheet-open');
+            overlay?.classList.remove('active');
+            body.classList.remove('sheet-view-active');
+            body.style.overflow = '';
+            
+            if (mobileStickyFooter) {
+                mobileStickyFooter.style.display = 'flex';
+            }
+
+            // Restore scroll position if needed
+            if (window.scrollPositionBeforeModal !== undefined) {
+                window.scrollTo(0, window.scrollPositionBeforeModal);
+                window.scrollPositionBeforeModal = undefined;
+            }
+        }
+
+        // Wait a bit for the sheet to close, then scroll to section
+        setTimeout(() => {
+            const headerOffset = 100; // Adjust based on your header height
+            const elementPosition = section.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }, summarySheet && summarySheet.classList.contains('sheet-open') ? 300 : 0);
+    }
+
+    function adjustShareholderQuantity(change) {
+        // If shareholders are not selected, select them first
+        const selectedControls = document.getElementById('shareholders-selected-controls');
+        const selectBtn = document.querySelector('.license-option-group:has(#shareholders-selected-controls) .visa-footer .select-btn');
+        
+        if (selectedControls && selectedControls.style.display === 'none') {
+            selectVisaCard('shareholders');
+        }
+        
+        const quantityElement = document.getElementById('shareholders-quantity');
+        const currentQuantity = parseInt(quantityElement.textContent) || 1;
+        
+        // Minimum 1 shareholder, no maximum limit (but pricing changes after 6)
+        const newQuantity = Math.max(1, currentQuantity + change);
+        
+        quantityElement.textContent = newQuantity;
+        
+        // Update hidden input
+        document.getElementById('shareholders-range').value = newQuantity;
+        
+        // Update minus button state
+        const minusBtn = quantityElement.parentElement.querySelector('.quantity-btn.minus');
+        if (newQuantity <= 1) {
+            minusBtn.disabled = true;
+        } else {
+            minusBtn.disabled = false;
+        }
+        
+        // Mark shareholders section as interacted
+        markPreviousSectionsAsInteracted('shareholdersSection');
+        
+        // Trigger calculation
+        calculateCosts();
+    }
+
     // Employee visa limit info functions
     function showEmployeeVisaLimitInfo() {
         // Check if info card already exists
@@ -5401,13 +5591,44 @@
     window.deselectVisaCard = deselectVisaCard;
     window.adjustVisaQuantity = adjustVisaQuantity;
     window.adjustStatusCount = adjustStatusCount;
+    window.scrollToSection = scrollToSection;
     
 
 
     // Deselect visa card function - unified approach
     function deselectVisaCard(visaType) {
+        if (visaType === 'shareholders') {
+            // Special handling for shareholders since it's not a visa card
+            const visaFooter = document.querySelector('.license-option-group:has(#shareholders-selected-controls) .visa-footer');
+            const selectBtn = visaFooter?.querySelector('.select-btn');
+            const selectedControls = document.getElementById('shareholders-selected-controls');
+            const quantityValue = document.getElementById('shareholders-quantity');
+            const selectedBtn = selectedControls?.querySelector('.select-btn');
+            
+            if (selectBtn && selectedControls) {
+                selectBtn.style.display = 'block';
+                selectedControls.style.display = 'none';
+                
+                // Reset the selected button to use unified styling
+                if (selectedBtn) {
+                    updateButtonState(selectedBtn, false);
+                }
+                
+                // Reset quantity to 1
+                if (quantityValue) {
+                    quantityValue.textContent = '1';
+                }
+                
+                document.getElementById('shareholders-range').value = 1;
+                
+                // Trigger calculation
+                calculateCosts();
+            }
+            return;
+        }
+        
         const card = document.querySelector(`[data-visa="${visaType}"]`);
-        const selectBtn = card.querySelector('.select-btn');
+        const selectBtn = card?.querySelector('.select-btn');
         const selectedControls = document.getElementById(`${visaType}-selected-controls`);
         const quantityValue = document.getElementById(`${visaType}-quantity`);
         const selectedBtn = selectedControls?.querySelector('.select-btn');
@@ -5893,7 +6114,7 @@
             button.addEventListener('click', () => {
                 durationInteracted = true;
                 // Don't immediately scroll, just scroll to shareholders section
-                const shareholdersSection = document.getElementById('shareholders-options');
+                const shareholdersSection = document.getElementById('shareholders-selected-controls');
                 if (shareholdersSection && !shareholdersInteracted) {
                     setTimeout(() => {
                         const headerOffset = 80;
@@ -5913,7 +6134,7 @@
         });
         
         // Shareholders Buttons - mark as interacted and check if ready to scroll
-        const shareholdersButtons = document.querySelectorAll('#shareholders-options .pill-option');
+        const shareholdersButtons = document.querySelectorAll('#shareholders-selected-controls .quantity-btn');
         shareholdersButtons.forEach(button => {
             button.addEventListener('click', () => {
                 shareholdersInteracted = true;

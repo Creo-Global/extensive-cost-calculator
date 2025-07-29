@@ -1,0 +1,951 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+</head>
+<section id="srix-NewCostCalForm">
+        <!-- Form sections -->
+        <div class="form-sections-container">
+            <form id="multiStepForm">
+                <!-- Personal Details Section -->
+                <div class="form-section contact-form-section" id="personal-details-section">
+                    <div class="contact-form-container">
+                        <div class="contact-form-header">
+                            <div class="contact-avatars">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbeca07af928355615613_avatars.png" alt="Team member" class="avatar">   
+        </div>
+                            <h2 class="contact-title">Tell Us a Few Details to Get Started</h2>
+                            <p class="contact-subtitle">The more we know about your business goals, the more accurate your setup path.</p>
+    </div>
+                        <div class="contact-form-fields">
+                <div class="form-group" style="z-index: 0;">
+                    <label for="full-name">Enter your full name *</label>
+                    <input type="text" id="full-name" placeholder="Your name" required>
+                                            <div class="calc-error-message" id="calc-full-name-error"></div>
+                        </div>
+
+                        <div class="form-group" style="z-index: 2;">
+                    <label for="phone">Enter phone number *</label>
+                    <div class="phone-input">
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone number" required>
+                    </div>
+                                            <div class="calc-error-message" id="calc-phone-error"></div>
+                </div>
+
+                <div class="form-group" style="z-index: 0;">
+                    <label for="email">Enter email address *</label>
+                <input type="email" id="email" placeholder="Email address" required>
+                                        <div class="calc-error-message" id="calc-email-error"></div>
+                    </div>
+
+                            <button type="button" id="submitBtn" class="submit-button">
+                                <span>Calculate</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14"></path>
+                                    <path d="m12 5 7 7-7 7"></path>
+                                </svg>
+                            </button>
+                            
+                            <div class="contact-form-progress" id="contact-progress">
+                                <p>
+                                    <span class="progress-icon" id="progress-icon"></span>
+                                    This is a required step to calculate your business setup cost.
+                                </p>
+                            </div>
+                        </div>
+                             </div>
+            </div>
+                <!-- Company Setup Section -->
+                <div class="form-section" id="company-setup-section">
+                    <div class="section-header">
+                        <h2>Pick From Two Powerful Business License Options 📑 </h2>
+                        <p class="section-subtitle">Choose the setup that aligns with your goals.</p>
+                    </div>
+                    
+                    <div class="license-cards-container">
+                        <div class="license-card selected" data-license="fawri">
+                            <div class="license-card-image">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b601639b2df4bfdbec4_fawri.webp" alt="Fawri License">
+                            </div>
+                            <div class="license-card-content">
+                                <div class="license-header">
+                                    <h3>Fawri License</h3>
+                                    <div class="license-duration">
+                                        <p>In 60 Mins</p>
+                                        <span class="duration-icon">🚀</span>
+                                    </div>
+            </div>
+                                <p class="license-description">Start fast with a solo-friendly instant license that's designed to evolve with your business.</p>
+                                <div class="license-footer">
+                                    <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+  <path d="M9.83608 2.85526L8.39486 8.23398C8.34973 8.4024 8.23955 8.54598 8.08856 8.63315C7.93754 8.72035 7.7581 8.74398 7.58972 8.69883C7.42131 8.6537 7.27769 8.54354 7.19052 8.39256C7.10334 8.24157 7.07975 8.06211 7.12488 7.8937L8.15647 4.0466L1.19444 8.06614C1.04371 8.15316 0.864589 8.17676 0.696474 8.13171C0.528359 8.08666 0.385005 7.97665 0.297986 7.82593C0.210968 7.67521 0.187394 7.49609 0.23244 7.32798C0.277486 7.15986 0.387462 7.0165 0.53819 6.92948L7.50022 2.90995L3.65285 1.87787C3.48448 1.83272 3.34086 1.72256 3.25368 1.57157C3.16651 1.42058 3.14292 1.24112 3.18801 1.07274C3.23314 0.904325 3.34332 0.760738 3.4943 0.673566C3.64533 0.586372 3.82477 0.562747 3.99314 0.607891L9.37186 2.04911C9.45541 2.0714 9.53369 2.10996 9.60226 2.16257C9.67082 2.21518 9.72833 2.28084 9.77148 2.35575C9.81461 2.43062 9.84251 2.51333 9.85361 2.59906C9.86466 2.68478 9.85871 2.77187 9.83608 2.85526Z" fill="url(#paint0_linear_4780_3976)"/>
+  <defs>
+    <linearGradient id="paint0_linear_4780_3976" x1="-2" y1="3.8457" x2="10.3017" y2="0.264528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB5F40"/>
+      <stop offset="1" stop-color="#B5348B"/>
+    </linearGradient>
+  </defs>
+</svg></button>
+                                    <button type="button" class="select-btn selected" data-license="fawri">
+                                        <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                          </svg></span>
+                                        Selected
+                                    </button>
+        </div>
+                </div>
+            </div>
+
+                        <div class="license-card" data-license="regular">
+                            <div class="license-card-image">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b602ab2cde8b87325e8_regular.webp" alt="Regular Business License">
+                            </div>
+                            <div class="license-card-content">
+                                <div class="license-header">
+                                    <h3>Regular Business License</h3>
+                                    <div class="license-duration">
+                                        <span>3-5 Days</span>
+                                        <span class="duration-icon">📨</span>
+                                    </div>
+                                </div>
+                                <p class="license-description">A scalable license for startups and teams. Built for flexibility, partners, and long-term growth.</p>
+                                <div class="license-footer">
+                                    <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+  <path d="M9.83608 2.85526L8.39486 8.23398C8.34973 8.4024 8.23955 8.54598 8.08856 8.63315C7.93754 8.72035 7.7581 8.74398 7.58972 8.69883C7.42131 8.6537 7.27769 8.54354 7.19052 8.39256C7.10334 8.24157 7.07975 8.06211 7.12488 7.8937L8.15647 4.0466L1.19444 8.06614C1.04371 8.15316 0.864589 8.17676 0.696474 8.13171C0.528359 8.08666 0.385005 7.97665 0.297986 7.82593C0.210968 7.67521 0.187394 7.49609 0.23244 7.32798C0.277486 7.15986 0.387462 7.0165 0.53819 6.92948L7.50022 2.90995L3.65285 1.87787C3.48448 1.83272 3.34086 1.72256 3.25368 1.57157C3.16651 1.42058 3.14292 1.24112 3.18801 1.07274C3.23314 0.904325 3.34332 0.760738 3.4943 0.673566C3.64533 0.586372 3.82477 0.562747 3.99314 0.607891L9.37186 2.04911C9.45541 2.0714 9.53369 2.10996 9.60226 2.16257C9.67082 2.21518 9.72833 2.28084 9.77148 2.35575C9.81461 2.43062 9.84251 2.51333 9.85361 2.59906C9.86466 2.68478 9.85871 2.77187 9.83608 2.85526Z" fill="url(#paint0_linear_4780_3976)"/>
+  <defs>
+    <linearGradient id="paint0_linear_4780_3976" x1="-2" y1="3.8457" x2="10.3017" y2="0.264528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB5F40"/>
+      <stop offset="1" stop-color="#B5348B"/>
+    </linearGradient>
+  </defs>
+</svg></button>
+                                    <button type="button" class="select-btn" data-license="regular">
+                                        Select
+                                    </button>
+                                </div>
+    </div>
+                        </div>
+                    </div>
+
+                    <div class="license-options-container">
+                        <div class="license-option-group">
+                            <h4>Duration of Business License</h4>
+                            <div class="pill-options" id="duration-options">
+                                <button type="button" class="pill-option selected" data-value="1">1 Year</button>
+                                <button type="button" class="pill-option" data-value="2">2</button>
+                                <button type="button" class="pill-option" data-value="3">3</button>
+                                <button type="button" class="pill-option" data-value="4">4</button>
+                                <button type="button" class="pill-option" data-value="5">5</button>
+                                <button type="button" class="pill-option" data-value="6">6</button>
+                            </div>
+                            <p class="option-note">* Discounts available on multi-year licenses</p>
+                </div>
+
+                        <div class="license-option-group">
+                            <h4>Number of Shareholders</h4>
+                            <div class="visa-footer" style="width: 100%;">
+                                <button type="button" class="select-btn" data-visa="shareholders" onclick="selectVisaCard('shareholders')">
+                                    Select
+                                </button>
+                                <div class="visa-selected-controls" id="shareholders-selected-controls" style="display: none; ">
+                                    <div class="quantity-selector">
+                                        <button type="button" class="quantity-btn minus" onclick="adjustShareholderQuantity(-1)">−</button>
+                                        <span class="quantity-value" id="shareholders-quantity">1</span>
+                                        <button type="button" class="quantity-btn plus" onclick="adjustShareholderQuantity(1)">+</button>
+                                    </div>
+                                    <button type="button" class="select-btn" onclick="deselectVisaCard('shareholders')">
+                                        Selected
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="option-note">* Includes 6 shareholders; AED 2,000 for each additional.</p>
+                            
+            </div>
+                </div>
+
+                    <!-- Hidden inputs for form validation -->
+                    <input type="hidden" id="license-type" name="license-type" value="fawri" required>
+                    <input type="hidden" id="license-duration" name="license-duration" value="1" required>
+                    <input type="hidden" id="shareholders-range" name="shareholders-range" value="1" required>
+                </div>
+
+                <!-- Business Activities Section -->
+                <div class="form-section" id="business-activities-section">
+                    <div class="section-header">
+                        <h2>Select Your Business Activities 💼 </h2>
+                        <p class="section-subtitle">Choose <span class="free-groups">business activities</span> from 2,500+ options.</p>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-icon">
+                            <svg width="20" height="20" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0.433594 8C0.433594 5.83933 0.433594 4.75899 0.723797 3.88643C1.28872 2.18788 2.62147 0.855126 4.32003 0.290203C5.19258 0 6.27292 0 8.43359 0C10.5943 0 11.6746 0 12.5472 0.290203C14.2457 0.855126 15.5785 2.18788 16.1434 3.88643C16.4336 4.75899 16.4336 5.83933 16.4336 8C16.4336 10.1607 16.4336 11.241 16.1434 12.1136C15.5785 13.8121 14.2457 15.1449 12.5472 15.7098C11.6746 16 10.5943 16 8.43359 16C6.27292 16 5.19258 16 4.32003 15.7098C2.62147 15.1449 1.28872 13.8121 0.723797 12.1136C0.433594 11.241 0.433594 10.1607 0.433594 8Z" fill="#2A3AC6"/>
+                                <path d="M8.43349 3.55447C5.98904 3.55447 3.98904 5.55447 3.98904 7.99891C3.98904 10.4434 5.98904 12.4434 8.43349 12.4434C10.8779 12.4434 12.8779 10.4434 12.8779 7.99892C12.8779 5.55447 10.8779 3.55447 8.43349 3.55447Z" stroke="#FAFAFA" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M8.43359 9.77734L8.43359 7.55512" stroke="#FAFAFA" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M8.43604 6.22266L8.43204 6.22266" stroke="#FAFAFA" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>                                
+                        </div>
+                        <p class="info-text">You get 3 business activity groups included with your license at no cost. Any additional activities will incur a charge of AED 1,000 each.</p>
+                    </div>
+                
+                <div class="activity-search-container">
+                        <input type="text" class="activity-search-input" placeholder="Search business activity group" aria-label="Search for business activities">
+                    <span class="search-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 21L16.65 16.65" stroke="#808080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    </div>
+                
+                    <div class="activity-cards-wrapper">
+                        <div class="activity-cards-container">
+                            <!-- Activity cards will be dynamically generated by JavaScript -->
+                        </div>
+                        <div class="scroll-indicator scroll-indicator-left hidden" id="scroll-indicator-left">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                        </div>
+                        <div class="scroll-indicator scroll-indicator-right" id="scroll-indicator-right">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                </div>
+            </div>
+                <div id="activities-list-placeholder"></div>
+                </div>
+                <!-- Visa Options Section -->
+                <div class="form-section" id="visa-options-section">
+                    <div class="section-header">
+                        <h2>Please Select Your Visa Type 🪪</h2>
+                        <p class="section-subtitle">Choose the visa types you need, for yourself, your team, or your dependents.</p>
+                    </div>
+
+                    <div class="visa-cards-container">
+                        <div class="visa-card" data-visa="investor">
+                            <div class="visa-card-image">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbfae4fc11d7f87391fb4_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.png" alt="Investor Visa">
+                            </div>
+                            <div class="visa-card-content">
+                                <div class="visa-header">
+                                    <h3>Investor Visa</h3>
+                                    <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+  <path d="M9.83608 2.85526L8.39486 8.23398C8.34973 8.4024 8.23955 8.54598 8.08856 8.63315C7.93754 8.72035 7.7581 8.74398 7.58972 8.69883C7.42131 8.6537 7.27769 8.54354 7.19052 8.39256C7.10334 8.24157 7.07975 8.06211 7.12488 7.8937L8.15647 4.0466L1.19444 8.06614C1.04371 8.15316 0.864589 8.17676 0.696474 8.13171C0.528359 8.08666 0.385005 7.97665 0.297986 7.82593C0.210968 7.67521 0.187394 7.49609 0.23244 7.32798C0.277486 7.15986 0.387462 7.0165 0.53819 6.92948L7.50022 2.90995L3.65285 1.87787C3.48448 1.83272 3.34086 1.72256 3.25368 1.57157C3.16651 1.42058 3.14292 1.24112 3.18801 1.07274C3.23314 0.904325 3.34332 0.760738 3.4943 0.673566C3.64533 0.586372 3.82477 0.562747 3.99314 0.607891L9.37186 2.04911C9.45541 2.0714 9.53369 2.10996 9.60226 2.16257C9.67082 2.21518 9.72833 2.28084 9.77148 2.35575C9.81461 2.43062 9.84251 2.51333 9.85361 2.59906C9.86466 2.68478 9.85871 2.77187 9.83608 2.85526Z" fill="url(#paint0_linear_4780_3976)"/>
+  <defs>
+    <linearGradient id="paint0_linear_4780_3976" x1="-2" y1="3.8457" x2="10.3017" y2="0.264528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB5F40"/>
+      <stop offset="1" stop-color="#B5348B"/>
+    </linearGradient>
+  </defs>
+</svg></button>
+                                </div>
+                                <p class="visa-description">Live in the UAE as a business owner and manage your company.</p>
+                                <div class="visa-footer">
+                                    <div class="visa-toggle-container">
+                                        <div class="visa-toggle-labels">
+                                            <span class="visa-toggle-label no">No</span>
+                                            <span class="visa-toggle-label yes">Yes</span>
+                        </div>
+                                        <label class="visa-toggle-switch">
+                                            <input type="checkbox" id="investor-visa-toggle" onchange="toggleVisaCard('investor')" aria-label="Toggle investor visa">
+                                            <span class="visa-toggle-slider"></span>
+                                        </label>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="visa-card" data-visa="employee">
+                            <div class="visa-card-image">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0004d1341d4ccb5b150_2193782fa28109786e70758b4f8700cf49d9201e377abc3571b6302582c10d9b.webp" alt="Employee Visa">
+                        </div>
+                            <div class="visa-card-content">
+                                <div class="visa-header">
+                                    <h3>Employee Visa</h3>
+                                    <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+  <path d="M9.83608 2.85526L8.39486 8.23398C8.34973 8.4024 8.23955 8.54598 8.08856 8.63315C7.93754 8.72035 7.7581 8.74398 7.58972 8.69883C7.42131 8.6537 7.27769 8.54354 7.19052 8.39256C7.10334 8.24157 7.07975 8.06211 7.12488 7.8937L8.15647 4.0466L1.19444 8.06614C1.04371 8.15316 0.864589 8.17676 0.696474 8.13171C0.528359 8.08666 0.385005 7.97665 0.297986 7.82593C0.210968 7.67521 0.187394 7.49609 0.23244 7.32798C0.277486 7.15986 0.387462 7.0165 0.53819 6.92948L7.50022 2.90995L3.65285 1.87787C3.48448 1.83272 3.34086 1.72256 3.25368 1.57157C3.16651 1.42058 3.14292 1.24112 3.18801 1.07274C3.23314 0.904325 3.34332 0.760738 3.4943 0.673566C3.64533 0.586372 3.82477 0.562747 3.99314 0.607891L9.37186 2.04911C9.45541 2.0714 9.53369 2.10996 9.60226 2.16257C9.67082 2.21518 9.72833 2.28084 9.77148 2.35575C9.81461 2.43062 9.84251 2.51333 9.85361 2.59906C9.86466 2.68478 9.85871 2.77187 9.83608 2.85526Z" fill="url(#paint0_linear_4780_3976)"/>
+  <defs>
+    <linearGradient id="paint0_linear_4780_3976" x1="-2" y1="3.8457" x2="10.3017" y2="0.264528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB5F40"/>
+      <stop offset="1" stop-color="#B5348B"/>
+    </linearGradient>
+  </defs>
+</svg></button>
+                                </div>
+                                <p class="visa-description">Sponsor team members under your company license.</p>
+                                <div class="visa-footer">
+                                    <button type="button" class="select-btn" data-visa="employee" onclick="selectVisaCard('employee')">
+                                        Select
+                                    </button>
+                                    <div class="visa-selected-controls" id="employee-selected-controls" style="display: none;">
+                                        <div class="quantity-selector">
+                                            <button type="button" class="quantity-btn minus" onclick="adjustVisaQuantity('employee', -1)">−</button>
+                                            <span class="quantity-value" id="employee-quantity">1</span>
+                                            <button type="button" class="quantity-btn plus" onclick="adjustVisaQuantity('employee', 1)">+</button>
+                                                </div>
+                                        <button type="button" class="select-btn selected" onclick="deselectVisaCard('employee')">
+                                            Selected
+                                        </button>
+                                </div>
+                                </div>
+                            </div>
+            </div>
+
+                        <div class="visa-card" data-visa="dependent">
+                            <div class="visa-card-image">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc001b0a226a76d71d00d_de8b99eed6930d3f9455605a063e0514bbbcb91427bf01dca897e5aa4b11d820.webp" alt="Dependent Visa">
+                                </div>
+                            <div class="visa-card-content">
+                                <div class="visa-header">
+                                    <h3>Dependent Visa</h3>
+                                    <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+  <path d="M9.83608 2.85526L8.39486 8.23398C8.34973 8.4024 8.23955 8.54598 8.08856 8.63315C7.93754 8.72035 7.7581 8.74398 7.58972 8.69883C7.42131 8.6537 7.27769 8.54354 7.19052 8.39256C7.10334 8.24157 7.07975 8.06211 7.12488 7.8937L8.15647 4.0466L1.19444 8.06614C1.04371 8.15316 0.864589 8.17676 0.696474 8.13171C0.528359 8.08666 0.385005 7.97665 0.297986 7.82593C0.210968 7.67521 0.187394 7.49609 0.23244 7.32798C0.277486 7.15986 0.387462 7.0165 0.53819 6.92948L7.50022 2.90995L3.65285 1.87787C3.48448 1.83272 3.34086 1.72256 3.25368 1.57157C3.16651 1.42058 3.14292 1.24112 3.18801 1.07274C3.23314 0.904325 3.34332 0.760738 3.4943 0.673566C3.64533 0.586372 3.82477 0.562747 3.99314 0.607891L9.37186 2.04911C9.45541 2.0714 9.53369 2.10996 9.60226 2.16257C9.67082 2.21518 9.72833 2.28084 9.77148 2.35575C9.81461 2.43062 9.84251 2.51333 9.85361 2.59906C9.86466 2.68478 9.85871 2.77187 9.83608 2.85526Z" fill="url(#paint0_linear_4780_3976)"/>
+  <defs>
+    <linearGradient id="paint0_linear_4780_3976" x1="-2" y1="3.8457" x2="10.3017" y2="0.264528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB5F40"/>
+      <stop offset="1" stop-color="#B5348B"/>
+    </linearGradient>
+  </defs>
+</svg></button>
+                                </div>
+                                <p class="visa-description">Bring your spouse, children, or parents to live with you.</p>
+                                <div class="visa-footer">
+                                    <button type="button" class="select-btn" data-visa="dependent" onclick="selectVisaCard('dependent')">
+                                        Select
+                                    </button>
+                                    <div class="visa-selected-controls" id="dependent-selected-controls" style="display: none;">
+                                        <div class="quantity-selector">
+                                            <button type="button" class="quantity-btn minus" onclick="adjustVisaQuantity('dependent', -1)">−</button>
+                                            <span class="quantity-value" id="dependent-quantity">1</span>
+                                            <button type="button" class="quantity-btn plus" onclick="adjustVisaQuantity('dependent', 1)">+</button>
+                                </div>
+                                        <button type="button" class="select-btn selected" onclick="deselectVisaCard('dependent')">
+                                            Selected
+                                        </button>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden inputs for backward compatibility -->
+                    <input type="number" id="employee-visa-count" value="0" style="display: none;">
+                    <input type="number" id="dependency-visas" value="0" style="display: none;">
+                    <select id="investor-visa-count" style="display: none;">
+                        <option value="0" selected>0</option>
+                        <option value="1">1</option>
+                    </select>
+                </div>
+
+                <!-- Change Status Section -->
+                <div class="form-section" id="change-status-section" style="display: none;">
+                                       <div class="visa-cards-container">
+                        <div class="visa-card change-status-card" data-visa="change-status">
+                            <div class="visa-card-image">
+                                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68763d4feb6dc26436a8d668_831cebae91bcfa5c27afa8ba08a0e68f314db7dbbb164f9bacbfcc9f88edc4bc.webp" alt="Change Status">
+                            </div>
+                            <div class="visa-card-content">
+                                <div class="visa-header">
+                                    <h3>Change of Status</h3>
+                                    <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+                                        <path d="M9.83608 2.85526L8.39486 8.23398C8.34973 8.4024 8.23955 8.54598 8.08856 8.63315C7.93754 8.72035 7.7581 8.74398 7.58972 8.69883C7.42131 8.6537 7.27769 8.54354 7.19052 8.39256C7.10334 8.24157 7.07975 8.06211 7.12488 7.8937L8.15647 4.0466L1.19444 8.06614C1.04371 8.15316 0.864589 8.17676 0.696474 8.13171C0.528359 8.08666 0.385005 7.97665 0.297986 7.82593C0.210968 7.67521 0.187394 7.49609 0.23244 7.32798C0.277486 7.15986 0.387462 7.0165 0.53819 6.92948L7.50022 2.90995L3.65285 1.87787C3.48448 1.83272 3.34086 1.72256 3.25368 1.57157C3.16651 1.42058 3.14292 1.24112 3.18801 1.07274C3.23314 0.904325 3.34332 0.760738 3.4943 0.673566C3.64533 0.586372 3.82477 0.562747 3.99314 0.607891L9.37186 2.04911C9.45541 2.0714 9.53369 2.10996 9.60226 2.16257C9.67082 2.21518 9.72833 2.28084 9.77148 2.35575C9.81461 2.43062 9.84251 2.51333 9.85361 2.59906C9.86466 2.68478 9.85871 2.77187 9.83608 2.85526Z" fill="url(#paint0_linear_4780_3976)"/>
+                                        <defs>
+                                            <linearGradient id="paint0_linear_4780_3976" x1="-2" y1="3.8457" x2="10.3017" y2="0.264528" gradientUnits="userSpaceOnUse">
+                                                <stop stop-color="#EB5F40"/>
+                                                <stop offset="1" stop-color="#B5348B"/>
+                                            </linearGradient>
+                                        </defs>
+                                    </svg></button>
+                                </div>
+                                <p class="visa-description">Required for applicants currently in the UAE, so their visa can be processed locally without needing to exit and re-enter.</p>
+                                <div class="change-status-details">
+                                    <div class="status-info-row">
+                                        <span class="status-label">Applicants Outside the UAE: </span>
+                                        <span class="status-count" id="outside-count"> 0</span>
+                                    </div>
+                                    <div class="status-info-row">
+                                        <span class="status-label inside-label">Applicants Inside the UAE:</span>
+                                        <div class="" id="inside-selected-controls">
+                                            <div class="quantity-selector">
+                                                <button type="button" class="quantity-btn minus">−</button>
+                                                <span class="quantity-value" id="inside-quantity">0</span>
+                                                <button type="button" class="quantity-btn plus">+</button>
+                                            </div>
+                                </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden inputs for form submission -->
+                    <input type="hidden" id="applicants-inside-uae" value="0">
+                    <input type="hidden" id="applicants-outside-uae" value="0">
+                </div>
+
+                <!-- Add-ons Section -->
+                <div class="form-section" id="addons-section">
+                    <div class="section-header">
+                        <h2>Add-ons</h2>
+                        <p class="section-subtitle">Customise your setup with additional services to help you start and scale with confidence.</p>
+                        </div>
+                        
+                    <div class="addons-container">
+                        <div class="addon-category-card">
+                            <div class="addon-category-header">
+                                <h3>mCore</h3>
+                                <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+  <path d="M9.83608 2.85526L8.39486 8.23398C8.34973 8.4024 8.23955 8.54598 8.08856 8.63315C7.93754 8.72035 7.7581 8.74398 7.58972 8.69883C7.42131 8.6537 7.27769 8.54354 7.19052 8.39256C7.10334 8.24157 7.07975 8.06211 7.12488 7.8937L8.15647 4.0466L1.19444 8.06614C1.04371 8.15316 0.864589 8.17676 0.696474 8.13171C0.528359 8.08666 0.385005 7.97665 0.297986 7.82593C0.210968 7.67521 0.187394 7.49609 0.23244 7.32798C0.277486 7.15986 0.387462 7.0165 0.53819 6.92948L7.50022 2.90995L3.65285 1.87787C3.48448 1.83272 3.34086 1.72256 3.25368 1.57157C3.16651 1.42058 3.14292 1.24112 3.18801 1.07274C3.23314 0.904325 3.34332 0.760738 3.4943 0.673566C3.64533 0.586372 3.82477 0.562747 3.99314 0.607891L9.37186 2.04911C9.45541 2.0714 9.53369 2.10996 9.60226 2.16257C9.67082 2.21518 9.72833 2.28084 9.77148 2.35575C9.81461 2.43062 9.84251 2.51333 9.85361 2.59906C9.86466 2.68478 9.85871 2.77187 9.83608 2.85526Z" fill="url(#paint0_linear_4780_3976)"/>
+  <defs>
+    <linearGradient id="paint0_linear_4780_3976" x1="-2" y1="3.8457" x2="10.3017" y2="0.264528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB5F40"/>
+      <stop offset="1" stop-color="#B5348B"/>
+    </linearGradient>
+  </defs>
+</svg></button>
+                            </div>
+                            <p class="addon-category-description">Essential tools to kickstart your business with ease, from banking to branding.</p>
+                            <div class="addon-services">
+                                <button type="button" class="service-pill selected" data-service="bank-account">
+                                    <span class="check-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                        </svg>
+                                    </span>
+                                    Bank Account
+                                </button>
+                                <button type="button" class="service-pill" data-service="business-card">Business Card</button>
+                                <button type="button" class="service-pill selected" data-service="company-stamp">
+                                    <span class="check-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                    </svg>
+                                    </span>
+                                    Company Stamp
+                                </button>
+                                <button type="button" class="service-pill" data-service="ecommerce-starter">E-commerce Starter</button>
+                            </div>
+                        </div>
+                        
+                        <div class="addon-category-card">
+                            <div class="addon-category-header">
+                                <h3>mResidency</h3>
+                                <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+  <path d="M9.83608 2.85526L8.39486 8.23398C8.34973 8.4024 8.23955 8.54598 8.08856 8.63315C7.93754 8.72035 7.7581 8.74398 7.58972 8.69883C7.42131 8.6537 7.27769 8.54354 7.19052 8.39256C7.10334 8.24157 7.07975 8.06211 7.12488 7.8937L8.15647 4.0466L1.19444 8.06614C1.04371 8.15316 0.864589 8.17676 0.696474 8.13171C0.528359 8.08666 0.385005 7.97665 0.297986 7.82593C0.210968 7.67521 0.187394 7.49609 0.23244 7.32798C0.277486 7.15986 0.387462 7.0165 0.53819 6.92948L7.50022 2.90995L3.65285 1.87787C3.48448 1.83272 3.34086 1.72256 3.25368 1.57157C3.16651 1.42058 3.14292 1.24112 3.18801 1.07274C3.23314 0.904325 3.34332 0.760738 3.4943 0.673566C3.64533 0.586372 3.82477 0.562747 3.99314 0.607891L9.37186 2.04911C9.45541 2.0714 9.53369 2.10996 9.60226 2.16257C9.67082 2.21518 9.72833 2.28084 9.77148 2.35575C9.81461 2.43062 9.84251 2.51333 9.85361 2.59906C9.86466 2.68478 9.85871 2.77187 9.83608 2.85526Z" fill="url(#paint0_linear_4780_3976)"/>
+  <defs>
+    <linearGradient id="paint0_linear_4780_3976" x1="-2" y1="3.8457" x2="10.3017" y2="0.264528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB5F40"/>
+      <stop offset="1" stop-color="#B5348B"/>
+    </linearGradient>
+  </defs>
+</svg></button>
+                                </div>
+                            <p class="addon-category-description">Simplified residency services for you, your employees, or your family.</p>
+                            <div class="addon-services">
+                                <button type="button" class="service-pill" data-service="medical-emirates-id">Medical & Emirates ID</button>
+                                <button type="button" class="service-pill" data-service="medical-insurance">Medical Insurance</button>
+                                <button type="button" class="service-pill" data-service="dependent-visa">Dependent Visa</button>
+                            </div>
+                        </div>
+                        
+                        <div class="addon-category-card">
+                            <div class="addon-category-header">
+                                <h3>mAssist</h3>
+                                <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+  <path d="M9.83608 2.85526L8.39486 8.23398C8.34973 8.4024 8.23955 8.54598 8.08856 8.63315C7.93754 8.72035 7.7581 8.74398 7.58972 8.69883C7.42131 8.6537 7.27769 8.54354 7.19052 8.39256C7.10334 8.24157 7.07975 8.06211 7.12488 7.8937L8.15647 4.0466L1.19444 8.06614C1.04371 8.15316 0.864589 8.17676 0.696474 8.13171C0.528359 8.08666 0.385005 7.97665 0.297986 7.82593C0.210968 7.67521 0.187394 7.49609 0.23244 7.32798C0.277486 7.15986 0.387462 7.0165 0.53819 6.92948L7.50022 2.90995L3.65285 1.87787C3.48448 1.83272 3.34086 1.72256 3.25368 1.57157C3.16651 1.42058 3.14292 1.24112 3.18801 1.07274C3.23314 0.904325 3.34332 0.760738 3.4943 0.673566C3.64533 0.586372 3.82477 0.562747 3.99314 0.607891L9.37186 2.04911C9.45541 2.0714 9.53369 2.10996 9.60226 2.16257C9.67082 2.21518 9.72833 2.28084 9.77148 2.35575C9.81461 2.43062 9.84251 2.51333 9.85361 2.59906C9.86466 2.68478 9.85871 2.77187 9.83608 2.85526Z" fill="url(#paint0_linear_4780_3976)"/>
+  <defs>
+    <linearGradient id="paint0_linear_4780_3976" x1="-2" y1="3.8457" x2="10.3017" y2="0.264528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB5F40"/>
+      <stop offset="1" stop-color="#B5348B"/>
+    </linearGradient>
+  </defs>
+</svg></button>
+                            </div>
+                            <p class="addon-category-description">A full range of tools and administration support built for smooth, hassle-free operation.</p>
+                            <div class="addon-services">
+                                <button type="button" class="service-pill" data-service="melite">
+                                    <span class="check-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                    </svg>
+                                    </span>
+                                    mElite
+                                </button>
+                                <button type="button" class="service-pill" data-service="meeting-rooms">Meeting Rooms</button>
+                                <button type="button" class="service-pill" data-service="po-box">PO Box</button>
+                                <button type="button" class="service-pill" data-service="document-translation">Document Translation</button>
+                                <button type="button" class="service-pill" data-service="mail-management">Mail Management</button>
+                                <button type="button" class="service-pill" data-service="virtual-assistant">Virtual Assistant</button>
+                            </div>
+                        </div>
+                        
+                        <div class="addon-category-card">
+                            <div class="addon-category-header">
+                                <h3>mAccounting</h3>
+                                <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+  <path d="M9.83608 2.85526L8.39486 8.23398C8.34973 8.4024 8.23955 8.54598 8.08856 8.63315C7.93754 8.72035 7.7581 8.74398 7.58972 8.69883C7.42131 8.6537 7.27769 8.54354 7.19052 8.39256C7.10334 8.24157 7.07975 8.06211 7.12488 7.8937L8.15647 4.0466L1.19444 8.06614C1.04371 8.15316 0.864589 8.17676 0.696474 8.13171C0.528359 8.08666 0.385005 7.97665 0.297986 7.82593C0.210968 7.67521 0.187394 7.49609 0.23244 7.32798C0.277486 7.15986 0.387462 7.0165 0.53819 6.92948L7.50022 2.90995L3.65285 1.87787C3.48448 1.83272 3.34086 1.72256 3.25368 1.57157C3.16651 1.42058 3.14292 1.24112 3.18801 1.07274C3.23314 0.904325 3.34332 0.760738 3.4943 0.673566C3.64533 0.586372 3.82477 0.562747 3.99314 0.607891L9.37186 2.04911C9.45541 2.0714 9.53369 2.10996 9.60226 2.16257C9.67082 2.21518 9.72833 2.28084 9.77148 2.35575C9.81461 2.43062 9.84251 2.51333 9.85361 2.59906C9.86466 2.68478 9.85871 2.77187 9.83608 2.85526Z" fill="url(#paint0_linear_4780_3976)"/>
+  <defs>
+    <linearGradient id="paint0_linear_4780_3976" x1="-2" y1="3.8457" x2="10.3017" y2="0.264528" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB5F40"/>
+      <stop offset="1" stop-color="#B5348B"/>
+    </linearGradient>
+  </defs>
+</svg></button>
+                            </div>
+                            <p class="addon-category-description">Full-service tax, audit, and bookkeeping to keep your finances compliant.</p>
+                            <div class="addon-services">
+                                <button type="button" class="service-pill selected tax-compliance-pill" data-service="corporate-tax">
+                                    <span class="check-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                    </svg>
+                                    </span>
+                                    Corporate Tax
+                                </button>
+                                <button type="button" class="service-pill" data-service="vat-registration">VAT Registration</button>
+                                <button type="button" class="service-pill" data-service="bookkeeping">Book Keeping</button>
+                                <button type="button" class="service-pill" data-service="liquidation-report">Liquidation Report</button>
+                                <button type="button" class="service-pill" data-service="financial-audit-report">Financial Audit Report</button>
+                                <button type="button" class="service-pill" data-service="valuation-report">Valuation Report</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Hidden inputs for backward compatibility -->
+                    <input type="checkbox" id="bank-account" class="service-checkbox" value="bank-account" checked style="display: none;">
+                    <input type="checkbox" id="business-card" class="service-checkbox" value="business-card" style="display: none;">
+                    <input type="checkbox" id="company-stamp" class="service-checkbox" value="company-stamp" checked style="display: none;">
+                    <input type="checkbox" id="ecommerce-starter" class="service-checkbox" value="ecommerce-starter" style="display: none;">
+                    <input type="checkbox" id="medical-emirates-id" class="service-checkbox" value="medical-emirates-id" style="display: none;">
+                    <input type="checkbox" id="medical-insurance" class="service-checkbox" value="medical-insurance" style="display: none;">
+                    <input type="checkbox" id="dependent-visa" class="service-checkbox" value="dependent-visa" style="display: none;">
+                    <input type="checkbox" id="melite" class="service-checkbox" value="melite" style="display: none;">
+                    <input type="checkbox" id="meeting-rooms" class="service-checkbox" value="meeting-rooms" style="display: none;">
+                    <input type="checkbox" id="po-box" class="service-checkbox" value="po-box" style="display: none;">
+                    <input type="checkbox" id="mail-management" class="service-checkbox" value="mail-management" style="display: none;">
+                    <input type="checkbox" id="document-translation" class="service-checkbox" value="document-translation" style="display: none;">
+                    <input type="checkbox" id="virtual-assistant" class="service-checkbox" value="virtual-assistant" style="display: none;">
+                    <input type="checkbox" id="corporate-tax" class="service-checkbox tax-compliance-checkbox" value="corporate-tax" checked style="display: none;">
+                    <input type="checkbox" id="vat-registration" class="service-checkbox tax-compliance-checkbox" value="vat-registration" style="display: none;">
+                    <input type="checkbox" id="liquidation-report" class="service-checkbox" value="liquidation-report" style="display: none;">
+                    <input type="checkbox" id="financial-audit-report" class="service-checkbox" value="financial-audit-report" style="display: none;">
+                    <input type="checkbox" id="valuation-report" class="service-checkbox" value="valuation-report" style="display: none;">
+                    <input type="checkbox" id="bookkeeping" class="service-checkbox" value="bookkeeping" style="display: none;">
+
+                    <div id="tax-compliance-warning" class="tax-compliance-warning" style="display: none;">
+                        <p>Corporate Tax and VAT Registration are mandatory for UAE businesses. We strongly recommend keeping these services.</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Sticky summary -->
+        <div class="sticky-summary-container summary-pricing-hidden">
+            <!-- Pricing overlay -->
+            <div class="pricing-overlay">
+                <div class="pricing-overlay-content">
+                    <h4>📝 Your Custom Quote Awaits</h4>
+                    <p>Start filling out the form to see your personalized pricing breakdown</p>
+                </div>
+            </div>
+            <div class="summary-header">
+                <h3>Your Business Setup Estimate</h3>
+                <p class="summary-subtitle">Here's your total cost, based on the options you selected.</p>
+            </div>
+            
+            <div class="sheet-close-handle">
+                <div class="handle-bar"></div>
+            </div>
+            <!-- Simplified Summary View -->
+            <div class="simplified-summary" id="simplified-summary">
+            </div>
+            
+            <!-- Detailed Summary View (Hidden by default) -->
+            <div class="detailed-summary" id="detailed-summary" style="display: block;">
+                <div class="summary-section">
+                    <div class="summary-section-header">
+                        <h4>Company Setup</h4>
+                        <button class="edit-btn" type="button" aria-label="Edit company setup">
+                            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0.36084 12.3975C0.36084 8.66993 0.36084 6.80616 0.969804 5.33599C1.78176 3.37577 3.33915 1.81838 5.29937 1.00642C6.76954 0.397461 8.63331 0.397461 12.3608 0.397461C16.0884 0.397461 17.9521 0.397461 19.4223 1.00642C21.3825 1.81838 22.9399 3.37577 23.7519 5.33599C24.3608 6.80616 24.3608 8.66993 24.3608 12.3975C24.3608 16.125 24.3608 17.9888 23.7519 19.4589C22.9399 21.4192 21.3825 22.9765 19.4223 23.7885C17.9521 24.3975 16.0884 24.3975 12.3608 24.3975C8.63331 24.3975 6.76954 24.3975 5.29937 23.7885C3.33915 22.9765 1.78176 21.4192 0.969804 19.4589C0.36084 17.9888 0.36084 16.125 0.36084 12.3975Z" fill="#882392"/>
+                                <path d="M13.2004 6.7963L7.72708 12.5896C7.52042 12.8096 7.32042 13.243 7.28042 13.543L7.03375 15.703C6.94708 16.483 7.50708 17.0163 8.28042 16.883L10.4271 16.5163C10.7271 16.463 11.1471 16.243 11.3537 16.0163L16.8271 10.223C17.7737 9.22297 18.2004 8.08297 16.7271 6.68964C15.2604 5.30964 14.1471 5.7963 13.2004 6.7963Z" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12.2866 7.76465C12.5733 9.60465 14.0666 11.0113 15.92 11.198" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M6.36084 19.0635H18.3608" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                        </button>
+                        </div>
+                        
+                    <div class="summary-content">
+                        <div class="summary-row">
+                            <span class="summary-label">License Type</span>
+                            <span class="summary-value" id="summary-package-type">Fawri License 🚀</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">License Duration</span>
+                            <span class="summary-value" id="summary-license-duration">1 Year</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Shareholders</span>
+                            <span class="summary-value" id="summary-shareholders">1</span>
+                        </div>
+                        <div class="summary-total">
+                            <span class="summary-label">Total Cost</span>
+                            <span class="summary-price" id="company-setup-price">AED 0</span>
+                            </div>
+                                </div>
+                            </div>
+                
+                <div class="summary-section">
+                    <div class="summary-section-header">
+                        <h4>Business Activities</h4>
+                        <button class="edit-btn" type="button" aria-label="Edit business activities">
+                            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0.36084 12.3975C0.36084 8.66993 0.36084 6.80616 0.969804 5.33599C1.78176 3.37577 3.33915 1.81838 5.29937 1.00642C6.76954 0.397461 8.63331 0.397461 12.3608 0.397461C16.0884 0.397461 17.9521 0.397461 19.4223 1.00642C21.3825 1.81838 22.9399 3.37577 23.7519 5.33599C24.3608 6.80616 24.3608 8.66993 24.3608 12.3975C24.3608 16.125 24.3608 17.9888 23.7519 19.4589C22.9399 21.4192 21.3825 22.9765 19.4223 23.7885C17.9521 24.3975 16.0884 24.3975 12.3608 24.3975C8.63331 24.3975 6.76954 24.3975 5.29937 23.7885C3.33915 22.9765 1.78176 21.4192 0.969804 19.4589C0.36084 17.9888 0.36084 16.125 0.36084 12.3975Z" fill="#882392"/>
+                                <path d="M13.2004 6.7963L7.72708 12.5896C7.52042 12.8096 7.32042 13.243 7.28042 13.543L7.03375 15.703C6.94708 16.483 7.50708 17.0163 8.28042 16.883L10.4271 16.5163C10.7271 16.463 11.1471 16.243 11.3537 16.0163L16.8271 10.223C17.7737 9.22297 18.2004 8.08297 16.7271 6.68964C15.2604 5.30964 14.1471 5.7963 13.2004 6.7963Z" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12.2866 7.76465C12.5733 9.60465 14.0666 11.0113 15.92 11.198" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M6.36084 19.0635H18.3608" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="summary-content" id="business-activity-summary">
+                        <div class="activity-tags" id="activity-tags-container"></div>
+                        <div class="summary-total">
+                            <span class="summary-label">Total Cost</span>
+                            <span class="summary-price" id="business-activities-cost">AED 0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-section">
+                    <div class="summary-section-header">
+                        <h4>Number of Visas</h4>
+                        <button class="edit-btn" type="button" aria-label="Edit visa selections">
+                            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0.36084 12.3975C0.36084 8.66993 0.36084 6.80616 0.969804 5.33599C1.78176 3.37577 3.33915 1.81838 5.29937 1.00642C6.76954 0.397461 8.63331 0.397461 12.3608 0.397461C16.0884 0.397461 17.9521 0.397461 19.4223 1.00642C21.3825 1.81838 22.9399 3.37577 23.7519 5.33599C24.3608 6.80616 24.3608 8.66993 24.3608 12.3975C24.3608 16.125 24.3608 17.9888 23.7519 19.4589C22.9399 21.4192 21.3825 22.9765 19.4223 23.7885C17.9521 24.3975 16.0884 24.3975 12.3608 24.3975C8.63331 24.3975 6.76954 24.3975 5.29937 23.7885C3.33915 22.9765 1.78176 21.4192 0.969804 19.4589C0.36084 17.9888 0.36084 16.125 0.36084 12.3975Z" fill="#882392"/>
+                                <path d="M13.2004 6.7963L7.72708 12.5896C7.52042 12.8096 7.32042 13.243 7.28042 13.543L7.03375 15.703C6.94708 16.483 7.50708 17.0163 8.28042 16.883L10.4271 16.5163C10.7271 16.463 11.1471 16.243 11.3537 16.0163L16.8271 10.223C17.7737 9.22297 18.2004 8.08297 16.7271 6.68964C15.2604 5.30964 14.1471 5.7963 13.2004 6.7963Z" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12.2866 7.76465C12.5733 9.60465 14.0666 11.0113 15.92 11.198" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M6.36084 19.0635H18.3608" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="summary-content" id="visas-summary">
+                        <div class="summary-row">
+                            <span class="summary-label">Investor Visa <span id="summary-investor-visa-display">(0)</span></span>
+                            <span class="summary-value" id="investor-visa-cost">AED 0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Employee Visa <span id="summary-employee-visa-display">(0)</span></span>
+                            <span class="summary-value" id="employee-visa-cost">AED 0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Dependency Visa <span id="summary-dependency-visa-display">(0)</span></span>
+                            <span class="summary-value" id="dependency-visa-cost">AED 0</span>
+                        </div>
+                        <div class="summary-row" id="immigration-card-row" style="display: none;">
+                            <span class="summary-label">Immigration Card Fee</span>
+                            <span class="summary-value" id="immigration-card-cost">AED 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-section">
+                    <div class="summary-section-header">
+                        <h4>Change of Status</h4>
+                        <span class="summary-price" id="change-status-header-price">AED 0</span>
+                    </div>
+                    
+                    <div class="summary-content" id="change-status-summary">
+                        <div class="summary-row">
+                            <span class="summary-label">Applicants Outside the UAE <span id="summary-outside-count">(0)</span></span>
+                            <span class="summary-value">AED 0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Applicants Inside the UAE <span id="summary-inside-count">(0)</span></span>
+                            <span class="summary-value" id="inside-status-cost">AED 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-section" id="addons-summary-section">
+                    <div class="summary-section-header">
+                        <h4>Additional Services</h4>
+                        <button aria-label="Edit additional services" class="edit-btn" type="button">
+                            <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0.36084 12.3975C0.36084 8.66993 0.36084 6.80616 0.969804 5.33599C1.78176 3.37577 3.33915 1.81838 5.29937 1.00642C6.76954 0.397461 8.63331 0.397461 12.3608 0.397461C16.0884 0.397461 17.9521 0.397461 19.4223 1.00642C21.3825 1.81838 22.9399 3.37577 23.7519 5.33599C24.3608 6.80616 24.3608 8.66993 24.3608 12.3975C24.3608 16.125 24.3608 17.9888 23.7519 19.4589C22.9399 21.4192 21.3825 22.9765 19.4223 23.7885C17.9521 24.3975 16.0884 24.3975 12.3608 24.3975C8.63331 24.3975 6.76954 24.3975 5.29937 23.7885C3.33915 22.9765 1.78176 21.4192 0.969804 19.4589C0.36084 17.9888 0.36084 16.125 0.36084 12.3975Z" fill="#882392"/>
+                                <path d="M13.2004 6.7963L7.72708 12.5896C7.52042 12.8096 7.32042 13.243 7.28042 13.543L7.03375 15.703C6.94708 16.483 7.50708 17.0163 8.28042 16.883L10.4271 16.5163C10.7271 16.463 11.1471 16.243 11.3537 16.0163L16.8271 10.223C17.7737 9.22297 18.2004 8.08297 16.7271 6.68964C15.2604 5.30964 14.1471 5.7963 13.2004 6.7963Z" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12.2866 7.76465C12.5733 9.60465 14.0666 11.0113 15.92 11.198" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M6.36084 19.0635H18.3608" stroke="#FAFAFA" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="summary-content" id="addons-summary-container">
+                        <!-- Addons will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grand-total-container">
+                <div class="grand-total" id="grand-total-clickable">
+                    <span class="grand-total-label">Grand Total</span>
+                    <span class="grand-total-amount" id="total-cost-display">AED 0</span>
+                </div>
+            </div>
+            
+            <button class="get-call-btn" type="button">
+                Get a Call
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                </svg>
+            </button>
+            
+            <!-- Success message positioned in sticky summary -->
+            <div id="theFinalSuccessMessage" class="success-message-container d-none">
+                <div class="success-message-content">
+                    <div class="success-text">
+                        <h2 class="success-title">Thank You, <span id="success-first-name"></span>!</h2>
+                        <p class="success-description">A member of our team will contact you within 60 minutes to get you started.</p>
+                    </div>
+                    <div class="success-image">
+                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68874640ab4845b1ab8b20d5_thanks.webp" alt="Team member" class="team-member-photo">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div id="mobile-sticky-footer" class="summary-pricing-hidden">
+        <div id="mobile-summary-handle">
+            <div class="handle-bar"></div>
+        </div>
+        <div class="footer-content">
+            <div class="price-section clickable-area" title="Tap to view breakdown">
+                <span id="mobile-grand-total-price">AED 0</span>
+                <span class="total-label">Grand Total</span>
+                <svg class="expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
+            </div>
+            <button class="get-call-btn" id="mobile-get-call-btn">
+                Get a Call
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                </svg>
+            </button>
+            
+            <!-- Mobile success message -->
+            <div id="mobile-success-message" class="mobile-success-container d-none">
+                <div class="mobile-success-content">
+                    <div class="mobile-success-text">
+                        <h3 class="mobile-success-title">Thank You, <span id="mobile-success-first-name"></span>!</h3>
+                        <p class="mobile-success-description">We'll contact you within 60 minutes.</p>
+                    </div>
+                    <div class="mobile-success-image">
+                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68874640ab4845b1ab8b20d5_thanks.webp" alt="Team member" class="mobile-team-photo">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="bottom-sheet-overlay"></div>
+
+    <!-- Success Message Popup Modal -->
+    <div id="success-popup-modal" class="success-popup-overlay" style="display: none;">
+        <div class="success-popup-content">
+            <button class="success-popup-close" aria-label="Close success message">&times;</button>
+            <div class="success-popup-inner">
+                <div class="success-popup-text">
+                    <h2 class="success-popup-title">Thank You, <span id="popup-success-first-name"></span>!</h2>
+                    <p class="success-popup-description">A member of our team will contact you within 60 minutes to get you started.</p>
+                </div>
+                <div class="success-popup-image">
+                    <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68874640ab4845b1ab8b20d5_thanks.webp" alt="Team member" class="popup-team-photo">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Search Modal -->
+    <div id="activity-search-modal" class="activity-modal-overlay" style="display: none;">
+        <div class="activity-modal-content">
+            <div class="activity-modal-header">
+                <h3 id="modal-title">Explore the Full Business Activity List</h3>
+                <button id="close-modal-btn" class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <p class="modal-subtitle">Any additional activities will incur a charge of AED 1,000 each.</p>
+            
+            <div class="modal-category-selector">
+                <label for="modal-category-select" class="category-selector-label">Selected Group/ Category:</label>
+                <div class="custom-select-wrapper">
+                    <select id="modal-category-select" class="modal-category-select">
+                        <!-- Options will be generated by JavaScript -->
+                    </select>
+                    <div class="select-arrow">
+                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-search-container">
+                <input type="text" id="modal-search-input" class="modal-search-input" placeholder="Search all business activity lists" aria-label="Search for business activities">
+                <span class="modal-search-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            </div>
+            
+            <div id="modal-activities-list">
+                <!-- Activities will be loaded here -->
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-back-btn" id="modal-back-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="57" height="57" viewBox="0 0 57 57" fill="none">
+                        <rect x="0.361328" y="0.574219" width="56.0176" height="56.0176" rx="28.0088" fill="#FEF4F2"/>
+                        <path d="M31.8712 21.5801L24.869 28.5823L31.8712 35.5845" stroke="url(#paint0_linear_4646_6520)" stroke-width="1.75055" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                          <linearGradient id="paint0_linear_4646_6520" x1="31.8712" y1="21.5801" x2="25.9258" y2="36.0196" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#EB5F40"/>
+                            <stop offset="1" stop-color="#B5348B"/>
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                </button>
+                <button class="modal-continue-btn" id="modal-continue-btn">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Addons Services Modal -->
+    <div id="addons-modal" class="activity-modal-overlay" style="display: none;">
+        <div class="activity-modal-content">
+            <div class="activity-modal-header">
+                <div class="modal-header-content">
+                    <h3 id="addons-modal-title">mCore Services</h3>
+                    <button id="addons-close-modal-btn" class="close-btn" aria-label="Close modal">&times;</button>
+                </div>
+            </div>
+            <p id="addons-modal-subtitle" class="modal-subtitle">Essential tools to kickstart your business with ease, from banking to branding.</p>
+            
+            <div id="addons-modal-services-list">
+                <!-- Services will be loaded here -->
+            </div>
+            
+            <!-- Tax Compliance Warning in Modal -->
+            <div id="modal-tax-compliance-warning" class="tax-compliance-warning" style="display: none;">
+                <p>Corporate Tax and VAT Registration are mandatory for UAE businesses. We strongly recommend keeping these services.</p>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="modal-back-btn" id="addons-modal-back-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="57" height="57" viewBox="0 0 57 57" fill="none">
+                        <rect x="0.451172" y="0.875" width="56.0176" height="56.0176" rx="28.0088" fill="#FEF4F2"/>
+                        <path d="M31.9609 21.8809L24.9587 28.8831L31.9609 35.8853" stroke="url(#paint0_linear_4646_6500)" stroke-width="1.75055" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                          <linearGradient id="paint0_linear_4646_6500" x1="31.9609" y1="21.8809" x2="26.0155" y2="36.3204" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#EB5F40"/>
+                            <stop offset="1" stop-color="#B5348B"/>
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                </button>
+                <button class="modal-continue-btn" id="addons-modal-continue-btn">
+                    Continue
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+                        </div>
+        </div>
+    </div>
+    <!-- License Info Modal -->
+    <div id="license-modal" class="activity-modal-overlay" style="display: none;">
+        <div class="activity-modal-content">
+            <div class="activity-modal-header">
+                <div class="modal-header-content">
+                    <h3 id="license-modal-title">What Is Fawri License? 🚀</h3>
+                    <button id="license-close-modal-btn" class="close-btn" aria-label="Close modal">&times;</button>
+                </div>
+            </div>
+            <div id="license-modal-content">
+                <p id="license-modal-description">Fawri is your express route to a 60-minute, compliance-led LLC license. This 100% digital, fast-track license is designed exclusively for ambitious solo entrepreneurs and freelancers who want speed, control, and minimal setup friction.</p>
+                <p id="license-modal-additional">With over 1,800 activities, Fawri gets you licensed, visa-ready, and enables bank account applications on the same day. It's the fastest, most reliable way to launch your business in Dubai.</p>
+        </div>
+
+            <div class="modal-footer">
+                <button class="modal-back-btn" id="license-modal-back-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="57" height="57" viewBox="0 0 57 57" fill="none">
+                        <rect x="0.361328" y="0.277344" width="56.0176" height="56.0176" rx="28.0088" fill="#FEF4F2"/>
+                        <path d="M31.8711 21.2832L24.8689 28.2854L31.8711 35.2876" stroke="url(#paint0_linear_4613_2666)" stroke-width="1.75055" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                          <linearGradient id="paint0_linear_4613_2666" x1="31.8711" y1="21.2832" x2="25.9257" y2="35.7227" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#EB5F40"/>
+                            <stop offset="1" stop-color="#B5348B"/>
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                </button>
+                <button class="modal-continue-btn" id="license-modal-action-btn" onclick="document.getElementById('license-modal').style.display='none'; document.body.style.overflow='auto'; document.body.classList.remove('sheet-view-active'); document.getElementById('bottom-sheet-overlay')?.classList.remove('active');">
+                    Select Fawri License
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.2.1/css/intlTelInput.css">
+<style>
+
+/* Calculator-specific error messages to avoid Webflow conflicts */
+.calc-error-message {
+    color: #EB5F40 !important;
+    font-size: 14px !important;
+    margin-top: 5px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1;
+    font-family: "Plus Jakarta Sans", sans-serif !important;
+    line-height: 1.3 !important;
+    pointer-events: none !important;
+}
+
+/* Calculator-specific error field styling */
+input.calc-error {
+    border-color: #EB5F40 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+}
+
+/* Mobile-specific error message fixes */
+@media (max-width: 768px) {
+    .calc-error-message {
+        font-size: 13px !important;
+        margin-top: 4px !important;
+    }
+}
+</style>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.2.1/js/intlTelInput.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<link rel="stylesheet" href="/BP-calculator/BP-calculator.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/BP-calculator/BP-calculator.js"></script>

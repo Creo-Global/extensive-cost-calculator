@@ -1996,6 +1996,33 @@ line-height: 24px;
     transform: translateX(4px);
 }
 
+@media (max-width: 980px) {
+    .contact-form-container {
+        border-radius: 10px;
+        border: 1px solid #DADBE1;
+        background: rgba(255, 255, 255, 0.60);  
+      }
+        .license-card {
+            background: #FFF;
+backdrop-filter: blur(24px);
+-webkit-backdrop-filter: blur(24px);
+        }
+        .license-option-group {
+            background: #FFF;
+        }
+        .addons-container {
+            background: #FFF;
+        }
+        #mobile-sticky-footer {
+            position: relative;
+            width: 100vw;
+            margin-left: -3%;
+            background: rgba(255, 255, 255, 0.60);
+        }
+        .footer-content {
+            padding: 24px 16px;
+        }
+}
 @media (max-width: 768px) {
     .contact-form-container {
         padding: 16px;
@@ -2978,9 +3005,7 @@ background-clip: text;
     bottom: 0;
     left: 0;
     right: 0;
-    background: #FFFFFF;
-    border-top: 1px solid #E5E7EB;
-    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.60);
     z-index: 1000;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -3001,7 +3026,6 @@ background-clip: text;
 .handle-bar {
     width: 25px;
     height: 5px;
-    background: rgba(0, 0, 0, 0.80);
     border-radius: 100px;
 }
 
@@ -3074,7 +3098,7 @@ background-clip: text;
     display: flex;
     align-items: center;
     gap: 12px;
-    width: fit-content;
+    width: 40%;
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;

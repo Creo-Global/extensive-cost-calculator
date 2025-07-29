@@ -522,7 +522,7 @@
                         visibility: visible !important;
                         opacity: 1 !important;
                         position: relative !important;
-                        z-index: 9999 !important;
+                        z-index: 9 !important;
                         pointer-events: none !important;
                         color: #EB5F40 !important;
                         font-size: 14px !important;
@@ -5726,32 +5726,24 @@
             return;
         }
 
-        // Close mobile sheet if it's open
-        const summarySheet = document.querySelector('.sticky-summary-container');
-        const overlay = document.getElementById('bottom-sheet-overlay');
-        const mobileStickyFooter = document.getElementById('mobile-sticky-footer');
-        const body = document.body;
-
-        if (summarySheet && summarySheet.classList.contains('sheet-open')) {
-            // Close the sheet
-            summarySheet.classList.remove('sheet-open');
-            document.querySelector('.sheet-close-handle')?.classList.remove('sheet-open');
-            overlay?.classList.remove('active');
-            body.classList.remove('sheet-view-active');
-            body.style.overflow = '';
-            
-            if (mobileStickyFooter) {
-                mobileStickyFooter.style.display = 'flex';
+        // Close mobile sheet if it's open (using proper state management)
+        let wasSheetOpen = false;
+        if (typeof window.isMobileSheetOpen === 'function' && window.isMobileSheetOpen()) {
+            wasSheetOpen = true;
+            if (typeof window.closeMobileSheet === 'function') {
+                window.closeMobileSheet();
             }
-
-            // Restore scroll position if needed
-            if (window.scrollPositionBeforeModal !== undefined) {
-                window.scrollTo(0, window.scrollPositionBeforeModal);
-                window.scrollPositionBeforeModal = undefined;
+        } else {
+            // Fallback: Check DOM state if functions aren't available yet
+            const summarySheet = document.querySelector('.sticky-summary-container');
+            if (summarySheet && summarySheet.classList.contains('sheet-open')) {
+                wasSheetOpen = true;
+                // Don't manually close here - let the sheet initialize properly
             }
         }
 
         // Wait a bit for the sheet to close, then scroll to section
+        const delay = wasSheetOpen ? 300 : 0;
         setTimeout(() => {
             const headerOffset = 100; // Adjust based on your header height
             const elementPosition = section.getBoundingClientRect().top;
@@ -5761,7 +5753,7 @@
                 top: offsetPosition,
                 behavior: 'smooth'
             });
-        }, summarySheet && summarySheet.classList.contains('sheet-open') ? 300 : 0);
+        }, delay);
     }
 
     function adjustShareholderQuantity(change) {
@@ -6184,6 +6176,12 @@
             
             sheetIsOpen = false;
         };
+
+        // Make closeSheet globally accessible for edit buttons
+        window.closeMobileSheet = closeSheet;
+        
+        // Make sheet state check globally accessible
+        window.isMobileSheetOpen = () => sheetIsOpen;
 
         // Add click handlers for sheet opening (excluding get call button)
         const priceSection = mobileStickyFooter.querySelector('.price-section');

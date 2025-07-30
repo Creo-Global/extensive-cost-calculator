@@ -696,7 +696,7 @@
                     visibility: visible !important;
                     opacity: 1 !important;
                     position: relative !important;
-                    z-index: 9999 !important;
+                    z-index: 99 !important;
                     pointer-events: none !important;
                     color: #EB5F40 !important;
                     font-size: 14px !important;
@@ -711,7 +711,7 @@
                         visibility: visible !important;
                         opacity: 1 !important;
                         position: relative !important;
-                        z-index: 9999 !important;
+                        z-index: 99 !important;
                         pointer-events: none !important;
                         color: #EB5F40 !important;
                         font-size: 14px !important;
@@ -776,12 +776,27 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Validating...';
 
+            // First, trigger validation for any prefilled fields
+            triggerFormValidationAfterProgrammaticFill();
+
             setTimeout(() => {
                 const isValid = this.validateContactForm();
                 
                 if (isValid) {
                     submitBtn.innerHTML = '✓ Valid';
                     submitBtn.classList.add('validated');
+                    
+                    // Ensure sections are revealed if they haven't been already
+                    if (!isContactFormCompleted) {
+                        isContactFormCompleted = true;
+                        updateSectionLockState();
+                        
+                        // Mark license section as interacted for pricing display
+                        setTimeout(() => {
+                            sectionInteractions.licenseSection = true;
+                            calculateCosts();
+                        }, 1000);
+                    }
                     
                     if (typeof window.handleContactFormSubmit === 'function') {
                         window.handleContactFormSubmit();
@@ -795,14 +810,14 @@
                         submitBtn.disabled = false;
                     }, 2000);
                 }
-            }, 100);
+            }, 200);
         }
 
         handleSuccessfulSubmission() {
             // Scroll to the next section (company setup)
             const nextSection = document.getElementById('company-setup-section');
             if (nextSection) {
-                const headerOffset = 80; // Account for any fixed headers
+                const headerOffset = 60; // Account for any fixed headers
                 const elementPosition = nextSection.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -969,6 +984,9 @@
             
             // Initialize edit button functionality
             initializeEditButtons();
+            
+            // Initialize back to top button
+            initializeBackToTopButton();
             
             calculateCosts();
             
@@ -1808,37 +1826,40 @@
     }
 
     function openAddonModal(categoryName, categoryDescription) {
-        const modal = document.getElementById('addons-modal');
-        const modalTitle = document.getElementById('addons-modal-title');
-        const modalSubtitle = document.getElementById('addons-modal-subtitle');
-        const modalHeader = document.querySelector('#addons-modal .activity-modal-header');
-        
-        // Category images
-        const categoryImages = {
-            'mCore': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0009c49b9f6e1a1b8b5_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.webp',
-            'mResidency': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6afd5ddb5f1622f99baf_775fd8f4871640146c1e5f5c6af9c273275f1e4d307c502d91bb9baf561163fc.webp',
-            'mAssist': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6aeaeb91eccdec925bcc_f03ef01cb46009b032f13938d1ce70d5c48295bb78648a5be0cff97a231d87de.webp',
-            'mAccounting': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6ae3a479cb1ee9225627_b6c212f84a314ee75c93701d8cc4a1745ef6957b2ea1458e7e33513166368c0d.webp'
-        };
-        
-        // Remove any existing category image
-        const existingImage = modalHeader.querySelector('.addon-category-image-container');
-        if (existingImage) {
-            existingImage.remove();
-        }
-        
-        // Add category image to the modal header content
-        const modalHeaderContent = modalHeader.querySelector('.modal-header-content');
-        if (categoryImages[categoryName] && modalHeaderContent) {
-            const imageHtml = `
-                <div class="addon-category-image-container">
-                    <img src="${categoryImages[categoryName]}" alt="${categoryName}" class="addon-category-image" />
-                </div>`;
-            modalHeaderContent.insertAdjacentHTML('afterbegin', imageHtml);
-        }
-        
+    const modal = document.getElementById('addons-modal');
+    const modalTitle = document.getElementById('addons-modal-title');
+    const modalSubtitle = document.getElementById('addons-modal-subtitle');
+    const modalHeader = document.querySelector('#addons-modal .activity-modal-header');
+    
+    // Category images
+    const categoryImages = {
+        'mCore': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0009c49b9f6e1a1b8b5_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.webp',
+        'mResidency': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6afd5ddb5f1622f99baf_775fd8f4871640146c1e5f5c6af9c273275f1e4d307c502d91bb9baf561163fc.webp',
+        'mAssist': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6aeaeb91eccdec925bcc_f03ef01cb46009b032f13938d1ce70d5c48295bb78648a5be0cff97a231d87de.webp',
+        'mAccounting': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6ae3a479cb1ee9225627_b6c212f84a314ee75c93701d8cc4a1745ef6957b2ea1458e7e33513166368c0d.webp'
+    };
+    
+    // Remove any existing category image
+    const existingImage = modalHeader.querySelector('.addon-category-image-container');
+    if (existingImage) {
+        existingImage.remove();
+    }
+    
+    // Add category image to the modal header content
+    const modalHeaderContent = modalHeader.querySelector('.modal-header-content');
+    if (categoryImages[categoryName] && modalHeaderContent) {
+        const imageHtml = `
+            <div class="addon-category-image-container">
+                <img src="${categoryImages[categoryName]}" alt="${categoryName}" class="addon-category-image" />
+            </div>`;
+        modalHeaderContent.insertAdjacentHTML('afterbegin', imageHtml);
+    }
+    
+    // Update title and subtitle text
+    if (modalTitle && modalSubtitle) {
         modalTitle.textContent = categoryName;
         modalSubtitle.textContent = categoryDescription;
+    }
         
         // Load services for this category
         loadServicesForCategory(categoryName);
@@ -1915,68 +1936,78 @@
     }
 
     function loadServicesForCategory(categoryName) {
-        const servicesList = document.getElementById('addons-modal-services-list');
-        const services = getServicesForCategory(categoryName);
-        
-        let html = '';
-        
-        // Add services list without individual images
-        services.forEach(service => {
-            const isSelected = isServiceSelected(service.id);
-            html += `
-                <div class="addon-service-item" data-service="${service.id}">
-                    <div class="addon-service-content">
-                        <div class="addon-service-header">
-                            <div class="addon-service-name">${service.name}</div>
-                            <div class="addon-service-toggle-container">
-                                <span class="addon-service-toggle-label ${isSelected ? 'selected' : ''}">
-                                    ${isSelected ? 'Selected' : ''}
-                                </span>
-                                <div class="addon-service-toggle ${isSelected ? 'checked' : ''}" data-service="${service.id}">
-                                    <div class="addon-service-toggle-slider"></div>
-                                </div>
+    const servicesList = document.getElementById('addons-modal-services-list');
+    const services = getServicesForCategory(categoryName);
+    
+    // Find existing services container or create one
+    let servicesContainer = servicesList.querySelector('.addon-services-list');
+    if (!servicesContainer) {
+        servicesContainer = document.createElement('div');
+        servicesContainer.className = 'addon-services-list';
+        servicesList.appendChild(servicesContainer);
+    }
+    
+    let html = '';
+    
+    // Add services list without individual images
+    services.forEach(service => {
+        const isSelected = isServiceSelected(service.id);
+        html += `
+            <div class="addon-service-item" data-service="${service.id}">
+                <div class="addon-service-content">
+                    <div class="addon-service-header">
+                        <div class="addon-service-name">${service.name}</div>
+                        <div class="addon-service-toggle-container">
+                            <span class="addon-service-toggle-label ${isSelected ? 'selected' : ''}">
+                                ${isSelected ? 'Selected' : ''}
+                            </span>
+                            <div class="addon-service-toggle ${isSelected ? 'checked' : ''}" data-service="${service.id}">
+                                <div class="addon-service-toggle-slider"></div>
                             </div>
                         </div>
-                        <div class="addon-service-description">${service.description}</div>
                     </div>
-                </div>`;
-        });
+                    <div class="addon-service-description">${service.description}</div>
+                </div>
+            </div>`;
+    });
+    
+    // Update the services container
+    servicesContainer.innerHTML = html;
         
-        servicesList.innerHTML = html;
-        
-        // Add click handlers for toggle switches
-        servicesList.querySelectorAll('.addon-service-toggle').forEach(toggle => {
-            toggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const serviceId = this.dataset.service;
-                const isCurrentlySelected = this.classList.contains('checked');
-                const item = this.closest('.addon-service-item');
-                const label = item.querySelector('.addon-service-toggle-label');
-                
-                if (isCurrentlySelected) {
-                    this.classList.remove('checked');
-                    label.classList.remove('selected');
-                    label.textContent = '';
-                    deselectService(serviceId);
-                } else {
-                    this.classList.add('checked');
-                    label.classList.add('selected');
-                    label.textContent = 'Selected';
-                    selectService(serviceId);
+            // Add click handlers for toggle switches
+    const toggles = servicesList.querySelectorAll('.addon-service-toggle');
+    toggles.forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const serviceId = this.dataset.service;
+            const isCurrentlySelected = this.classList.contains('checked');
+            const item = this.closest('.addon-service-item');
+            const label = item.querySelector('.addon-service-toggle-label');
+            
+            if (isCurrentlySelected) {
+                this.classList.remove('checked');
+                label.classList.remove('selected');
+                label.textContent = '';
+                deselectService(serviceId);
+            } else {
+                this.classList.add('checked');
+                label.classList.add('selected');
+                label.textContent = 'Selected';
+                selectService(serviceId);
+            }
+            
+            // Clear any existing error messages when services are selected
+            const existingErrors = document.querySelectorAll('.tax-compliance-warning, .calc-error-message');
+            existingErrors.forEach(error => {
+                if (error.style.display !== 'none') {
+                    error.style.display = 'none';
                 }
-                
-                // Clear any existing error messages when services are selected
-                const existingErrors = document.querySelectorAll('.tax-compliance-warning, .calc-error-message');
-                existingErrors.forEach(error => {
-                    if (error.style.display !== 'none') {
-                        error.style.display = 'none';
-                    }
-                });
-                
-                // Update costs and UI
-                calculateCosts();
             });
+            
+            // Update costs and UI
+            calculateCosts();
         });
+    });
     }
 
     function getServicesForCategory(categoryName) {
@@ -4678,11 +4709,11 @@
         });
     }
 
-    // Section Locking System
+    // Section Hiding/Revealing System
     function initializeSectionLocking() {
         try {
-            // Lock all sections except contact form on page load
-            lockSections();
+            // Hide all sections except contact form on page load
+            hideSections();
             
             // Add real-time validation listeners to contact form fields
             const contactFields = ['full-name', 'phone', 'email'];
@@ -4747,141 +4778,110 @@
         }
     }
 
-    function lockSections() {
+    function hideSections() {
         try {
-            const sectionsToLock = [
+            const sectionsToHide = [
                 'company-setup-section',
                 'business-activities-section', 
                 'visa-options-section',
                 'change-status-section',
-                'addons-section'
+                'addons-section',
+                'mobile-sticky-footer'
+
             ];
             
-            sectionsToLock.forEach(sectionId => {
+            sectionsToHide.forEach(sectionId => {
                 const section = document.getElementById(sectionId);
-                if (section && !section.classList.contains('locked')) {
-                    section.classList.add('locked');
+                if (section) {
+                    section.classList.remove('visible', 'revealing');
+                    section.classList.add('hidden');
                     
-                    // Add lock overlay if it doesn't exist
-                    if (!section.querySelector('.section-lock-overlay')) {
-                        const overlay = createLockOverlay(sectionId);
-                        section.appendChild(overlay);
-                        
-                        // Add click handler to overlay to scroll to contact form
-                        overlay.addEventListener('click', () => {
-                            const contactSection = document.getElementById('personal-details-section');
-                            if (contactSection) {
-                                const headerOffset = 20;
-                                const elementPosition = contactSection.getBoundingClientRect().top;
-                                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                                window.scrollTo({
-                                    top: offsetPosition,
-                                    behavior: 'smooth'
-                                });
-                                
-                                // Focus on first empty field
-                                const firstEmptyField = contactSection.querySelector('input:not([value]), input[value=""]');
-                                if (firstEmptyField) {
-                                    setTimeout(() => firstEmptyField.focus(), 500);
-                                }
-                            }
-                        });
-                        
-                        // Add hover effect
-                        overlay.style.cursor = 'pointer';
-                        overlay.title = 'Click to go to contact form';
+                    // Remove any existing overlays
+                    const existingOverlay = section.querySelector('.section-lock-overlay');
+                    if (existingOverlay) {
+                        existingOverlay.remove();
                     }
                 }
             });
         } catch (err) {
-            console.error("Error locking sections:", err);
+            console.error("Error hiding sections:", err);
         }
     }
 
-    function unlockSections() {
+    function revealSections() {
         try {
-            const sectionsToUnlock = [
+            const sectionsToReveal = [
                 'company-setup-section',
                 'business-activities-section',
                 'visa-options-section', 
                 'change-status-section',
-                'addons-section'
+                'addons-section',
+                'mobile-sticky-footer'
             ];
             
-            sectionsToUnlock.forEach(sectionId => {
+            // Show elegant reveal message
+            showRevealMessage();
+            
+            // Reveal sections with staggered animation
+            sectionsToReveal.forEach((sectionId, index) => {
                 const section = document.getElementById(sectionId);
-                if (section && section.classList.contains('locked')) {
-                    section.classList.add('unlocking');
-                    section.classList.remove('locked');
-                    
-                    // Remove lock overlay
-                    const overlay = section.querySelector('.section-lock-overlay');
-                    if (overlay) {
-                        overlay.remove();
-                    }
-                    
-                    // Remove unlocking class after animation
+                if (section && section.classList.contains('hidden')) {
                     setTimeout(() => {
-                        section.classList.remove('unlocking');
-                    }, 500);
+                        section.classList.remove('hidden');
+                        section.classList.add('revealing');
+                        
+                        // After animation completes, mark as visible
+                        setTimeout(() => {
+                            section.classList.remove('revealing');
+                            section.classList.add('visible');
+                        }, 800); // Animation duration
+                        
+                    }, index * 100); // Stagger each section by 100ms
                 }
             });
             
-            // Do NOT mark sections as interacted when unlocking
-            // Let user interaction or visibility determine when to show prices
-            
-            // Recalculate costs with current section interaction states
-            calculateCosts();
+            setTimeout(() => {
+                calculateCosts();
+            }, sectionsToReveal.length * 100 + 400);
             
         } catch (err) {
-            console.error("Error unlocking sections:", err);
+            console.error("Error revealing sections:", err);
+        }
+    }
+    
+    function showRevealMessage() {
+        try {
+            // Create reveal message overlay
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'sections-revealing-message';
+            messageDiv.innerHTML = `
+                <h3>✨ Setting up your calculator...</h3>
+                <p>Your form is validated! Loading calculator sections.</p>
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            // Show message
+            setTimeout(() => {
+                messageDiv.classList.add('show');
+            }, 50);
+            
+            // Hide and remove message after sections start revealing
+            setTimeout(() => {
+                messageDiv.classList.remove('show');
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 300);
+            }, 1200);
+            
+        } catch (err) {
+            console.error("Error showing reveal message:", err);
         }
     }
 
-    function createLockOverlay(sectionId) {
-        const overlay = document.createElement('div');
-        overlay.className = 'section-lock-overlay';
-        
-        let title = 'Complete Contact Information';
-        let message = 'Fill out your contact details above to unlock this section';
-        
-        // Customize message based on section
-        switch(sectionId) {
-            case 'company-setup-section':
-                title = 'Choose Your Business License';
-                message = 'Complete your contact information to select your business license type';
-                break;
-            case 'business-activities-section':
-                title = 'Select Business Activities';
-                message = 'Complete your contact information to choose your business activities';
-                break;
-            case 'visa-options-section':
-                title = 'Configure Visa Options';
-                message = 'Complete your contact information to set up visa requirements';
-                break;
-            case 'change-status-section':
-                title = 'Change Status Options';
-                message = 'Complete your contact information to access change status services';
-                break;
-            case 'addons-section':
-                title = 'Additional Services';
-                message = 'Complete your contact information to explore additional services';
-                break;
-        }
-        
-        overlay.innerHTML = `
-            <div class="lock-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
-                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/>
-                </svg>
-            </div>
-            <h3>${title}</h3>
-            <p>${message}</p>
-        `;
-        
-        return overlay;
-    }
+
 
     function updateSectionLockState() {
         try {
@@ -4891,10 +4891,30 @@
             const progressIndicator = document.getElementById('contact-progress');
             const progressIcon = document.getElementById('progress-icon');
             
+            // Update button text based on whether form fields have values
+            if (submitBtn && isValid) {
+                const nameField = document.getElementById('full-name');
+                const emailField = document.getElementById('email');
+                const phoneField = document.getElementById('phone');
+                
+                const hasValues = nameField?.value?.trim() && emailField?.value?.trim() && phoneField?.value?.trim();
+                if (hasValues && !isContactFormCompleted) {
+                    submitBtn.querySelector('span').textContent = 'Calculate';
+                } else if (!isContactFormCompleted) {
+                    submitBtn.querySelector('span').textContent = 'Calculate';
+                }
+            }
+            
             if (isValid && !isContactFormCompleted) {
-                // Form is now valid - unlock sections
+                // Form is now valid - reveal sections with elegant animation
                 isContactFormCompleted = true;
-                unlockSections();
+                
+                // Add validation glow to contact form
+                if (contactSection) {
+                    contactSection.classList.add('validated');
+                }
+                
+                revealSections();
                 
                 // REVEAL PRICING CONTAINER - when form is validated
                 // But don't calculate actual prices until user interacts with sections
@@ -4955,9 +4975,15 @@
                 }
                 
             } else if (!isValid && isContactFormCompleted) {
-                // Form was valid but now invalid - lock sections again
+                // Form was valid but now invalid - hide sections again
                 isContactFormCompleted = false;
-                lockSections();
+                
+                // Remove validation glow
+                if (contactSection) {
+                    contactSection.classList.remove('validated');
+                }
+                
+                hideSections();
                 
                 // Update contact section styling
                 if (contactSection) {
@@ -5598,7 +5624,7 @@
                 quantityValue.textContent = '1';
             }
             
-            // Update hidden input with initial quantity
+            // Update hidden inputs with initial quantity
             if (visaType === 'employee') {
                 document.getElementById('employee-visa-count').value = 1;
                 // Ensure plus button is enabled and info card is hidden when starting at 1
@@ -6529,7 +6555,7 @@
         // Visa Toggle Switches
         const visaToggles = document.querySelectorAll('.visa-toggle-switch input');
         visaToggles.forEach(toggle => {
-            toggle.addEventListener('change', () => {
+            toggle.addEventListener('click', () => {
                 const visaCard = toggle.closest('.visa-card');
                 if (visaCard) {
                     const allVisaCards = Array.from(document.querySelectorAll('.visa-card:not(.change-status-card)'));
@@ -6598,7 +6624,206 @@
         });
     }
 
-    // Initialize mobile auto-scroll when DOM is loaded
+    function initializeBackToTopButton() {
+                try {
+            const backToTopBtn = document.getElementById('back-to-top-btn');
+            const progressRing = document.querySelector('.progress-ring-progress');
+            const contactSection = document.getElementById('personal-details-section');
+            
+            if (!backToTopBtn || !progressRing || !contactSection) {
+                return;
+            }
+            
+            // Calculate the circumference of the progress ring
+            const radius = 28; // From CSS - updated for border positioning
+            const circumference = 2 * Math.PI * radius;
+            
+            // Set up initial state
+            progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
+            progressRing.style.strokeDashoffset = circumference;
+        
+        // Function to update progress based on scroll
+        const updateProgress = () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const mobileFooter = document.getElementById('mobile-sticky-footer');
+            const calculatorSection = document.getElementById('srix-NewCostCalForm');
+            
+            if (!calculatorSection || !mobileFooter) return;
+            
+            // Get calculator section boundaries
+            const sectionRect = calculatorSection.getBoundingClientRect();
+            const sectionTop = sectionRect.top + scrollTop;
+            const sectionBottom = sectionTop + sectionRect.height;
+            
+            // Get mobile footer position
+            const footerRect = mobileFooter.getBoundingClientRect();
+            const footerTop = footerRect.top + scrollTop;
+            
+            // Check if user is within the calculator section
+            const isInSection = scrollTop >= sectionTop - 100 && scrollTop < footerTop - 100;
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isInSection && isMobile) {
+                // Calculate progress within the calculator section
+                const sectionProgress = Math.min(Math.max((scrollTop - sectionTop) / (sectionRect.height * 0.8), 0), 1);
+                
+                // Update the progress ring
+                const offset = circumference - (sectionProgress * circumference);
+                progressRing.style.strokeDashoffset = offset;
+                
+                // Show button
+                backToTopBtn.classList.add('visible');
+            } else {
+                // Hide button when outside section or on desktop
+                backToTopBtn.classList.remove('visible');
+            }
+        };
+        
+        // Function to scroll to top of calculator section
+        const scrollToSectionTop = (e) => {
+            e.preventDefault();
+            
+            const calculatorSection = document.getElementById('srix-NewCostCalForm');
+            if (!calculatorSection) return;
+            
+            const headerOffset = 80;
+            const elementPosition = calculatorSection.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        };
+        
+        // Event listeners
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        window.addEventListener('resize', updateProgress, { passive: true });
+        backToTopBtn.addEventListener('click', scrollToSectionTop);
+        
+        // Initial progress update
+        updateProgress();
+        
+        // Force initial check after a short delay
+        setTimeout(updateProgress, 100);
+        
+        } catch (error) {
+            console.error('Error initializing back to top button:', error);
+        }
+    }
+
+    // Helper function to trigger form validation after programmatic field filling
+    function triggerFormValidationAfterProgrammaticFill() {
+        try {
+            // Get form fields
+            const nameField = document.getElementById('full-name');
+            const emailField = document.getElementById('email');
+            const phoneField = document.getElementById('phone');
+            
+            // Trigger input events to simulate user interaction
+            const fields = [nameField, emailField, phoneField].filter(field => field);
+            
+            fields.forEach(field => {
+                if (field && field.value.trim()) {
+                    // Create and dispatch input event
+                    const inputEvent = new Event('input', { 
+                        bubbles: true, 
+                        cancelable: true 
+                    });
+                    field.dispatchEvent(inputEvent);
+                    
+                    // Create and dispatch change event
+                    const changeEvent = new Event('change', { 
+                        bubbles: true, 
+                        cancelable: true 
+                    });
+                    field.dispatchEvent(changeEvent);
+                    
+                    // Trigger blur event for validation
+                    const blurEvent = new Event('blur', { 
+                        bubbles: true, 
+                        cancelable: true 
+                    });
+                    field.dispatchEvent(blurEvent);
+                }
+            });
+            
+            // Trigger phone validation specifically if FormValidator exists
+            if (window.formValidator && phoneField && phoneField.value.trim()) {
+                // Trigger phone-specific validation
+                if (typeof window.formValidator.validateField === 'function') {
+                    window.formValidator.validateField('phone');
+                }
+            }
+            
+            // Force update section lock state
+            if (typeof updateSectionLockState === 'function') {
+                // Small delay to ensure all validations complete
+                setTimeout(() => {
+                    updateSectionLockState();
+                    
+                    // If form is valid and sections should be revealed, also mark as having basic interaction
+                    const isValid = window.formValidator && window.formValidator.validateContactForm();
+                    if (isValid && !isContactFormCompleted) {
+                        // Mark some basic sections as interacted so pricing shows when calculate is clicked
+                        setTimeout(() => {
+                            if (sectionInteractions.licenseSection !== true) {
+                                sectionInteractions.licenseSection = true;
+                                calculateCosts();
+                            }
+                        }, 500);
+                    }
+                }, 100);
+            }
+                        
+        } catch (error) {
+            console.error('Error triggering form validation:', error);
+        }
+    }
+
+    // Helper function to fill form AND trigger validation
+    function fillFormAndTriggerValidation(userData) {
+        try {
+            // Fill the form fields
+            if (userData.fullName) {
+                const nameField = document.getElementById('full-name');
+                if (nameField) nameField.value = userData.fullName;
+            }
+            
+            if (userData.email) {
+                const emailField = document.getElementById('email');
+                if (emailField) emailField.value = userData.email;
+            }
+            
+            if (userData.phone) {
+                const phoneField = document.getElementById('phone');
+                if (phoneField) {
+                    phoneField.value = userData.phone;
+                    
+                    // If using international phone input, set the number properly
+                    if (window.formValidator && window.formValidator.phoneInput) {
+                        try {
+                            window.formValidator.phoneInput.setNumber(userData.phone);
+                        } catch (e) {
+                            console.warn('Could not set phone number via phoneInput:', e);
+                        }
+                    }
+                }
+            }
+            
+            // Trigger validation after filling
+            triggerFormValidationAfterProgrammaticFill();
+            
+        } catch (error) {
+            console.error('Error filling form and triggering validation:', error);
+        }
+    }
+
+    // Make both functions globally available
+    window.triggerFormValidationAfterProgrammaticFill = triggerFormValidationAfterProgrammaticFill;
+    window.fillFormAndTriggerValidation = fillFormAndTriggerValidation;
+
+    // Initialize mobile auto-scroll when DOM is loaded  
     document.addEventListener('DOMContentLoaded', function() {
         initializeMobileAutoScroll();
         

@@ -751,6 +751,31 @@
 
     <div id="bottom-sheet-overlay"></div>
 
+    <!-- Back to Top Button with Progress (Mobile Only) -->
+    <button id="back-to-top-btn" class="back-to-top-button" aria-label="Back to top">
+        <svg class="progress-ring" width="64" height="64">
+            <circle class="progress-ring-circle" cx="32" cy="32" r="28" stroke-width="4" fill="transparent" stroke="#F7BFB3"/>
+            <circle class="progress-ring-progress" cx="32" cy="32" r="28" stroke-width="4" fill="transparent" stroke="url(#gradient)" stroke-linecap="round"/>
+            <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#EB5F40;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#B5348B;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+        </svg>
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="22.003" cy="22.0001" r="21.5909" fill="white"/>
+            <path d="M22.0014 29.9561L22.0014 14.047M22.0014 14.047L14.0469 22.0015M22.0014 14.047L29.956 22.0015" stroke="url(#paint0_linear_1302_187)" stroke-width="1.53409" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+            <linearGradient id="paint0_linear_1302_187" x1="14.0469" y1="29.9561" x2="17.8358" y2="11.5518" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#EB5F40"/>
+            <stop offset="1" stop-color="#B5348B"/>
+            </linearGradient>
+            </defs>
+            </svg>
+            
+    </button>
+
     <!-- Success Message Popup Modal -->
     <div id="success-popup-modal" class="success-popup-overlay" style="display: none;">
         <div class="success-popup-content">
@@ -832,13 +857,13 @@
         <div class="activity-modal-content">
             <div class="activity-modal-header">
                 <div class="modal-header-content">
-                    <h3 id="addons-modal-title">mCore Services</h3>
                     <button id="addons-close-modal-btn" class="close-btn" aria-label="Close modal">&times;</button>
                 </div>
             </div>
-            <p id="addons-modal-subtitle" class="modal-subtitle">Essential tools to kickstart your business with ease, from banking to branding.</p>
             
             <div id="addons-modal-services-list">
+                <h3 id="addons-modal-title">mCore Services</h3>
+                <p id="addons-modal-subtitle" class="modal-subtitle">Essential tools to kickstart your business with ease, from banking to branding.</p>
                 <!-- Services will be loaded here -->
             </div>
             

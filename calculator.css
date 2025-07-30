@@ -3684,7 +3684,8 @@ background-clip: text;
 
 /* Position relative for overlay positioning */
 .sticky-summary-container {
-    position: relative;
+    position: sticky;
+    top: 110px;
 }
 
 #mobile-sticky-footer {
@@ -3855,7 +3856,7 @@ form[data-name] .calc-error-message,
 font-size: 22px;
 font-style: normal;
 font-weight: 700;
-line-height: 24px; /* 109.091% */
+line-height: normal;
     background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
     background-clip: text;
     -webkit-background-clip: text;

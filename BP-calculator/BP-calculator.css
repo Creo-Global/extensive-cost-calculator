@@ -218,6 +218,7 @@ font-size: 14px;
     margin: 0;
     font-weight: 400;
     opacity: 0.8;
+    margin-bottom: 32px;
 }
 
 /* Info Section Styling */
@@ -247,15 +248,18 @@ align-items: center;
     font-weight: 500;
     line-height: 18px; 
 }
-
-employee-visa-limit-info{
-
-}
 /* License cards styling */
 .license-cards-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+    .license-cards-container {
+        margin-bottom: 0px;
+    }
 }
 
 .license-card {
@@ -494,6 +498,7 @@ font-weight: 600;
     position: relative;
     box-sizing: border-box;
     width: 100%;
+    margin: 16px 0
 }
 
 .activity-search-input {
@@ -2527,6 +2532,12 @@ background-clip: text;
     padding: 24px;
 }
 
+@media (max-width: 768px) {
+    .activity-modal-header .addon-category-image {
+        height: 130px;
+        padding: 0 24px;
+    }
+}
 .activity-modal-header h3 {
     order: 2;
     padding:16px 24px;
@@ -2571,7 +2582,7 @@ background-clip: text;
     font-size: 14px;
     color: #718096;
     margin: 4px 0 16px 0;
-    padding: 0 24px;
+
 }
 
 .modal-category-selector {
@@ -2817,6 +2828,8 @@ background-clip: text;
     max-height: 500px;
 }
 
+
+
 .addon-category-image-container {
     width: 100%;
 }
@@ -2995,18 +3008,17 @@ background-clip: text;
     border-radius:8px;
   }
 #license-modal-title {
-    padding: 0 24px;
+    padding: 8px 24px;
 }
 
 /* Mobile Sticky Footer & Bottom Sheet Implementation */
 #mobile-sticky-footer {
     display: none;
-    position: fixed;
+    position: relative;
     bottom: 0;
     left: 0;
     right: 0;
     background: rgba(255, 255, 255, 0.60);
-    z-index: 1000;
     cursor: pointer;
     transition: all 0.3s ease;
 
@@ -3412,106 +3424,145 @@ background-clip: text;
     }
 }
 
-/* Form section locking styles */
-.form-section.locked {
-    position: relative;
-    opacity: 0.5;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+/* Hidden form sections - completely hidden until validated */
+.form-section.hidden {
+    display: none;
+    opacity: 0;
+    transform: translateY(30px);
 }
 
-.form-section.locked::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    -webkit-backdrop-filter: blur(2px);
-    backdrop-filter: blur(2px);
-    z-index: 10;
-    border-radius: 16px;
+/* Revealing form sections with elegant animation */
+.form-section.revealing {
+    display: block;
+    animation: revealSection 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.section-lock-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    text-align: center;
-    z-index: 11;
-    border: 1px solid #E5E7EB;
-    max-width: 300px;
-    width: 90%;
+.form-section.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease;
 }
 
-.section-lock-overlay .lock-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 16px;
-    background: linear-gradient(135deg, #EB5F40 0%, #B5348B 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Staggered reveal animation for multiple sections */
+.form-section.revealing:nth-of-type(2) {
+    animation-delay: 0.1s;
 }
 
-.section-lock-overlay .lock-icon svg {
-    width: 24px;
-    height: 24px;
-    fill: white;
+.form-section.revealing:nth-of-type(3) {
+    animation-delay: 0.2s;
 }
 
-.section-lock-overlay h3 {
-    font-family: "Plus Jakarta Sans";
-    font-size: 16px;
-    font-weight: 600;
-    color: #1C1C1C;
-    margin: 0 0 8px 0;
-    line-height: 1.4;
+.form-section.revealing:nth-of-type(4) {
+    animation-delay: 0.3s;
 }
 
-.section-lock-overlay p {
-    font-family: "Plus Jakarta Sans";
-    font-size: 14px;
-    color: #1C1C1C;
-    margin: 0;
-    line-height: 1.4;
+.form-section.revealing:nth-of-type(5) {
+    animation-delay: 0.4s;
 }
 
-.section-lock-overlay:hover {
-    transform: translate(-50%, -50%) scale(1.02);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
+.form-section.revealing:nth-of-type(6) {
+    animation-delay: 0.5s;
 }
 
-.section-lock-overlay:hover .lock-icon {
-    transform: scale(1.1);
-    transition: transform 0.2s ease;
-}
-
-.form-section:not(.locked) {
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.form-section.unlocking {
-    animation: unlockSection 0.5s ease forwards;
-}
-
-@keyframes unlockSection {
+/* Elegant reveal animation */
+@keyframes revealSection {
     0% {
-        opacity: 0.5;
-        transform: translateY(10px);
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+        filter: blur(8px);
+    }
+    30% {
+        opacity: 0.4;
+        transform: translateY(20px) scale(0.98);
+        filter: blur(4px);
+    }
+    60% {
+        opacity: 0.8;
+        transform: translateY(8px) scale(1.01);
+        filter: blur(1px);
     }
     100% {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
     }
+}
+
+/* Contact form validation success glow */
+.contact-form-section.validated {
+    position: relative;
+}
+
+.contact-form-section.validated::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(145deg, rgba(235, 95, 64, 0.08), rgba(181, 52, 139, 0.08));
+    border-radius: 14px;
+    z-index: -1;
+    animation: validationGlow 2s ease-out;
+}
+
+@keyframes validationGlow {
+    0% {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.01);
+    }
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+}
+
+/* Sections reveal sequence message */
+.sections-revealing-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    padding: 24px 32px;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    z-index: 9999;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sections-revealing-message.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.sections-revealing-message h3 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 18px;
+    font-weight: 600;
+    color: #1C1C1C;
+    margin: 0 0 8px 0;
+    background: linear-gradient(145deg, #EB5F40, #B5348B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.sections-revealing-message p {
+    font-family: "Plus Jakarta Sans";
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0;
 }
 
 /* Contact form completion indicator */
@@ -3712,7 +3763,7 @@ background-clip: text;
 }
 
 #mobile-sticky-footer {
-    position: fixed;
+    position: relative;
 }
 /* Collapsible addons section in sticky summary */
 #addons-summary-section {
@@ -4181,4 +4232,110 @@ line-height: 24px; /* 109.091% */
 .iti__country-list {
     z-index: 10000 !important;
     background-color: #fff !important;
+}
+
+/* Back to Top Button with Progress (Mobile Only) */
+.back-to-top-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.98);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.8);
+    pointer-events: none;
+    padding: 2px; /* Space for the border ring */
+}
+
+.back-to-top-button.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(247, 191, 179, 0.2);
+}
+
+.back-to-top-button:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16);
+    background: rgba(255, 255, 255, 1);
+}
+
+.back-to-top-button:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.progress-ring {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 64px;
+    height: 64px;
+    transform: rotate(-90deg);
+    z-index: 1;
+}
+
+.progress-ring-circle {
+    stroke: #F7BFB3;
+    stroke-width: 4;
+    opacity: 0.4;
+}
+
+.progress-ring-progress {
+    stroke-dasharray: 175.93; /* Circumference: 2 * π * 28 */
+    stroke-dashoffset: 175.93;
+    transition: stroke-dashoffset 0.2s ease;
+    filter: drop-shadow(0 0 2px rgba(235, 95, 64, 0.3));
+}
+
+.back-to-top-icon {
+    position: relative;
+    z-index: 2;
+    color: #374151;
+    transition: color 0.3s ease;
+}
+
+.back-to-top-button:hover .back-to-top-icon {
+    color: #B5348B;
+}
+
+/* Hide on desktop */
+@media (min-width: 769px) {
+    .back-to-top-button {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+    .back-to-top-button {
+        bottom: 85px; /* Adjusted for relative positioned footer */
+    }
+    
+    /* Adjust when sheet is open */
+    body.sheet-view-active .back-to-top-button {
+        bottom: 60vh;
+    }
+    
+    /* Ensure it's visible on mobile when conditions are met */
+    .back-to-top-button.visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
 }

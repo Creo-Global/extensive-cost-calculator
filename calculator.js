@@ -5219,7 +5219,7 @@
             updateButtonsDisplay(stepNumber);
             
             // Scroll to top of form
-            const formContainer = document.querySelector('#srix-NewCostCalForm');
+            const formContainer = document.querySelector('#MFZ-NewCostCalForm');
             if (formContainer) {
                 formContainer.scrollIntoView({ behavior: 'smooth' });
             }

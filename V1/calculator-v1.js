@@ -123,7 +123,7 @@
     });
 
     function updateProgressBar(step) {
-        const progressBar = document.querySelector('#srix-NewCostCalForm .step-progress');
+        const progressBar = document.querySelector('#MFZ-NewCostCalForm .step-progress');
         
         if (progressBar) {
             let progressWidth;
@@ -1054,7 +1054,7 @@
                 if (submitButton.length > 0) {
                     submitButton.click();
                     
-                    document.querySelector('#srix-NewCostCalForm .form-container').style.display = 'none';
+                    document.querySelector('#MFZ-NewCostCalForm .form-container').style.display = 'none';
                     const successMessage = document.getElementById('theFinalSuccessMessage');
                     document.getElementById('success-first-name').textContent = fullName.split(' ')[0] || '';
                     successMessage.classList.remove('d-none');

@@ -31,14 +31,14 @@
     display: none !important;
 }
 
-#srix-NewCostCalForm * {
+#MFZ-NewCostCalForm * {
 box-sizing: border-box;
 margin: 0;
 padding: 0;
 
 }
 
-.header-grid-srix {
+.header-grid-MFZ {
 display: grid;
 grid-auto-flow: column;
 align-content: center;
@@ -46,7 +46,7 @@ align-items: center;
 column-gap: 20px;
 }
 
-.header-grid-srix h2{
+.header-grid-MFZ h2{
 margin-bottom: 0px;
 color: #1C1C1C;
 font-family: "Plus Jakarta Sans";
@@ -56,7 +56,7 @@ font-weight: 700;
 line-height: 24px;
 }
 
-.header-grid-srix img {
+.header-grid-MFZ img {
   width: 48px;
   height: 48px;
 }
@@ -70,7 +70,7 @@ line-height: 24px;
 .select2-results__option--selected {
     background-color: #F4F2FF !important;
 }
-#srix-NewCostCalForm .form-container {
+#MFZ-NewCostCalForm .form-container {
     background: linear-gradient(131deg, rgba(16, 206, 166, 0.10) 7.48%, rgba(155, 149, 251, 0.10) 72.83%, rgba(75, 87, 251, 0.10) 98.46%);
 max-width: 700px;
 margin: 0 auto;
@@ -81,7 +81,7 @@ overflow: hidden;
 position: relative;
 }
 
-#srix-NewCostCalForm .header {
+#MFZ-NewCostCalForm .header {
 display: flex;
 justify-content: space-between;
 align-items: center;
@@ -92,15 +92,15 @@ border-radius: 20px 20px 0 0;
 }
 
 @media(max-width:768px){
-#srix-NewCostCalForm .header{
+#MFZ-NewCostCalForm .header{
     border-radius: 0px !important;
 }
 }
-#srix-NewCostCalForm .icon i {
+#MFZ-NewCostCalForm .icon i {
 color: #6226FF;
 }
 
-#srix-NewCostCalForm .step-counter {
+#MFZ-NewCostCalForm .step-counter {
 color: #494949;
 font-family: "Plus Jakarta Sans";
 font-size: 14px;
@@ -358,15 +358,15 @@ background-clip: text !important;
 -webkit-text-fill-color: transparent !important;
 }
 
-#srix-NewCostCalForm .step-counter::before {
+#MFZ-NewCostCalForm .step-counter::before {
 content: none;
 }
 
-#srix-NewCostCalForm .stepper-container {
+#MFZ-NewCostCalForm .stepper-container {
   display: none; 
 }
 
-#srix-NewCostCalForm .form-step-title {
+#MFZ-NewCostCalForm .form-step-title {
     color: #000;
 font-family: "Plus Jakarta Sans";
 font-size: 14px;
@@ -384,7 +384,7 @@ padding-bottom: 8px;
   margin-bottom: 40px;
 }
 
-#srix-NewCostCalForm .step-progress {
+#MFZ-NewCostCalForm .step-progress {
   position: absolute;
   top: 0;
   left: 0;
@@ -396,37 +396,37 @@ padding-bottom: 8px;
     width: 15%; /* Updated for 6 steps instead of 7 */
 }
 
-#srix-NewCostCalForm .form-step-container {
+#MFZ-NewCostCalForm .form-step-container {
   padding: 0 24px;
 }
 
-#srix-NewCostCalForm #heading-top-right-numbs-steps-1 {
+#MFZ-NewCostCalForm #heading-top-right-numbs-steps-1 {
   position: relative;
   z-index: 2;
 text-align: right;
 color: #1C1C1C;
 }
 
-#srix-NewCostCalForm #heading-top-right-numbs-steps-1 span {
+#MFZ-NewCostCalForm #heading-top-right-numbs-steps-1 span {
 color: #1C1C1C;
 }
 
-#srix-NewCostCalForm .step-counter span {
+#MFZ-NewCostCalForm .step-counter span {
 color: #494949 !important;
 }
 
-#srix-NewCostCalForm .step-counter #current-step {
+#MFZ-NewCostCalForm .step-counter #current-step {
   color: white;
 }
 
-#srix-NewCostCalForm .step-labels-container {
+#MFZ-NewCostCalForm .step-labels-container {
   display: flex;
   justify-content: space-between;
   margin-bottom: 30px;
   padding: 0 5px;
 }
 
-#srix-NewCostCalForm .step-label {
+#MFZ-NewCostCalForm .step-label {
   font-size: 12px;
   color: #808080;
   text-align: center;
@@ -434,25 +434,25 @@ color: #494949 !important;
   max-width: 100px;
 }
 
-#srix-NewCostCalForm #step-indicator-1.active ~ #step-1-label,
-#srix-NewCostCalForm #step-indicator-1.completed ~ #step-1-label,
-#srix-NewCostCalForm #step-indicator-2.active ~ #step-2-label,
-#srix-NewCostCalForm #step-indicator-2.completed ~ #step-2-label,
-#srix-NewCostCalForm #step-indicator-3.active ~ #step-3-label,
-#srix-NewCostCalForm #step-indicator-3.completed ~ #step-3-label,
-#srix-NewCostCalForm #step-indicator-4.active ~ #step-4-label,
-#srix-NewCostCalForm #step-indicator-4.completed ~ #step-4-label {
+#MFZ-NewCostCalForm #step-indicator-1.active ~ #step-1-label,
+#MFZ-NewCostCalForm #step-indicator-1.completed ~ #step-1-label,
+#MFZ-NewCostCalForm #step-indicator-2.active ~ #step-2-label,
+#MFZ-NewCostCalForm #step-indicator-2.completed ~ #step-2-label,
+#MFZ-NewCostCalForm #step-indicator-3.active ~ #step-3-label,
+#MFZ-NewCostCalForm #step-indicator-3.completed ~ #step-3-label,
+#MFZ-NewCostCalForm #step-indicator-4.active ~ #step-4-label,
+#MFZ-NewCostCalForm #step-indicator-4.completed ~ #step-4-label {
   color: #6226FF;
 
 }
 
-#srix-NewCostCalForm .form-step {
+#MFZ-NewCostCalForm .form-step {
 display: none;
 animation: fadeIn 0.5s ease-in-out;
 min-height: 400px;
 }
 
-#srix-NewCostCalForm .form-step.active {
+#MFZ-NewCostCalForm .form-step.active {
 display: block;
 }
 
@@ -461,15 +461,15 @@ from { opacity: 0; }
 to { opacity: 1; }
 }
 
-#srix-NewCostCalForm h2 {
+#MFZ-NewCostCalForm h2 {
 color: #333;
 }
 
-#srix-NewCostCalForm .form-group {
+#MFZ-NewCostCalForm .form-group {
 margin-bottom: 20px;
 }
 
-#srix-NewCostCalForm label {
+#MFZ-NewCostCalForm label {
 
 margin-bottom: 10px;
 display: flex;
@@ -483,11 +483,11 @@ margin-top: 12px;
 margin-bottom: 12px;
 }
 
-#srix-NewCostCalForm input[type="text"],
-#srix-NewCostCalForm input[type="email"],
-#srix-NewCostCalForm input[type="tel"],
-#srix-NewCostCalForm input[type="number"],
-#srix-NewCostCalForm select {
+#MFZ-NewCostCalForm input[type="text"],
+#MFZ-NewCostCalForm input[type="email"],
+#MFZ-NewCostCalForm input[type="tel"],
+#MFZ-NewCostCalForm input[type="number"],
+#MFZ-NewCostCalForm select {
 width: 100%;
 padding: 12px 16px;
 border: none;
@@ -499,11 +499,11 @@ font-size: 1em;
 
 }
 
-#srix-NewCostCalForm input[type="text"]:focus,
-#srix-NewCostCalForm input[type="email"]:focus,
-#srix-NewCostCalForm input[type="tel"]:focus,
-#srix-NewCostCalForm input[type="number"]:focus,
-#srix-NewCostCalForm select:focus {
+#MFZ-NewCostCalForm input[type="text"]:focus,
+#MFZ-NewCostCalForm input[type="email"]:focus,
+#MFZ-NewCostCalForm input[type="tel"]:focus,
+#MFZ-NewCostCalForm input[type="number"]:focus,
+#MFZ-NewCostCalForm select:focus {
 
 outline: none;
 border: none;
@@ -511,7 +511,7 @@ border: 1px solid #EDEDED;
 
 }
 
-#srix-NewCostCalForm select {
+#MFZ-NewCostCalForm select {
 
 -webkit-appearance: none;
 -moz-appearance: none;
@@ -524,50 +524,50 @@ background-color: white;
 
 }
 
-#srix-NewCostCalForm .phone-input {
+#MFZ-NewCostCalForm .phone-input {
 display: flex;
 gap: 10px;
 }
 
-#srix-NewCostCalForm .phone-input select {
+#MFZ-NewCostCalForm .phone-input select {
 width: 30%;
 }
 
-#srix-NewCostCalForm .shareholder-input {
+#MFZ-NewCostCalForm .shareholder-input {
 margin-top: 10px;
 display: flex;
 flex-direction: column;
 gap: 5px;
 }
 
-#srix-NewCostCalForm .add-activity {
+#MFZ-NewCostCalForm .add-activity {
     width: 100%;
     margin-top: 0;
 }
 
-#srix-NewCostCalForm #add-activity-btn {
+#MFZ-NewCostCalForm #add-activity-btn {
     display: none !important;
 }
 
-#srix-NewCostCalForm .selected-activities {
+#MFZ-NewCostCalForm .selected-activities {
     display: none;
 }
 
-#srix-NewCostCalForm .note {
+#MFZ-NewCostCalForm .note {
 display: block;
 margin-top: 5px;
 color: #6226FF;
 font-size: 0.9em;
 }
 
-#srix-NewCostCalForm .license-options {
+#MFZ-NewCostCalForm .license-options {
 margin-top:10px;
 display: grid;
 grid-auto-flow: row;
 row-gap:20px;
 }
 
-#srix-NewCostCalForm .license-option {
+#MFZ-NewCostCalForm .license-option {
 border-radius: 16px;
 
 display: grid;
@@ -584,11 +584,11 @@ line-height: 24px;
 margin-top: 24px;
 }
 
-#srix-NewCostCalForm .license-option input {
+#MFZ-NewCostCalForm .license-option input {
 margin-right: 10px;
 }
 
-#srix-NewCostCalForm table {
+#MFZ-NewCostCalForm table {
 width: 100%;
 border: none;
 margin-top: 20px;
@@ -598,7 +598,7 @@ border-collapse: separate;
 border-radius: 10px;
 }
 
-#srix-NewCostCalForm table td {
+#MFZ-NewCostCalForm table td {
 padding: 3px;
 border: none;
 background: white;
@@ -613,13 +613,13 @@ line-height: 24px;
     text-align:end
 }
 
-#srix-NewCostCalForm table tr:nth-child(even) {
+#MFZ-NewCostCalForm table tr:nth-child(even) {
 background-color: white;
 }
 
 
 
-#srix-NewCostCalForm .form-navigation {
+#MFZ-NewCostCalForm .form-navigation {
 display: flex;
 justify-content: space-between;
 align-items: center;
@@ -628,11 +628,11 @@ padding: 0px 24px;
 border-radius: 0 0 20px 20px;
 }
 @media(max-width:428px) {
-#srix-NewCostCalForm .form-navigation{
+#MFZ-NewCostCalForm .form-navigation{
     margin-bottom: -25px;
 }
 }
-#srix-NewCostCalForm .form-navigation button {
+#MFZ-NewCostCalForm .form-navigation button {
 padding: 10px 20px;
 border: none;
 background: #195137;
@@ -648,19 +648,19 @@ align-items: center;
 justify-content: center;
 }
 
-#srix-NewCostCalForm .form-navigation button:hover {
+#MFZ-NewCostCalForm .form-navigation button:hover {
     background: linear-gradient(102deg, #61a60e 0%, #004a98 100%);
 }
 
 
-#srix-NewCostCalForm  #prevBtn{
+#MFZ-NewCostCalForm  #prevBtn{
 background: #FFF;
 color: #240B6A;
 border: 1px solid #F3F3F3;
 }
 
-#srix-NewCostCalForm #nextBtn,
-#srix-NewCostCalForm #submitBtn {
+#MFZ-NewCostCalForm #nextBtn,
+#MFZ-NewCostCalForm #submitBtn {
 display: flex;
 align-items: center;
 justify-content: center;
@@ -680,17 +680,17 @@ background: #195137;
 margin-bottom:10px
 }
 
-#srix-NewCostCalForm .form-navigation button:hover {
+#MFZ-NewCostCalForm .form-navigation button:hover {
 background-color: #240B6A;
 }
 
-#srix-NewCostCalForm #prevBtn {
+#MFZ-NewCostCalForm #prevBtn {
 background-color: #DDDDDD;
 justify-self: start;
 color: #1C1C1C;
 }
 
-#srix-NewCostCalForm #prevBtn:hover {
+#MFZ-NewCostCalForm #prevBtn:hover {
 background-color: transparent;
 border: 1px solid #1C1C1C;
 
@@ -720,7 +720,7 @@ background-color: #F4F2FF;
 border-radius: 50%;
 }
 
-.license-option .checkmark-srix {
+.license-option .checkmark-MFZ {
 display: inline-block;
 position: absolute;
 top: 31px;
@@ -733,7 +733,7 @@ height: 25px;
 display: inline-block;
 }
 
-.license-option input[type="radio"]:checked ~ .checkmark-srix {
+.license-option input[type="radio"]:checked ~ .checkmark-MFZ {
 display: inline-block;
 
 }
@@ -743,17 +743,17 @@ border: 1px solid green !important;
 }
 
 
-#srix-NewCostCalForm #srix-total-T-Cost-css td{
+#MFZ-NewCostCalForm #MFZ-total-T-Cost-css td{
 font-size: 19px;
 color: #240B6A;
 border-top:1px solid #80808029;
 }
 
 @media(max-width:768px){
-#srix-NewCostCalForm .form-container{
+#MFZ-NewCostCalForm .form-container{
     border-radius: 0px !important;
 }
-#srix-NewCostCalForm .phone-input select {
+#MFZ-NewCostCalForm .phone-input select {
     width: 40%;
     font-size: 12px;
   }
@@ -967,25 +967,25 @@ border-top:1px solid #80808029;
 
 
 
-#srix-NewCostCalForm .step-text-white,
-#srix-NewCostCalForm .step-text-white span,
-#srix-NewCostCalForm .step-text-white .step-word {
+#MFZ-NewCostCalForm .step-text-white,
+#MFZ-NewCostCalForm .step-text-white span,
+#MFZ-NewCostCalForm .step-text-white .step-word {
 color: white !important;
 
 }
 
-#srix-NewCostCalForm .step-text-colored,
-#srix-NewCostCalForm .step-text-colored span,
-#srix-NewCostCalForm .step-text-colored .step-word {
+#MFZ-NewCostCalForm .step-text-colored,
+#MFZ-NewCostCalForm .step-text-colored span,
+#MFZ-NewCostCalForm .step-text-colored .step-word {
 color: #494949 !important;
 
 }
 
-#srix-NewCostCalForm .step-word {
+#MFZ-NewCostCalForm .step-word {
 display: inline-block;
 }
 
-#srix-NewCostCalForm #multiStepForm {
+#MFZ-NewCostCalForm #multiStepForm {
 min-height: 450px;
 position: relative;
 display: flex;
@@ -1126,19 +1126,19 @@ margin-left: auto;
     background-color: transparent !important;
 }
 
-#srix-NewCostCalForm input[type="number"]::-webkit-inner-spin-button,
-#srix-NewCostCalForm input[type="number"]::-webkit-outer-spin-button {
+#MFZ-NewCostCalForm input[type="number"]::-webkit-inner-spin-button,
+#MFZ-NewCostCalForm input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     appearance: none;
     margin: 0;
 }
-#srix-NewCostCalForm input[type="number"] {
+#MFZ-NewCostCalForm input[type="number"] {
     -moz-appearance: textfield; 
     appearance: textfield; 
 }
 
 /* Visa number input styling */
-#srix-NewCostCalForm .visa-number-input {
+#MFZ-NewCostCalForm .visa-number-input {
     width: 100%;
     padding: 12px 16px;
     border: none;
@@ -1149,7 +1149,7 @@ margin-left: auto;
     font-family: "Plus Jakarta Sans";
 }
 
-#srix-NewCostCalForm .visa-number-input:focus {
+#MFZ-NewCostCalForm .visa-number-input:focus {
     outline: none;
     border: 1px solid #AB81C5;
 }
@@ -1240,14 +1240,14 @@ line-height: 32.359px;
     visibility: visible !important;
 }
 
-#srix-NewCostCalForm .license-type-options {
+#MFZ-NewCostCalForm .license-type-options {
     display: flex;
     gap: 12px;
 
     width: 100%;
 }
 
-#srix-NewCostCalForm .license-option {
+#MFZ-NewCostCalForm .license-option {
     display: flex;
     align-items: center;
     position: relative;
@@ -1257,7 +1257,7 @@ line-height: 32.359px;
     flex: 1;
 }
 
-#srix-NewCostCalForm .license-option label {
+#MFZ-NewCostCalForm .license-option label {
     margin: 0 0 0 0;
     color: #333;
     font-family: "Plus Jakarta Sans";
@@ -1265,7 +1265,7 @@ line-height: 32.359px;
     cursor: pointer;
 }
 
-#srix-NewCostCalForm .license-option input[type="radio"] {
+#MFZ-NewCostCalForm .license-option input[type="radio"] {
     appearance: none;
     -webkit-appearance: none;
     width: 24px;
@@ -1277,7 +1277,7 @@ line-height: 32.359px;
     margin: 0 12px 0 0;
 }
 
-#srix-NewCostCalForm .license-option input[type="radio"] {
+#MFZ-NewCostCalForm .license-option input[type="radio"] {
     margin: 0 12px 0 0;
     width: 24px;
     height: 24px;
@@ -1286,13 +1286,13 @@ line-height: 32.359px;
     position: relative;
 }
 
-#srix-NewCostCalForm .license-option input[type="radio"]:checked {
+#MFZ-NewCostCalForm .license-option input[type="radio"]:checked {
     border: none;
     background: linear-gradient(163deg, #AB81C5 10.55%, #42B8C6 118.78%);
     position: relative;
 }
 
-#srix-NewCostCalForm .license-option input[type="radio"]:checked::after {
+#MFZ-NewCostCalForm .license-option input[type="radio"]:checked::after {
     content: "";
     position: absolute;
     top: 7px;
@@ -1305,23 +1305,23 @@ line-height: 32.359px;
     border-radius: 0;
 }
 
-#srix-NewCostCalForm .license-option:hover {
+#MFZ-NewCostCalForm .license-option:hover {
     border-color: #195137;
 }
 
-#srix-NewCostCalForm .duration-info {
+#MFZ-NewCostCalForm .duration-info {
     margin-bottom: 36px;
 
 }
 
-#srix-NewCostCalForm .duration-info p {
+#MFZ-NewCostCalForm .duration-info p {
     font-family: "Plus Jakarta Sans";
     font-size: 1٤px;
     color: #333;
     margin: 0;
 }
 
-#srix-NewCostCalForm .duration-value {
+#MFZ-NewCostCalForm .duration-value {
     background: var(--Orange, linear-gradient(102deg, #EB5F400 0%, #B5348B 100%));
 background-clip: text;
 -webkit-background-clip: text;
@@ -1329,7 +1329,7 @@ background-clip: text;
     font-weight: 700;
 }
 
-#srix-NewCostCalForm .toggle-container {
+#MFZ-NewCostCalForm .toggle-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1341,27 +1341,27 @@ background-clip: text;
     box-shadow: 0px 4px 14px rgba(104, 104, 104, 0.08);
 }
 
-#srix-NewCostCalForm .toggle-label {
+#MFZ-NewCostCalForm .toggle-label {
     font-family: "Plus Jakarta Sans";
     font-size: 18px;
     font-weight: 500;
     color: #333;
 }
 
-#srix-NewCostCalForm .toggle-switch {
+#MFZ-NewCostCalForm .toggle-switch {
     position: relative;
     display: inline-block;
     width: 76px;
     height: 34px;
 }
 
-#srix-NewCostCalForm .toggle-switch input {
+#MFZ-NewCostCalForm .toggle-switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-#srix-NewCostCalForm .toggle-slider {
+#MFZ-NewCostCalForm .toggle-slider {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -1378,7 +1378,7 @@ background-clip: text;
     box-sizing: border-box;
 }
 
-#srix-NewCostCalForm .toggle-slider:before {
+#MFZ-NewCostCalForm .toggle-slider:before {
     position: absolute;
     content: "";
     height: 26px;
@@ -1391,8 +1391,8 @@ background-clip: text;
     z-index: 1;
 }
 
-#srix-NewCostCalForm .toggle-yes,
-#srix-NewCostCalForm .toggle-no {
+#MFZ-NewCostCalForm .toggle-yes,
+#MFZ-NewCostCalForm .toggle-no {
     position: absolute;
     font-size: 12px;
     font-weight: 700;
@@ -1401,52 +1401,52 @@ background-clip: text;
     transition: opacity 0.3s;
 }
 
-#srix-NewCostCalForm .toggle-yes {
+#MFZ-NewCostCalForm .toggle-yes {
     left: 37px;
     opacity: 0;
 }
 
-#srix-NewCostCalForm .toggle-no {
+#MFZ-NewCostCalForm .toggle-no {
     right: 42px;
     opacity: 1;
 }
 
-#srix-NewCostCalForm .toggle-switch input:checked + .toggle-slider {
+#MFZ-NewCostCalForm .toggle-switch input:checked + .toggle-slider {
     background-color: white;
 }
 
-#srix-NewCostCalForm .toggle-switch input:checked + .toggle-slider:before {
+#MFZ-NewCostCalForm .toggle-switch input:checked + .toggle-slider:before {
     transform: translateX(-42px);
     background: linear-gradient(102deg, #61a60e 0%, #004a98 100%);
 }
 
-#srix-NewCostCalForm .toggle-switch input:checked + .toggle-slider .toggle-yes {
+#MFZ-NewCostCalForm .toggle-switch input:checked + .toggle-slider .toggle-yes {
     opacity: 1;
 }
 
-#srix-NewCostCalForm .toggle-switch input:checked + .toggle-slider .toggle-no {
+#MFZ-NewCostCalForm .toggle-switch input:checked + .toggle-slider .toggle-no {
     opacity: 0;
 }
 
-#srix-NewCostCalForm .visa-options {
+#MFZ-NewCostCalForm .visa-options {
     display: flex;
     flex-direction: column;
     margin-top: 20px;
 }
 
-#srix-NewCostCalForm .visa-option {
+#MFZ-NewCostCalForm .visa-option {
     display: flex;
     flex-direction: column;
 }
 
-#srix-NewCostCalForm .visa-toggle {
+#MFZ-NewCostCalForm .visa-toggle {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 5px 0;
 }
 
-#srix-NewCostCalForm .visa-label {
+#MFZ-NewCostCalForm .visa-label {
     color: #1C1C1C;
     font-family: "Plus Jakarta Sans";
     font-size: 14px;
@@ -1457,11 +1457,11 @@ background-clip: text;
 }
 
 
-#srix-NewCostCalForm .services-category {
+#MFZ-NewCostCalForm .services-category {
     margin-bottom: 16px;
 }
 
-#srix-NewCostCalForm .services-category h4 {
+#MFZ-NewCostCalForm .services-category h4 {
     background: linear-gradient(163deg, #AB81C5 10.55%, #42B8C6 118.78%);
 background-clip: text;
 -webkit-background-clip: text;
@@ -1473,25 +1473,25 @@ font-weight: 700;
 line-height: 24px; 
 }
 
-#srix-NewCostCalForm .services-container {
+#MFZ-NewCostCalForm .services-container {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 10px;
 }
 
-#srix-NewCostCalForm .service-option {
+#MFZ-NewCostCalForm .service-option {
     position: relative;
 }
 
-#srix-NewCostCalForm .service-checkbox {
+#MFZ-NewCostCalForm .service-checkbox {
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-#srix-NewCostCalForm .service-label {
+#MFZ-NewCostCalForm .service-label {
     display: inline-block;
     padding: 12px 16px;
     border-radius: 40px;
@@ -1506,7 +1506,7 @@ line-height: 24px;
     margin-top: 0px;
 }
 
-#srix-NewCostCalForm .service-checkbox:checked + .service-label {
+#MFZ-NewCostCalForm .service-checkbox:checked + .service-label {
     background: linear-gradient(163deg, rgba(171, 129, 197, 0.20) 10.55%, rgba(66, 184, 198, 0.20) 118.78%);
     color: #1C1C1C;
     border: 1px solid #AB81C5;
@@ -1514,7 +1514,7 @@ line-height: 24px;
 }
 
 
-#srix-NewCostCalForm .tax-compliance-warning {
+#MFZ-NewCostCalForm .tax-compliance-warning {
     margin-top: 15px;
     padding: 10px 15px;
     background-color: #fff9e9;
@@ -1522,7 +1522,7 @@ line-height: 24px;
     border-radius: 4px;
 }
 
-#srix-NewCostCalForm .tax-compliance-warning p {
+#MFZ-NewCostCalForm .tax-compliance-warning p {
     margin: 0;
     color: #7a4500;
     font-size: 14px;
@@ -1530,17 +1530,17 @@ line-height: 24px;
     line-height: 1.4;
 }
 
-#srix-NewCostCalForm .form-step#step-3 {
+#MFZ-NewCostCalForm .form-step#step-3 {
     padding: 0;
 }
 
-#srix-NewCostCalForm .form-step#step-3 .form-step-title {
+#MFZ-NewCostCalForm .form-step#step-3 .form-step-title {
     padding-left: 24px;
     margin-bottom: 16px;
 }
 
 
-#srix-NewCostCalForm .activity-search-container {
+#MFZ-NewCostCalForm .activity-search-container {
     padding: 0 16px;
     margin-bottom: 24px;
     position: relative;
@@ -1548,7 +1548,7 @@ line-height: 24px;
     width: 100%;
 }
 
-#srix-NewCostCalForm .activity-search-input {
+#MFZ-NewCostCalForm .activity-search-input {
     width: 100%;
     padding: 16px 48px 16px 16px;
     border-radius: 8px;
@@ -1558,32 +1558,32 @@ line-height: 24px;
     font-family: "Plus Jakarta Sans";
 }
 
-#srix-NewCostCalForm .activity-search-input:focus {
+#MFZ-NewCostCalForm .activity-search-input:focus {
     outline: none;
     border-color: #AB81C5;
 }
 
-#srix-NewCostCalForm .search-icon {
+#MFZ-NewCostCalForm .search-icon {
     position: absolute;
     right: 32px;
     top: 50%;
     transform: translateY(-50%);
     color: #808080;
 }
-#srix-NewCostCalForm .search-icon svg{
+#MFZ-NewCostCalForm .search-icon svg{
     width: 18px;
     height: 18px;
 }
 
 
-#srix-NewCostCalForm .activity-groups-container {
+#MFZ-NewCostCalForm .activity-groups-container {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     padding: 0 16px;
 }
 
-#srix-NewCostCalForm .activity-group {
+#MFZ-NewCostCalForm .activity-group {
     position: relative;
     padding: 12px 16px;
     border-radius: 40px;
@@ -1600,13 +1600,13 @@ line-height: 24px;
     gap: 8px;
 }
 
-#srix-NewCostCalForm .activity-group.selected {
+#MFZ-NewCostCalForm .activity-group.selected {
     background: linear-gradient(163deg, rgba(171, 129, 197, 0.20) 10.55%, rgba(66, 184, 198, 0.20) 118.78%);
     border: 1px solid #AB81C5;
     font-weight: 700;
 }
 
-#srix-NewCostCalForm .activity-group .plus-icon {
+#MFZ-NewCostCalForm .activity-group .plus-icon {
     display: none;
     width: 17px;
     height: 16px;
@@ -1622,7 +1622,7 @@ line-height: 24px;
     background-position: center;
 }
 
-#srix-NewCostCalForm .activity-group.selected .plus-icon {
+#MFZ-NewCostCalForm .activity-group.selected .plus-icon {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
@@ -1630,12 +1630,12 @@ line-height: 24px;
 }
 
 
-#srix-NewCostCalForm .activity-group .plus-icon svg {
+#MFZ-NewCostCalForm .activity-group .plus-icon svg {
     display: none !important;
 }
 
 
-#srix-NewCostCalForm .activity-group.selected .plus-icon svg {
+#MFZ-NewCostCalForm .activity-group.selected .plus-icon svg {
     display: none !important;
     width: 17px;
     height: 16px;
@@ -1643,7 +1643,7 @@ line-height: 24px;
 }
 
 
-#srix-NewCostCalForm .activity-group .plus-icon svg path {
+#MFZ-NewCostCalForm .activity-group .plus-icon svg path {
 
     stroke: #AB81C5;
     stroke-width: 1.5;
@@ -1652,7 +1652,7 @@ line-height: 24px;
 }
 
 
-#srix-NewCostCalForm .activity-group.selected .plus-icon svg path {
+#MFZ-NewCostCalForm .activity-group.selected .plus-icon svg path {
     stroke: #AB81C5;
     stroke-width: 1.5;
     stroke-linecap: round;
@@ -1660,35 +1660,35 @@ line-height: 24px;
 }
 
 
-#srix-NewCostCalForm .activity-count {
+#MFZ-NewCostCalForm .activity-count {
     display: none;
 }
 
-#srix-NewCostCalForm .activity-group.selected[data-count="0"] .activity-count {
+#MFZ-NewCostCalForm .activity-group.selected[data-count="0"] .activity-count {
     display: none;
 }
 
-#srix-NewCostCalForm .activity-group.selected[data-count="1"] .activity-count,
-#srix-NewCostCalForm .activity-group.selected[data-count="2"] .activity-count,
-#srix-NewCostCalForm .activity-group.selected[data-count="3"] .activity-count,
-#srix-NewCostCalForm .activity-group.selected[data-count="4"] .activity-count,
-#srix-NewCostCalForm .activity-group.selected[data-count="5"] .activity-count {
+#MFZ-NewCostCalForm .activity-group.selected[data-count="1"] .activity-count,
+#MFZ-NewCostCalForm .activity-group.selected[data-count="2"] .activity-count,
+#MFZ-NewCostCalForm .activity-group.selected[data-count="3"] .activity-count,
+#MFZ-NewCostCalForm .activity-group.selected[data-count="4"] .activity-count,
+#MFZ-NewCostCalForm .activity-group.selected[data-count="5"] .activity-count {
     display: inline;
 }
 
-#srix-NewCostCalForm .activity-count {
+#MFZ-NewCostCalForm .activity-count {
     opacity: 0.7;
 }
 
 
-#srix-NewCostCalForm .selection-summary {
+#MFZ-NewCostCalForm .selection-summary {
     margin-top: 20px;
     padding: 0 16px;
     position: relative;
     z-index: 5;
 }
 
-#srix-NewCostCalForm .selection-summary p {
+#MFZ-NewCostCalForm .selection-summary p {
     font-family: "Plus Jakarta Sans";
     font-size: 16px;
     font-weight: 500;
@@ -1696,7 +1696,7 @@ line-height: 24px;
     margin-bottom: 8px;
 }
 
-#srix-NewCostCalForm .fee-warning {
+#MFZ-NewCostCalForm .fee-warning {
     font-family: "Plus Jakarta Sans";
     font-size: 14px;
     font-style: normal;
@@ -1893,7 +1893,7 @@ font-weight: 700;
         overflow: hidden;
     }
     
-    #srix-NewCostCalForm {
+    #MFZ-NewCostCalForm {
         height: 100vh;
         width: 100%;
         max-width: 100%;
@@ -1901,7 +1901,7 @@ font-weight: 700;
         padding: 0;
     }
     
-    #srix-NewCostCalForm .form-container {
+    #MFZ-NewCostCalForm .form-container {
         padding-bottom: 80px; /* Add space for fixed navigation */
         display: flex;
         flex-direction: column;
@@ -1911,7 +1911,7 @@ font-weight: 700;
         max-width: 100%;
     }
     
-    #srix-NewCostCalForm .header {
+    #MFZ-NewCostCalForm .header {
         position: sticky;
         top: 0;
         z-index: 100;
@@ -1920,7 +1920,7 @@ font-weight: 700;
         padding: 15px 20px;
     }
     
-    #srix-NewCostCalForm .form-step-container {
+    #MFZ-NewCostCalForm .form-step-container {
         flex: 1;
         overflow-y: auto;
         padding-bottom: 20px;
@@ -1928,10 +1928,10 @@ font-weight: 700;
         max-height: 591px !important;
     }
     
-    #srix-NewCostCalForm .form-step-title{
+    #MFZ-NewCostCalForm .form-step-title{
         padding-bottom: 0px !important;
     }
-    #srix-NewCostCalForm .form-navigation {
+    #MFZ-NewCostCalForm .form-navigation {
         position: fixed;
         bottom: 25px !important;
         left: 0;
@@ -1945,7 +1945,7 @@ font-weight: 700;
         justify-content: space-between;
     }
     
-    #srix-NewCostCalForm .progress-container {
+    #MFZ-NewCostCalForm .progress-container {
         position: sticky;
         top: 64px; /* Height of the header */
         z-index: 99;
@@ -1953,7 +1953,7 @@ font-weight: 700;
     }
     
     /* Adjust form steps for better mobile experience */
-    #srix-NewCostCalForm .form-step {
+    #MFZ-NewCostCalForm .form-step {
         padding-bottom: 20px;
         min-height: auto; /* Remove fixed height for better scrolling */
     }
@@ -1967,7 +1967,7 @@ font-weight: 700;
     }
     
     /* Adjust button sizes for mobile */
-    #srix-NewCostCalForm .form-navigation button {
+    #MFZ-NewCostCalForm .form-navigation button {
         min-width: 120px;
         height: 44px;
         padding: 8px 16px;
@@ -1975,28 +1975,28 @@ font-weight: 700;
     }
     
     /* Improve activity selection UI on mobile */
-    #srix-NewCostCalForm .activity-groups-container {
+    #MFZ-NewCostCalForm .activity-groups-container {
         gap: 8px;
     }
     
-    #srix-NewCostCalForm .activity-group {
+    #MFZ-NewCostCalForm .activity-group {
         padding: 8px 12px;
         font-size: 11px;
     }
     
     /* Improve form inputs on mobile */
-    #srix-NewCostCalForm input[type="text"],
-    #srix-NewCostCalForm input[type="email"],
-    #srix-NewCostCalForm input[type="tel"],
-    #srix-NewCostCalForm input[type="number"],
-    #srix-NewCostCalForm select {
+    #MFZ-NewCostCalForm input[type="text"],
+    #MFZ-NewCostCalForm input[type="email"],
+    #MFZ-NewCostCalForm input[type="tel"],
+    #MFZ-NewCostCalForm input[type="number"],
+    #MFZ-NewCostCalForm select {
         padding: 10px 14px;
         font-size: 14px;
     }
-    #srix-NewCostCalForm .shareholder-input{
+    #MFZ-NewCostCalForm .shareholder-input{
         gap: 5px !important;
     }
-    #srix-NewCostCalForm .service-label{
+    #MFZ-NewCostCalForm .service-label{
         padding: 8px 16px !important;
     }
     
@@ -2031,30 +2031,30 @@ font-weight: 700;
         left: 0px !important;
     }
 
-    #srix-NewCostCalForm .form-step#step-3 .form-step-title {
+    #MFZ-NewCostCalForm .form-step#step-3 .form-step-title {
         padding-left: 0px;
     }
-    #srix-NewCostCalForm .activity-search-container{
+    #MFZ-NewCostCalForm .activity-search-container{
         padding: 0px;
     }
-    #srix-NewCostCalForm .activity-groups-container{
+    #MFZ-NewCostCalForm .activity-groups-container{
         padding: 0px;
     }
-    #srix-NewCostCalForm .selection-summary{
+    #MFZ-NewCostCalForm .selection-summary{
         padding: 0px;
     }
-    #srix-NewCostCalForm label {
+    #MFZ-NewCostCalForm label {
         margin-bottom: 0px;
         margin-top: 6px;
         }
 
-        #srix-NewCostCalForm .services-container{
+        #MFZ-NewCostCalForm .services-container{
             gap: 5px !important;
         }
-        #srix-NewCostCalForm .total-card-title{
+        #MFZ-NewCostCalForm .total-card-title{
             font-size: 16px !important;
         }
-        #srix-NewCostCalForm .activity-tag {
+        #MFZ-NewCostCalForm .activity-tag {
             padding: 4px 8px !important;
             line-height: 100% !important;
         }

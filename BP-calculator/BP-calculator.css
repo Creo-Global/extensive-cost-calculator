@@ -14,7 +14,7 @@
     display: none !important;
 }
 
-#srix-NewCostCalForm * {
+#MFZ-NewCostCalForm * {
 box-sizing: border-box;
 /* margin: 0;
 padding: 0; */
@@ -22,7 +22,7 @@ padding: 0; */
 
 /* Main container styles removed for Webflow integration */
 
-#srix-NewCostCalForm .header {
+#MFZ-NewCostCalForm .header {
 display: flex;
     justify-content: center;
 align-items: center;
@@ -34,7 +34,7 @@ border-radius: 20px 20px 0 0;
     z-index: 100;
 }
 
-.header-grid-srix {
+.header-grid-MFZ {
 display: grid;
 grid-auto-flow: column;
 align-content: center;
@@ -42,7 +42,7 @@ align-items: center;
 column-gap: 20px;
 }
 
-.header-grid-srix h2{
+.header-grid-MFZ h2{
 margin-bottom: 0px;
 color: #1C1C1C;
 font-family: "Plus Jakarta Sans";
@@ -52,7 +52,7 @@ font-weight: 700;
     line-height: 32px;
 }
 
-.header-grid-srix img {
+.header-grid-MFZ img {
   width: 48px;
   height: 48px;
 }
@@ -93,7 +93,7 @@ font-style: normal;
 }
 
 
-#srix-NewCostCalForm label {
+#MFZ-NewCostCalForm label {
     margin-bottom: 8px;
     display: block;
 color: #333;
@@ -103,11 +103,11 @@ font-size: 14px;
     line-height: 20px;
 }
 
-#srix-NewCostCalForm input[type="text"],
-#srix-NewCostCalForm input[type="email"],
-#srix-NewCostCalForm input[type="tel"],
-#srix-NewCostCalForm input[type="number"],
-#srix-NewCostCalForm select {
+#MFZ-NewCostCalForm input[type="text"],
+#MFZ-NewCostCalForm input[type="email"],
+#MFZ-NewCostCalForm input[type="tel"],
+#MFZ-NewCostCalForm input[type="number"],
+#MFZ-NewCostCalForm select {
 width: 100%;
 padding: 12px 16px;
 border: none;
@@ -118,19 +118,19 @@ background: #FFF;
     font-family: "Plus Jakarta Sans";
     transition: border-color 0.3s ease;
 }
-#srix-NewCostCalForm select {
+#MFZ-NewCostCalForm select {
     box-shadow: 0px 4px 4px 0px rgba(98, 44, 5, 0.05);
 }
-#srix-NewCostCalForm input[type="text"]:focus,
-#srix-NewCostCalForm input[type="email"]:focus,
-#srix-NewCostCalForm input[type="tel"]:focus,
-#srix-NewCostCalForm input[type="number"]:focus,
-#srix-NewCostCalForm select:focus {
+#MFZ-NewCostCalForm input[type="text"]:focus,
+#MFZ-NewCostCalForm input[type="email"]:focus,
+#MFZ-NewCostCalForm input[type="tel"]:focus,
+#MFZ-NewCostCalForm input[type="number"]:focus,
+#MFZ-NewCostCalForm select:focus {
 outline: none;
     border: 1px solid #EB5F40;
 }
 
-#srix-NewCostCalForm select {
+#MFZ-NewCostCalForm select {
 -webkit-appearance: none;
 -moz-appearance: none;
 appearance: none;
@@ -140,14 +140,14 @@ background-size: 10px;
 background-color: white;
 }
 
-#srix-NewCostCalForm .license-type-options {
+#MFZ-NewCostCalForm .license-type-options {
 display: flex;
     gap: 12px;
     width: 100%;
     margin-bottom: 20px;
 }
 
-#srix-NewCostCalForm .license-option {
+#MFZ-NewCostCalForm .license-option {
 display: flex;
 align-items: center;
 position: relative;
@@ -160,7 +160,7 @@ cursor: pointer;
 background: white;
 }
 
-#srix-NewCostCalForm .license-option label {
+#MFZ-NewCostCalForm .license-option label {
     margin: 0;
     color: #333;
 font-family: "Plus Jakarta Sans";
@@ -169,7 +169,7 @@ font-family: "Plus Jakarta Sans";
     font-size: 16px;
 }
 
-#srix-NewCostCalForm .license-option input[type="radio"] {
+#MFZ-NewCostCalForm .license-option input[type="radio"] {
     appearance: none;
     -webkit-appearance: none;
     width: 24px;
@@ -182,12 +182,12 @@ cursor: pointer;
     position: relative;
 }
 
-#srix-NewCostCalForm .license-option input[type="radio"]:checked {
+#MFZ-NewCostCalForm .license-option input[type="radio"]:checked {
     border-color: #EB5F40;
     background: white;
 }
 
-#srix-NewCostCalForm .license-option input[type="radio"]:checked::after {
+#MFZ-NewCostCalForm .license-option input[type="radio"]:checked::after {
     content: "";
     position: absolute;
     top: 50%;
@@ -1486,12 +1486,12 @@ align-items: center;
         display: block;
     }
     
-    #srix-NewCostCalForm .form-container {
+    #MFZ-NewCostCalForm .form-container {
         border-radius: 0;
         min-height: 100vh;
     }
     
-    #srix-NewCostCalForm .header {
+    #MFZ-NewCostCalForm .header {
         border-radius: 0;
         position: static;
     }
@@ -3759,7 +3759,8 @@ background-clip: text;
 
 /* Position relative for overlay positioning */
 .sticky-summary-container {
-    position: relative;
+    position: sticky;
+    top: 110px;
 }
 
 #mobile-sticky-footer {
@@ -3788,6 +3789,34 @@ background-clip: text;
         opacity: 1;
         max-height: 500px;
     }
+}
+
+/* Sticky Buttons Viewport Control */
+.sticky-buttons {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.sticky-buttons.hiding {
+    transform: translateY(calc(100% + 60px)) !important;
+    opacity: 0 !important;
+    visibility: visible !important;
+}
+
+.sticky-buttons.hidden {
+    transform: translateY(calc(100% + 60px)) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+.sticky-buttons.showing {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }
 
 /* Calculator-specific error messages to avoid Webflow conflicts */

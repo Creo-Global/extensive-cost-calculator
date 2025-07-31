@@ -2529,14 +2529,14 @@
                 }, 10);
             }
             
-        return false;
-    });
-    
-    // Store current scroll position before opening modal
-    window.scrollPositionBeforeModal = window.pageYOffset || document.documentElement.scrollTop;
-    
-    // Setup modal event listeners
-    setupLicenseModalEventListeners();
+            return false;
+        });
+        
+        // Store current scroll position before opening modal
+        window.scrollPositionBeforeModal = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Setup modal event listeners
+        setupLicenseModalEventListeners();
         
         // Show the modal
         modal.style.display = 'flex';
@@ -2849,7 +2849,7 @@
                             errorMessage = `Phone number is too long for ${countryData.name}. Expected ${expectedLength} digits, got ${phoneValue.length}.`;
                         } else {
                             isPhoneValid = false;
-                            errorMessage = `Invalid phone number format for ${countryData.name}`;
+                            errorMessage = "Invalid phone number format";
                         }
                     }
                 } catch (err) {
@@ -3643,28 +3643,27 @@
                     activityGroups[groupName].push(activity);
                 });
                 
-                        // First 3 groups are free, then 1000 AED per individual activity in additional groups
-        const groupNames = Object.keys(activityGroups);
-        if (groupNames.length > 3) {
-            // Keep track of which groups were selected first (maintain selection order)
-            const groupSelectionOrder = [];
-            window.selectedActivities.forEach(activity => {
-                const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
-                if (!groupSelectionOrder.includes(groupName)) {
-                    groupSelectionOrder.push(groupName);
-                }
-            });
-            
-            // First 3 groups in selection order are free, charge for activities in remaining groups
-            for (let i = 3; i < groupSelectionOrder.length; i++) {
-                const groupName = groupSelectionOrder[i];
-                if (activityGroups[groupName]) {
-                    businessActivitiesCost += activityGroups[groupName].length * 1000;
+                // First 3 groups are free, then 1000 AED per individual activity in additional groups
+                const groupNames = Object.keys(activityGroups);
+                if (groupNames.length > 3) {
+                    // Keep track of which groups were selected first (maintain selection order)
+                    const groupSelectionOrder = [];
+                    window.selectedActivities.forEach(activity => {
+                        const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
+                        if (!groupSelectionOrder.includes(groupName)) {
+                            groupSelectionOrder.push(groupName);
+                        }
+                    });
+                    
+                    // First 3 groups in selection order are free, charge for activities in remaining groups
+                    for (let i = 3; i < groupSelectionOrder.length; i++) {
+                        const groupName = groupSelectionOrder[i];
+                        if (activityGroups[groupName]) {
+                            businessActivitiesCost += activityGroups[groupName].length * 1000;
+                        }
+                    }
                 }
             }
-        }
-            }
-            
             
             // Return the total cost
             return Math.round(licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost + changeStatusComponent);
@@ -3678,7 +3677,7 @@
 
 
     function submitToWebhook(formData) {
-        const webhookURL = 'https://flow.zoho.com/758936401/flow/webhook/incoming?zapikey=1001.9b6be080c9fa69677e2afb5090aeb9ef.16d36d524fa9d89adb3df08c5a8dc7d1&isdebug=false';
+        const webhookURL = 'https://flow.zoho.com/758936401/flow/webhook/incoming?zapikey=1001.94bc1104bf9127e946df8ce9f506cee8.b71769ce0ac6796266efd20fab162f4e&isdebug=false';
         
         return new Promise((resolve, reject) => {
             try {
@@ -3954,7 +3953,7 @@
             'at': '0664 1234567',      // Austria
             'ch': '078 123 45 67',     // Switzerland
             'se': '070 123 45 67',     // Sweden
-            'no': '406 12 345',        // Norway
+            'no': '406 12 34 56',       // Norway
             'dk': '20 12 34 56',       // Denmark
             'fi': '040 123 4567',      // Finland
             'pl': '512 345 678',       // Poland
@@ -4896,12 +4895,15 @@
                 const nameField = document.getElementById('full-name');
                 const emailField = document.getElementById('email');
                 const phoneField = document.getElementById('phone');
+                const submitBtnSpan = submitBtn.querySelector('span');
                 
-                const hasValues = nameField?.value?.trim() && emailField?.value?.trim() && phoneField?.value?.trim();
-                if (hasValues && !isContactFormCompleted) {
-                    submitBtn.querySelector('span').textContent = 'Calculate';
-                } else if (!isContactFormCompleted) {
-                    submitBtn.querySelector('span').textContent = 'Calculate';
+                if (submitBtnSpan) {
+                    const hasValues = nameField?.value?.trim() && emailField?.value?.trim() && phoneField?.value?.trim();
+                    if (hasValues && !isContactFormCompleted) {
+                        submitBtnSpan.textContent = 'Calculate';
+                    } else if (!isContactFormCompleted) {
+                        submitBtnSpan.textContent = 'Calculate';
+                    }
                 }
             }
             
@@ -4955,7 +4957,10 @@
                 // Update submit button
                 if (submitBtn) {
                     submitBtn.classList.add('validated');
-                    submitBtn.querySelector('span').textContent = 'Continue to Calculator';
+                    const submitBtnSpan = submitBtn.querySelector('span');
+                    if (submitBtnSpan) {
+                        submitBtnSpan.textContent = 'Continue to Calculator';
+                    }
                 }
                 
                 // Update progress indicator
@@ -4993,7 +4998,10 @@
                 // Update submit button
                 if (submitBtn) {
                     submitBtn.classList.remove('validated');
-                    submitBtn.querySelector('span').textContent = 'Next';
+                    const submitBtnSpan = submitBtn.querySelector('span');
+                    if (submitBtnSpan) {
+                        submitBtnSpan.textContent = 'Next';
+                    }
                 }
                 
                 // Update progress indicator
@@ -5245,7 +5253,7 @@
             updateButtonsDisplay(stepNumber);
             
             // Scroll to top of form
-            const formContainer = document.querySelector('#srix-NewCostCalForm');
+            const formContainer = document.querySelector('#MFZ-NewCostCalForm');
             if (formContainer) {
                 formContainer.scrollIntoView({ behavior: 'smooth' });
             }
@@ -6646,7 +6654,7 @@
         const updateProgress = () => {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             const mobileFooter = document.getElementById('mobile-sticky-footer');
-            const calculatorSection = document.getElementById('srix-NewCostCalForm');
+            const calculatorSection = document.getElementById('MFZ-NewCostCalForm');
             
             if (!calculatorSection || !mobileFooter) return;
             
@@ -6683,7 +6691,7 @@
         const scrollToSectionTop = (e) => {
             e.preventDefault();
             
-            const calculatorSection = document.getElementById('srix-NewCostCalForm');
+            const calculatorSection = document.getElementById('MFZ-NewCostCalForm');
             if (!calculatorSection) return;
             
             const headerOffset = 80;
@@ -6819,13 +6827,41 @@
         }
     }
 
-    // Make both functions globally available
+    // Function to handle sticky buttons visibility based on calculator viewport
+    function initializeStickyButtonsControl() {
+        const stickyButtons = document.querySelector('.sticky-buttons');
+        const calculatorSection = document.getElementById('MFZ-NewCostCalForm');
+
+        if (!stickyButtons || !calculatorSection) {
+            console.log('Sticky buttons or calculator section not found');
+            return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Calculator is in viewport - hide sticky buttons
+                    stickyButtons.classList.add('hidden');
+                } else {
+                    // Calculator is out of viewport - show sticky buttons
+                    stickyButtons.classList.remove('hidden');
+                }
+            });
+        }, {
+            threshold: 0.1, // Trigger when 10% of the calculator is visible
+        });
+
+        observer.observe(calculatorSection);
+    }
+
+    // Make core functions globally available
     window.triggerFormValidationAfterProgrammaticFill = triggerFormValidationAfterProgrammaticFill;
     window.fillFormAndTriggerValidation = fillFormAndTriggerValidation;
 
-    // Initialize mobile auto-scroll when DOM is loaded  
-    document.addEventListener('DOMContentLoaded', function() {
+    // Use window.load for better compatibility with Webflow's script loading
+    window.addEventListener('load', function() {
         initializeMobileAutoScroll();
+        initializeStickyButtonsControl();
         
         // Re-initialize on window resize if switching to/from mobile
         window.addEventListener('resize', function() {

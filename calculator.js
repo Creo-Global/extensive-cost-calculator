@@ -28,6 +28,590 @@
         timezone: null
     };
 
+    // User Interaction Tracking System
+    class UserInteractionTracker {
+            constructor() {
+        this.lastActivityTime = Date.now();
+        this.inactivityTimeout = 2 * 60 * 1000; // 2 minutes in milliseconds
+        this.inactivityTimer = null;
+        this.contactFormCompleted = false;
+        this.partialDataSubmitted = false;
+        this.pageUnloadDetected = false;
+        this.pageUnloadAttempted = false;
+        this.userSessionId = this.generateSessionId();
+        this.initializeTracking();
+    }
+
+        generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        initializeTracking() {
+            // Track user interactions
+            this.setupActivityListeners();
+            
+            // Track page visibility changes
+            this.setupVisibilityTracking();
+            
+            // Track beforeunload (page close/navigation)
+            this.setupBeforeUnloadTracking();
+            
+            // Start inactivity timer
+            this.resetInactivityTimer();
+        }
+
+        setupActivityListeners() {
+            const activityEvents = [
+                'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click',
+                'input', 'change', 'focus', 'blur'
+            ];
+
+            activityEvents.forEach(eventType => {
+                document.addEventListener(eventType, () => {
+                    this.updateLastActivity();
+                }, { passive: true });
+            });
+
+            // Track form-specific interactions
+            const form = document.getElementById('multiStepForm');
+            if (form) {
+                form.addEventListener('input', () => this.updateLastActivity());
+                form.addEventListener('change', () => this.updateLastActivity());
+            }
+        }
+
+        setupVisibilityTracking() {
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    // Page became hidden - user switched tabs or minimized
+                    this.handlePageHidden();
+                } else {
+                    // Page became visible again
+                    this.updateLastActivity();
+                }
+            });
+        }
+
+            setupBeforeUnloadTracking() {
+        window.addEventListener('beforeunload', (event) => {
+            this.handlePageUnload(event);
+        });
+
+        // Also track pagehide for better coverage
+        window.addEventListener('pagehide', () => {
+            this.handlePageUnload();
+        });
+
+        // Track navigation attempts
+        window.addEventListener('popstate', (event) => {
+            this.handleNavigationAttempt();
+        });
+
+        // Track URL changes
+        let currentUrl = window.location.href;
+        setInterval(() => {
+            if (window.location.href !== currentUrl) {
+                this.handleNavigationAttempt();
+                currentUrl = window.location.href;
+            }
+        }, 100);
+    }
+
+        updateLastActivity() {
+            this.lastActivityTime = Date.now();
+            this.resetInactivityTimer();
+        }
+
+        resetInactivityTimer() {
+            if (this.inactivityTimer) {
+                clearTimeout(this.inactivityTimer);
+            }
+            
+            this.inactivityTimer = setTimeout(() => {
+                this.handleInactivity();
+            }, this.inactivityTimeout);
+        }
+
+        handleInactivity() {
+            if (this.contactFormCompleted && !this.partialDataSubmitted) {
+                console.log('User inactive for 2 minutes - submitting partial data');
+                this.submitPartialData('inactivity');
+            }
+        }
+
+        handlePageHidden() {
+            if (this.contactFormCompleted && !this.partialDataSubmitted) {
+                console.log('Page hidden - submitting partial data');
+                this.submitPartialData('page_hidden');
+            }
+        }
+
+            handlePageUnload(event = null) {
+        if (this.contactFormCompleted && !this.partialDataSubmitted) {
+            console.log('Page unloading - showing confirmation dialog');
+            
+            // Show confirmation dialog
+            if (event) {
+                // Standard way to show confirmation dialog
+                event.preventDefault();
+                event.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                
+                // Set a flag to track that user is trying to leave
+                this.pageUnloadAttempted = true;
+                
+                // Show custom confirmation dialog
+                this.showLeaveConfirmationDialog();
+                
+                return event.returnValue;
+            } else {
+                // For pagehide event, submit data synchronously as fallback
+                this.pageUnloadDetected = true;
+                this.submitPartialDataSync('page_unload_fallback');
+            }
+        }
+    }
+
+        markContactFormCompleted() {
+            this.contactFormCompleted = true;
+            console.log('Contact form completed - tracking enabled');
+        }
+
+        markFormCompleted() {
+            this.partialDataSubmitted = true;
+            console.log('Form completed - partial data submission disabled');
+        }
+
+        async submitPartialData(reason) {
+            if (this.partialDataSubmitted) {
+                return; // Prevent duplicate submissions
+            }
+
+            this.partialDataSubmitted = true;
+            
+            try {
+                const partialFormData = this.getPartialFormData(reason);
+                console.log('Submitting partial data:', partialFormData);
+                
+                // Submit to webhook and return the promise
+                return await submitToWebhook(partialFormData);
+            } catch (error) {
+                console.error('Error preparing or submitting partial data:', error);
+                throw error; // Re-throw the error so caller can handle it
+            }
+        }
+
+        // Synchronous submission for immediate needs (like beforeunload)
+        submitPartialDataSync(reason) {
+            if (this.partialDataSubmitted) {
+                return; // Prevent duplicate submissions
+            }
+
+            this.partialDataSubmitted = true;
+            
+            try {
+                const partialFormData = this.getPartialFormData(reason);
+                console.log('Submitting partial data synchronously:', partialFormData);
+                
+                // Use synchronous submission method
+                this.submitViaURLParamsSync(partialFormData);
+            } catch (error) {
+                console.error('Error in synchronous submission:', error);
+            }
+        }
+
+        // Synchronous URL params submission
+        submitViaURLParamsSync(formData) {
+            try {
+                const webhookURL = 'https://flow.zoho.com/758936401/flow/webhook/incoming?zapikey=1001.9b6be080c9fa69677e2afb5090aeb9ef.16d36d524fa9d89adb3df08c5a8dc7d1&isdebug=false';
+                
+                // Convert formData to URL parameters
+                const params = new URLSearchParams();
+                Object.keys(formData).forEach(key => {
+                    params.append(key, formData[key] || '');
+                });
+                
+                // Create full URL with parameters
+                const fullURL = webhookURL + '&' + params.toString();
+                
+                // Use synchronous XMLHttpRequest
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', fullURL, false); // false = synchronous
+                xhr.send();
+                
+                console.log('Synchronous submission completed');
+            } catch (error) {
+                console.error('Synchronous submission failed:', error);
+            }
+        }
+
+            getPartialFormData(reason) {
+        // Get contact form data
+        const fullName = document.getElementById('full-name')?.value || '';
+        const phone = formValidator && formValidator.phoneInput ? formValidator.phoneInput.getNumber() : '';
+        const email = document.getElementById('email')?.value || '';
+        
+        // Get current form state
+        const currentState = this.getCurrentFormState();
+        
+        // Format business activities properly from the selectedActivities array
+        const businessActivitiesText = window.selectedActivities && window.selectedActivities.length > 0 
+            ? window.selectedActivities.map(activity => activity["Activity Name"] || activity.Name || activity.Description || '').filter(name => name).join(', ')
+            : '';
+
+        // Get selected addons
+        const selectedAddons = [];
+        document.querySelectorAll('.service-checkbox:checked').forEach(checkbox => selectedAddons.push(checkbox.value));
+
+        // Use the same field structure as complete form submission
+        const formData = {
+            // Form status to indicate this is a partial submission
+            form_status: reason === 'user_confirmed_leave' ? 'incomplete_user_confirmed' : 
+                        this.pageUnloadDetected ? 'incomplete_tab_closed' : 'incomplete',
+            
+            // Contact information (same field names as complete form)
+            fullName: fullName,
+            phone: phone,
+            email: email,
+            
+            // License information
+            license_type: currentState.selected_license || 'fawri',
+            license_duration: document.getElementById("license-duration")?.value || '',
+            
+            // Business activities
+            business_activities: businessActivitiesText,
+            
+            // Shareholders
+            shareholders_range: document.getElementById("shareholders-range")?.value || '0',
+            
+            // Visas
+            investor_visas: document.getElementById("investor-visa-count")?.value || '0',
+            employee_visas: document.getElementById("employee-visa-count")?.value || '0',
+            dependency_visas: document.getElementById("dependency-visas")?.value || '0',
+            
+            // Addons
+            selected_addons: selectedAddons.join(','),
+            
+            // Change status
+            applicants_inside_uae: document.getElementById("applicants-inside-uae")?.value || '0',
+            applicants_outside_uae: document.getElementById("applicants-outside-uae")?.value || '0',
+            
+            // Costs
+            total_cost: currentState.total_cost || 0,
+            license_cost: LicenseCost || 0,
+            visa_cost: VisaCost || 0,
+            
+            // Page information
+            current_url: window.location.href,
+            
+            // User location information
+            user_ip: userLocationInfo.ip,
+            user_country: userLocationInfo.country,
+            user_country_name: userLocationInfo.country_name,
+            user_city: userLocationInfo.city,
+            user_region: userLocationInfo.region,
+            user_timezone: userLocationInfo.timezone,
+            
+            // Tracking information
+            session_id: this.userSessionId,
+            submission_reason: reason,
+            time_on_page: Math.floor((Date.now() - this.lastActivityTime) / 1000),
+            form_progress: currentState.form_progress || 0,
+            form_completion_percentage: currentState.form_completion_percentage || 0,
+            completed_sections: currentState.completed_sections || []
+        };
+
+        return formData;
+    }
+
+        getCurrentFormState() {
+            const state = {
+                selected_license: '',
+                selected_activities: [],
+                selected_visas: [],
+                selected_addons: [],
+                total_cost: 0,
+                form_progress: 0
+            };
+
+            // Get selected license
+            const selectedLicenseCard = document.querySelector('.license-card.selected');
+            if (selectedLicenseCard) {
+                state.selected_license = selectedLicenseCard.getAttribute('data-license') || '';
+            }
+
+            // Get selected activities
+            const selectedActivityGroups = document.querySelectorAll('.activity-group.selected');
+            selectedActivityGroups.forEach(group => {
+                const groupName = group.getAttribute('data-group');
+                const count = group.getAttribute('data-count') || '0';
+                state.selected_activities.push({
+                    group: groupName,
+                    count: parseInt(count)
+                });
+            });
+
+            // Get selected visas
+            const selectedVisaCards = document.querySelectorAll('.visa-card.selected');
+            selectedVisaCards.forEach(card => {
+                const visaType = card.getAttribute('data-visa');
+                const quantity = card.querySelector('.visa-number-input')?.value || '0';
+                state.selected_visas.push({
+                    type: visaType,
+                    quantity: parseInt(quantity)
+                });
+            });
+
+            // Get selected addons
+            const selectedAddons = document.querySelectorAll('.service-pill.selected');
+            selectedAddons.forEach(group => {
+                const serviceId = group.getAttribute('data-service-id');
+                if (serviceId) {
+                    state.selected_addons.push(serviceId);
+                }
+            });
+
+            // Get total cost
+            const totalElement = document.querySelector('.grand-total-amount');
+            if (totalElement) {
+                const costText = totalElement.textContent || '';
+                const costMatch = costText.match(/[\d,]+/);
+                if (costMatch) {
+                    state.total_cost = parseInt(costMatch[0].replace(/,/g, ''));
+                }
+            }
+
+            // Calculate form progress
+            const sections = document.querySelectorAll('.form-section');
+            const completedSections = document.querySelectorAll('.form-section.completed');
+            state.form_progress = Math.round((completedSections.length / sections.length) * 100);
+            
+            // Add form completion percentage from tracker
+            if (this.completedSections) {
+                state.form_completion_percentage = this.getFormCompletionPercentage();
+                state.completed_sections = this.completedSections;
+            }
+
+            return state;
+        }
+
+        destroy() {
+            if (this.inactivityTimer) {
+                clearTimeout(this.inactivityTimer);
+            }
+        }
+
+        // Track form section completion
+        markSectionCompleted(sectionName) {
+            if (!this.completedSections) {
+                this.completedSections = [];
+            }
+            if (!this.completedSections.includes(sectionName)) {
+                this.completedSections.push(sectionName);
+            }
+        }
+
+        // Get form completion percentage
+        getFormCompletionPercentage() {
+            const totalSections = 6; // contact, license, activities, visas, addons, contact
+            const completedCount = this.completedSections ? this.completedSections.length : 0;
+            return Math.round((completedCount / totalSections) * 100);
+        }
+
+        showLeaveConfirmationDialog() {
+            // Create custom confirmation dialog
+            const dialog = document.createElement('div');
+            dialog.id = 'leave-confirmation-dialog';
+            dialog.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                font-family: Arial, sans-serif;
+            `;
+
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                max-width: 400px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            `;
+
+            content.innerHTML = `
+                <h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Save Your Progress?</h3>
+                <p style="margin: 0 0 20px 0; color: #666; line-height: 1.5;">
+                    You have unsaved changes. Would you like to save your progress before leaving?
+                </p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="save-and-leave" style="
+                        background: #007bff;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 14px;
+                    ">Save & Leave</button>
+                    <button id="leave-without-saving" style="
+                        background: #6c757d;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 14px;
+                    ">Leave Without Saving</button>
+                    <button id="stay-on-page" style="
+                        background: #28a745;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 14px;
+                    ">Stay on Page</button>
+                </div>
+            `;
+
+            dialog.appendChild(content);
+            document.body.appendChild(dialog);
+
+            // Add event listeners
+            document.getElementById('save-and-leave').addEventListener('click', () => {
+                this.handleSaveAndLeave();
+            });
+
+            document.getElementById('leave-without-saving').addEventListener('click', () => {
+                this.handleLeaveWithoutSaving();
+            });
+
+            document.getElementById('stay-on-page').addEventListener('click', () => {
+                this.handleStayOnPage();
+            });
+
+            // Store dialog reference for cleanup
+            this.leaveDialog = dialog;
+        }
+
+        async handleSaveAndLeave() {
+            console.log('User chose to save and leave');
+            
+            // Remove dialog
+            if (this.leaveDialog) {
+                document.body.removeChild(this.leaveDialog);
+                this.leaveDialog = null;
+            }
+            
+            // Show a brief "saving" message
+            const savingMsg = document.createElement('div');
+            savingMsg.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #28a745;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                z-index: 10001;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+            `;
+            savingMsg.textContent = 'Saving your progress...';
+            document.body.appendChild(savingMsg);
+            
+            try {
+                // Submit data and wait for it to complete
+                await this.submitPartialData('user_confirmed_leave');
+                console.log('Data submitted successfully, closing page...');
+                
+                // Update saving message
+                savingMsg.textContent = 'Progress saved! Closing page...';
+                savingMsg.style.background = '#28a745';
+                
+                // Close page after successful submission
+                setTimeout(() => {
+                    try {
+                        window.close();
+                    } catch (e) {
+                        // Fallback for browsers that don't allow window.close()
+                        window.location.href = 'about:blank';
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Failed to submit data:', error);
+                
+                // Update saving message to show error
+                savingMsg.textContent = 'Failed to save. Closing anyway...';
+                savingMsg.style.background = '#dc3545';
+                
+                // Close page even if submission failed
+                setTimeout(() => {
+                    try {
+                        window.close();
+                    } catch (e) {
+                        // Fallback for browsers that don't allow window.close()
+                        window.location.href = 'about:blank';
+                    }
+                }, 2000);
+            }
+        }
+
+        handleLeaveWithoutSaving() {
+            console.log('User chose to leave without saving');
+            
+            // Remove dialog
+            if (this.leaveDialog) {
+                document.body.removeChild(this.leaveDialog);
+                this.leaveDialog = null;
+            }
+            
+            // Close page immediately
+            try {
+                window.close();
+            } catch (e) {
+                // Fallback for browsers that don't allow window.close()
+                window.location.href = 'about:blank';
+            }
+        }
+
+        handleStayOnPage() {
+            console.log('User chose to stay on page');
+            
+            // Remove dialog
+            if (this.leaveDialog) {
+                document.body.removeChild(this.leaveDialog);
+                this.leaveDialog = null;
+            }
+            
+            // Reset the page unload attempt flag
+            this.pageUnloadAttempted = false;
+        }
+
+        handleNavigationAttempt() {
+            if (this.contactFormCompleted && !this.partialDataSubmitted && !this.pageUnloadAttempted) {
+                console.log('Navigation attempt detected - showing confirmation dialog');
+                this.showLeaveConfirmationDialog();
+            }
+        }
+    }
+
+    // Initialize the interaction tracker
+    const userInteractionTracker = new UserInteractionTracker();
+    window.userInteractionTracker = userInteractionTracker;
+    
+    // Debug logging
+    console.log('User Interaction Tracker initialized:', userInteractionTracker);
+
     // Initialize user location detection when page loads
     if (typeof window !== 'undefined') {
         window.addEventListener('load', function() {
@@ -153,6 +737,24 @@
         // Mark all sections up to and including the current one as interacted
         for (let i = 0; i <= currentIndex; i++) {
             sectionInteractions[sectionOrder[i]] = true;
+        }
+        
+        // Also track section completion in user interaction tracker
+        if (window.userInteractionTracker) {
+            // Map section names to user-friendly names
+            const sectionNameMap = {
+                'licenseSection': 'license',
+                'durationSection': 'duration',
+                'shareholdersSection': 'shareholders',
+                'businessActivitiesSection': 'activities',
+                'visaSection': 'visas',
+                'addonsSection': 'addons'
+            };
+            
+            const sectionName = sectionNameMap[currentSection];
+            if (sectionName) {
+                window.userInteractionTracker.markSectionCompleted(sectionName);
+            }
         }
     }
 
@@ -3063,9 +3665,9 @@
             additionalShareholdersCost = (shareholdersCount - 6) * 2000;
         }
 
-        let totalBeforeDiscount = businessLicenseCost + additionalShareholdersCost;
-        let discountAmount = totalBeforeDiscount * (discountPercentage / 100);
-        let licenseAfterDiscount = totalBeforeDiscount - discountAmount;
+        // Apply discount only to the business license cost, not to additional shareholders cost
+        let discountAmount = businessLicenseCost * (discountPercentage / 100);
+        let licenseAfterDiscount = businessLicenseCost - discountAmount + additionalShareholdersCost;
         
         window.baseLicenseCostValue = baseLicenseCost;
         window.additionalShareholdersCost = additionalShareholdersCost;
@@ -3612,26 +4214,26 @@
                     activityGroups[groupName].push(activity);
                 });
                 
-                        // First 3 groups are free, then 1000 AED per individual activity in additional groups
-        const groupNames = Object.keys(activityGroups);
-        if (groupNames.length > 3) {
-            // Keep track of which groups were selected first (maintain selection order)
-            const groupSelectionOrder = [];
-            window.selectedActivities.forEach(activity => {
-                const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
-                if (!groupSelectionOrder.includes(groupName)) {
-                    groupSelectionOrder.push(groupName);
+                // First 3 groups are free, then 1000 AED per individual activity in additional groups
+                const groupNames = Object.keys(activityGroups);
+                if (groupNames.length > 3) {
+                    // Keep track of which groups were selected first (maintain selection order)
+                    const groupSelectionOrder = [];
+                    window.selectedActivities.forEach(activity => {
+                        const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
+                        if (!groupSelectionOrder.includes(groupName)) {
+                            groupSelectionOrder.push(groupName);
+                        }
+                    });
+                    
+                    // First 3 groups in selection order are free, charge for activities in remaining groups
+                    for (let i = 3; i < groupSelectionOrder.length; i++) {
+                        const groupName = groupSelectionOrder[i];
+                        if (activityGroups[groupName]) {
+                            businessActivitiesCost += activityGroups[groupName].length * 1000;
+                        }
+                    }
                 }
-            });
-            
-            // First 3 groups in selection order are free, charge for activities in remaining groups
-            for (let i = 3; i < groupSelectionOrder.length; i++) {
-                const groupName = groupSelectionOrder[i];
-                if (activityGroups[groupName]) {
-                    businessActivitiesCost += activityGroups[groupName].length * 1000;
-                }
-            }
-        }
             }
             
             
@@ -3917,154 +4519,154 @@
             'fr': '06 12 34 56 78',    // France
             'it': '320 123 4567',      // Italy
             'es': '612 34 56 78',      // Spain
-            'pt': '912 345 678',       // Portugal
-            'nl': '06 12345678',       // Netherlands
-            'be': '0470 12 34 56',     // Belgium
-            'at': '0664 1234567',      // Austria
-            'ch': '078 123 45 67',     // Switzerland
-            'se': '070 123 45 67',     // Sweden
-            'no': '406 12 345',        // Norway
-            'dk': '20 12 34 56',       // Denmark
-            'fi': '040 123 4567',      // Finland
-            'pl': '512 345 678',       // Poland
-            'cz': '601 123 456',       // Czech Republic
-            'hu': '06 20 123 4567',    // Hungary
-            'ro': '0712 345 678',      // Romania
-            'bg': '087 123 4567',      // Bulgaria
-            'hr': '091 234 5678',      // Croatia
-            'si': '031 234 567',       // Slovenia
-            'sk': '0901 123 456',      // Slovakia
-            'lt': '8612 34567',        // Lithuania
-            'lv': '2012 3456',         // Latvia
-            'ee': '5123 4567',         // Estonia
-            'gr': '694 123 4567',      // Greece
-            'cy': '9612 3456',         // Cyprus
-            'mt': '9912 3456',         // Malta
-            'lu': '621 123 456',       // Luxembourg
+            'pt': '912 345 678',      // Portugal
+            'nl': '06 12345678',      // Netherlands
+            'be': '0470 12 34 56',    // Belgium
+            'at': '0664 1234567',     // Austria
+            'ch': '078 123 45 67',    // Switzerland
+            'se': '070 123 45 67',    // Sweden
+            'no': '406 12 345',       // Norway
+            'dk': '20 12 34 56',      // Denmark
+            'fi': '040 123 4567',     // Finland
+            'pl': '512 345 678',      // Poland
+            'cz': '601 123 456',      // Czech Republic
+            'hu': '06 20 123 4567',   // Hungary
+            'ro': '0712 345 678',     // Romania
+            'bg': '087 123 4567',     // Bulgaria
+            'hr': '091 234 5678',     // Croatia
+            'si': '031 234 567',      // Slovenia
+            'sk': '0901 123 456',     // Slovakia
+            'lt': '8612 34567',       // Lithuania
+            'lv': '2012 3456',        // Latvia
+            'ee': '5123 4567',        // Estonia
+            'gr': '694 123 4567',     // Greece
+            'cy': '9612 3456',        // Cyprus
+            'mt': '9912 3456',        // Malta
+            'lu': '621 123 456',      // Luxembourg
             
             // Asia-Pacific
-            'jp': '090 1234 5678',     // Japan
-            'kr': '010 1234 5678',     // South Korea
-            'cn': '138 0013 8000',     // China
-            'hk': '9123 4567',         // Hong Kong
-            'tw': '0912 345 678',      // Taiwan
-            'sg': '8123 4567',         // Singapore
-            'my': '012 345 6789',      // Malaysia
-            'th': '081 234 5678',      // Thailand
-            'ph': '0917 123 4567',     // Philippines
-            'id': '0812 3456 7890',    // Indonesia
-            'vn': '091 234 56 78',     // Vietnam
-            'in': '91234 56789',       // India
-            'pk': '0301 2345678',      // Pakistan
-            'bd': '01712 345678',      // Bangladesh
-            'lk': '071 234 5678',      // Sri Lanka
-            'np': '984 123 4567',      // Nepal
-            'mm': '09 123 456 789',    // Myanmar
-            'kh': '012 345 678',       // Cambodia
-            'la': '020 123 4567',      // Laos
-            'bn': '712 3456',          // Brunei
-            'mv': '791 2345',          // Maldives
+            'jp': '090 1234 5678',    // Japan
+            'kr': '010 1234 5678',    // South Korea
+            'cn': '138 0013 8000',    // China
+            'hk': '9123 4567',        // Hong Kong
+            'tw': '0912 345 678',     // Taiwan
+            'sg': '8123 4567',        // Singapore
+            'my': '012 345 6789',     // Malaysia
+            'th': '081 234 5678',     // Thailand
+            'ph': '0917 123 4567',    // Philippines
+            'id': '0812 3456 7890',   // Indonesia
+            'vn': '091 234 56 78',    // Vietnam
+            'in': '91234 56789',      // India
+            'pk': '0301 2345678',     // Pakistan
+            'bd': '01712 345678',     // Bangladesh
+            'lk': '071 234 5678',     // Sri Lanka
+            'np': '984 123 4567',     // Nepal
+            'mm': '09 123 456 789',   // Myanmar
+            'kh': '012 345 678',      // Cambodia
+            'la': '020 123 4567',     // Laos
+            'bn': '712 3456',         // Brunei
+            'mv': '791 2345',         // Maldives
             
             // Middle East & North Africa
-            'tr': '0532 123 45 67',    // Turkey
+            'tr': '0532 123 45 67',   // Turkey
             'il': '050 123 4567',      // Israel
             'ps': '059 123 4567',      // Palestine
             'jo': '079 123 4567',      // Jordan
-            'lb': '71 123 456',        // Lebanon
-            'sy': '0944 123 456',      // Syria
-            'iq': '0790 123 4567',     // Iraq
-            'ir': '0912 345 6789',     // Iran
-            'af': '070 123 4567',      // Afghanistan
-            'eg': '0100 123 4567',     // Egypt
-            'ly': '091 234 5678',      // Libya
-            'tn': '20 123 456',        // Tunisia
-            'dz': '0551 23 45 67',     // Algeria
-            'ma': '0612 345678',       // Morocco
-            'sd': '091 123 4567',      // Sudan
-            'ye': '070 123 456',       // Yemen
+            'lb': '71 123 456',       // Lebanon
+            'sy': '0944 123 456',     // Syria
+            'iq': '0790 123 4567',    // Iraq
+            'ir': '0912 345 6789',    // Iran
+            'af': '070 123 4567',     // Afghanistan
+            'eg': '0100 123 4567',    // Egypt
+            'ly': '091 234 5678',     // Libya
+            'tn': '20 123 456',       // Tunisia
+            'dz': '0551 23 45 67',    // Algeria
+            'ma': '0612 345678',      // Morocco
+            'sd': '091 123 4567',     // Sudan
+            'ye': '070 123 456',      // Yemen
             
             // Africa
-            'ng': '0803 123 4567',     // Nigeria
-            'gh': '024 123 4567',      // Ghana
-            'ke': '0712 345678',       // Kenya
-            'tz': '0754 123456',       // Tanzania
-            'ug': '0772 123456',       // Uganda
-            'rw': '078 123 4567',      // Rwanda
-            'et': '091 123 4567',      // Ethiopia
-            'zm': '097 123 4567',      // Zambia
-            'zw': '077 123 4567',      // Zimbabwe
-            'bw': '71 123 456',        // Botswana
-            'mz': '82 123 4567',       // Mozambique
-            'ao': '923 123 456',       // Angola
-            'cm': '6123 4567',         // Cameroon
-            'ci': '0123 456789',       // Côte d'Ivoire
-            'sn': '70 123 45 67',      // Senegal
-            'ml': '65 12 34 56',       // Mali
-            'bf': '70 12 34 56',       // Burkina Faso
+            'ng': '0803 123 4567',    // Nigeria
+            'gh': '024 123 4567',     // Ghana
+            'ke': '0712 345678',      // Kenya
+            'tz': '0754 123456',      // Tanzania
+            'ug': '0772 123456',      // Uganda
+            'rw': '078 123 4567',     // Rwanda
+            'et': '091 123 4567',     // Ethiopia
+            'zm': '097 123 4567',     // Zambia
+            'zw': '077 123 4567',     // Zimbabwe
+            'bw': '71 123 456',       // Botswana
+            'mz': '82 123 4567',      // Mozambique
+            'ao': '923 123 456',      // Angola
+            'cm': '6123 4567',        // Cameroon
+            'ci': '0123 456789',      // Côte d'Ivoire
+            'sn': '70 123 45 67',     // Senegal
+            'ml': '65 12 34 56',      // Mali
+            'bf': '70 12 34 56',      // Burkina Faso
             
             // Latin America
-            'mx': '55 1234 5678',      // Mexico
-            'br': '11 91234 5678',     // Brazil
-            'ar': '11 1234 5678',      // Argentina
-            'cl': '9 1234 5678',       // Chile
-            'co': '321 123 4567',      // Colombia
-            'pe': '912 345 678',       // Peru
-            've': '0412 1234567',      // Venezuela
-            'ec': '099 123 4567',      // Ecuador
-            'uy': '094 123 456',       // Uruguay
-            'py': '0981 123456',       // Paraguay
-            'bo': '6123 4567',         // Bolivia
-            'cr': '8312 3456',         // Costa Rica
-            'pa': '6123 4567',         // Panama
-            'gt': '5123 4567',         // Guatemala
-            'hn': '9123 4567',         // Honduras
-            'sv': '7123 4567',         // El Salvador
-            'ni': '8123 4567',         // Nicaragua
-            'bz': '612 3456',          // Belize
-            'jm': '876 123 4567',      // Jamaica
-            'tt': '868 123 4567',      // Trinidad and Tobago
-            'bb': '246 123 4567',      // Barbados
-            'bs': '242 123 4567',      // Bahamas
-            'do': '809 123 4567',      // Dominican Republic
-            'pr': '787 123 4567',      // Puerto Rico
-            'cu': '5123 4567',         // Cuba
-            'ht': '3123 4567',         // Haiti
+            'mx': '55 1234 5678',     // Mexico
+            'br': '11 91234 5678',    // Brazil
+            'ar': '11 1234 5678',     // Argentina
+            'cl': '9 1234 5678',      // Chile
+            'co': '321 123 4567',     // Colombia
+            'pe': '912 345 678',      // Peru
+            've': '0412 1234567',     // Venezuela
+            'ec': '099 123 4567',     // Ecuador
+            'uy': '094 123 456',      // Uruguay
+            'py': '0981 123456',      // Paraguay
+            'bo': '6123 4567',        // Bolivia
+            'cr': '8312 3456',       // Costa Rica
+            'pa': '6123 4567',        // Panama
+            'gt': '5123 4567',        // Guatemala
+            'hn': '9123 4567',        // Honduras
+            'sv': '7123 4567',        // El Salvador
+            'ni': '8123 4567',        // Nicaragua
+            'bz': '612 3456',         // Belize
+            'jm': '876 123 4567',     // Jamaica
+            'tt': '868 123 4567',     // Trinidad and Tobago
+            'bb': '246 123 4567',     // Barbados
+            'bs': '242 123 4567',     // Bahamas
+            'do': '809 123 4567',     // Dominican Republic
+            'pr': '787 123 4567',     // Puerto Rico
+            'cu': '5123 4567',        // Cuba
+            'ht': '3123 4567',        // Haiti
             
             // Eastern Europe & Russia
-            'ru': '8 912 345 6789',    // Russia
-            'ua': '050 123 45 67',     // Ukraine
-            'by': '029 123 45 67',     // Belarus
-            'md': '0621 12345',        // Moldova
-            'ge': '555 123 456',       // Georgia
-            'am': '077 123 456',       // Armenia
-            'az': '050 123 45 67',     // Azerbaijan
-            'kz': '701 123 4567',      // Kazakhstan
-            'kg': '0555 123 456',      // Kyrgyzstan
-            'tj': '93 123 45 67',      // Tajikistan
-            'tm': '65 123 456',        // Turkmenistan
-            'uz': '90 123 45 67',      // Uzbekistan
-            'mn': '8812 3456',         // Mongolia
+            'ru': '8 912 345 6789',   // Russia
+            'ua': '050 123 45 67',    // Ukraine
+            'by': '029 123 45 67',    // Belarus
+            'md': '0621 12345',       // Moldova
+            'ge': '555 123 456',      // Georgia
+            'am': '077 123 456',      // Armenia
+            'az': '050 123 45 67',    // Azerbaijan
+            'kz': '701 123 4567',     // Kazakhstan
+            'kg': '0555 123 456',     // Kyrgyzstan
+            'tj': '93 123 45 67',     // Tajikistan
+            'tm': '65 123 456',       // Turkmenistan
+            'uz': '90 123 45 67',     // Uzbekistan
+            'mn': '8812 3456',        // Mongolia
             
             // Nordic & Baltic (additional)
-            'is': '611 1234',          // Iceland
-            'fo': '211234',            // Faroe Islands
-            'gl': '221234',            // Greenland
+            'is': '611 1234',         // Iceland
+            'fo': '211234',           // Faroe Islands
+            'gl': '221234',           // Greenland
             
             // Pacific Islands
-            'fj': '701 2345',          // Fiji
-            'pg': '7012 3456',         // Papua New Guinea
-            'vu': '591 2345',          // Vanuatu
-            'sb': '7412345',           // Solomon Islands
+            'fj': '701 2345',        // Fiji
+            'pg': '7012 3456',        // Papua New Guinea
+            'vu': '591 2345',         // Vanuatu
+            'sb': '7412345',          // Solomon Islands
             'nc': '123456',            // New Caledonia
-            'pf': '87 12 34 56',       // French Polynesia
-            'ws': '72 12345',          // Samoa
-            'to': '771 2345',          // Tonga
-            'ki': '7312 3456',         // Kiribati
-            'tv': '901 2345',          // Tuvalu
-            'nr': '555 1234',          // Nauru
-            'pw': '620 1234',          // Palau
-            'fm': '350 1234',          // Micronesia
-            'mh': '235 1234',          // Marshall Islands
+            'pf': '87 12 34 56',      // French Polynesia
+            'ws': '72 12345',         // Samoa
+            'to': '771 2345',         // Tonga
+            'ki': '7312 3456',        // Kiribati
+            'tv': '901 2345',         // Tuvalu
+            'nr': '555 1234',         // Nauru
+            'pw': '620 1234',         // Palau
+            'fm': '350 1234',         // Micronesia
+            'mh': '235 1234',        // Marshall Islands
         };
         phoneInputField.placeholder = countryPlaceholders[countryData.iso2] || "Phone number";
         
@@ -4626,6 +5228,7 @@
             : '';
 
         const completeFormData = {
+            form_status: 'complete',
             fullName: fullName,
             phone: phone,
             email: email,
@@ -4651,6 +5254,11 @@
             user_region: userLocationInfo.region,
             user_timezone: userLocationInfo.timezone
         };
+
+        // Mark form as completed to prevent partial data submission
+        if (window.userInteractionTracker) {
+            window.userInteractionTracker.markFormCompleted();
+        }
 
         // Submit to webhook
         submitToWebhook(completeFormData)
@@ -4831,6 +5439,12 @@
             // Do NOT mark sections as interacted when unlocking
             // Let user interaction or visibility determine when to show prices
             
+            // Start user interaction tracking when sections are unlocked
+            if (window.userInteractionTracker) {
+                window.userInteractionTracker.markContactFormCompleted();
+                console.log('Sections unlocked - user interaction tracking started');
+            }
+            
             // Recalculate costs with current section interaction states
             calculateCosts();
             
@@ -4932,6 +5546,11 @@
                     contactSection.classList.add('completed');
                 }
                 
+                // Mark contact section as completed in user interaction tracker
+                if (window.userInteractionTracker) {
+                    window.userInteractionTracker.markSectionCompleted('contact');
+                }
+                
                 // Update submit button
                 if (submitBtn) {
                     submitBtn.classList.add('validated');
@@ -4962,6 +5581,14 @@
                 // Update contact section styling
                 if (contactSection) {
                     contactSection.classList.remove('completed');
+                }
+                
+                // Remove contact section from completed tracking
+                if (window.userInteractionTracker && window.userInteractionTracker.completedSections) {
+                    const index = window.userInteractionTracker.completedSections.indexOf('contact');
+                    if (index > -1) {
+                        window.userInteractionTracker.completedSections.splice(index, 1);
+                    }
                 }
                 
                 // Update submit button

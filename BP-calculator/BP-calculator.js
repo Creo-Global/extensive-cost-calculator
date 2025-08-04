@@ -1,3 +1,4 @@
+    // Global variables
     let selectedActivities = []; 
     let LicenseCost = 0;
     let VisaCost = 0;
@@ -28,12 +29,52 @@
         timezone: null
     };
 
-    // Initialize user location detection when page loads
-    if (typeof window !== 'undefined') {
-        window.addEventListener('load', function() {
-            detectUserLocation();
-        });
+    // Robust initialization function for Webflow compatibility
+    function initializeCalculator() {
+        try {
+            // Initialize user location detection
+            if (typeof detectUserLocation === 'function') {
+                detectUserLocation();
+            }
+            
+            // Initialize all functions
+            if (typeof initializeMobileAutoScroll === 'function') {
+                initializeMobileAutoScroll();
+            }
+            
+            if (typeof initializeStickyButtonsControl === 'function') {
+                initializeStickyButtonsControl();
+            }
+            
+            if (typeof initializeBackToTopButton === 'function') {
+                initializeBackToTopButton();
+            }
+            
+        } catch (error) {
+            console.error('Error during calculator initialization:', error);
+        }
     }
+
+    // Multiple initialization strategies for Webflow compatibility
+    
+    // Strategy 1: Immediate execution if DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCalculator();
+        });
+    } else {
+        initializeCalculator();
+    }
+    
+    // Strategy 2: Window load event
+    window.addEventListener('load', function() {
+        initializeCalculator();
+    });
+    
+    // Strategy 3: Fallback with timeout
+    setTimeout(function() {
+        initializeCalculator();
+    }, 1000);
 
     // Success popup functionality
     function showSuccessPopup(firstName) {
@@ -962,7 +1003,6 @@
             initializeVisaModals();
             
             initializeSummaryToggle();
-            initializeMobileSummary();
             
             // Initialize with appropriate summary view
             autoToggleSummaryView();
@@ -2985,7 +3025,6 @@
 
         return {
             licenseType: document.getElementById("license-type")?.value || "fawri",
-            packageType: "standard",
             licenseDuration: parseInt(document.getElementById("license-duration")?.value) || 1,
             shareholdersCount: parseInt(document.getElementById("shareholders-range")?.value) || 1,
             investorVisas: investorVisaCount,
@@ -3094,9 +3133,9 @@
             additionalShareholdersCost = (shareholdersCount - 6) * 2000;
         }
 
-        let totalBeforeDiscount = businessLicenseCost + additionalShareholdersCost;
-        let discountAmount = totalBeforeDiscount * (discountPercentage / 100);
-        let licenseAfterDiscount = totalBeforeDiscount - discountAmount;
+        // Apply discount only to the business license cost, not to additional shareholders cost
+        let discountAmount = businessLicenseCost * (discountPercentage / 100);
+        let licenseAfterDiscount = businessLicenseCost - discountAmount + additionalShareholdersCost;
         
         window.baseLicenseCostValue = baseLicenseCost;
         window.additionalShareholdersCost = additionalShareholdersCost;
@@ -4656,30 +4695,156 @@
             : '';
 
         const completeFormData = {
+            // Basic contact information
             fullName: fullName,
             phone: phone,
             email: email,
+            
+            // License information
             license_type: licenseType,
-            business_activities: businessActivitiesText,
-            shareholders_range: document.getElementById("shareholders-range").value,
             license_duration: document.getElementById("license-duration")?.value || '',
+            
+            // Business activities
+            business_activities: businessActivitiesText,
+            selected_activities_count: window.selectedActivities ? window.selectedActivities.length : 0,
+            selected_activities_details: window.selectedActivities ? JSON.stringify(window.selectedActivities) : '',
+            
+            // Shareholders
+            shareholders_range: document.getElementById("shareholders-range").value,
+            
+            // Visa information
             investor_visas: document.getElementById("investor-visa-count")?.value || '0',
             employee_visas: document.getElementById("employee-visa-count")?.value || '0',
             dependency_visas: document.getElementById("dependency-visas")?.value || '0',
+            total_visas: (parseInt(document.getElementById("investor-visa-count")?.value || 0) + 
+                         parseInt(document.getElementById("employee-visa-count")?.value || 0) + 
+                         parseInt(document.getElementById("dependency-visas")?.value || 0)).toString(),
+            
+            // Add-ons and services
             selected_addons: selectedAddons.join(','),
+            selected_addons_count: selectedAddons.length,
+            selected_addons_details: JSON.stringify(selectedAddons),
+            
+            // Change status information
             applicants_inside_uae: document.getElementById("applicants-inside-uae")?.value || '0',
             applicants_outside_uae: document.getElementById("applicants-outside-uae")?.value || '0',
+            
+            // Cost breakdown for proforma invoice
             total_cost: calculateTotalCost(),
-            license_cost: LicenseCost,
-            visa_cost: VisaCost,
+            license_cost: LicenseCost || 0,
+            visa_cost: VisaCost || 0,
+            addons_cost: window.AddonsComponent || 0,
+            business_activities_cost: window.BusinessActivitiesCost || 0,
+            change_status_cost: window.ChangeStatusCost || 0,
+            office_cost: 0, // Always 0 as per current implementation
+            
+            // License pricing details
+            license_base_cost_per_year: licenseType === "fawri" ? 15000 : 12500,
+            license_duration_years: parseInt(document.getElementById("license-duration")?.value || 1),
+            license_discount_percentage: parseInt(document.getElementById("license-duration")?.value || 1) > 1 ? 15 : 0,
+            additional_shareholders_count: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6),
+            additional_shareholders_cost: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000,
+            
+            // Detailed cost breakdown for invoice
+            cost_breakdown: JSON.stringify({
+                license: {
+                    type: licenseType,
+                    duration: document.getElementById("license-duration")?.value || '',
+                    base_cost_per_year: licenseType === "fawri" ? 15000 : 12500,
+                    cost_per_unit: licenseType === "fawri" ? 15000 : 12500,
+                    duration_years: parseInt(document.getElementById("license-duration")?.value || 1),
+                    base_cost_total: (licenseType === "fawri" ? 15000 : 12500) * parseInt(document.getElementById("license-duration")?.value || 1),
+                    shareholders_count: parseInt(document.getElementById("shareholders-range")?.value || 1),
+                    additional_shareholders: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6),
+                    additional_shareholders_cost: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000,
+                    cost_per_additional_shareholder: 2000,
+                    subtotal_before_discount: ((licenseType === "fawri" ? 15000 : 12500) * parseInt(document.getElementById("license-duration")?.value || 1)) + (Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000),
+                    discount_percentage: parseInt(document.getElementById("license-duration")?.value || 1) > 1 ? 15 : 0,
+                    discount_amount: parseInt(document.getElementById("license-duration")?.value || 1) > 1 ? (((licenseType === "fawri" ? 15000 : 12500) * parseInt(document.getElementById("license-duration")?.value || 1)) + (Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000)) * 0.15 : 0,
+                    final_cost: LicenseCost || 0
+                },
+                visas: {
+                    investor: {
+                        count: parseInt(document.getElementById("investor-visa-count")?.value || 0),
+                        cost_per_unit: 5850,
+                        total_cost: parseInt(document.getElementById("investor-visa-count")?.value || 0) * 5850
+                    },
+                    employee: {
+                        count: parseInt(document.getElementById("employee-visa-count")?.value || 0),
+                        cost_per_unit: 5350,
+                        total_cost: parseInt(document.getElementById("employee-visa-count")?.value || 0) * 5350
+                    },
+                    dependency: {
+                        count: parseInt(document.getElementById("dependency-visas")?.value || 0),
+                        cost_per_unit: 7850,
+                        total_cost: parseInt(document.getElementById("dependency-visas")?.value || 0) * 7850
+                    },
+                    immigration_card_fee: 2000,
+                    total_visa_cost: VisaCost || 0
+                },
+                addons: {
+                    selected_services: selectedAddons,
+                    cost: window.AddonsComponent || 0,
+                    details: selectedAddons.map(addon => {
+                        const addonCosts = {
+                            "bank-account": 1500,
+                            "business-card": 240,
+                            "company-stamp": 200,
+                            "ecommerce-starter": 1000,
+                            "medical-emirates-id": 2250,
+                            "dependent-visa": 6000,
+                            "medical-insurance": 1080,
+                            "melite": 6000,
+                            "meeting-rooms": 150,
+                            "po-box": 1700,
+                            "mail-management": 750,
+                            "document-translation": 250,
+                            "virtual-assistant": 12000,
+                            "corporate-tax": 1200,
+                            "vat-registration": 1500,
+                            "liquidation-report": 1000,
+                            "financial-audit-report": 250,
+                            "valuation-report": 10000,
+                            "bookkeeping": 1000
+                        };
+                        return {
+                            service: addon,
+                            cost: addonCosts[addon] || 0
+                        };
+                    })
+                },
+                business_activities: {
+                    selected_activities: window.selectedActivities || [],
+                    activity_count: window.selectedActivities ? window.selectedActivities.length : 0,
+                    cost: window.BusinessActivitiesCost || 0
+                },
+                change_status: {
+                    inside_uae: parseInt(document.getElementById("applicants-inside-uae")?.value || 0),
+                    outside_uae: parseInt(document.getElementById("applicants-outside-uae")?.value || 0),
+                    cost_per_inside_applicant: 1500,
+                    total_cost: window.ChangeStatusCost || 0
+                }
+            }),
+            
+            // Form interaction data
+            sections_interacted: JSON.stringify(sectionInteractions),
+            
+            // Current URL and user information
             current_url: window.location.href,
-            // User IP and location information
             user_ip: userLocationInfo.ip,
             user_country: userLocationInfo.country,
             user_country_name: userLocationInfo.country_name,
             user_city: userLocationInfo.city,
             user_region: userLocationInfo.region,
-            user_timezone: userLocationInfo.timezone
+            user_timezone: userLocationInfo.timezone,
+            
+            // Timestamp
+            submission_timestamp: new Date().toISOString(),
+            
+            // Additional metadata for invoice generation
+            invoice_currency: 'AED',
+            invoice_currency_symbol: 'د.إ',
+            calculation_version: '1.0'
         };
 
         // Submit to webhook
@@ -6130,193 +6295,9 @@
     }
 
     // Function specifically to update mobile price display
-    function updateMobilePrice() {
-        const mobileGrandTotalPrice = document.getElementById('mobile-grand-total-price');
-        if (mobileGrandTotalPrice) {
-            const totalCost = calculateTotalCost();
-            const formattedTotal = `AED ${totalCost.toLocaleString()}`;
-            mobileGrandTotalPrice.textContent = formattedTotal;
-        }
-    }
 
-    function initializeMobileSummary() {
-        const mobileStickyFooter = document.getElementById('mobile-sticky-footer');
-        const summarySheet = document.querySelector('.sticky-summary-container');
-        const overlay = document.getElementById('bottom-sheet-overlay');
-        const closeTrigger = document.querySelector('.sheet-close-handle');
-        const body = document.body;
-        const mobileGetCallBtn = document.getElementById('mobile-get-call-btn');
 
-        if (!mobileStickyFooter || !summarySheet || !overlay || !closeTrigger) {
-            console.warn('Mobile summary elements not found. Feature disabled.');
-            return;
-        }
 
-        let sheetIsOpen = false;
-
-        const openSheet = () => {
-            if (sheetIsOpen) return;
-            
-            // Store current scroll position before opening sheet
-            window.scrollPositionBeforeModal = window.pageYOffset || document.documentElement.scrollTop;
-            
-            // Force the total to update before opening
-            updateMobilePrice();
-            
-            // Show the detailed summary instead of simplified
-            const simplifiedSummary = document.getElementById('simplified-summary');
-            const detailedSummary = document.getElementById('detailed-summary');
-            if (simplifiedSummary && detailedSummary) {
-                simplifiedSummary.style.display = 'none';
-                detailedSummary.style.display = 'block';
-            }
-            
-            // Add classes to show the sheet
-            summarySheet.classList.add('sheet-open');
-            closeTrigger.classList.add('sheet-open');
-            overlay.classList.add('active');
-            body.classList.add('sheet-view-active');
-            
-            // Prevent body scroll
-            body.style.overflow = 'hidden';
-            
-            // Hide the footer when sheet is open
-            mobileStickyFooter.style.display = 'none';
-            
-            sheetIsOpen = true;
-        };
-
-        const closeSheet = () => {
-            if (!sheetIsOpen) return;
-            
-            // Remove classes to hide the sheet
-            summarySheet.classList.remove('sheet-open');
-            closeTrigger.classList.remove('sheet-open');
-            overlay.classList.remove('active');
-            body.classList.remove('sheet-view-active');
-            
-            // Restore body scroll
-            body.style.overflow = 'auto';
-            
-            // Show the footer when sheet is closed
-            mobileStickyFooter.style.display = 'block';
-            
-            // Restore scroll position after a brief delay
-            if (typeof window.scrollPositionBeforeModal !== 'undefined') {
-                setTimeout(() => {
-                    window.scrollTo(0, window.scrollPositionBeforeModal);
-                }, 10);
-            }
-            
-            sheetIsOpen = false;
-        };
-
-        // Make closeSheet globally accessible for edit buttons
-        window.closeMobileSheet = closeSheet;
-        
-        // Make sheet state check globally accessible
-        window.isMobileSheetOpen = () => sheetIsOpen;
-
-        // Add click handlers for sheet opening (excluding get call button)
-        const priceSection = mobileStickyFooter.querySelector('.price-section');
-        const mobileHandle = document.getElementById('mobile-summary-handle');
-        
-        if (priceSection) {
-            priceSection.addEventListener('click', openSheet);
-        }
-        
-        if (mobileHandle) {
-            mobileHandle.addEventListener('click', openSheet);
-        }
-        
-        closeTrigger.addEventListener('click', closeSheet);
-        overlay.addEventListener('click', closeSheet);
-
-        // Swipe gestures
-        let touchStartY = 0;
-        let touchMoveY = 0;
-
-        const handleTouchStart = (e) => {
-            if (!sheetIsOpen && !e.target.closest('#mobile-get-call-btn')) {
-                touchStartY = e.touches[0].clientY;
-            }
-        };
-
-        const handleTouchMove = (e) => {
-            if (!sheetIsOpen && !e.target.closest('#mobile-get-call-btn')) {
-                touchMoveY = e.touches[0].clientY;
-            }
-        };
-
-        const handleTouchEnd = (e) => {
-            // Only open if not touching the get call button
-            if (!sheetIsOpen && !e.target.closest('#mobile-get-call-btn') && touchStartY - touchMoveY > 75) {
-                openSheet();
-            }
-            // Reset values
-            touchStartY = 0;
-            touchMoveY = 0;
-        };
-
-        // Apply touch handlers to price section and handle specifically
-        if (priceSection) {
-            priceSection.addEventListener('touchstart', handleTouchStart);
-            priceSection.addEventListener('touchmove', handleTouchMove);
-            priceSection.addEventListener('touchend', handleTouchEnd);
-        }
-        
-        if (mobileHandle) {
-            mobileHandle.addEventListener('touchstart', handleTouchStart);
-            mobileHandle.addEventListener('touchmove', handleTouchMove);
-            mobileHandle.addEventListener('touchend', handleTouchEnd);
-        }
-
-        // Swipe down on the sheet handle/header to close
-        const handleSheetTouchStart = (e) => {
-            touchStartY = e.touches[0].clientY;
-        };
-
-        const handleSheetTouchMove = (e) => {
-            touchMoveY = e.touches[0].clientY;
-        };
-
-        const handleSheetTouchEnd = (e) => {
-            // Only trigger close if swiping down from the top of the sheet
-            if (sheetIsOpen && touchMoveY - touchStartY > 75 && summarySheet.scrollTop === 0) {
-                closeSheet();
-            }
-            touchStartY = 0;
-            touchMoveY = 0;
-        };
-
-        summarySheet.addEventListener('touchstart', handleSheetTouchStart);
-        summarySheet.addEventListener('touchmove', handleSheetTouchMove);
-        summarySheet.addEventListener('touchend', handleSheetTouchEnd);
-        
-        // Ensure the mobile grand total price is updated on page load
-        updateMobilePrice();
-        
-        // Set up a MutationObserver to watch for changes in the total-cost-display
-        // and update the mobile price accordingly
-        const totalCostDisplay = document.getElementById('total-cost-display');
-        if (totalCostDisplay) {
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'characterData' || mutation.type === 'childList') {
-                        updateMobilePrice();
-                    }
-                });
-            });
-            
-            observer.observe(totalCostDisplay, { 
-                characterData: true, 
-                childList: true, 
-                subtree: true 
-            });
-        }
-    
-
-    }
 
     // Mobile Auto-Scroll Functionality
     function initializeMobileAutoScroll() {
@@ -6332,7 +6313,7 @@
                 const nextCard = allCards[currentIndex + 1];
                 if (nextCard) {
                     setTimeout(() => {
-                        const headerOffset = 80;
+                        const headerOffset = 180;
                         const elementPosition = nextCard.getBoundingClientRect().top;
                         const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -6653,22 +6634,17 @@
         // Function to update progress based on scroll
         const updateProgress = () => {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const mobileFooter = document.getElementById('mobile-sticky-footer');
             const calculatorSection = document.getElementById('MFZ-NewCostCalForm');
             
-            if (!calculatorSection || !mobileFooter) return;
+            if (!calculatorSection) return;
             
             // Get calculator section boundaries
             const sectionRect = calculatorSection.getBoundingClientRect();
             const sectionTop = sectionRect.top + scrollTop;
             const sectionBottom = sectionTop + sectionRect.height;
             
-            // Get mobile footer position
-            const footerRect = mobileFooter.getBoundingClientRect();
-            const footerTop = footerRect.top + scrollTop;
-            
             // Check if user is within the calculator section
-            const isInSection = scrollTop >= sectionTop - 100 && scrollTop < footerTop - 100;
+            const isInSection = scrollTop >= sectionTop - 100 && scrollTop < sectionBottom - 100;
             const isMobile = window.innerWidth <= 768;
             
             if (isInSection && isMobile) {
@@ -6829,11 +6805,11 @@
 
     // Function to handle sticky buttons visibility based on calculator viewport
     function initializeStickyButtonsControl() {
-        const stickyButtons = document.querySelector('.sticky-buttons');
+        // Target the specific navbar class
+        const stickyButtons = document.querySelector('.navbar1_container-3.mobile-nav');
         const calculatorSection = document.getElementById('MFZ-NewCostCalForm');
 
         if (!stickyButtons || !calculatorSection) {
-            console.log('Sticky buttons or calculator section not found');
             return;
         }
 
@@ -6858,13 +6834,9 @@
     window.triggerFormValidationAfterProgrammaticFill = triggerFormValidationAfterProgrammaticFill;
     window.fillFormAndTriggerValidation = fillFormAndTriggerValidation;
 
-    // Use window.load for better compatibility with Webflow's script loading
-    window.addEventListener('load', function() {
-        initializeMobileAutoScroll();
-        initializeStickyButtonsControl();
-        
-        // Re-initialize on window resize if switching to/from mobile
-        window.addEventListener('resize', function() {
+    // Re-initialize on window resize if switching to/from mobile
+    window.addEventListener('resize', function() {
+        if (typeof initializeMobileAutoScroll === 'function') {
             initializeMobileAutoScroll();
-        });
+        }
     });

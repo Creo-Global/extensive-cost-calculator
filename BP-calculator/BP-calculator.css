@@ -57,17 +57,12 @@ font-weight: 700;
   height: 48px;
 }
 
-/* Main wrapper grid removed for Webflow integration */
-
-
-
 .sticky-summary-container {
     width: 100%;
     padding: 24px;
     border-radius: 20px;
     background: #F9FAFB;
     height: fit-content;
-    /* Webflow will handle positioning and sticky behavior */
 }
 
 .form-section {
@@ -1495,13 +1490,10 @@ align-items: center;
         border-radius: 0;
         position: static;
     }
-    
-    /* Mobile responsive adjustments for Webflow integration */
-    
+      
     .sticky-summary-container {
         max-width: 100%;
         position: static;
-        border-top: 1px solid rgba(0, 0, 0, 0.1);
         max-height: none;
         padding: 32px 16px 16px 16px !important;
         border-radius: 20px;
@@ -2018,12 +2010,7 @@ backdrop-filter: blur(24px);
         .addons-container {
             background: #FFF;
         }
-        #mobile-sticky-footer {
-            position: relative;
-            width: 100vw;
-            margin-left: -3%;
-            background: rgba(255, 255, 255, 0.60);
-        }
+
         .footer-content {
             padding: 24px 16px;
         }
@@ -3011,123 +2998,7 @@ background-clip: text;
     padding: 8px 24px;
 }
 
-/* Mobile Sticky Footer & Bottom Sheet Implementation */
-#mobile-sticky-footer {
-    display: none;
-    position: relative;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.60);
-    cursor: pointer;
-    transition: all 0.3s ease;
 
-}
-
-@media (max-width: 768px) {
-    /* Mobile-specific styles for very small screens can go here */
-}
-
-#mobile-summary-handle {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px 0;
-}
-
-.handle-bar {
-    width: 25px;
-    height: 5px;
-    border-radius: 100px;
-}
-
-.footer-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 10px;
-    gap: 16px;
-}
-
-.price-section {
-        display: flex;
-        flex-direction: column;
-    align-items: flex-start;
-    position: relative;
-}
-
-.clickable-area {
-    cursor: pointer;
-    padding: 8px 12px 8px 0;
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
-}
-
-.clickable-area:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-.expand-icon {
-    position: absolute;
-    right: -4px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #666;
-    transition: transform 0.2s ease;
-}
-
-.clickable-area:hover .expand-icon {
-    transform: translateY(-50%) scale(1.1);
-}
-
-#mobile-grand-total-price {
-    color: #1F2937;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 1.2;
-}
-
-.total-label {
-    color: rgba(14, 16, 18, 0.40);
-    font-family: "Plus Jakarta Sans";
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 24px; 
-    display: block;
-}
-
-#mobile-get-call-btn {
-    background: linear-gradient(102deg, #61A60E 1.79%, #004A98 100%);
-    color: white;
-    border: none;
-    border-radius: 40px;
-    padding: 16px 8px;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 40%;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-#mobile-get-call-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-#mobile-get-call-btn svg {
-    transition: transform 0.3s ease;
-}
-
-#mobile-get-call-btn:hover svg {
-    transform: translateX(2px);
-}
 
 /* Bottom Sheet Overlay */
 #bottom-sheet-overlay {
@@ -3152,209 +3023,11 @@ background-clip: text;
 .sheet-close-handle {
     display: none;
 }
-/* Sheet Open State */
-@media (max-width: 1200px) {
-    /* Sheet close handle - always positioned but hidden */
-    .sheet-close-handle {
-        position: fixed;
-        top: -60px;
-        left: 0;
-        right: 0;
-        display: flex;
-        justify-content: center;
-    align-items: center;
-        background: transparent;
-        cursor: pointer;
-        z-index: 1001;
-        transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        padding: 12px 0;
-    }
-    
-    .sheet-close-handle .handle-bar {
-        width: 40px;
-        height: 4px;
-        background: #D1D5DB;
-        border-radius: 2px;
-    }
-    
-    /* When sheet is open, override the hide and show the summary */
-    .sticky-summary-container.sheet-open {
-        display: block !important;
-        position: fixed;
-        top: auto;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 999;
-        background: #F9FAFB;
-        border-radius: 20px 20px 0 0;
-        overflow-x: hidden;
-        transform: translate3d(0, 0, 0);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        -webkit-overflow-scrolling: touch;
-        will-change: transform;
-        height: 85vh;
-        animation: slideUpSheet 0.3s forwards;
-        box-shadow: 0px -5px 25.9px 0px rgba(0, 0, 0, 0.15);
-    }
-    
-    @keyframes slideUpSheet {
-        from {
-            transform: translateY(100%);
-        }
-        to {
-            transform: translateY(0);
-        }
-    }
-    
-    /* Show the close handle when sheet is open */
-    .sheet-close-handle.sheet-open {
-        top: 0;
-    }
+
+
     
     /* Body scroll lock when sheet is open */
-    body.sheet-view-active {
-        overflow: hidden;
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-    }
-    .summary-section {
-        padding-bottom: 16px !important;
-        margin-bottom: 0 !important;
-    }
-    /* Prevent any potential zoom issues */
-    .sticky-summary-container.sheet-open * {
-        -webkit-text-size-adjust: 100%;
-        text-size-adjust: 100%;
-    }
     
-    /* Adjust summary content for mobile sheet */
-    .sticky-summary-container.sheet-open .summary-header {
-        margin-bottom: 0;
-        border-bottom: 1px solid #E5E7EB;
-    }
-    
-    .sticky-summary-container.sheet-open .summary-subtitle {
-        font-size: 14px;
-        line-height: 20px;
-        color: #1C1C1C;
-        margin: 0;
-    }
-    
-    /* Summary sections in sheet */
-    .sticky-summary-container.sheet-open .summary-section {
-        margin: 0;
-        padding:10px 0;
-
-        border-radius: 0;
-        border: none;
-        border-bottom: 1px solid #E5E7EB;
-    }
-    
-    .sticky-summary-container.sheet-open .summary-section:last-of-type {
-        margin-bottom: 100px; /* Space for footer */
-        border-bottom: none;
-    }
-    
-    .sticky-summary-container.sheet-open .summary-section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-    }
-    
-    .sticky-summary-container.sheet-open .summary-section-header h4 {
-        font-size: 16px;
-        font-weight: 600;
-        color: #111827;
-        margin: 0;
-    }
-    
-    /* Grand total in sheet */
-    .sticky-summary-container.sheet-open .grand-total-container {
-
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 1002;
-    }
-    
-    .sticky-summary-container.sheet-open .grand-total {
-        display: flex;
-        justify-content: space-between;
-        border-radius: 10px;
-        border: 1px solid #DADBE1;
-        background: linear-gradient(0deg, rgba(255, 255, 255, 0.80) 0%, rgba(255, 255, 255, 0.80) 100%), rgba(217, 217, 217, 0.20);
-        box-shadow: 0px -6px 29.3px 0px rgba(0, 0, 0, 0.03);
-        -webkit-backdrop-filter: blur(24px);
-        backdrop-filter: blur(24px);
-    }
-    
-    .sticky-summary-container.sheet-open .grand-total-label {
-        font-size: 16px;
-        font-weight: 600;
-        color: #111827;
-    }
-    
-    .sticky-summary-container.sheet-open .grand-total-amount {
-        font-size: 20px;
-        font-weight: 700;
-        background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    
-    .sticky-summary-container.sheet-open .get-call-btn {
-        width: 100%;
-        padding: 16px;
-        font-size: 16px;
-        justify-content: center;
-        background: linear-gradient(102deg, #61A60E 1.79%, #004A98 100%);
-        border-radius: 40px;
-    }
-    
-    /* Hide simplified summary in sheet view */
-    .sticky-summary-container.sheet-open .simplified-summary {
-        display: none !important;
-    }
-    
-    /* Show detailed summary in sheet view */
-    .sticky-summary-container.sheet-open .detailed-summary {
-        display: block !important;
-        height: auto;
-        max-height: calc(65vh - 60px - 100px);
-        overflow-y: auto;
-        padding-right: 0;
-    }
-    .grand-total-container {
-        margin: 0px 0 16px 0 !important;
-    }
-    /* Style for individual items in the sheet */
-    .sticky-summary-container.sheet-open .summary-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 12px;
-    }
-    
-    .sticky-summary-container.sheet-open .summary-row:last-child {
-        margin-bottom: 0;
-    }
-    
-    .sticky-summary-container.sheet-open .summary-label {
-        color: #4B5563;
-        font-size: 14px;
-    }
-    
-    .sticky-summary-container.sheet-open .summary-value {
-        font-weight: 500;
-        color: #111827;
-        font-size: 14px;
-    }
-}
 
 @media (max-width: 768px) {
     .summary-section-header {
@@ -3374,36 +3047,14 @@ background-clip: text;
         gap: 12px;
     }
     
-    #mobile-get-call-btn {
-        padding: 10px 16px;
-        font-size: 14px;
-    }
+
 }
 
-/* Animation keyframes */
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-    }
-    to {
-        transform: translateY(0);
-    }
-}
 
-@keyframes slideDown {
-    from {
-        transform: translateY(0);
-    }
-    to {
-        transform: translateY(100%);
-    }
-}
 
 /* Touch interaction improvements */
 @media (max-width: 1200px) {
-    #mobile-sticky-footer:active {
-        transform: scale(0.98);
-    }
+
     
     .sheet-close-handle:active .handle-bar {
         background: #1C1C1C;
@@ -3411,13 +3062,17 @@ background-clip: text;
 }
 
 @media (max-width: 1200px) {
-    #mobile-sticky-footer {
-        display: block;
-    }
+    
     /* Mobile responsive adjustments for Webflow */
-    /* Hide desktop summary on mobile by default */
+    /* Show sticky summary on mobile */
     .sticky-summary-container {
-        display: none !important;
+        display: block !important;
+        position:relative;
+        z-index: 9;
+        background: #F9FAFB;
+        border-radius: 20px;
+        max-height: 85vh;
+        overflow-y: auto;
     }
     .activity-cards-container {
         max-width: 93vw;
@@ -3763,9 +3418,7 @@ background-clip: text;
     top: 110px;
 }
 
-#mobile-sticky-footer {
-    position: relative;
-}
+
 /* Collapsible addons section in sticky summary */
 #addons-summary-section {
     transition: all 0.3s ease;
@@ -4286,7 +3939,7 @@ line-height: 24px; /* 109.091% */
     visibility: hidden;
     transform: translateY(20px) scale(0.8);
     pointer-events: none;
-    padding: 2px; /* Space for the border ring */
+    padding: 2px;
 }
 
 .back-to-top-button.visible {
@@ -4350,18 +4003,26 @@ line-height: 24px; /* 109.091% */
     }
 }
 
+/* Sticky buttons/navbar hiding animation */
+.sticky-buttons.hidden,
+.navbar1_container-3.mobile-nav.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sticky-buttons,
+.navbar1_container-3.mobile-nav {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Mobile specific adjustments */
 @media (max-width: 768px) {
     .back-to-top-button {
-        bottom: 85px; /* Adjusted for relative positioned footer */
+        bottom: 85px;
     }
     
-    /* Adjust when sheet is open */
-    body.sheet-view-active .back-to-top-button {
-        bottom: 60vh;
-    }
-    
-    /* Ensure it's visible on mobile when conditions are met */
     .back-to-top-button.visible {
         opacity: 1;
         visibility: visible;

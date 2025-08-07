@@ -2546,7 +2546,7 @@ background-clip: text;
     font-size: 14px;
     color: #718096;
     margin: 4px 0 16px 0;
-    padding: 0 24px;
+    margin: 4px 24px 16px;
 }
 
 .modal-category-selector {
@@ -4161,3 +4161,6 @@ line-height: normal;
     z-index: 10000 !important;
     background-color: #fff !important;
 }
+#investor-dependent-disclaimer {
+    margin-bottom: 16px;
+    }

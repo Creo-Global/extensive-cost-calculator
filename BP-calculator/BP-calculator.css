@@ -2568,7 +2568,7 @@ background-clip: text;
 .modal-subtitle {
     font-size: 14px;
     color: #718096;
-    margin: 4px 0 16px 0;
+    margin: 4px 24px 16px;
 
 }
 
@@ -4028,4 +4028,8 @@ line-height: 24px; /* 109.091% */
         visibility: visible;
         pointer-events: auto;
     }
+}
+
+#investor-dependent-disclaimer {
+margin-bottom: 16px;
 }

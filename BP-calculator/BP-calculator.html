@@ -25,7 +25,7 @@
                         <div class="form-group" style="z-index: 2;">
                     <label for="phone">Enter phone number *</label>
                     <div class="phone-input">
-                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone number" required>
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone number" required autocomplete="on">
                     </div>
                                             <div class="calc-error-message" id="calc-phone-error"></div>
                 </div>
@@ -35,7 +35,6 @@
                 <input type="email" id="email" placeholder="Email address" required>
                                         <div class="calc-error-message" id="calc-email-error"></div>
                     </div>
-
                             <button type="button" id="submitBtn" class="submit-button">
                                 <span>Calculate</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -85,15 +84,12 @@
   </defs>
 </svg></button>
                                     <button type="button" class="select-btn selected" data-license="fawri">
-                                        <span class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
-                                          </svg></span>
+                                        <span class="check-icon"><img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/689453765dc003d002d51677_check.svg" alt="Check"></span>
                                         Selected
                                     </button>
         </div>
                 </div>
             </div>
-
                         <div class="license-card" data-license="regular">
                             <div class="license-card-image">
                                 <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b602ab2cde8b87325e8_regular.webp" alt="Regular Business License">
@@ -124,7 +120,6 @@
     </div>
                         </div>
                     </div>
-
                     <div class="license-options-container">
                         <div class="license-option-group">
                             <h4>Duration of Business License</h4>
@@ -160,7 +155,6 @@
                             
             </div>
                 </div>
-
                     <!-- Hidden inputs for form validation -->
                     <input type="hidden" id="license-type" name="license-type" value="fawri" required>
                     <input type="hidden" id="license-duration" name="license-duration" value="1" required>
@@ -308,6 +302,18 @@
 </svg></button>
                                 </div>
                                 <p class="visa-description">Bring your spouse, children, or parents to live with you.</p>
+                                <!-- Investor-Dependent Disclaimer -->
+                                <div class="info-section" id="investor-dependent-disclaimer" style="display: none;">
+                                    <div class="info-icon">
+                                        <svg width="20" height="20" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M0.433594 8C0.433594 5.83933 0.433594 4.75899 0.723797 3.88643C1.28872 2.18788 2.62147 0.855126 4.32003 0.290203C5.19258 0 6.27292 0 8.43359 0C10.5943 0 11.6746 0 12.5472 0.290203C14.2457 0.855126 15.5785 2.18788 16.1434 3.88643C16.4336 4.75899 16.4336 5.83933 16.4336 8C16.4336 10.1607 16.4336 11.241 16.1434 12.1136C15.5785 13.8121 14.2457 15.1449 12.5472 15.7098C11.6746 16 10.5943 16 8.43359 16C6.27292 16 5.19258 16 4.32003 15.7098C2.62147 15.1449 1.28872 13.8121 0.723797 12.1136C0.433594 11.241 0.433594 10.1607 0.433594 8Z" fill="#2A3AC6"/>
+                                            <path d="M8.43349 3.55447C5.98904 3.55447 3.98904 5.55447 3.98904 7.99891C3.98904 10.4434 5.98904 12.4434 8.43349 12.4434C10.8779 12.4434 12.8779 10.4434 12.8779 7.99892C12.8779 5.55447 10.8779 3.55447 8.43349 3.55447Z" stroke="#FAFAFA" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M8.43359 9.77734L8.43359 7.55512" stroke="#FAFAFA" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M8.43604 6.22266L8.43204 6.22266" stroke="#FAFAFA" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>                                
+                                    </div>
+                                    <p class="info-text">When the investor is the sponsor of the dependent visa, a deposit fee of AED 3,000 is required.</p>
+                                </div>
                                 <div class="visa-footer">
                                     <button type="button" class="select-btn" data-visa="dependent" onclick="selectVisaCard('dependent')">
                                         Select
@@ -326,7 +332,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Hidden inputs for backward compatibility -->
                     <input type="number" id="employee-visa-count" value="0" style="display: none;">
                     <input type="number" id="dependency-visas" value="0" style="display: none;">
@@ -376,7 +381,6 @@
                             </div>
                         </div>
                     </div>
-                    
                     <!-- Hidden inputs for form submission -->
                     <input type="hidden" id="applicants-inside-uae" value="0">
                     <input type="hidden" id="applicants-outside-uae" value="0">
@@ -407,18 +411,14 @@
                             <div class="addon-services">
                                 <button type="button" class="service-pill selected" data-service="bank-account">
                                     <span class="check-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
-                                        </svg>
+                                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/689453765dc003d002d51677_check.svg" alt="Check">
                                     </span>
                                     Bank Account
                                 </button>
                                 <button type="button" class="service-pill" data-service="business-card">Business Card</button>
                                 <button type="button" class="service-pill selected" data-service="company-stamp">
                                     <span class="check-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
-                                    </svg>
+                                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/689453765dc003d002d51677_check.svg" alt="Check">
                                     </span>
                                     Company Stamp
                                 </button>
@@ -426,7 +426,7 @@
                             </div>
                         </div>
                         
-                        <div class="addon-category-card">
+                        <div class="addon-category-card" id="mresidency-addon-card" style="display: none;">
                             <div class="addon-category-header">
                                 <h3>mResidency</h3>
                                 <button type="button" class="learn-more-btn">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
@@ -443,7 +443,6 @@
                             <div class="addon-services">
                                 <button type="button" class="service-pill" data-service="medical-emirates-id">Medical & Emirates ID</button>
                                 <button type="button" class="service-pill" data-service="medical-insurance">Medical Insurance</button>
-                                <button type="button" class="service-pill" data-service="dependent-visa">Dependent Visa</button>
                             </div>
                         </div>
                         
@@ -464,9 +463,7 @@
                             <div class="addon-services">
                                 <button type="button" class="service-pill" data-service="melite">
                                     <span class="check-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
-                                    </svg>
+                                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/689453765dc003d002d51677_check.svg" alt="Check">
                                     </span>
                                     mElite
                                 </button>
@@ -495,14 +492,12 @@
                             <div class="addon-services">
                                 <button type="button" class="service-pill selected tax-compliance-pill" data-service="corporate-tax">
                                     <span class="check-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                            <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
-                                    </svg>
+                                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/689453765dc003d002d51677_check.svg" alt="Check">
                                     </span>
                                     Corporate Tax
                                 </button>
                                 <button type="button" class="service-pill" data-service="vat-registration">VAT Registration</button>
-                                <button type="button" class="service-pill" data-service="bookkeeping">Book Keeping</button>
+                                <button type="button" class="service-pill" data-service="bookkeeping">Bookkeeping</button>
                                 <button type="button" class="service-pill" data-service="liquidation-report">Liquidation Report</button>
                                 <button type="button" class="service-pill" data-service="financial-audit-report">Financial Audit Report</button>
                                 <button type="button" class="service-pill" data-service="valuation-report">Valuation Report</button>
@@ -516,7 +511,6 @@
                     <input type="checkbox" id="ecommerce-starter" class="service-checkbox" value="ecommerce-starter" style="display: none;">
                     <input type="checkbox" id="medical-emirates-id" class="service-checkbox" value="medical-emirates-id" style="display: none;">
                     <input type="checkbox" id="medical-insurance" class="service-checkbox" value="medical-insurance" style="display: none;">
-                    <input type="checkbox" id="dependent-visa" class="service-checkbox" value="dependent-visa" style="display: none;">
                     <input type="checkbox" id="melite" class="service-checkbox" value="melite" style="display: none;">
                     <input type="checkbox" id="meeting-rooms" class="service-checkbox" value="meeting-rooms" style="display: none;">
                     <input type="checkbox" id="po-box" class="service-checkbox" value="po-box" style="display: none;">
@@ -529,7 +523,6 @@
                     <input type="checkbox" id="financial-audit-report" class="service-checkbox" value="financial-audit-report" style="display: none;">
                     <input type="checkbox" id="valuation-report" class="service-checkbox" value="valuation-report" style="display: none;">
                     <input type="checkbox" id="bookkeeping" class="service-checkbox" value="bookkeeping" style="display: none;">
-
                     <div id="tax-compliance-warning" class="tax-compliance-warning" style="display: none;">
                         <p>Corporate Tax and VAT Registration are mandatory for UAE businesses. We strongly recommend keeping these services.</p>
                     </div>

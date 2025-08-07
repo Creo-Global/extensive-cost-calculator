@@ -2097,13 +2097,6 @@
                     image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
                     description: 'Access UAE-compliant health coverage options tailored for you, your team, or dependents.'
                 },
-                {
-                    id: 'dependent-visa',
-                    name: 'Dependent Visa',
-                    price: 6000,
-                    image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Easily sponsor family members with full assistance on documents, applications, and legal compliance.'
-                }
             ],
             'mAssist': [
                 {
@@ -3049,8 +3042,6 @@
             
             // mResidency
             "medical-emirates-id": 2250,
-            "dependent-visa": 6000,
-            // "eid-card-delivery": 250, // Service removed
             "medical-insurance": 1080,
             
             // mAssist
@@ -3071,7 +3062,14 @@
         };
 
         selectedAddons.forEach(addon => {
-            const addonCost = addonCosts[addon] || 0;
+            let addonCost = addonCosts[addon] || 0;
+            
+            // Medical & Emirates ID should be multiplied by total number of visas
+            if (addon === 'medical-emirates-id') {
+                const totalVisas = investorVisas + employeeVisas + dependencyVisas;
+                addonCost = addonCost * totalVisas;
+            }
+            
             cost += addonCost;
         });
         return cost;
@@ -3089,7 +3087,7 @@
 
     function calculateVisaCost(snapshot) {
         let visaAdditionalCosts = 0;
-        const { investorVisas, employeeVisas, dependencyVisas } = snapshot;
+        const { investorVisas, employeeVisas, dependencyVisas, licenseDuration } = snapshot;
 
         // Fixed visa costs as specified
         if (investorVisas > 0) {
@@ -3101,12 +3099,12 @@
         }
         
         if (dependencyVisas > 0) {
-            visaAdditionalCosts += 7850 * dependencyVisas; // 7,850 AED per dependency visa
+            visaAdditionalCosts += 6000 * dependencyVisas; // 7,850 AED per dependency visa
         }
         
-        // Add immigration card fee (2,000 AED) if any visas are selected (including dependency visas)
+        // Add immigration card fee (2,000 AED per year) if any visas are selected (including dependency visas)
         if (investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0) {
-            visaAdditionalCosts += 2000; // Immigration card fee
+            visaAdditionalCosts += 2000 * licenseDuration; // Immigration card fee multiplied by license duration
         }
         
         return visaAdditionalCosts;
@@ -3116,15 +3114,26 @@
         const { licenseType, packageType, licenseDuration, investorVisas, employeeVisas, dependencyVisas, shareholdersCount } = snapshot;
         
         let baseLicenseCost = 0;
+        let sharedDeskFee = 375; // Shared desk fee is always 375 AED
+        
         if (licenseType === "fawri") {
-            baseLicenseCost = 15000; // AED 15,000 for Fawri License
+            baseLicenseCost = 14625; // AED 14,625 for Fawri License (base cost without shared desk fee)
         } else {
-            baseLicenseCost = 12500; // AED 12,500 for Regular License
+            baseLicenseCost = 12125; // AED 12,125 for Regular License (base cost without shared desk fee)
         }
 
         let discountPercentage = licenseDuration > 1 ? 15 : 0; // 15% discount for multi-year licenses
 
-        let businessLicenseCost = baseLicenseCost * licenseDuration;
+        // Calculate base license cost for the duration
+        let baseLicenseCostForDuration = baseLicenseCost * licenseDuration;
+        
+        // Apply discount only to the base license cost, not to shared desk fee
+        let discountAmount = baseLicenseCostForDuration * (discountPercentage / 100);
+        let discountedBaseCost = baseLicenseCostForDuration - discountAmount;
+        
+        // Add shared desk fee (not discounted)
+        let sharedDeskFeeForDuration = sharedDeskFee * licenseDuration;
+        let businessLicenseCost = discountedBaseCost + sharedDeskFeeForDuration;
 
         // Calculate additional shareholder costs
         // First 6 shareholders are free, each additional costs AED 2,000
@@ -3133,15 +3142,14 @@
             additionalShareholdersCost = (shareholdersCount - 6) * 2000;
         }
 
-        // Apply discount only to the business license cost, not to additional shareholders cost
-        let discountAmount = businessLicenseCost * (discountPercentage / 100);
-        let licenseAfterDiscount = businessLicenseCost - discountAmount + additionalShareholdersCost;
+        // Add additional shareholders cost to the final license cost
+        let licenseAfterDiscount = businessLicenseCost + additionalShareholdersCost;
         
         window.baseLicenseCostValue = baseLicenseCost;
         window.additionalShareholdersCost = additionalShareholdersCost;
         
        
-        let immigrationCardTotal = (investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0) ? 2000 : 0;
+        let immigrationCardTotal = (investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0) ? (2000 * licenseDuration) : 0;
         
        
         window.immigrationCardFee = immigrationCardTotal;
@@ -3335,7 +3343,7 @@
         const visaSection = document.querySelector('.summary-section:nth-child(3)');
         const investorVisaCost = investorVisas > 0 ? 5850 * investorVisas : 0;
         const employeeVisaCost = employeeVisas > 0 ? 5350 * employeeVisas : 0;
-        const dependencyVisaCost = dependencyVisas > 0 ? 7850 * dependencyVisas : 0;
+        const dependencyVisaCost = dependencyVisas > 0 ? 6000 * dependencyVisas : 0;
         const totalVisaCost = investorVisaCost + employeeVisaCost + dependencyVisaCost + window.immigrationCardFee;
         
         if (visaSection) {
@@ -3440,7 +3448,6 @@
             
             // Group 2: mResidency
             "medical-emirates-id": { name: "Medical & Emirates ID", cost: 2250, group: "mResidency" },
-            "dependent-visa": { name: "Dependent Visa", cost: 6000, group: "mResidency" },
             "medical-insurance": { name: "Medical Insurance", cost: 1080, group: "mResidency" },
 
             // Group 3: mAssist
@@ -3504,7 +3511,15 @@
                         
                         const value = document.createElement('span');
                         value.className = 'summary-value';
-                        value.innerText = `AED ${addon.cost.toLocaleString()}`;
+                        
+                        // Calculate actual cost - Medical & Emirates ID should be multiplied by total visas
+                        let displayCost = addon.cost;
+                        if (addon.name === 'Medical & Emirates ID') {
+                            const totalVisas = investorVisas + employeeVisas + dependencyVisas;
+                            displayCost = addon.cost * totalVisas;
+                        }
+                        
+                        value.innerText = `AED ${displayCost.toLocaleString()}`;
                         
                         row.appendChild(label);
                         row.appendChild(value);
@@ -3637,6 +3652,8 @@
 
         // Update change status section visibility
         updateChangeStatusVisibility();
+        updateMResidencyVisibility();
+        updateInvestorDependentDisclaimer();
 
         updateSummaryUI(costs, snapshot);
         
@@ -4776,8 +4793,8 @@
                     },
                     dependency: {
                         count: parseInt(document.getElementById("dependency-visas")?.value || 0),
-                        cost_per_unit: 7850,
-                        total_cost: parseInt(document.getElementById("dependency-visas")?.value || 0) * 7850
+                        cost_per_unit: 6000,
+                        total_cost: parseInt(document.getElementById("dependency-visas")?.value || 0) * 6000
                     },
                     immigration_card_fee: 2000,
                     total_visa_cost: VisaCost || 0
@@ -4792,7 +4809,6 @@
                             "company-stamp": 200,
                             "ecommerce-starter": 1000,
                             "medical-emirates-id": 2250,
-                            "dependent-visa": 6000,
                             "medical-insurance": 1080,
                             "melite": 6000,
                             "meeting-rooms": 150,
@@ -4807,9 +4823,21 @@
                             "valuation-report": 10000,
                             "bookkeeping": 1000
                         };
+                        
+                        let cost = addonCosts[addon] || 0;
+                        
+                        // Medical & Emirates ID should be multiplied by total number of visas
+                        if (addon === 'medical-emirates-id') {
+                            const investorVisas = parseInt(document.getElementById("investor-visa-count")?.value || 0);
+                            const employeeVisas = parseInt(document.getElementById("employee-visa-count")?.value || 0);
+                            const dependencyVisas = parseInt(document.getElementById("dependency-visas")?.value || 0);
+                            const totalVisas = investorVisas + employeeVisas + dependencyVisas;
+                            cost = cost * totalVisas;
+                        }
+                        
                         return {
                             service: addon,
-                            cost: addonCosts[addon] || 0
+                            cost: cost
                         };
                     })
                 },
@@ -5311,6 +5339,8 @@
         
         calculateCosts();
         updateChangeStatusVisibility();
+        updateMResidencyVisibility();
+        updateInvestorDependentDisclaimer();
     }
     
 
@@ -5816,6 +5846,7 @@
             // Trigger calculation
             calculateCosts();
             updateChangeStatusVisibility();
+        updateMResidencyVisibility();
         }
     }
 
@@ -5866,6 +5897,8 @@
         
         calculateCosts();
         updateChangeStatusVisibility();
+        updateMResidencyVisibility();
+        updateInvestorDependentDisclaimer();
     }
 
     // Shareholder quantity selector functions
@@ -6120,6 +6153,8 @@
             // Trigger calculation
             calculateCosts();
             updateChangeStatusVisibility();
+            updateMResidencyVisibility();
+            updateInvestorDependentDisclaimer();
         }
     }
 
@@ -6178,8 +6213,8 @@
     function getTotalVisaCount() {
         const investorVisas = parseInt(document.getElementById('investor-visa-count').value) || 0;
         const employeeVisas = parseInt(document.getElementById('employee-visa-count').value) || 0;
-        const dependencyVisas = parseInt(document.getElementById('dependency-visas').value) || 0;
-        return investorVisas + employeeVisas + dependencyVisas;
+        // Dependency visas don't require change of status, so they're excluded
+        return investorVisas + employeeVisas;
     }
 
     function updateStatusButtonStates() {
@@ -6238,6 +6273,29 @@
             document.getElementById('outside-count').textContent = '0';
             document.getElementById('applicants-inside-uae').value = '0';
             document.getElementById('applicants-outside-uae').value = '0';
+        }
+    }
+
+    function updateMResidencyVisibility() {
+        const investorVisas = parseInt(document.getElementById('investor-visa-count').value) || 0;
+        const employeeVisas = parseInt(document.getElementById('employee-visa-count').value) || 0;
+        const dependencyVisas = parseInt(document.getElementById('dependency-visas').value) || 0;
+        const totalVisas = investorVisas + employeeVisas + dependencyVisas;
+        
+        // Find the mResidency addon category card by ID
+        const mResidencyCard = document.getElementById('mresidency-addon-card');
+        if (mResidencyCard) {
+            mResidencyCard.style.display = totalVisas > 0 ? 'block' : 'none';
+        }
+    }
+
+    function updateInvestorDependentDisclaimer() {
+        const investorVisas = parseInt(document.getElementById('investor-visa-count').value) || 0;
+        const dependencyVisas = parseInt(document.getElementById('dependency-visas').value) || 0;
+        
+        const disclaimer = document.getElementById('investor-dependent-disclaimer');
+        if (disclaimer) {
+            disclaimer.style.display = (investorVisas > 0 && dependencyVisas > 0) ? 'flex' : 'none';
         }
     }
 

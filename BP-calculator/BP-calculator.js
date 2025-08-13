@@ -3064,10 +3064,10 @@
         selectedAddons.forEach(addon => {
             let addonCost = addonCosts[addon] || 0;
             
-            // Medical & Emirates ID should be multiplied by total number of visas
+            // Medical & Emirates ID applies only to investor and employee visas (no fee for dependents)
             if (addon === 'medical-emirates-id') {
-                const totalVisas = investorVisas + employeeVisas + dependencyVisas;
-                addonCost = addonCost * totalVisas;
+                const eligibleVisas = investorVisas + employeeVisas;
+                addonCost = addonCost * eligibleVisas;
             }
             
             cost += addonCost;
@@ -3512,11 +3512,11 @@
                         const value = document.createElement('span');
                         value.className = 'summary-value';
                         
-                        // Calculate actual cost - Medical & Emirates ID should be multiplied by total visas
+                        // Calculate actual cost - Medical & Emirates ID applies only to investor + employee visas
                         let displayCost = addon.cost;
                         if (addon.name === 'Medical & Emirates ID') {
-                            const totalVisas = investorVisas + employeeVisas + dependencyVisas;
-                            displayCost = addon.cost * totalVisas;
+                            const eligibleVisas = investorVisas + employeeVisas;
+                            displayCost = addon.cost * eligibleVisas;
                         }
                         
                         value.innerText = `AED ${displayCost.toLocaleString()}`;
@@ -4826,13 +4826,12 @@
                         
                         let cost = addonCosts[addon] || 0;
                         
-                        // Medical & Emirates ID should be multiplied by total number of visas
+                        // Medical & Emirates ID applies only to investor and employee visas (no fee for dependents)
                         if (addon === 'medical-emirates-id') {
                             const investorVisas = parseInt(document.getElementById("investor-visa-count")?.value || 0);
                             const employeeVisas = parseInt(document.getElementById("employee-visa-count")?.value || 0);
-                            const dependencyVisas = parseInt(document.getElementById("dependency-visas")?.value || 0);
-                            const totalVisas = investorVisas + employeeVisas + dependencyVisas;
-                            cost = cost * totalVisas;
+                            const eligibleVisas = investorVisas + employeeVisas;
+                            cost = cost * eligibleVisas;
                         }
                         
                         return {

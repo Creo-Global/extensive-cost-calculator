@@ -3089,17 +3089,23 @@
         let visaAdditionalCosts = 0;
         const { investorVisas, employeeVisas, dependencyVisas, licenseDuration } = snapshot;
 
-        // Fixed visa costs as specified
+        // Only the visa allocation fee (AED 1,850) scales with duration; base fee is one-time
+        const allocationFeePerYear = 1850;
+        const allocationFeePerYearEffective = licenseDuration > 1 ? Math.round(allocationFeePerYear * 0.85) : allocationFeePerYear;
+        const investorBaseFee = 5850 - allocationFeePerYear; // 4,000
+        const employeeBaseFee = 5350 - allocationFeePerYear; // 3,500
+
         if (investorVisas > 0) {
-            visaAdditionalCosts += 5850 * investorVisas; // 5,850 AED per investor visa
+            visaAdditionalCosts += (investorBaseFee * investorVisas) + (allocationFeePerYearEffective * licenseDuration * investorVisas);
         }
 
         if (employeeVisas > 0) {
-            visaAdditionalCosts += 5350 * employeeVisas; // 5,350 AED per employee visa
+            visaAdditionalCosts += (employeeBaseFee * employeeVisas) + (allocationFeePerYearEffective * licenseDuration * employeeVisas);
         }
         
+        // Dependency visas do not have allocation fee and should not scale with duration
         if (dependencyVisas > 0) {
-            visaAdditionalCosts += 6000 * dependencyVisas; // 7,850 AED per dependency visa
+            visaAdditionalCosts += 6000 * dependencyVisas;
         }
         
         // Add immigration card fee (2,000 AED per year) if any visas are selected (including dependency visas)
@@ -3341,8 +3347,12 @@
         
         // Update visa information and show/hide section
         const visaSection = document.querySelector('.summary-section:nth-child(3)');
-        const investorVisaCost = investorVisas > 0 ? 5850 * investorVisas : 0;
-        const employeeVisaCost = employeeVisas > 0 ? 5350 * employeeVisas : 0;
+        const allocationFeePerYear = 1850;
+        const allocationFeePerYearEffective = licenseDuration > 1 ? Math.round(allocationFeePerYear * 0.85) : allocationFeePerYear;
+        const investorBaseFee = 5850 - allocationFeePerYear; // 4,000
+        const employeeBaseFee = 5350 - allocationFeePerYear; // 3,500
+        const investorVisaCost = investorVisas > 0 ? (investorBaseFee * investorVisas) + (allocationFeePerYearEffective * licenseDuration * investorVisas) : 0;
+        const employeeVisaCost = employeeVisas > 0 ? (employeeBaseFee * employeeVisas) + (allocationFeePerYearEffective * licenseDuration * employeeVisas) : 0;
         const dependencyVisaCost = dependencyVisas > 0 ? 6000 * dependencyVisas : 0;
         const totalVisaCost = investorVisaCost + employeeVisaCost + dependencyVisaCost + window.immigrationCardFee;
         

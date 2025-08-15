@@ -3623,7 +3623,7 @@
 
         // Only the visa allocation fee (AED 1,850) scales with duration; base fee is one-time
         const allocationFeePerYear = 1850;
-        const allocationFeePerYearEffective = licenseDuration > 1 ? Math.round(allocationFeePerYear * 0.85) : allocationFeePerYear;
+        const allocationFeePerYearEffective = licenseDuration > 1 ? (allocationFeePerYear * 0.85) : allocationFeePerYear;
         const investorBaseFee = 5850 - allocationFeePerYear; // 4,000
         const employeeBaseFee = 5350 - allocationFeePerYear; // 3,500
 
@@ -3680,11 +3680,17 @@
             additionalShareholdersCost = (shareholdersCount - 6) * 2000;
         }
 
-        // Add additional shareholders cost to the final license cost
-        let licenseAfterDiscount = businessLicenseCost + additionalShareholdersCost;
+        // Add Innovation Fee and Knowledge Fee (10 AED each)
+        const innovationFee = 10;
+        const knowledgeFee = 10;
+        
+        // Add additional shareholders cost and mandatory fees to the final license cost
+        let licenseAfterDiscount = businessLicenseCost + additionalShareholdersCost + innovationFee + knowledgeFee;
         
         window.baseLicenseCostValue = baseLicenseCost;
         window.additionalShareholdersCost = additionalShareholdersCost;
+        window.innovationFee = innovationFee;
+        window.knowledgeFee = knowledgeFee;
         
        
         let immigrationCardTotal = (investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0) ? (2000 * licenseDuration) : 0;
@@ -3733,6 +3739,46 @@
         } else if (additionalShareholderRow) {
             // Remove the row if it exists but is no longer needed
             additionalShareholderRow.remove();
+        }
+        
+        // Add Innovation Fee and Knowledge Fee rows
+        let innovationFeeRow = document.getElementById('innovation-fee-row');
+        let knowledgeFeeRow = document.getElementById('knowledge-fee-row');
+        
+        // Create Innovation Fee row if it doesn't exist
+        if (!innovationFeeRow && window.innovationFee) {
+            innovationFeeRow = document.createElement('div');
+            innovationFeeRow.className = 'summary-row';
+            innovationFeeRow.id = 'innovation-fee-row';
+            
+            // Add to the end of company setup content
+            companySetupContent.appendChild(innovationFeeRow);
+        }
+        
+        // Create Knowledge Fee row if it doesn't exist
+        if (!knowledgeFeeRow && window.knowledgeFee) {
+            knowledgeFeeRow = document.createElement('div');
+            knowledgeFeeRow.className = 'summary-row';
+            knowledgeFeeRow.id = 'knowledge-fee-row';
+            
+            // Add to the end of company setup content
+            companySetupContent.appendChild(knowledgeFeeRow);
+        }
+        
+        // Update Innovation Fee row content
+        if (innovationFeeRow && window.innovationFee) {
+            innovationFeeRow.innerHTML = `
+                <span class="summary-label">Innovation Fee</span>
+                <span class="summary-value">AED ${window.innovationFee.toLocaleString()}</span>
+            `;
+        }
+        
+        // Update Knowledge Fee row content
+        if (knowledgeFeeRow && window.knowledgeFee) {
+            knowledgeFeeRow.innerHTML = `
+                <span class="summary-label">Knowledge Fee</span>
+                <span class="summary-value">AED ${window.knowledgeFee.toLocaleString()}</span>
+            `;
         }
         
         // Update license base cost
@@ -3880,7 +3926,7 @@
         // Update visa information and show/hide section
         const visaSection = document.querySelector('.summary-section:nth-child(3)');
         const allocationFeePerYear = 1850;
-        const allocationFeePerYearEffective = licenseDuration > 1 ? Math.round(allocationFeePerYear * 0.85) : allocationFeePerYear;
+        const allocationFeePerYearEffective = licenseDuration > 1 ? (allocationFeePerYear * 0.85) : allocationFeePerYear;
         const investorBaseFee = 5850 - allocationFeePerYear; // 4,000
         const employeeBaseFee = 5350 - allocationFeePerYear; // 3,500
         const investorVisaCost = investorVisas > 0 ? (investorBaseFee * investorVisas) + (allocationFeePerYearEffective * licenseDuration * investorVisas) : 0;
@@ -6769,7 +6815,9 @@
     function updateGrandTotal(totalCost) {
         const totalCostDisplay = document.getElementById('total-cost-display');
         const mobileGrandTotalPrice = document.getElementById('mobile-grand-total-price');
-        const formattedTotal = `AED ${totalCost.toLocaleString()}`;
+        
+        // Display the exact value without rounding
+        const formattedTotal = `AED ${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
         if (totalCostDisplay) {
             totalCostDisplay.textContent = formattedTotal;
@@ -6784,7 +6832,7 @@
         const mobileGrandTotalPrice = document.getElementById('mobile-grand-total-price');
         if (mobileGrandTotalPrice) {
             const totalCost = calculateTotalCost();
-            const formattedTotal = `AED ${totalCost.toLocaleString()}`;
+            const formattedTotal = `AED ${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             mobileGrandTotalPrice.textContent = formattedTotal;
         }
     }

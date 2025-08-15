@@ -3102,8 +3102,6 @@
         if (employeeVisas > 0) {
             visaAdditionalCosts += (employeeBaseFee * employeeVisas) + (allocationFeePerYearEffective * licenseDuration * employeeVisas);
         }
-        
-        // Dependency visas do not have allocation fee and should not scale with duration
         if (dependencyVisas > 0) {
             visaAdditionalCosts += 6000 * dependencyVisas;
         }

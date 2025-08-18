@@ -49,6 +49,10 @@
             if (typeof initializeBackToTopButton === 'function') {
                 initializeBackToTopButton();
             }
+
+            // Initialize sharing functionality
+            initializeUnifiedSharing();
+            
             
         } catch (error) {
             console.error('Error during calculator initialization:', error);
@@ -1001,8 +1005,6 @@
             initializeLicenseModals();
             
             initializeVisaModals();
-            
-            initializeSummaryToggle();
             
             // Initialize with appropriate summary view
             autoToggleSummaryView();
@@ -2694,39 +2696,7 @@
         });
     }
 
-    // Summary Toggle Functions
-    function initializeSummaryToggle() {
-        const grandTotal = document.getElementById('grand-total-clickable');
-        
-        grandTotal.addEventListener('click', function() {
-            toggleSummaryView();
-        });
-    }
 
-    function toggleSummaryView() {
-        const simplifiedSummary = document.getElementById('simplified-summary');
-        const detailedSummary = document.getElementById('detailed-summary');
-        const summaryHeader = document.querySelector('.summary-header');
-        
-        // Manual toggle overrides auto-toggle
-        if (detailedSummary.style.display === 'none' || detailedSummary.style.display === '') {
-            // Show detailed view
-            simplifiedSummary.style.display = 'none';
-            detailedSummary.style.display = 'block';
-            // Add expanded styles to header
-            if (summaryHeader) {
-                summaryHeader.classList.add('expanded');
-            }
-            } else {
-            // Hide both summaries - only show grand total
-            simplifiedSummary.style.display = 'none';
-            detailedSummary.style.display = 'none';
-            // Remove expanded styles from header
-            if (summaryHeader) {
-                summaryHeader.classList.remove('expanded');
-            }
-        }
-    }
 
     function updateBasicPackagePrice(totalCost) {
         const basicPackagePrice = document.getElementById('basic-package-price');
@@ -5269,6 +5239,1225 @@
 
     // Countries array removed as we no longer need nationality selection
 
+    // =================== SHARING FUNCTIONALITY ===================
+
+    /**
+     * Collect all current form values for sharing
+     */
+    function collectFormConfiguration() {
+        // Contact Information
+        let phoneValue = document.getElementById("phone")?.value?.trim() || '';
+        
+        // Format phone number - get the actual international number if using intl-tel-input
+        if (window.formValidator && window.formValidator.phoneInput && phoneValue) {
+            try {
+                // Get the full international number (this should already be properly formatted)
+                phoneValue = window.formValidator.phoneInput.getNumber();
+            } catch (err) {
+            }
+        }
+        
+        const contactData = {
+            fullName: document.getElementById("full-name")?.value?.trim() || '',
+            email: document.getElementById("email")?.value?.trim() || '',
+            phone: phoneValue
+        };
+
+        // License Configuration
+        const licenseData = {
+            licenseType: document.getElementById("license-type")?.value || "fawri",
+            licenseDuration: parseInt(document.getElementById("license-duration")?.value) || 1,
+            shareholdersCount: parseInt(document.getElementById("shareholders-range")?.value) || 1
+        };
+
+        // Visa Configuration
+        const visaData = {
+            investorVisas: parseInt(document.getElementById("investor-visa-count")?.value) || 0,
+            employeeVisas: parseInt(document.getElementById("employee-visa-count")?.value) || 0,
+            dependencyVisas: parseInt(document.getElementById("dependency-visas")?.value) || 0
+        };
+
+        // Business Activities
+        const activitiesData = {
+            selectedActivities: window.selectedActivities || [],
+            selectedActivitiesCount: window.selectedActivities ? window.selectedActivities.length : 0
+        };
+
+        // Add-ons
+        const selectedAddons = [];
+        document.querySelectorAll('.service-checkbox:checked').forEach(checkbox => {
+            selectedAddons.push(checkbox.value);
+        });
+
+        // Change Status
+        const changeStatusData = {
+            applicantsInsideUAE: parseInt(document.getElementById("applicants-inside-uae")?.value) || 0,
+            applicantsOutsideUAE: parseInt(document.getElementById("applicants-outside-uae")?.value) || 0
+        };
+
+        return {
+            contact: contactData,
+            license: licenseData,
+            visa: visaData,
+            activities: activitiesData,
+            addons: selectedAddons,
+            changeStatus: changeStatusData,
+            timestamp: Date.now()
+        };
+    }
+
+    /**
+     * Encode configuration data to Base64 for URL sharing
+     * Using the same method as your existing Client/SalesPerson encoding
+     */
+    function encodeConfigurationToBase64(configData) {
+        try {
+            const jsonString = JSON.stringify(configData);
+            // Use escape() + encodeURIComponent() like your existing system
+            return btoa(unescape(encodeURIComponent(jsonString)));
+        } catch (e) {
+            console.error("Configuration encode error", e);
+            return '';
+        }
+    }
+
+    /**
+     * Decode configuration data from Base64
+     * Using the same method as your existing decodeBase64 function
+     */
+    function decodeConfigurationFromBase64(encodedString) {
+        try {
+            // Use the same decoding method as your existing decodeBase64 function
+            const jsonString = decodeURIComponent(escape(atob(encodedString)));
+            return JSON.parse(jsonString);
+        } catch (e) {
+            console.error("Configuration decode error", e);
+            return null;
+        }
+    }
+
+    /**
+     * Generate shareable URL with current configuration
+     */
+    function generateShareableURL() {
+        const configData = collectFormConfiguration();
+        const encodedConfig = encodeConfigurationToBase64(configData);
+        
+        if (!encodedConfig) {
+            console.error("Failed to encode configuration");
+            return null;
+        }
+
+        const currentURL = new URL(window.location.href);
+        // Keep existing Client and SalesPerson parameters if they exist
+        const params = new URLSearchParams(currentURL.search);
+        
+        // Add or update the configuration parameter
+        params.set("Config", encodedConfig);
+        
+        const finalURL = `${currentURL.origin}${currentURL.pathname}?${params.toString()}`;
+        return finalURL;
+    }
+
+    /**
+     * Apply shared configuration to form fields
+     */
+    function applySharedConfiguration(configData) {
+        if (!configData) {
+            return;
+        }
+
+        try {
+            // Apply contact information (only if fields are empty to not override client data)
+            if (configData.contact) {
+                const nameField = document.getElementById("full-name");
+                const emailField = document.getElementById("email");
+                const phoneField = document.getElementById("phone");
+
+                if (nameField && !nameField.value && configData.contact.fullName) {
+                    nameField.value = configData.contact.fullName;
+                }
+                if (emailField && !emailField.value && configData.contact.email) {
+                    emailField.value = configData.contact.email;
+                }
+                if (phoneField && !phoneField.value && configData.contact.phone) {
+                    
+                    // For UAE numbers, extract just the local part to avoid leading 0 issue
+                    let phoneToSet = configData.contact.phone;
+                    if (phoneToSet.startsWith('+971')) {
+                        // Extract the local number part (everything after +971)
+                        const localNumber = phoneToSet.substring(4);
+                        
+                        // Set just the local number directly to the input field
+                        phoneField.value = localNumber;
+                        
+                        // Trigger any necessary events
+                        phoneField.dispatchEvent(new Event('input', { bubbles: true }));
+                        phoneField.dispatchEvent(new Event('change', { bubbles: true }));
+                    } else {
+                        // For non-UAE numbers, try the normal methods
+                        if (window.formValidator && window.formValidator.phoneInput) {
+                            try {
+                                window.formValidator.phoneInput.setNumber(phoneToSet);
+                            } catch (err) {
+                                phoneField.value = phoneToSet;
+                            }
+                        } else {
+                            phoneField.value = phoneToSet;
+                        }
+                    }
+                }
+            } else {
+            }
+
+            // Apply license configuration
+                    if (configData.license) {
+                
+                // Set license type
+                if (configData.license.licenseType) {
+                    if (typeof selectLicenseType === 'function') {
+                        selectLicenseType(configData.license.licenseType);
+                    } else {
+                        const licenseTypeField = document.getElementById("license-type");
+                        if (licenseTypeField) {
+                            licenseTypeField.value = configData.license.licenseType;
+                        }
+                    }
+                }
+
+                // Set license duration
+                if (configData.license.licenseDuration) {
+                    const durationField = document.getElementById("license-duration");
+                    if (durationField) {
+                        durationField.value = configData.license.licenseDuration;
+                    }
+                    
+                    // Trigger the duration button selection
+                    const durationBtn = document.querySelector(`[data-value="${configData.license.licenseDuration}"]`);
+                    if (durationBtn) {
+                        durationBtn.click();
+                    }
+                }
+
+                // Set shareholders count
+                if (configData.license.shareholdersCount) {
+                    const shareholdersRange = document.getElementById("shareholders-range");
+                    
+                    if (shareholdersRange) {
+                        shareholdersRange.value = configData.license.shareholdersCount;
+                        
+                        // For any shareholders count, ensure the UI reflects the value
+                        // Even with count = 1, we need to update the display properly
+                        
+                        // Check if shareholders are already selected or need to be selected
+                        const selectedControls = document.getElementById('shareholders-selected-controls');
+                        const shouldSelect = configData.license.shareholdersCount >= 1;
+                        
+                        if (shouldSelect && selectedControls) {
+                            // Ensure shareholders section is selected
+                            if (typeof selectVisaCard === 'function') {
+                                selectVisaCard('shareholders');
+                            }
+                            
+                            // Update the quantity display
+                            setTimeout(() => {
+                                const quantityElement = document.getElementById('shareholders-quantity');
+                                if (quantityElement) {
+                                    quantityElement.textContent = configData.license.shareholdersCount;
+                                }
+                                
+                                // Also ensure the range slider matches
+                                shareholdersRange.value = configData.license.shareholdersCount;
+                            }, 200);
+                        }
+                        
+                        // Trigger change event
+                        shareholdersRange.dispatchEvent(new Event('change'));
+                    }
+                }
+            } else {
+            }
+
+            // Apply visa configuration
+            if (configData.visa) {
+                
+                // Set investor visas
+                if (configData.visa.investorVisas > 0) {
+                    document.getElementById("investor-visa-count").value = configData.visa.investorVisas;
+                    
+                    // Use toggleVisaCard for investor visa
+                    if (typeof toggleVisaCard === 'function') {
+                        const toggle = document.getElementById('investor-visa-toggle');
+                        if (toggle) toggle.checked = true;
+                        toggleVisaCard('investor');
+                    }
+                    
+                    // Update quantity
+                    setTimeout(() => {
+                        const quantityElement = document.getElementById("investor-quantity");
+                        if (quantityElement) {
+                            quantityElement.textContent = configData.visa.investorVisas;
+                        }
+                    }, 200);
+                }
+
+                // Set employee visas
+                if (configData.visa.employeeVisas > 0) {
+                    document.getElementById("employee-visa-count").value = configData.visa.employeeVisas;
+                    
+                    // Use selectVisaCard for employee visa
+                    if (typeof selectVisaCard === 'function') {
+                        selectVisaCard('employee');
+                    }
+                    
+                    // Update quantity
+                    setTimeout(() => {
+                        const quantityElement = document.getElementById("employee-quantity");
+                        if (quantityElement) {
+                            quantityElement.textContent = configData.visa.employeeVisas;
+                        }
+                    }, 200);
+                }
+
+                // Set dependency visas
+                if (configData.visa.dependencyVisas > 0) {
+                    
+                    // First select the visa card
+                    if (typeof selectVisaCard === 'function') {
+                        selectVisaCard('dependent');
+                    }
+                    
+                    // Update quantity and hidden input properly
+                    setTimeout(() => {
+                        const quantityElement = document.getElementById("dependent-quantity");
+                        const hiddenInput = document.getElementById("dependency-visas");
+                        
+                        if (quantityElement) {
+                            quantityElement.textContent = configData.visa.dependencyVisas;
+                        }
+                        
+                        if (hiddenInput) {
+                            hiddenInput.value = configData.visa.dependencyVisas;
+                            
+                            // Trigger change event on hidden input to update calculations
+                            hiddenInput.dispatchEvent(new Event('change'));
+                        }
+                    }, 200);
+                }
+            } else {
+            }
+
+            // Apply business activities
+                if (configData.activities && configData.activities.selectedActivities && configData.activities.selectedActivities.length > 0) {
+                window.selectedActivities = configData.activities.selectedActivities;
+                
+                // Update activities display - manually update each group card
+                configData.activities.selectedActivities.forEach(activity => {
+                    const groupName = activity.groupName || mapCategoryToGroup(activity.Category, activity.Group);
+                    
+                    // Find the corresponding group card
+                    const groupCard = document.querySelector(`.activity-card[data-group="${groupName}"]`);
+                    if (groupCard) {
+                        
+                        // Count activities in this group
+                        const activitiesInGroup = window.selectedActivities.filter(act => {
+                            const activityGroupName = act.groupName || mapCategoryToGroup(act.Category, act.Group);
+                            return activityGroupName === groupName;
+                        }).length;
+                        
+                        
+                        if (activitiesInGroup > 0) {
+                            // Mark group as selected
+                            groupCard.classList.add('selected');
+                            
+                            // Update count display
+                            const countElement = groupCard.querySelector('.selected-activities-count');
+                            const linkElement = groupCard.querySelector('.select-activity-link');
+                            
+                            if (countElement) {
+                                countElement.style.display = 'block';
+                                countElement.textContent = `Selected Activities: ${activitiesInGroup}`;
+                            }
+                            
+                            if (linkElement) {
+                                linkElement.innerHTML = 'Select more activities <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979636 8.88925 1.05219 8.92232 1.13203C8.95539 1.21188 8.97237 1.29748 8.97235 1.38395L8.97135 1.3842Z" fill="#000" fill-opacity="0.6"/></svg></span>';
+                            }
+                        }
+                    } else {
+                    }
+                });
+                
+                // Update the selected groups count
+                if (typeof updateSelectedGroupsCount === 'function') {
+                    updateSelectedGroupsCount();
+                }
+                
+            } else {
+            }
+
+            // Apply add-ons
+            if (configData.addons && Array.isArray(configData.addons) && configData.addons.length > 0) {
+                configData.addons.forEach(addonValue => {
+                    const checkbox = document.querySelector(`.service-checkbox[value="${addonValue}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        
+                        // Use selectService function to properly update the UI
+                        if (typeof selectService === 'function') {
+                            selectService(addonValue);
+                        } else {
+                            // Fallback: trigger change event
+                            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    } else {
+                    }
+                });
+            } else {
+            }
+
+            // Apply change status data
+            if (configData.changeStatus && (configData.changeStatus.applicantsInsideUAE > 0 || configData.changeStatus.applicantsOutsideUAE > 0)) {
+            
+                
+                // Update inside UAE applicants
+                if (configData.changeStatus.applicantsInsideUAE > 0) {
+                    const insideField = document.getElementById("applicants-inside-uae");
+                    const insideQuantityDisplay = document.getElementById("inside-quantity");
+                    
+                    if (insideField) {
+                        insideField.value = configData.changeStatus.applicantsInsideUAE;
+                        
+                        // Update quantity display
+                        if (insideQuantityDisplay) {
+                            insideQuantityDisplay.textContent = configData.changeStatus.applicantsInsideUAE;
+                        }
+                        
+                        // Trigger change event to update calculations
+                        insideField.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+                
+                // Update outside UAE applicants
+                if (configData.changeStatus.applicantsOutsideUAE > 0) {
+                    const outsideField = document.getElementById("applicants-outside-uae");
+                    const outsideCountDisplay = document.getElementById("outside-count");
+                    
+                    if (outsideField) {
+                        outsideField.value = configData.changeStatus.applicantsOutsideUAE;
+                        
+                        // Update count display
+                        if (outsideCountDisplay) {
+                            outsideCountDisplay.textContent = configData.changeStatus.applicantsOutsideUAE;
+                        }
+                        
+                        // Trigger change event to update calculations
+                        outsideField.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            } else {
+            }
+
+            // Recalculate costs after applying all configurations
+            setTimeout(() => {
+                if (typeof calculateCosts === 'function') {
+                    calculateCosts();
+                }
+            }, 500);
+
+        } catch (error) {
+            console.error("Error applying shared configuration:", error);
+        }
+    }
+
+    /**
+     * Copy shareable URL to clipboard
+     */
+    async function copyShareableURL() {
+        const shareableURL = generateShareableURL();
+        
+        if (!shareableURL) {
+            alert("Unable to generate shareable URL. Please ensure you have filled out the form.");
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(shareableURL);
+            
+            // Show success feedback
+            showShareSuccessMessage();
+            
+        } catch (err) {
+            // Fallback for older browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = shareableURL;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showShareSuccessMessage();
+            } catch (fallbackErr) {
+                console.error('Could not copy URL: ', fallbackErr); 
+                alert("Unable to copy URL automatically. Please copy this URL manually:\n\n" + shareableURL);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+    }
+
+    /**
+     * Show success message after copying URL
+     */
+    function showShareSuccessMessage() {
+        // Create and show a temporary success message
+        const successDiv = document.createElement('div');
+        successDiv.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-family: inherit;
+                font-size: 14px;
+                font-weight: 500;
+            ">
+                ✓ Shareable URL copied to clipboard!
+            </div>
+        `;
+        
+        document.body.appendChild(successDiv);
+        
+        // Remove the message after 3 seconds
+        setTimeout(() => {
+            if (successDiv.parentNode) {
+                successDiv.parentNode.removeChild(successDiv);
+            }
+        }, 3000);
+    }
+
+    /**
+     * Share via WhatsApp
+     */
+    function shareViaWhatsApp() {
+        const shareableURL = generateShareableURL();
+        if (!shareableURL) {
+            alert("Unable to generate shareable URL. Please ensure you have filled out the form.");
+            return;
+        }
+        const message = "Check out this business setup configuration: " + shareableURL;
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
+    }
+
+    /**
+     * Share via Email
+     */
+    function shareViaEmail() {
+        const shareableURL = generateShareableURL();
+        if (!shareableURL) {
+            alert("Unable to generate shareable URL. Please ensure you have filled out the form.");
+            return;
+        }
+        const subject = "Business Setup Configuration";
+        const body = `Hi,\n\nI've configured a business setup calculator with specific requirements. You can view it here:\n\n${shareableURL}\n\nBest regards`;
+        window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    }
+
+    /**
+     * Initialize sharing functionality on page load
+     */
+    function initializeSharing() {
+        // Check for shared configuration in URL (both static and dynamic)
+        const params = new URLSearchParams(window.location.search);
+        const configParam = params.get("Config");
+        const shareParam = params.get("share");
+        const legacyDynamicParam = params.get("DynamicConfig"); // For backward compatibility
+        
+        if (configParam) {
+            const configData = decodeConfigurationFromBase64(configParam);
+            if (configData) {
+                // Apply the shared configuration after a short delay to ensure DOM is ready
+                setTimeout(() => {
+                    applySharedConfiguration(configData);
+                }, 1000);
+            }
+        } else if (shareParam || legacyDynamicParam) {
+        }
+        
+    }
+
+    // Make functions globally accessible
+    window.collectFormConfiguration = collectFormConfiguration;
+    window.generateShareableURL = generateShareableURL;
+    window.copyShareableURL = copyShareableURL;
+    window.shareViaWhatsApp = shareViaWhatsApp;
+    window.shareViaEmail = shareViaEmail;
+
+    window.applySharedConfiguration = applySharedConfiguration;
+    window.initializeSharing = initializeSharing;
+
+    // =================== DYNAMIC CONFIGURATION SHARING WITH SUPABASE ===================
+    
+    // Global variables for dynamic sharing (using var to avoid TDZ issues)
+    var currentConfigId = null;
+    var currentShareableURL = null;
+    var urlUpdateTimeout = null;
+    
+    // Generate unique configuration ID
+    function generateConfigId() {
+        const timestamp = Date.now().toString(36);
+        const randomStr = Math.random().toString(36).substring(2, 8);
+        return `calc_${timestamp}_${randomStr}`;
+    }
+    
+    // Debounce function to prevent excessive updates
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Store configuration in Supabase
+    async function storeConfiguration(configId, configData) {
+        try {
+            
+            // Check if record exists first
+            const { data: existing } = await supabase
+                .from('shared_configs')
+                .select('id, created_at')
+                .eq('id', configId)
+                .single();
+            
+            const now = new Date().toISOString();
+            const upsertData = {
+                id: configId,
+                config_data: configData,
+                updated_at: now
+            };
+            
+            // Only set created_at if it's a new record
+            if (!existing) {
+                upsertData.created_at = now;
+            }
+            
+            const { data, error } = await supabase
+                .from('shared_configs')
+                .upsert(upsertData);
+            
+            if (error) {
+                console.error('Error storing configuration:', error);
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error storing configuration:', error);
+            return false;
+        }
+    }
+    
+    // Load configuration from Supabase
+    async function loadConfiguration(configId) {
+        try {
+            
+            const { data, error } = await supabase
+                .from('shared_configs')
+                .select('config_data')
+                .eq('id', configId)
+                .single();
+            
+            if (error) {
+                console.error('Error loading configuration:', error);
+                return null;
+            }
+            
+            return data.config_data;
+        } catch (error) {
+            console.error('Error loading configuration:', error);
+            return null;
+        }
+    }
+    
+    // Generate dynamic shareable URL
+    async function generateDynamicShareableURL() {
+        try {
+            const configData = collectFormConfiguration();
+            
+            // Get or create config ID
+            if (!currentConfigId) {
+                currentConfigId = generateConfigId();
+                sessionStorage.setItem('currentConfigId', currentConfigId);
+            }
+            
+            // Store configuration
+            const stored = await storeConfiguration(currentConfigId, configData);
+            if (!stored) {
+                console.error('Failed to store configuration');
+                return null;
+            }
+            
+            // Generate URL with config ID
+            const currentUrl = new URL(window.location);
+            const params = new URLSearchParams(currentUrl.search);
+            
+            // Preserve existing Client and SalesPerson parameters
+            const existingClient = params.get("Client");
+            const existingSalesPerson = params.get("SalesPerson");
+            
+            // Clear params and add back essential ones
+            params.delete("Config"); // Remove old static config
+            if (existingClient) params.set("Client", existingClient);
+            if (existingSalesPerson) params.set("SalesPerson", existingSalesPerson);
+            
+            // Add dynamic config ID with new parameter name
+            params.set("share", currentConfigId);
+            
+            const shareableURL = `${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?${params.toString()}`;
+            
+            return shareableURL;
+        } catch (error) {
+            console.error('Error generating dynamic shareable URL:', error);
+            return null;
+        }
+    }
+    
+    // Update configuration in real-time
+    const updateDynamicConfiguration = debounce(async () => {
+        if (currentConfigId) {
+            try {
+                const configData = collectFormConfiguration();
+                await storeConfiguration(currentConfigId, configData);
+            } catch (error) {
+                console.error('Error updating dynamic configuration:', error);
+            }
+        }
+    }, 1500); // 1.5 second debounce
+    
+    // Initialize dynamic sharing on page load
+    async function initializeDynamicSharing() {
+        
+        // Check URL for dynamic config
+        const urlParams = new URLSearchParams(window.location.search);
+        const dynamicConfigId = urlParams.get("DynamicConfig");
+        
+        if (dynamicConfigId) {
+            
+            // Load and apply configuration
+            const configData = await loadConfiguration(dynamicConfigId);
+            if (configData) {
+                setTimeout(() => {
+                    applySharedConfiguration(configData);
+                }, 2000); // Wait for page to be ready
+                
+                // Set this as current config ID for updates
+                currentConfigId = dynamicConfigId;
+                sessionStorage.setItem('currentConfigId', dynamicConfigId);
+            } else {
+                // Fallback to static config if available
+                const staticConfig = urlParams.get("Config");
+                if (staticConfig) {
+                    const staticConfigData = decodeConfigurationFromBase64(staticConfig);
+                    if (staticConfigData) {
+                        setTimeout(() => {
+                            applySharedConfiguration(staticConfigData);
+                        }, 2000);
+                    }
+                }
+            }
+        } else {
+            // Check for existing config ID in sessionStorage
+            const existingConfigId = sessionStorage.getItem('currentConfigId');
+            if (existingConfigId) {
+                currentConfigId = existingConfigId;
+            }
+        }
+        
+        // Set up real-time updates
+        setupRealTimeUpdates();
+    }
+    
+    // Set up real-time configuration updates
+    function setupRealTimeUpdates() {
+        
+        // Add event listeners to all form inputs
+        const formInputs = document.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('change', updateDynamicConfiguration);
+            input.addEventListener('input', updateDynamicConfiguration);
+        });
+        
+        // Add listeners for custom events (clicks on buttons, cards, etc.)
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.quantity-btn, .select-btn, .visa-card, .activity-card, .service-checkbox, .addon-category-card')) {
+                updateDynamicConfiguration();
+            }
+        });
+        
+        // Hook into calculateCosts function
+        const originalCalculateCosts = window.calculateCosts;
+        if (originalCalculateCosts && typeof originalCalculateCosts === 'function') {
+            window.calculateCosts = function(...args) {
+                const result = originalCalculateCosts.apply(this, args);
+                updateDynamicConfiguration();
+                return result;
+            };
+        }
+        
+    }
+    
+    // Enhanced copy function for dynamic URLs
+    async function copyDynamicShareableURL() {
+        const shareableURL = await generateDynamicShareableURL();
+        
+        if (!shareableURL) {
+            alert("Unable to generate shareable URL. Please ensure you have filled out the form.");
+            return;
+        }
+
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(shareableURL);
+                showShareSuccessMessage();
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement("textarea");
+                textArea.value = shareableURL;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showShareSuccessMessage();
+                } catch (err) {
+                    console.error('Fallback copy failed:', err);
+                    alert("Copy failed. Please copy the URL manually: " + shareableURL);
+                }
+                
+                document.body.removeChild(textArea);
+            }
+        } catch (err) {
+            console.error('Error copying to clipboard:', err);
+            alert("Copy failed. Please copy the URL manually: " + shareableURL);
+        }
+    }
+
+    // New share button handler with animations
+    async function handleShareClick() {
+        const shareBtn = document.getElementById('share-btn');
+        const shareText = shareBtn.querySelector('.share-text');
+        const shareLoading = shareBtn.querySelector('.share-loading');
+        const shareCopied = shareBtn.querySelector('.share-copied');
+        const shareIcon = shareBtn.querySelector('.share-icon');
+        
+        // Show loading state
+        shareBtn.classList.add('loading');
+        shareBtn.disabled = true;
+        shareText.style.display = 'none';
+        shareLoading.style.display = 'inline';
+        shareCopied.style.display = 'none';
+        
+        try {
+            const shareableURL = await generateDynamicShareableURL();
+            
+            if (!shareableURL) {
+                // Reset to normal state
+                shareBtn.classList.remove('loading');
+                shareBtn.disabled = false;
+                shareText.style.display = 'inline';
+                shareLoading.style.display = 'none';
+                
+                alert("Unable to generate shareable URL. Please ensure you have filled out the form.");
+                return;
+            }
+
+            // Copy to clipboard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(shareableURL);
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement("textarea");
+                textArea.value = shareableURL;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+            
+            // Show copied state
+            shareBtn.classList.remove('loading');
+            shareBtn.classList.add('copied');
+            shareText.style.display = 'none';
+            shareLoading.style.display = 'none';
+            shareCopied.style.display = 'inline';
+            
+            // Reset to normal after 3 seconds
+            setTimeout(() => {
+                shareBtn.classList.remove('copied');
+                shareBtn.disabled = false;
+                shareText.style.display = 'inline';
+                shareLoading.style.display = 'none';
+                shareCopied.style.display = 'none';
+            }, 3000);
+            
+        } catch (err) {
+            console.error('Error in handleShareClick:', err);
+            
+            // Reset to normal state on error
+            shareBtn.classList.remove('loading');
+            shareBtn.disabled = false;
+            shareText.style.display = 'inline';
+            shareLoading.style.display = 'none';
+            shareCopied.style.display = 'none';
+            
+            alert("Copy failed. Please try again.");
+        }
+    }
+    
+    // Enhanced WhatsApp sharing for dynamic URLs
+    async function shareViaDynamicWhatsApp() {
+        const shareableURL = await generateDynamicShareableURL();
+        
+        if (!shareableURL) {
+            alert("Unable to generate shareable URL. Please ensure you have filled out the form.");
+            return;
+        }
+        
+        const message = encodeURIComponent(`Check out this business setup calculator configuration: ${shareableURL}`);
+        const whatsappUrl = `https://wa.me/?text=${message}`;
+        window.open(whatsappUrl, '_blank');
+    }
+    
+    // Enhanced email sharing for dynamic URLs
+    async function shareViaDynamicEmail() {
+        const shareableURL = await generateDynamicShareableURL();
+        
+        if (!shareableURL) {
+            alert("Unable to generate shareable URL. Please ensure you have filled out the form.");
+            return;
+        }
+        
+        const subject = encodeURIComponent("Business Setup Calculator Configuration");
+        const body = encodeURIComponent(`Hi,\n\nI've prepared a business setup calculation for you. You can view it here:\n\n${shareableURL}\n\nThis link will always show you the most up-to-date configuration.\n\nBest regards`);
+        const mailtoUrl = `mailto:?subject=${subject}&body=${body}`;
+        window.location.href = mailtoUrl;
+    }
+    
+    // Create new configuration (start fresh)
+    function createNewConfiguration() {
+        currentConfigId = null;
+        sessionStorage.removeItem('currentConfigId');
+        
+        // Clear URL parameters
+        const currentUrl = new URL(window.location);
+        const params = new URLSearchParams(currentUrl.search);
+        params.delete("share"); // Updated parameter name
+        params.delete("Config");
+        
+        const newUrl = `${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+        window.history.replaceState({}, document.title, newUrl);
+        
+    }
+    
+
+    
+    // =================== UNIFIED SHARING INITIALIZATION ===================
+    
+    // Unified initialization function that handles both static and dynamic sharing
+    function initializeUnifiedSharing() {
+        try {
+            // Initialize config ID from sessionStorage if available
+            const existingConfigId = sessionStorage.getItem('currentConfigId');
+            if (existingConfigId && !currentConfigId) {
+                currentConfigId = existingConfigId;
+            }
+            
+            // Check URL for both static and dynamic configs
+            const params = new URLSearchParams(window.location.search);
+            const staticConfig = params.get("Config");
+            const shareConfig = params.get("share");
+            const legacyDynamicConfig = params.get("DynamicConfig"); // Backward compatibility
+            const dynamicConfig = shareConfig || legacyDynamicConfig;
+            
+            // Set up event listeners for share buttons
+            setupShareButtons();
+            
+            // Handle configuration loading
+            if (dynamicConfig) {
+                handleDynamicConfiguration(dynamicConfig);
+            } else if (staticConfig) {
+                handleStaticConfiguration(staticConfig);
+            }
+            
+            // Set up real-time updates (using manual system due to conflicts)
+            setupManualRealTimeSystem();
+            
+        } catch (error) {
+            console.error('Error in unified sharing initialization:', error);
+        }
+    }
+    
+    // Handle dynamic configuration
+    async function handleDynamicConfiguration(dynamicConfigId) {
+        try {
+            currentConfigId = dynamicConfigId;
+            sessionStorage.setItem('currentConfigId', dynamicConfigId);
+            
+            // Track this link view
+            await trackLinkView(dynamicConfigId);
+            
+            const configData = await loadConfiguration(dynamicConfigId);
+            if (configData) {
+                setTimeout(() => {
+                    applySharedConfiguration(configData);
+                }, 1000);
+            } else {
+            }
+        } catch (error) {
+            console.error('Error handling dynamic configuration:', error);
+        }
+    }
+    
+    // Track link views
+    async function trackLinkView(configId) {
+        try {
+            // Insert a new view record
+            const { error } = await supabase
+                .from('config_views')
+                .insert({
+                    config_id: configId,
+                    viewed_at: new Date().toISOString(),
+                    user_agent: navigator.userAgent,
+                    referrer: document.referrer || null
+                });
+            
+            if (error) {
+                console.error('Error tracking view:', error);
+            }
+        } catch (error) {
+            console.error('Error in trackLinkView:', error);
+        }
+    }
+    
+    // Get view count for a config
+    async function getViewCount(configId) {
+        try {
+            const { data, error } = await supabase
+                .from('config_views')
+                .select('id')
+                .eq('config_id', configId);
+            
+            if (error) {
+                console.error('Error getting view count:', error);
+                return 0;
+            }
+            
+            return data ? data.length : 0;
+        } catch (error) {
+            console.error('Error in getViewCount:', error);
+            return 0;
+        }
+    }
+    
+    // Get detailed view analytics
+    async function getViewAnalytics(configId) {
+        try {
+            const { data, error } = await supabase
+                .from('config_views')
+                .select('*')
+                .eq('config_id', configId)
+                .order('viewed_at', { ascending: false });
+            
+            if (error) {
+                console.error('Error getting view analytics:', error);
+                return null;
+            }
+            
+            return {
+                total_views: data.length,
+                views: data,
+                first_view: data[data.length - 1]?.viewed_at,
+                last_view: data[0]?.viewed_at,
+                unique_referrers: [...new Set(data.map(v => v.referrer).filter(r => r))]
+            };
+        } catch (error) {
+            console.error('Error in getViewAnalytics:', error);
+            return null;
+        }
+    }
+    
+    // Handle static configuration
+    function handleStaticConfiguration(staticConfig) {
+        try {
+            const configData = decodeConfigurationFromBase64(staticConfig);
+            if (configData) {
+                setTimeout(() => {
+                    applySharedConfiguration(configData);
+                }, 1000);
+            } else {
+            }
+        } catch (error) {
+            console.error('Error handling static configuration:', error);
+        }
+    }
+    
+    // Set up share button event listeners
+    function setupShareButtons() {
+        // The new share button uses inline onclick handler
+        // No additional event listener setup needed
+        // handleShareClick is called directly from HTML onclick attribute
+    }
+    
+    // Make dynamic sharing functions globally available
+    window.generateDynamicShareableURL = generateDynamicShareableURL;
+    window.copyDynamicShareableURL = copyDynamicShareableURL;
+    window.shareViaDynamicWhatsApp = shareViaDynamicWhatsApp;
+    window.shareViaDynamicEmail = shareViaDynamicEmail;
+    window.initializeDynamicSharing = initializeDynamicSharing;
+    window.createNewConfiguration = createNewConfiguration;
+    window.handleShareClick = handleShareClick;
+
+    window.updateDynamicConfiguration = updateDynamicConfiguration;
+    window.initializeUnifiedSharing = initializeUnifiedSharing;
+    
+    // Expose global variables for debugging (with error handling)
+    window.getCurrentConfigId = function() {
+        try {
+            return currentConfigId || sessionStorage.getItem('currentConfigId') || null;
+        } catch (error) {
+            console.error('Error getting config ID:', error);
+            return null;
+        }
+    };
+    
+    window.setCurrentConfigId = function(id) {
+        try {
+            currentConfigId = id;
+            if (id) {
+                sessionStorage.setItem('currentConfigId', id);
+            } else {
+                sessionStorage.removeItem('currentConfigId');
+            }
+
+        } catch (error) {
+            console.error('Error setting config ID:', error);
+        }
+    };
+    
+
+
+    // =================== MANUAL REAL-TIME UPDATE SYSTEM ===================
+    
+    // Since the automatic system has conflicts, implement a manual real-time system
+    var updateTimeout = null;
+    
+    async function manualUpdateConfig() {
+        const configId = sessionStorage.getItem('currentConfigId');
+        if (configId) {
+                    try {
+            const configData = collectFormConfiguration();
+            await storeConfiguration(configId, configData);
+        } catch (error) {
+            console.error('Auto-update error:', error);
+        }
+        }
+    }
+    
+    function scheduleUpdate() {
+        clearTimeout(updateTimeout);
+        updateTimeout = setTimeout(() => {
+            manualUpdateConfig();
+        }, 1500); // 1.5 second delay
+    }
+    
+    function setupManualRealTimeSystem() {
+        // Wait a bit for DOM to be ready
+        setTimeout(() => {
+            // Add event listeners to all form inputs
+            const inputs = document.querySelectorAll('input, select, textarea');
+            
+            inputs.forEach(input => {
+                input.addEventListener('change', scheduleUpdate);
+                input.addEventListener('input', scheduleUpdate);
+            });
+            
+            // Add click listeners for interactive elements
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('.quantity-btn, .select-btn, .visa-card, .activity-card, .service-checkbox, .addon-category-card, .duration-pill, .license-pill')) {
+                    scheduleUpdate();
+                }
+            });
+            
+            // Hook into calculateCosts if it exists
+            if (typeof window.calculateCosts === 'function') {
+                const originalCalculateCosts = window.calculateCosts;
+                window.calculateCosts = function(...args) {
+                    const result = originalCalculateCosts.apply(this, args);
+                    scheduleUpdate();
+                    return result;
+                };
+            }
+        }, 2000);
+    }
+    
+    // Export manual functions globally
+    window.manualUpdateConfig = manualUpdateConfig;
+    window.scheduleUpdate = scheduleUpdate;
+    window.setupManualRealTimeSystem = setupManualRealTimeSystem;
+    
+    // Export view tracking functions
+    window.trackLinkView = trackLinkView;
+    window.getViewCount = getViewCount;
+    window.getViewAnalytics = getViewAnalytics;
+    
+    // Add fallback functions that work
+    window.getCurrentConfigId = function() {
+        try {
+            return currentConfigId || sessionStorage.getItem('currentConfigId') || null;
+        } catch (error) {
+            return sessionStorage.getItem('currentConfigId');
+        }
+    };
+    
+    window.setCurrentConfigId = function(id) {
+        try {
+            if (typeof currentConfigId !== 'undefined') {
+                currentConfigId = id;
+            }
+            sessionStorage.setItem('currentConfigId', id);
+
+        } catch (error) {
+            console.error('Error setting config ID:', error);
+        }
+    };
+    
+    // Ensure config ID is set from URL if available
+    try {
+        const dynamicConfig = new URLSearchParams(window.location.search).get('share');
+        if (dynamicConfig) {
+            window.setCurrentConfigId(dynamicConfig);
+        }
+    } catch (error) {
+        console.error('Error setting config from URL:', error);
+    }
+    
+    // Initialize from URL parameters if available
+    
+    // Unified initialization is now handled in initializeCalculator()
+    // No need for immediate initialization here
+
     document.addEventListener('DOMContentLoaded', function() {
         
         // Reset all section interactions to false on page load
@@ -5358,8 +6547,7 @@
         
         // Trigger initial calculation to populate summary
         calculateCosts();
-        
-        // DOMContentLoaded initialization complete
+  
         
         checkTaxCompliance();
     });
@@ -5395,9 +6583,6 @@
         updateMResidencyVisibility();
         updateInvestorDependentDisclaimer();
     }
-    
-
-    
          // Legacy function for backward compatibility
      function toggleVisaOptions(visaType) {
          // This function is kept for any remaining references
@@ -5450,7 +6635,6 @@
             goToStep(5);
             break;
     }
-    
     // Store that we're in edit mode and the original step we came from
     sessionStorage.setItem('editMode', 'true');
     sessionStorage.setItem('returnToStep', '7');
@@ -5509,10 +6693,6 @@
 
         }
     }
-
-
-
-
     
     document.addEventListener('DOMContentLoaded', function() {
         const placeholder = document.querySelector('#activities-list-placeholder');
@@ -5956,8 +7136,7 @@
 
     // Shareholder quantity selector functions
     function toggleShareholderSelector() {
-        // This function can be used if we want to add toggle functionality later
-        // For now, shareholders are always selected (similar to default services)
+
     }
 
     function initializeShareholderSelector() {

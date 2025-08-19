@@ -3125,17 +3125,13 @@
         let sharedDeskFeeForDuration = sharedDeskFee * licenseDuration;
         let businessLicenseCost = discountedBaseCost + sharedDeskFeeForDuration;
 
-        // Add Innovation Fee and Knowledge Fee (10 AED each)
-        const innovationFee = 10;
-        const knowledgeFee = 10;
+        // Innovation Fee and Knowledge Fee removed as requested
         
-        // Add additional shareholders cost and mandatory fees to the final license cost
-        let licenseAfterDiscount = businessLicenseCost + additionalShareholdersCost + innovationFee + knowledgeFee;
+        // Add additional shareholders cost to the final license cost
+        let licenseAfterDiscount = businessLicenseCost + additionalShareholdersCost;
         
         window.baseLicenseCostValue = baseLicenseCost;
         window.additionalShareholdersCost = additionalShareholdersCost;
-        window.innovationFee = innovationFee;
-        window.knowledgeFee = knowledgeFee;
         
        
         let immigrationCardTotal = (investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0) ? (2000 * licenseDuration) : 0;
@@ -3185,46 +3181,8 @@
             // Remove the row if it exists but is no longer needed
             additionalShareholderRow.remove();
         }
-        
-        // Add Innovation Fee and Knowledge Fee rows
-        let innovationFeeRow = document.getElementById('innovation-fee-row');
-        let knowledgeFeeRow = document.getElementById('knowledge-fee-row');
-        
-        // Create Innovation Fee row if it doesn't exist
-        if (!innovationFeeRow && window.innovationFee) {
-            innovationFeeRow = document.createElement('div');
-            innovationFeeRow.className = 'summary-row';
-            innovationFeeRow.id = 'innovation-fee-row';
-            
-            // Add to the end of company setup content
-            companySetupContent.appendChild(innovationFeeRow);
-        }
-        
-        // Create Knowledge Fee row if it doesn't exist
-        if (!knowledgeFeeRow && window.knowledgeFee) {
-            knowledgeFeeRow = document.createElement('div');
-            knowledgeFeeRow.className = 'summary-row';
-            knowledgeFeeRow.id = 'knowledge-fee-row';
-            
-            // Add to the end of company setup content
-            companySetupContent.appendChild(knowledgeFeeRow);
-        }
-        
-        // Update Innovation Fee row content
-        if (innovationFeeRow && window.innovationFee) {
-            innovationFeeRow.innerHTML = `
-                <span class="summary-label">Innovation Fee</span>
-                <span class="summary-value">AED ${window.innovationFee.toLocaleString()}</span>
-            `;
-        }
-        
-        // Update Knowledge Fee row content
-        if (knowledgeFeeRow && window.knowledgeFee) {
-            knowledgeFeeRow.innerHTML = `
-                <span class="summary-label">Knowledge Fee</span>
-                <span class="summary-value">AED ${window.knowledgeFee.toLocaleString()}</span>
-            `;
-        }
+        // Innovation and Knowledge Fee rows have been removed as requested
+        // The fees are still calculated but not displayed in the UI
         
         // Update license base cost
         const licenseCostElement = document.getElementById("license-base-cost");
@@ -5537,6 +5495,68 @@
     }
 
     /**
+     * Show all sections immediately for shared links (no progressive disclosure)
+     */
+    function enableFullPricingForSharedLink() {
+        // Show all main sections
+        const sectionsToShow = [
+            'company-setup-section',
+            'business-activities-section', 
+            'visa-options-section',
+            'change-status-section',
+            'addons-section',
+            'mobile-sticky-footer'
+        ];
+        
+        sectionsToShow.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.remove('hidden');
+                section.classList.add('visible');
+                section.style.display = 'block';
+            }
+        });
+        
+        // Mark all sections as interacted for shared links
+        sectionInteractions = {
+            licenseSection: true,
+            durationSection: true,
+            shareholdersSection: true,
+            businessActivitiesSection: true,
+            visaSection: true,
+            addonsSection: true
+        };
+        
+        // Expand addons section immediately for shared links
+        const addonsSection = document.getElementById('addons-summary-section');
+        if (addonsSection) {
+            addonsSection.classList.add('expanded');
+        }
+        
+        // Reveal pricing immediately for shared links
+        pricingRevealed = true;
+        const summaryContainers = document.querySelectorAll('.summary-container, .sticky-summary-container');
+        summaryContainers.forEach(container => {
+            container.classList.remove('summary-pricing-hidden');
+            container.classList.add('summary-pricing-revealed');
+        });
+        
+        // Also show mobile footer pricing
+        const mobileFooter = document.getElementById('mobile-sticky-footer');
+        if (mobileFooter) {
+            mobileFooter.classList.remove('summary-pricing-hidden');
+            mobileFooter.classList.add('summary-pricing-revealed');
+        }
+        
+        // Mark contact form as completed to bypass form validation
+        isContactFormCompleted = true;
+        const contactSection = document.getElementById('personal-details-section');
+        if (contactSection) {
+            contactSection.classList.add('validated');
+        }
+    }
+
+    /**
      * Collect all current form values for sharing
      */
     function collectFormConfiguration() {
@@ -6621,6 +6641,9 @@
         try {
             currentConfigId = dynamicConfigId;
             sessionStorage.setItem('currentConfigId', dynamicConfigId);
+            
+            // Enable full pricing for shared links immediately
+            enableFullPricingForSharedLink();
             
             // Track this link view
             await trackLinkView(dynamicConfigId);

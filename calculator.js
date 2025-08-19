@@ -3681,17 +3681,13 @@
             additionalShareholdersCost = (shareholdersCount - 6) * 2000 * licenseDuration;
         }
 
-        // Add Innovation Fee and Knowledge Fee (10 AED each)
-        const innovationFee = 10;
-        const knowledgeFee = 10;
+        // Innovation Fee and Knowledge Fee removed as requested
         
-        // Add additional shareholders cost and mandatory fees to the final license cost
-        let licenseAfterDiscount = businessLicenseCost + additionalShareholdersCost + innovationFee + knowledgeFee;
+        // Add additional shareholders cost to the final license cost
+        let licenseAfterDiscount = businessLicenseCost + additionalShareholdersCost;
         
         window.baseLicenseCostValue = baseLicenseCost;
         window.additionalShareholdersCost = additionalShareholdersCost;
-        window.innovationFee = innovationFee;
-        window.knowledgeFee = knowledgeFee;
         
        
         let immigrationCardTotal = (investorVisas > 0 || employeeVisas > 0 || dependencyVisas > 0) ? (2000 * licenseDuration) : 0;
@@ -3742,45 +3738,8 @@
             additionalShareholderRow.remove();
         }
         
-        // Add Innovation Fee and Knowledge Fee rows
-        let innovationFeeRow = document.getElementById('innovation-fee-row');
-        let knowledgeFeeRow = document.getElementById('knowledge-fee-row');
-        
-        // Create Innovation Fee row if it doesn't exist
-        if (!innovationFeeRow && window.innovationFee) {
-            innovationFeeRow = document.createElement('div');
-            innovationFeeRow.className = 'summary-row';
-            innovationFeeRow.id = 'innovation-fee-row';
-            
-            // Add to the end of company setup content
-            companySetupContent.appendChild(innovationFeeRow);
-        }
-        
-        // Create Knowledge Fee row if it doesn't exist
-        if (!knowledgeFeeRow && window.knowledgeFee) {
-            knowledgeFeeRow = document.createElement('div');
-            knowledgeFeeRow.className = 'summary-row';
-            knowledgeFeeRow.id = 'knowledge-fee-row';
-            
-            // Add to the end of company setup content
-            companySetupContent.appendChild(knowledgeFeeRow);
-        }
-        
-        // Update Innovation Fee row content
-        if (innovationFeeRow && window.innovationFee) {
-            innovationFeeRow.innerHTML = `
-                <span class="summary-label">Innovation Fee</span>
-                <span class="summary-value">AED ${window.innovationFee.toLocaleString()}</span>
-            `;
-        }
-        
-        // Update Knowledge Fee row content
-        if (knowledgeFeeRow && window.knowledgeFee) {
-            knowledgeFeeRow.innerHTML = `
-                <span class="summary-label">Knowledge Fee</span>
-                <span class="summary-value">AED ${window.knowledgeFee.toLocaleString()}</span>
-            `;
-        }
+        // Innovation and Knowledge Fee rows have been removed as requested
+        // The fees are no longer calculated or displayed in the UI
         
         // Update license base cost
         const licenseCostElement = document.getElementById("license-base-cost");

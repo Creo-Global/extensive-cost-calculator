@@ -4975,6 +4975,15 @@
             configuration_id: uniqueConfigId,
             last_viewed_timestamp: lastViewedTimestamp,
             
+            // Client and sales data
+            client_name: window.currentClientData?.name || '',
+            client_email: window.currentClientData?.email || '',
+            client_phone: window.currentClientData?.phone || '',
+            client_id: window.currentClientData?.clientId || '',
+            salesperson_name: window.currentSalesData?.name || '',
+            salesperson_email: window.currentSalesData?.email || '',
+            salesperson_phone: window.currentSalesData?.phone || '',
+            
             // Timestamp
             submission_timestamp: new Date().toISOString(),
             
@@ -5326,6 +5335,206 @@
     // Countries array removed as we no longer need nationality selection
 
     // =================== SHARING FUNCTIONALITY ===================
+
+    /**
+     * Decode Base64 safely
+     */
+    function decodeBase64(str) {
+        try {
+            return decodeURIComponent(escape(atob(str)));
+        } catch (e) {
+            console.error("Base64 decode error", e);
+            return '';
+        }
+    }
+
+    /**
+     * Parse URL parameters for client and sales data
+     */
+    function parseURLParameters() {
+        const params = new URLSearchParams(window.location.search);
+        let clientData = null;
+        let salesData = null;
+
+        // Parse Client parameter
+        const clientEncoded = params.get("Client");
+        if (clientEncoded) {
+            const [name, email, phone, clientId] = decodeBase64(clientEncoded).split(",");
+            
+            if (name || email || phone || clientId) {
+                clientData = {
+                    name: name?.trim() || '',
+                    email: email?.trim() || '',
+                    phone: phone?.trim() || '',
+                    clientId: clientId?.trim() || ''
+                };
+            }
+        }
+
+        // Parse SalesPerson parameter
+        const salespersonEncoded = params.get("SalesPerson");
+        if (salespersonEncoded) {
+            const [name, email, phone] = decodeBase64(salespersonEncoded).split(",");
+            
+            if (name || email || phone) {
+                salesData = {
+                    name: name?.trim() || '',
+                    email: email?.trim() || '',
+                    phone: phone?.trim() || ''
+                };
+            }
+        }
+
+        return { clientData, salesData };
+    }
+
+    /**
+     * Populate page elements with client and sales data
+     */
+    function populatePageData(clientData, salesData) {
+        // Default values
+        const defaultPhone = "971565387670";
+        const defaultEmail = "setup@meydanfz.ae";
+
+        let spPhone = defaultPhone;
+        let spEmail = defaultEmail;
+
+        // Populate client data
+        if (clientData) {
+            if (clientData.name) {
+                document.querySelectorAll(".client-name").forEach(el => el.textContent = clientData.name);
+                // Set name input fields
+                const nameInputs = ["name", "client-name", "full-name"];
+                nameInputs.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) input.value = clientData.name;
+                });
+            }
+
+            if (clientData.email) {
+                document.querySelectorAll(".client-email").forEach(el => el.textContent = clientData.email);
+                // Set email input fields
+                const emailInputs = ["email", "client-email"];
+                emailInputs.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) input.value = clientData.email;
+                });
+            }
+
+            if (clientData.phone) {
+                document.querySelectorAll(".client-phone").forEach(el => el.textContent = clientData.phone);
+                // Set phone using intl-tel-input if available
+                setPhoneInputValue(["phone", "client-phone"], clientData.phone);
+            }
+
+            if (clientData.clientId) {
+                document.querySelectorAll(".client-id").forEach(el => el.textContent = clientData.clientId);
+                // Set client ID fields
+                const clientIdSelectors = [
+                    '#client-id', '[name="client-id"]',
+                    '#wf-client-id', '[name="wf-client-id"]'
+                ];
+                clientIdSelectors.forEach(sel => {
+                    const input = document.querySelector(sel);
+                    if (input) input.value = clientData.clientId;
+                });
+            }
+
+            // Show valued client blocks
+            document.querySelectorAll(".valued-client").forEach(el => el.style.display = "block");
+        }
+
+        // Populate sales data
+        if (salesData) {
+            if (salesData.name) {
+                document.querySelectorAll(".salesperson-name").forEach(el => el.textContent = salesData.name);
+            }
+            if (salesData.email) {
+                document.querySelectorAll(".salesperson-email").forEach(el => el.textContent = salesData.email);
+                spEmail = salesData.email;
+            }
+            if (salesData.phone) {
+                document.querySelectorAll(".salesperson-phone").forEach(el => el.textContent = salesData.phone);
+                spPhone = salesData.phone.replace(/\D/g, '') || defaultPhone;
+            }
+        }
+
+        // Update button links
+        document.querySelectorAll(".call-salesperson").forEach(el => el.href = `tel:${spPhone}`);
+        document.querySelectorAll(".whatsapp-salesperson").forEach(el => el.href = `https://wa.me/${spPhone}`);
+        document.querySelectorAll(".email-salesperson").forEach(el => el.href = `mailto:${spEmail}`);
+    }
+
+    /**
+     * Set phone input using intl-tel-input with retries
+     */
+    function setPhoneInputValue(selectors, rawNumber) {
+        let cleaned = rawNumber.trim().replace(/[\s\-().]/g, '');
+        if (!cleaned.startsWith('+') && /^\d+$/.test(cleaned)) {
+            cleaned = '+' + cleaned;
+        }
+
+        selectors.forEach(selector => {
+            let input = document.getElementById(selector);
+            if (!input) {
+                input = document.querySelector(`input[name="${selector}"]`);
+            }
+            if (!input) return;
+
+            let attempts = 0;
+            const maxAttempts = 10;
+
+            const trySetNumber = () => {
+                if (window.formValidator && window.formValidator.phoneInput && typeof window.formValidator.phoneInput.setNumber === 'function') {
+                    try {
+                        window.formValidator.phoneInput.setNumber(cleaned);
+                        return;
+                    } catch (e) {
+                        console.warn('Could not set phone number via formValidator phoneInput:', e);
+                    }
+                }
+
+                const iti = window.intlTelInputGlobals?.getInstance?.(input);
+                if (iti && typeof iti.setNumber === 'function') {
+                    try {
+                        iti.setNumber(cleaned);
+                        return;
+                    } catch (e) {
+                        console.warn('Could not set phone number via intl-tel-input:', e);
+                    }
+                } else if (attempts < maxAttempts) {
+                    attempts++;
+                    setTimeout(trySetNumber, 200);
+                    return;
+                }
+                
+                // Fallback to setting value directly
+                input.value = cleaned;
+            };
+
+            trySetNumber();
+        });
+    }
+
+    /**
+     * Send webhook notification when shared link is opened
+     */
+    async function notifySharedLinkOpened(shareId, clientId) {
+        if (!shareId) return;
+
+        try {
+            const webhookUrl = `https://flow.zoho.com/758936401/flow/webhook/incoming?zapikey=1001.39d22b6d92f320b9b8712ecb624775c0.de63fb6697866768a1ec4c03da42cacc&isdebug=false&share=${shareId}&oppid=${clientId || ''}`;
+            
+            // Use fetch with no-cors mode to avoid CORS issues
+            await fetch(webhookUrl, {
+                method: 'GET',
+                mode: 'no-cors'
+            });
+            
+        } catch (error) {
+            console.error('Error sending webhook notification:', error);
+        }
+    }
 
     /**
      * Collect all current form values for sharing
@@ -5965,7 +6174,7 @@
     }
     
     // Store configuration in Supabase
-    async function storeConfiguration(configId, configData) {
+    async function storeConfiguration(configId, configData, clientData = null, salesData = null) {
         try {
             
             // Check if record exists first
@@ -5985,6 +6194,21 @@
             // Only set created_at if it's a new record
             if (!existing) {
                 upsertData.created_at = now;
+            }
+
+            // Add client data if provided (only for new records or if explicitly updating)
+            if (clientData && (!existing || clientData.forceUpdate)) {
+                upsertData.client_name = clientData.name;
+                upsertData.client_email = clientData.email;
+                upsertData.client_phone = clientData.phone;
+                upsertData.client_id = clientData.clientId;
+            }
+
+            // Add sales data if provided (only for new records or if explicitly updating)
+            if (salesData && (!existing || salesData.forceUpdate)) {
+                upsertData.salesperson_name = salesData.name;
+                upsertData.salesperson_email = salesData.email;
+                upsertData.salesperson_phone = salesData.phone;
             }
             
             const { data, error } = await supabase
@@ -6009,7 +6233,7 @@
             
             const { data, error } = await supabase
                 .from('shared_configs')
-                .select('config_data')
+                .select('config_data, client_name, client_email, client_phone, client_id, salesperson_name, salesperson_email, salesperson_phone')
                 .eq('id', configId)
                 .single();
             
@@ -6018,7 +6242,20 @@
                 return null;
             }
             
-            return data.config_data;
+            return {
+                config_data: data?.config_data || null,
+                client_data: data?.client_name ? {
+                    name: data.client_name,
+                    email: data.client_email,
+                    phone: data.client_phone,
+                    clientId: data.client_id
+                } : null,
+                sales_data: data?.salesperson_name ? {
+                    name: data.salesperson_name,
+                    email: data.salesperson_email,
+                    phone: data.salesperson_phone
+                } : null
+            };
         } catch (error) {
             console.error('Error loading configuration:', error);
             return null;
@@ -6292,19 +6529,27 @@
     }
     
     // Create new configuration (start fresh)
-    function createNewConfiguration() {
-        currentConfigId = null;
-        sessionStorage.removeItem('currentConfigId');
-        
-        // Clear URL parameters
-        const currentUrl = new URL(window.location);
-        const params = new URLSearchParams(currentUrl.search);
-        params.delete("share"); // Updated parameter name
-        params.delete("Config");
-        
-        const newUrl = `${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}${params.toString() ? '?' + params.toString() : ''}`;
-        window.history.replaceState({}, document.title, newUrl);
-        
+    async function createNewConfiguration() {
+        try {
+            // Generate new configuration ID
+            const newConfigId = generateConfigId();
+            currentConfigId = newConfigId;
+            sessionStorage.setItem('currentConfigId', newConfigId);
+            
+            // Get current form configuration
+            const configData = collectFormConfiguration();
+            
+            // Store with client and sales data if available
+            const clientData = window.currentClientData || null;
+            const salesData = window.currentSalesData || null;
+            
+            await storeConfiguration(newConfigId, configData, clientData, salesData);
+            
+            return newConfigId;
+        } catch (error) {
+            console.error('Error creating new configuration:', error);
+            return null;
+        }
     }
     
 
@@ -6314,6 +6559,9 @@
     // Unified initialization function that handles both static and dynamic sharing
     function initializeUnifiedSharing() {
         try {
+            // Parse URL parameters for client and sales data
+            const { clientData, salesData } = parseURLParameters();
+            
             // Initialize config ID from sessionStorage if available
             const existingConfigId = sessionStorage.getItem('currentConfigId');
             if (existingConfigId && !currentConfigId) {
@@ -6327,6 +6575,22 @@
             const legacyDynamicConfig = params.get("DynamicConfig"); // Backward compatibility
             const dynamicConfig = shareConfig || legacyDynamicConfig;
             
+            // Store client and sales data globally for later use
+            if (clientData || salesData) {
+                window.currentClientData = clientData;
+                window.currentSalesData = salesData;
+                
+                // Populate page immediately if we have the data
+                populatePageData(clientData, salesData);
+                
+                // Clean URL but preserve share parameter if it exists
+                let newURL = window.location.pathname;
+                if (dynamicConfig) {
+                    newURL += `?share=${dynamicConfig}`;
+                }
+                window.history.replaceState({}, document.title, newURL);
+            }
+            
             // Set up event listeners for share buttons
             setupShareButtons();
             
@@ -6335,6 +6599,13 @@
                 handleDynamicConfiguration(dynamicConfig);
             } else if (staticConfig) {
                 handleStaticConfiguration(staticConfig);
+            } else if (clientData || salesData) {
+                // If we have client/sales data but no existing config, create a new configuration
+                setTimeout(async () => {
+                    if (!currentConfigId) {
+                        await createNewConfiguration();
+                    }
+                }, 2000); // Wait for form to initialize
             }
             
             // Set up real-time updates (using manual system due to conflicts)
@@ -6354,12 +6625,28 @@
             // Track this link view
             await trackLinkView(dynamicConfigId);
             
-            const configData = await loadConfiguration(dynamicConfigId);
-            if (configData) {
-                setTimeout(() => {
-                    applySharedConfiguration(configData);
-                }, 1000);
+            const result = await loadConfiguration(dynamicConfigId);
+            if (result) {
+                const { config_data, client_data, sales_data } = result;
+                
+                // Populate client and sales data on the page
+                if (client_data || sales_data) {
+                    populatePageData(client_data, sales_data);
+                }
+                
+                // Send webhook notification
+                if (client_data?.clientId) {
+                    await notifySharedLinkOpened(dynamicConfigId, client_data.clientId);
+                }
+                
+                // Apply form configuration
+                if (config_data) {
+                    setTimeout(() => {
+                        applySharedConfiguration(config_data);
+                    }, 1000);
+                }
             } else {
+                console.warn('No configuration data found for ID:', dynamicConfigId);
             }
         } catch (error) {
             console.error('Error handling dynamic configuration:', error);

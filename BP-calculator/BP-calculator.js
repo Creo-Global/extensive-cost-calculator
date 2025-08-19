@@ -1041,20 +1041,28 @@
         document.addEventListener('input', function(e) {
             if (e.target.matches('input, select')) {
                 hasStartedForm = true;
-                calculateCosts();
+                if (typeof isLoadingSharedConfiguration === 'undefined' || !isLoadingSharedConfiguration) {
+                    calculateCosts();
+                }
             }
         });
 
         document.addEventListener('change', function(e) {
             if (e.target.matches('input, select')) {
                 hasStartedForm = true;
-                calculateCosts();
+                if (typeof isLoadingSharedConfiguration === 'undefined' || !isLoadingSharedConfiguration) {
+                    calculateCosts();
+                }
             }
         });
 
         document.addEventListener('click', function(e) {
             if (e.target.matches('input[type="checkbox"], input[type="radio"]')) {
-                setTimeout(() => calculateCosts(), 10); // Small delay to ensure state is updated
+                setTimeout(() => {
+                    if (typeof isLoadingSharedConfiguration === 'undefined' || !isLoadingSharedConfiguration) {
+                        calculateCosts();
+                    }
+                }, 10); // Small delay to ensure state is updated
             }
         });
 
@@ -3101,20 +3109,21 @@
         // Calculate base license cost for the duration
         let baseLicenseCostForDuration = baseLicenseCost * licenseDuration;
         
-        // Apply discount only to the base license cost, not to shared desk fee
+        // Calculate additional shareholder costs (no discount applied)
+        // First 6 shareholders are free, each additional costs AED 2,000
+        // Multiply by license duration to account for multi-year licenses
+        let additionalShareholdersCost = 0;
+        if (shareholdersCount > 6) {
+            additionalShareholdersCost = (shareholdersCount - 6) * 2000 * licenseDuration;
+        }
+        
+        // Apply discount ONLY to the base license cost, not to shared desk fee or shareholders cost
         let discountAmount = baseLicenseCostForDuration * (discountPercentage / 100);
         let discountedBaseCost = baseLicenseCostForDuration - discountAmount;
         
         // Add shared desk fee (not discounted)
         let sharedDeskFeeForDuration = sharedDeskFee * licenseDuration;
         let businessLicenseCost = discountedBaseCost + sharedDeskFeeForDuration;
-
-        // Calculate additional shareholder costs
-        // First 6 shareholders are free, each additional costs AED 2,000
-        let additionalShareholdersCost = 0;
-        if (shareholdersCount > 6) {
-            additionalShareholdersCost = (shareholdersCount - 6) * 2000;
-        }
 
         // Add Innovation Fee and Knowledge Fee (10 AED each)
         const innovationFee = 10;
@@ -3605,6 +3614,11 @@
 
 
     function calculateCosts() {
+        // Don't calculate during shared configuration loading to prevent glitchy calculations
+        if (typeof isLoadingSharedConfiguration !== 'undefined' && isLoadingSharedConfiguration) {
+            return;
+        }
+        
         const snapshot = getFormSnapshot();
         
         // Calculate costs for sections that have been interacted with
@@ -4672,7 +4686,7 @@
         const getCallButtons = document.querySelectorAll('.get-call-btn');
         
         getCallButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
+            button.addEventListener('click', async function(e) {
         e.preventDefault();
         const submitBtn = this;
 
@@ -4719,6 +4733,70 @@
         submitBtn.disabled = true;
 
         calculateCosts();
+
+        // Check if we're already on a shared link, if so use existing config ID
+        const params = new URLSearchParams(window.location.search);
+        const existingConfigId = params.get('share') || params.get('DynamicConfig') || sessionStorage.getItem('currentConfigId');
+        const uniqueConfigId = existingConfigId || generateConfigId();
+        let shareableLink = '';
+        let lastViewedTimestamp = '';
+        
+        try {
+            // Collect current form configuration
+            const currentConfigData = collectFormConfiguration();
+            
+            // Store the configuration in Supabase (this will update existing config if ID already exists)
+            const stored = await storeConfiguration(uniqueConfigId, currentConfigData);
+            
+            if (stored) {
+                // Generate the shareable URL
+                const currentURL = new URL(window.location.href);
+                const params = new URLSearchParams();
+                
+                // Preserve existing client and salesperson parameters if they exist
+                const existingParams = new URLSearchParams(currentURL.search);
+                if (existingParams.get('Client')) {
+                    params.set('Client', existingParams.get('Client'));
+                }
+                if (existingParams.get('SalesPerson')) {
+                    params.set('SalesPerson', existingParams.get('SalesPerson'));
+                }
+                
+                // Add the shared config parameter
+                params.set('share', uniqueConfigId);
+                
+                shareableLink = `${currentURL.origin}${currentURL.pathname}?${params.toString()}`;
+                
+                // Get last viewed timestamp for this configuration
+                try {
+                    // First try to get last_viewed from the main config table
+                    const { data: configData, error: configError } = await supabase
+                        .from('shared_configs')
+                        .select('last_viewed')
+                        .eq('id', uniqueConfigId)
+                        .single();
+                    
+                    if (!configError && configData && configData.last_viewed) {
+                        lastViewedTimestamp = configData.last_viewed;
+                    } else {
+                        // Fallback to analytics table
+                        const analytics = await getViewAnalytics(uniqueConfigId);
+                        if (analytics && analytics.length > 0) {
+                            const sortedViews = analytics.sort((a, b) => new Date(b.viewed_at) - new Date(a.viewed_at));
+                            lastViewedTimestamp = sortedViews[0].viewed_at;
+                        } else {
+                            lastViewedTimestamp = new Date().toISOString();
+                        }
+                    }
+                } catch (timestampError) {
+                    console.error('Error getting last viewed timestamp:', timestampError);
+                    lastViewedTimestamp = new Date().toISOString();
+                }
+            }
+        } catch (error) {
+            console.error('Error generating shareable link:', error);
+            // Continue with submission even if shareable link generation fails
+        }
 
         const fullName = document.getElementById("full-name").value;
         const phone = formValidator.phoneInput.getNumber();
@@ -4784,24 +4862,27 @@
             license_duration_years: parseInt(document.getElementById("license-duration")?.value || 1),
             license_discount_percentage: parseInt(document.getElementById("license-duration")?.value || 1) > 1 ? 15 : 0,
             additional_shareholders_count: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6),
-            additional_shareholders_cost: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000,
+            additional_shareholders_cost: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000 * parseInt(document.getElementById("license-duration")?.value || 1),
             
             // Detailed cost breakdown for invoice
             cost_breakdown: JSON.stringify({
                 license: {
                     type: licenseType,
                     duration: document.getElementById("license-duration")?.value || '',
-                    base_cost_per_year: licenseType === "fawri" ? 15000 : 12500,
-                    cost_per_unit: licenseType === "fawri" ? 15000 : 12500,
+                    base_cost_per_year: licenseType === "fawri" ? 14625 : 12125, // Base cost without shared desk fee
+                    shared_desk_fee: 375, // Shared desk fee separated
+                    cost_per_unit: licenseType === "fawri" ? 14625 : 12125, // Base cost without shared desk fee
                     duration_years: parseInt(document.getElementById("license-duration")?.value || 1),
-                    base_cost_total: (licenseType === "fawri" ? 15000 : 12500) * parseInt(document.getElementById("license-duration")?.value || 1),
+                    base_cost_total: (licenseType === "fawri" ? 14625 : 12125) * parseInt(document.getElementById("license-duration")?.value || 1), // Base cost without shared desk fee
                     shareholders_count: parseInt(document.getElementById("shareholders-range")?.value || 1),
                     additional_shareholders: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6),
-                    additional_shareholders_cost: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000,
+                    additional_shareholders_cost: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000 * parseInt(document.getElementById("license-duration")?.value || 1),
                     cost_per_additional_shareholder: 2000,
-                    subtotal_before_discount: ((licenseType === "fawri" ? 15000 : 12500) * parseInt(document.getElementById("license-duration")?.value || 1)) + (Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000),
+                    subtotal_before_discount: ((licenseType === "fawri" ? 14625 : 12125) * parseInt(document.getElementById("license-duration")?.value || 1)) + // Base cost
+                        (375 * parseInt(document.getElementById("license-duration")?.value || 1)) + // Shared desk fee
+                        (Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000 * parseInt(document.getElementById("license-duration")?.value || 1)), // Additional shareholders cost
                     discount_percentage: parseInt(document.getElementById("license-duration")?.value || 1) > 1 ? 15 : 0,
-                    discount_amount: parseInt(document.getElementById("license-duration")?.value || 1) > 1 ? (((licenseType === "fawri" ? 15000 : 12500) * parseInt(document.getElementById("license-duration")?.value || 1)) + (Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000)) * 0.15 : 0,
+                    discount_amount: parseInt(document.getElementById("license-duration")?.value || 1) > 1 ? ((licenseType === "fawri" ? 14625 : 12125) * parseInt(document.getElementById("license-duration")?.value || 1)) * 0.15 : 0, // Discount ONLY applies to base license cost (excluding shared desk fee)
                     final_cost: LicenseCost || 0
                 },
                 visas: {
@@ -4888,6 +4969,11 @@
             user_city: userLocationInfo.city,
             user_region: userLocationInfo.region,
             user_timezone: userLocationInfo.timezone,
+            
+            // Shareable link and tracking information
+            shareable_link: shareableLink,
+            configuration_id: uniqueConfigId,
+            last_viewed_timestamp: lastViewedTimestamp,
             
             // Timestamp
             submission_timestamp: new Date().toISOString(),
@@ -5366,6 +5452,13 @@
         if (!configData) {
             return;
         }
+        
+        // Temporarily disable scrolling during form population
+        const originalMobileUserHasInteracted = mobileUserHasInteracted;
+        mobileUserHasInteracted = false;
+        
+        // Disable real-time updates during configuration loading
+        isLoadingSharedConfiguration = true;
 
         try {
             // Apply contact information (only if fields are empty to not override client data)
@@ -5501,13 +5594,27 @@
                     }, 200);
                 }
 
-                // Set employee visas
-                if (configData.visa.employeeVisas > 0) {
+                // Set employee visas (allow 0 values)
+                if (configData.visa.employeeVisas >= 0) {
                     document.getElementById("employee-visa-count").value = configData.visa.employeeVisas;
                     
-                    // Use selectVisaCard for employee visa
-                    if (typeof selectVisaCard === 'function') {
-                        selectVisaCard('employee');
+                    // Only select visa card if count > 0, but don't reset the value
+                    if (configData.visa.employeeVisas > 0) {
+                        // Manually show the selected state without calling selectVisaCard which resets to 1
+                        const card = document.querySelector(`[data-visa="employee"]`);
+                        const selectBtn = card?.querySelector('.select-btn');
+                        const selectedControls = document.getElementById('employee-selected-controls');
+                        const selectedBtn = selectedControls?.querySelector('.select-btn');
+                        
+                        if (card && selectBtn && selectedControls) {
+                            card.classList.add('selected');
+                            selectBtn.style.display = 'none';
+                            selectedControls.style.display = 'flex';
+                            
+                            if (selectedBtn && typeof updateButtonState === 'function') {
+                                updateButtonState(selectedBtn, true);
+                            }
+                        }
                     }
                     
                     // Update quantity
@@ -5616,11 +5723,10 @@
             }
 
             // Apply change status data
-            if (configData.changeStatus && (configData.changeStatus.applicantsInsideUAE > 0 || configData.changeStatus.applicantsOutsideUAE > 0)) {
-            
+            if (configData.changeStatus && (configData.changeStatus.applicantsInsideUAE >= 0 || configData.changeStatus.applicantsOutsideUAE >= 0)) {
                 
-                // Update inside UAE applicants
-                if (configData.changeStatus.applicantsInsideUAE > 0) {
+                // Update inside UAE applicants (allow 0 values)
+                if (configData.changeStatus.applicantsInsideUAE >= 0) {
                     const insideField = document.getElementById("applicants-inside-uae");
                     const insideQuantityDisplay = document.getElementById("inside-quantity");
                     
@@ -5637,8 +5743,8 @@
                     }
                 }
                 
-                // Update outside UAE applicants
-                if (configData.changeStatus.applicantsOutsideUAE > 0) {
+                // Update outside UAE applicants (allow 0 values)
+                if (configData.changeStatus.applicantsOutsideUAE >= 0) {
                     const outsideField = document.getElementById("applicants-outside-uae");
                     const outsideCountDisplay = document.getElementById("outside-count");
                     
@@ -5654,18 +5760,48 @@
                         outsideField.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 }
-            } else {
             }
 
-            // Recalculate costs after applying all configurations
+            // Re-enable scrolling and updates after form is populated, then calculate
+            setTimeout(() => {
+                // Allow user to scroll manually now that form is populated
+                mobileUserHasInteracted = true;
+                
+                // Re-enable real-time updates after form is fully loaded
+                isLoadingSharedConfiguration = false;
+                
+                // Now calculate costs with the correct form values
+                setTimeout(() => {
+                    if (typeof calculateCosts === 'function') {
+                        calculateCosts();
+                        // Force a second calculation to ensure everything is up to date
+                        setTimeout(() => {
+                            calculateCosts();
+                        }, 200);
+                    }
+                }, 100);
+                
+                // Keep user at the top of the page initially on mobile
+                if (window.innerWidth <= 768 && isSharedLinkSession) {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'auto'
+                    });
+                }
+            }, 800); // Increased delay to ensure all form updates are complete
+
+        } catch (error) {
+            console.error("Error applying shared configuration:", error);
+            // Re-enable scrolling and updates even if there was an error
+            mobileUserHasInteracted = true;
+            isLoadingSharedConfiguration = false;
+            
+            // Ensure calculations work even after error
             setTimeout(() => {
                 if (typeof calculateCosts === 'function') {
                     calculateCosts();
                 }
             }, 500);
-
-        } catch (error) {
-            console.error("Error applying shared configuration:", error);
         }
     }
 
@@ -6245,9 +6381,30 @@
             
             if (error) {
                 console.error('Error tracking view:', error);
+            } else {
+                // Also update the last_viewed timestamp in the main shared_configs table
+                await updateLastViewedTimestamp(configId);
             }
         } catch (error) {
             console.error('Error in trackLinkView:', error);
+        }
+    }
+    
+    // Update last viewed timestamp in shared_configs table
+    async function updateLastViewedTimestamp(configId) {
+        try {
+            const { error } = await supabase
+                .from('shared_configs')
+                .update({
+                    last_viewed: new Date().toISOString()
+                })
+                .eq('id', configId);
+            
+            if (error) {
+                console.error('Error updating last viewed timestamp:', error);
+            }
+        } catch (error) {
+            console.error('Error in updateLastViewedTimestamp:', error);
         }
     }
     
@@ -6362,17 +6519,64 @@
     
     // Since the automatic system has conflicts, implement a manual real-time system
     var updateTimeout = null;
+    var isLoadingSharedConfiguration = false;
     
     async function manualUpdateConfig() {
+        // Don't update if we're currently loading a shared configuration
+        if (isLoadingSharedConfiguration) {
+            return;
+        }
+        
         const configId = sessionStorage.getItem('currentConfigId');
         if (configId) {
+            try {
+                // Add a delay and validation before updating to prevent premature updates
+                setTimeout(async () => {
+                    // Double-check the flag after the delay
+                    if (isLoadingSharedConfiguration) {
+                        return;
+                    }
+                    
                     try {
-            const configData = collectFormConfiguration();
-            await storeConfiguration(configId, configData);
-        } catch (error) {
-            console.error('Auto-update error:', error);
+                        const configData = collectFormConfiguration();
+                        
+                        // Validate the configuration before storing to prevent corrupted data
+                        if (isValidConfiguration(configData)) {
+                            await storeConfiguration(configId, configData);
+                        }
+                    } catch (error) {
+                        console.error('Auto-update error:', error);
+                    }
+                }, 500); // Add delay to ensure form is stable
+            } catch (error) {
+                console.error('Auto-update error:', error);
+            }
         }
+    }
+    
+    // Validate configuration to prevent storing corrupted data
+    function isValidConfiguration(config) {
+        // Check for negative values that shouldn't be negative
+        if (config.changeStatus) {
+            if (config.changeStatus.applicantsOutsideUAE < 0) {
+                console.warn('Invalid configuration: negative applicantsOutsideUAE', config.changeStatus.applicantsOutsideUAE);
+                return false;
+            }
+            if (config.changeStatus.applicantsInsideUAE < 0) {
+                console.warn('Invalid configuration: negative applicantsInsideUAE', config.changeStatus.applicantsInsideUAE);
+                return false;
+            }
         }
+        
+        // Check for invalid visa counts
+        if (config.visa) {
+            if (config.visa.employeeVisas < 0 || config.visa.investorVisas < 0 || config.visa.dependencyVisas < 0) {
+                console.warn('Invalid configuration: negative visa counts', config.visa);
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     function scheduleUpdate() {
@@ -6416,9 +6620,16 @@
     window.manualUpdateConfig = manualUpdateConfig;
     window.scheduleUpdate = scheduleUpdate;
     window.setupManualRealTimeSystem = setupManualRealTimeSystem;
+    window.isValidConfiguration = isValidConfiguration;
+    
+    // Export loading state for other functions to check
+    window.isLoadingSharedConfiguration = function() {
+        return typeof isLoadingSharedConfiguration !== 'undefined' ? isLoadingSharedConfiguration : false;
+    };
     
     // Export view tracking functions
     window.trackLinkView = trackLinkView;
+    window.updateLastViewedTimestamp = updateLastViewedTimestamp;
     window.getViewCount = getViewCount;
     window.getViewAnalytics = getViewAnalytics;
     
@@ -7592,12 +7803,71 @@
 
 
     // Mobile Auto-Scroll Functionality
+    // Shared-link gating flags
+    var isSharedLinkSession = false;
+    var mobileUserHasInteracted = false;
+    var originalWindowScrollTo = null;
+    var originalElementScrollIntoView = null;
+    
+    function canAutoScroll() {
+        return !isSharedLinkSession || mobileUserHasInteracted;
+    }
+    
     function initializeMobileAutoScroll() {
         // Only run on mobile devices
         if (window.innerWidth > 768) return;
         
+        // Detect shared-link session and gate auto-scroll until first interaction
+        try {
+            // Prevent browser restoring previous scroll on navigation
+            if ('scrollRestoration' in window.history) {
+                window.history.scrollRestoration = 'manual';
+            }
+            
+            const params = new URLSearchParams(window.location.search);
+            isSharedLinkSession = !!(params.get('share') || params.get('DynamicConfig') || params.get('Config'));
+            mobileUserHasInteracted = false; // Always require interaction first
+            
+            if (isSharedLinkSession) {
+                // Capture original programmatic scroll functions and gate them
+                if (!originalWindowScrollTo) originalWindowScrollTo = window.scrollTo.bind(window);
+                if (!originalElementScrollIntoView) originalElementScrollIntoView = Element.prototype.scrollIntoView;
+                
+                window.scrollTo = function(...args) {
+                    if (!mobileUserHasInteracted) return;
+                    return originalWindowScrollTo(...args);
+                };
+                
+                Element.prototype.scrollIntoView = function(...args) {
+                    if (!mobileUserHasInteracted) return;
+                    return originalElementScrollIntoView.apply(this, args);
+                };
+                
+                // Keep user at the top of the page initially
+                setTimeout(() => {
+                    if (originalWindowScrollTo) {
+                        originalWindowScrollTo(0, 0);
+                    } else {
+                        window.scrollTo(0, 0);
+                    }
+                }, 100);
+                // Unlock auto-scroll on first user interaction
+                const unlock = () => {
+                    mobileUserHasInteracted = true;
+                    document.removeEventListener('click', unlock, true);
+                    document.removeEventListener('touchstart', unlock, true);
+                };
+                
+                document.addEventListener('click', unlock, { once: true, capture: true });
+                document.addEventListener('touchstart', unlock, { once: true, capture: true });
+            }
+        } catch (err) { 
+            console.error('Error in shared link scroll handling:', err);
+        }
+        
         // Function to scroll to next card by ID
         const scrollToNextCard = (currentElement, cardSelector) => {
+            if (!canAutoScroll()) return;
             const allCards = Array.from(document.querySelectorAll(cardSelector));
             const currentIndex = allCards.indexOf(currentElement);
             
@@ -7620,6 +7890,7 @@
         
         // Special scroll for form completion - go to next section
         const scrollToNextSection = () => {
+            if (!canAutoScroll()) return;
             const companySetupSection = document.getElementById('company-setup-section');
             if (companySetupSection && !companySetupSection.classList.contains('locked')) {
                 setTimeout(() => {
@@ -7660,6 +7931,7 @@
         const selectButtons = document.querySelectorAll('.select-btn');
         selectButtons.forEach(button => {
             button.addEventListener('click', () => {
+                if (!canAutoScroll()) return;
                 // Scroll to duration options after selecting a license
                 const durationOptions = document.getElementById('duration-options');
                 if (durationOptions) {
@@ -7683,6 +7955,7 @@
         
         // Function to check if both sections have been interacted with
         const checkBothSectionsInteracted = () => {
+            if (!canAutoScroll()) return;
             if (durationInteracted && shareholdersInteracted) {
                 const businessActivitiesSection = document.getElementById('business-activities-section');
                 if (businessActivitiesSection && !businessActivitiesSection.classList.contains('locked')) {
@@ -7706,6 +7979,7 @@
             button.addEventListener('click', () => {
                 durationInteracted = true;
                 // Don't immediately scroll, just scroll to shareholders section
+                if (!canAutoScroll()) return;
                 const shareholdersSection = document.getElementById('shareholders-selected-controls');
                 if (shareholdersSection && !shareholdersInteracted) {
                     setTimeout(() => {
@@ -7753,6 +8027,7 @@
                 if (activityCard) {
                     // Check if any activities are selected after a short delay (to allow selection to complete)
                     setTimeout(() => {
+                        if (!canAutoScroll()) return;
                         if (window.selectedActivities && window.selectedActivities.length > 0) {
                             const visaOptionsSection = document.getElementById('visa-options-section');
                             if (visaOptionsSection && !visaOptionsSection.classList.contains('locked')) {
@@ -7779,6 +8054,7 @@
             const modalCloseHandler = () => {
                 // Check if any activities are selected after modal closes
                 setTimeout(() => {
+                    if (!canAutoScroll()) return;
                     if (window.selectedActivities && window.selectedActivities.length > 0) {
                         const visaOptionsSection = document.getElementById('visa-options-section');
                         if (visaOptionsSection && !visaOptionsSection.classList.contains('locked')) {
@@ -7808,6 +8084,7 @@
         const visaCards = document.querySelectorAll('.visa-card:not(.change-status-card)');
         visaCards.forEach(card => {
             card.addEventListener('click', () => {
+                if (!canAutoScroll()) return;
                 const allVisaCards = Array.from(document.querySelectorAll('.visa-card:not(.change-status-card)'));
                 const currentIndex = allVisaCards.indexOf(card);
                 
@@ -7837,6 +8114,7 @@
         const visaToggles = document.querySelectorAll('.visa-toggle-switch input');
         visaToggles.forEach(toggle => {
             toggle.addEventListener('click', () => {
+                if (!canAutoScroll()) return;
                 const visaCard = toggle.closest('.visa-card');
                 if (visaCard) {
                     const allVisaCards = Array.from(document.querySelectorAll('.visa-card:not(.change-status-card)'));
@@ -7869,6 +8147,7 @@
         const quantityButtons = document.querySelectorAll('.quantity-btn');
         quantityButtons.forEach(button => {
             button.addEventListener('click', () => {
+                if (!canAutoScroll()) return;
                 const addonsSection = document.getElementById('addons-section');
                 if (addonsSection && !addonsSection.classList.contains('locked')) {
                     setTimeout(() => {
@@ -7889,6 +8168,7 @@
         const addonCategories = document.querySelectorAll('.addon-category-card');
         addonCategories.forEach(category => {
             category.addEventListener('click', () => {
+                if (!canAutoScroll()) return;
                 scrollToNextCard(category, '.addon-category-card');
             });
         });
@@ -7897,6 +8177,7 @@
         const serviceCheckboxes = document.querySelectorAll('.addons-container input[type="checkbox"]');
         serviceCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => {
+                if (!canAutoScroll()) return;
                 const categoryCard = checkbox.closest('.addon-category-card');
                 if (categoryCard) {
                     scrollToNextCard(categoryCard, '.addon-category-card');
@@ -8099,9 +8380,10 @@
     function initializeStickyButtonsControl() {
         // Target the specific navbar class
         const stickyButtons = document.querySelector('.navbar1_container-3.mobile-nav');
+        const stickyButtonsClass = document.querySelector('.sticky-buttons');
         const calculatorSection = document.getElementById('MFZ-NewCostCalForm');
 
-        if (!stickyButtons || !calculatorSection) {
+        if ((!stickyButtons && !stickyButtonsClass) || !calculatorSection) {
             return;
         }
 
@@ -8109,10 +8391,12 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     // Calculator is in viewport - hide sticky buttons
-                    stickyButtons.classList.add('hidden');
+                    if (stickyButtons) stickyButtons.classList.add('hidden');
+                    if (stickyButtonsClass) stickyButtonsClass.classList.add('hidden');
                 } else {
                     // Calculator is out of viewport - show sticky buttons
-                    stickyButtons.classList.remove('hidden');
+                    if (stickyButtons) stickyButtons.classList.remove('hidden');
+                    if (stickyButtonsClass) stickyButtonsClass.classList.remove('hidden');
                 }
             });
         }, {

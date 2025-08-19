@@ -3071,7 +3071,6 @@ background-clip: text;
         z-index: 9;
         background: #F9FAFB;
         border-radius: 20px;
-        max-height: 85vh;
         overflow-y: auto;
     }
     .activity-cards-container {

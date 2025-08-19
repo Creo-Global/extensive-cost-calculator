@@ -3675,9 +3675,10 @@
 
         // Calculate additional shareholder costs
         // First 6 shareholders are free, each additional costs AED 2,000
+        // Multiply by license duration to account for multi-year licenses
         let additionalShareholdersCost = 0;
         if (shareholdersCount > 6) {
-            additionalShareholdersCost = (shareholdersCount - 6) * 2000;
+            additionalShareholdersCost = (shareholdersCount - 6) * 2000 * licenseDuration;
         }
 
         // Add Innovation Fee and Knowledge Fee (10 AED each)

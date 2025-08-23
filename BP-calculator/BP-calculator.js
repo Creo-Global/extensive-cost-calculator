@@ -969,30 +969,36 @@
                 feeWarning.style.display = 'none';
             }
             
-            // Ensure default services are checked and pills are properly synced
-            const defaultServices = ['bank-account', 'company-stamp', 'corporate-tax', 'vat-registration'];
-            defaultServices.forEach(serviceId => {
-                const input = document.getElementById(serviceId);
-                const pill = document.querySelector(`.service-pill[data-service="${serviceId}"]`);
-                
-                if (input && pill) {
-                    input.checked = true;
-                    pill.classList.add('selected');
+            // Check if we're loading from a shared link
+            const params = new URLSearchParams(window.location.search);
+            const hasShareConfig = params.get("Config") || params.get("share") || params.get("DynamicConfig");
+            
+            // Only apply default VAT registration if NOT loading from a shared link
+            if (!hasShareConfig) {
+                const defaultServices = ['vat-registration'];
+                defaultServices.forEach(serviceId => {
+                    const input = document.getElementById(serviceId);
+                    const pill = document.querySelector(`.service-pill[data-service="${serviceId}"]`);
                     
-                    // Ensure check icon is present for selected pills
-                    const existingIcon = pill.querySelector('.check-icon');
-                    if (!existingIcon) {
-                        const checkIcon = document.createElement('span');
-                        checkIcon.className = 'check-icon';
-                        checkIcon.innerHTML = `
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
-                            </svg>
-                        `;
-                        pill.insertBefore(checkIcon, pill.firstChild);
+                    if (input && pill) {
+                        input.checked = true;
+                        pill.classList.add('selected');
+                        
+                        // Ensure check icon is present for selected pills
+                        const existingIcon = pill.querySelector('.check-icon');
+                        if (!existingIcon) {
+                            const checkIcon = document.createElement('span');
+                            checkIcon.className = 'check-icon';
+                            checkIcon.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                    <path d="M9.2806 0.666016C4.68893 0.666016 0.947266 4.40768 0.947266 8.99935C0.947266 13.591 4.68893 17.3327 9.2806 17.3327C13.8723 17.3327 17.6139 13.591 17.6139 8.99935C17.6139 4.40768 13.8723 0.666016 9.2806 0.666016ZM13.2639 7.08268L8.53893 11.8077C8.42227 11.9243 8.26393 11.991 8.09727 11.991C7.9306 11.991 7.77227 11.9243 7.6556 11.8077L5.29727 9.44935C5.0556 9.20768 5.0556 8.80768 5.29727 8.56602C5.53893 8.32435 5.93893 8.32435 6.1806 8.56602L8.09727 10.4827L12.3806 6.19935C12.6223 5.95768 13.0223 5.95768 13.2639 6.19935C13.5056 6.44102 13.5056 6.83268 13.2639 7.08268Z" fill="white"/>
+                                </svg>
+                            `;
+                            pill.insertBefore(checkIcon, pill.firstChild);
+                        }
                     }
-                }
-            });
+                });
+            }
             
             selectedActivities = [];
             
@@ -5931,7 +5937,20 @@
             } else {
             }
 
-            // Apply add-ons
+            // First, clear all existing add-ons to ensure only shared configuration is applied
+            document.querySelectorAll('.service-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+                const pill = document.querySelector(`.service-pill[data-service="${checkbox.value}"]`);
+                if (pill) {
+                    pill.classList.remove('selected');
+                    const checkIcon = pill.querySelector('.check-icon');
+                    if (checkIcon) {
+                        checkIcon.remove();
+                    }
+                }
+            });
+
+            // Apply add-ons from shared configuration
             if (configData.addons && Array.isArray(configData.addons) && configData.addons.length > 0) {
                 configData.addons.forEach(addonValue => {
                     const checkbox = document.querySelector(`.service-checkbox[value="${addonValue}"]`);
@@ -5945,10 +5964,8 @@
                             // Fallback: trigger change event
                             checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                         }
-                    } else {
                     }
                 });
-            } else {
             }
 
             // Apply change status data

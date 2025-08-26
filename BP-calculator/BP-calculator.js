@@ -30,12 +30,26 @@
     };
 
     // Robust initialization function for Webflow compatibility
+    // Function to handle BSA code input
+    function setupBsaCodeInput() {
+        const bsaCodeInput = document.getElementById('bsa-code');
+        
+        if (bsaCodeInput) {
+            bsaCodeInput.addEventListener('input', function() {
+                // Just capture the input, no need to update display since it's directly visible
+            });
+        }
+    }
+
     function initializeCalculator() {
         try {
             // Initialize user location detection
             if (typeof detectUserLocation === 'function') {
                 detectUserLocation();
             }
+            
+            // Setup BSA code input
+            setupBsaCodeInput();
             
             // Initialize all functions
             if (typeof initializeMobileAutoScroll === 'function') {
@@ -4765,6 +4779,7 @@
         const fullName = document.getElementById("full-name").value;
         const phone = formValidator.phoneInput.getNumber();
         const email = document.getElementById("email").value;
+        const bsaCode = document.getElementById("bsa-code")?.value || "";
                 const licenseType = document.getElementById("license-type")?.value || "fawri";
         
         const shareholdersCount = parseInt(document.getElementById("shareholders-range").value) || 0;
@@ -4782,6 +4797,7 @@
             fullName: fullName,
             phone: phone,
             email: email,
+            bsa_code: bsaCode,
             
             // License information
             license_type: licenseType,

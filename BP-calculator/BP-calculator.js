@@ -35,8 +35,9 @@
         const bsaCodeInput = document.getElementById('bsa-code');
         
         if (bsaCodeInput) {
-            bsaCodeInput.addEventListener('input', function() {
-                // Just capture the input, no need to update display since it's directly visible
+            bsaCodeInput.addEventListener('input', function(e) {
+                // Prevent the event from bubbling up to document level listeners
+                e.stopPropagation();
             });
         }
     }
@@ -1059,7 +1060,8 @@
 
     function setupLiveCalculations() {
         document.addEventListener('input', function(e) {
-            if (e.target.matches('input, select')) {
+            // Exclude BSA code input from triggering recalculation
+            if (e.target.matches('input, select') && e.target.id !== 'bsa-code') {
                 hasStartedForm = true;
                 if (typeof isLoadingSharedConfiguration === 'undefined' || !isLoadingSharedConfiguration) {
                     calculateCosts();
@@ -1068,7 +1070,8 @@
         });
 
         document.addEventListener('change', function(e) {
-            if (e.target.matches('input, select')) {
+            // Exclude BSA code input from triggering recalculation
+            if (e.target.matches('input, select') && e.target.id !== 'bsa-code') {
                 hasStartedForm = true;
                 if (typeof isLoadingSharedConfiguration === 'undefined' || !isLoadingSharedConfiguration) {
                     calculateCosts();

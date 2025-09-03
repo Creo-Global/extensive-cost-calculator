@@ -409,19 +409,9 @@
                             </div>
                             <p class="addon-category-description">Essential tools to kickstart your business with ease, from banking to branding.</p>
                             <div class="addon-services">
-                                <button type="button" class="service-pill selected" data-service="bank-account">
-                                    <span class="check-icon">
-                                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/689453765dc003d002d51677_check.svg" alt="Check">
-                                    </span>
-                                    Bank Account
-                                </button>
+                                <button type="button" class="service-pill" data-service="bank-account">Bank Account</button>
                                 <button type="button" class="service-pill" data-service="business-card">Business Card</button>
-                                <button type="button" class="service-pill selected" data-service="company-stamp">
-                                    <span class="check-icon">
-                                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/689453765dc003d002d51677_check.svg" alt="Check">
-                                    </span>
-                                    Company Stamp
-                                </button>
+                                <button type="button" class="service-pill" data-service="company-stamp">Company Stamp</button>
                                 <button type="button" class="service-pill" data-service="ecommerce-starter">E-commerce Starter</button>
                             </div>
                         </div>
@@ -490,12 +480,7 @@
                             </div>
                             <p class="addon-category-description">Full-service tax, audit, and bookkeeping to keep your finances compliant.</p>
                             <div class="addon-services">
-                                <button type="button" class="service-pill selected tax-compliance-pill" data-service="corporate-tax">
-                                    <span class="check-icon">
-                                        <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/689453765dc003d002d51677_check.svg" alt="Check">
-                                    </span>
-                                    Corporate Tax
-                                </button>
+                                <button type="button" class="service-pill tax-compliance-pill" data-service="corporate-tax">Corporate Tax</button>
                                 <button type="button" class="service-pill" data-service="vat-registration">VAT Registration</button>
                                 <button type="button" class="service-pill" data-service="bookkeeping">Bookkeeping</button>
                                 <button type="button" class="service-pill" data-service="liquidation-report">Liquidation Report</button>
@@ -505,9 +490,9 @@
                         </div>
                     </div>
                     <!-- Hidden inputs for backward compatibility -->
-                    <input type="checkbox" id="bank-account" class="service-checkbox" value="bank-account" checked style="display: none;">
+                    <input type="checkbox" id="bank-account" class="service-checkbox" value="bank-account" style="display: none;">
                     <input type="checkbox" id="business-card" class="service-checkbox" value="business-card" style="display: none;">
-                    <input type="checkbox" id="company-stamp" class="service-checkbox" value="company-stamp" checked style="display: none;">
+                    <input type="checkbox" id="company-stamp" class="service-checkbox" value="company-stamp" style="display: none;">
                     <input type="checkbox" id="ecommerce-starter" class="service-checkbox" value="ecommerce-starter" style="display: none;">
                     <input type="checkbox" id="medical-emirates-id" class="service-checkbox" value="medical-emirates-id" style="display: none;">
                     <input type="checkbox" id="medical-insurance" class="service-checkbox" value="medical-insurance" style="display: none;">
@@ -517,7 +502,7 @@
                     <input type="checkbox" id="mail-management" class="service-checkbox" value="mail-management" style="display: none;">
                     <input type="checkbox" id="document-translation" class="service-checkbox" value="document-translation" style="display: none;">
                     <input type="checkbox" id="virtual-assistant" class="service-checkbox" value="virtual-assistant" style="display: none;">
-                    <input type="checkbox" id="corporate-tax" class="service-checkbox tax-compliance-checkbox" value="corporate-tax" checked style="display: none;">
+                    <input type="checkbox" id="corporate-tax" class="service-checkbox tax-compliance-checkbox" value="corporate-tax" style="display: none;">
                     <input type="checkbox" id="vat-registration" class="service-checkbox tax-compliance-checkbox" value="vat-registration" style="display: none;">
                     <input type="checkbox" id="liquidation-report" class="service-checkbox" value="liquidation-report" style="display: none;">
                     <input type="checkbox" id="financial-audit-report" class="service-checkbox" value="financial-audit-report" style="display: none;">
@@ -680,10 +665,10 @@
             
             
             <div class="grand-total-container">
-                    <div class="bsa-code-container">
+                    <!-- <div class="bsa-code-container">
             <label for="bsa-code"></label>
             <input type="text" id="bsa-code" placeholder="Business Setup Advisor's Code (Optional)">
-        </div>
+        </div> -->
                 <div class="grand-total" id="grand-total-clickable">
                     <div class="grand-total-left">
                         <span class="grand-total-label">Grand Total</span>

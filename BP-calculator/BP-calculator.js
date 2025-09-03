@@ -990,7 +990,7 @@
             
             // Only apply default VAT registration if NOT loading from a shared link
             if (!hasShareConfig) {
-                const defaultServices = ['vat-registration'];
+                const defaultServices = [];
                 defaultServices.forEach(serviceId => {
                     const input = document.getElementById(serviceId);
                     const pill = document.querySelector(`.service-pill[data-service="${serviceId}"]`);
@@ -3544,10 +3544,9 @@
                 addonsContainer.appendChild(groupSection);
             });
             } else {
-                // Collapse addons section if no addons selected or no interaction
+                // Hide addons section completely if no addons selected or no interaction
                 addonsSection.classList.remove('expanded');
-                // Keep section visible but collapsed (just the header)
-                addonsSection.style.display = 'block';
+                addonsSection.style.display = 'none';
             }
         }
         
@@ -5552,10 +5551,17 @@
             addonsSection: true
         };
         
-        // Expand addons section immediately for shared links
+        // Expand addons section immediately for shared links only if there are selected addons
         const addonsSection = document.getElementById('addons-summary-section');
         if (addonsSection) {
-            addonsSection.classList.add('expanded');
+            // Check if there are any selected addons before expanding
+            const hasSelectedAddons = document.querySelectorAll('.service-checkbox:checked').length > 0;
+            if (hasSelectedAddons) {
+                addonsSection.classList.add('expanded');
+                addonsSection.style.display = 'block';
+            } else {
+                addonsSection.style.display = 'none';
+            }
         }
         
         // Reveal pricing immediately for shared links

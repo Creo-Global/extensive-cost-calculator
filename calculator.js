@@ -1739,8 +1739,8 @@
             }
 
     // Initialize Supabase client
-    const supabaseUrl = 'https://bwommjnbmumvgtlyfddn.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3b21tam5ibXVtdmd0bHlmZGRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0NDM0NTAsImV4cCI6MjA2NTAxOTQ1MH0.1OxopB9p-yoGoYpY7AUyHs-T7Fe0cK2dUjFq_FbCL-I';
+    const supabaseUrl = 'https://sb.meydanfz.ae';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU3MjQyMDM2LCJleHAiOjIwNzI4MTgwMzZ9.5YF79Wen41bSpKNOKiT9Wcd_psXf8IV4vgK7RUjOZoI';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     window.selectedActivities = window.selectedActivities || [];

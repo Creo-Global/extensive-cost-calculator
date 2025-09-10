@@ -2131,7 +2131,7 @@
         try {
             const { data, error } = await supabase
                 .from('Activity List')
-                .select('*')
+                .select('Code, "Activity Name", Category, Group, "When", DNFBP')
                 .or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`)
                 .limit(50);
 
@@ -2155,11 +2155,32 @@
         let html = '';
         activities.forEach(activity => {
             const isSelected = selectedActivityCodes.includes(activity.Code);
+            // Use the correct column names from the database
+            const preApproval = activity.When && activity.When.toUpperCase() === 'PRE';
+            const dffbp = activity.DNFBP && activity.DNFBP.toLowerCase() === 'yes';
+            
+            let labelsHtml = '';
+            if (preApproval || dffbp) {
+                labelsHtml = '<div class="modal-activity-labels">';
+                if (preApproval) {
+                    labelsHtml += '<span class="activity-label pre-approval">Pre Approval</span>';
+                }
+                if (dffbp) {
+                    labelsHtml += '<span class="activity-label dffbp">DFFBP</span>';
+                }
+                labelsHtml += '</div>';
+            }
+            
             html += `
                 <div class="modal-activity-item" data-code="${activity.Code}" data-name="${activity["Activity Name"]}" data-category="${activity.Category}" data-group="${activity.Group}">
                 <div class="modal-activity-info">
-                    <div class="modal-activity-code">${activity.Code}</div>
-                    <div class="modal-activity-name">${activity["Activity Name"]}</div>
+                    <div>
+                        <div class="modal-activity-code">${activity.Code}</div>
+                        <div class="modal-activity-name">
+                            ${activity["Activity Name"]}
+                            ${labelsHtml}
+                        </div>
+                    </div>
                 </div>
                     <div class="modal-activity-checkbox ${isSelected ? 'checked' : ''}">
                         <span class="check-icon">✓</span>
@@ -2214,7 +2235,7 @@
             const categoryName = mapGroupToCategory(groupName);
             const { data, error } = await supabase
                 .from('Activity List')
-                .select('Code, "Activity Name", Category, Group')
+                .select('Code, "Activity Name", Category, Group, "When", DNFBP')
                 .eq('Category', categoryName)
                 .order('Code')
                 .limit(200);
@@ -2243,11 +2264,32 @@
         let html = '';
         activities.forEach(activity => {
             const isSelected = selectedActivityCodes.includes(activity.Code);
+            // Use the correct column names from the database
+            const preApproval = activity.When && activity.When.toUpperCase() === 'PRE';
+            const dffbp = activity.DNFBP && activity.DNFBP.toLowerCase() === 'yes';
+            
+            let labelsHtml = '';
+            if (preApproval || dffbp) {
+                labelsHtml = '<div class="modal-activity-labels">';
+                if (preApproval) {
+                    labelsHtml += '<span class="activity-label pre-approval">Pre Approval</span>';
+                }
+                if (dffbp) {
+                    labelsHtml += '<span class="activity-label dffbp">DFFBP</span>';
+                }
+                labelsHtml += '</div>';
+            }
+            
             html += `
                 <div class="modal-activity-item" data-code="${activity.Code}" data-name="${activity["Activity Name"]}" data-category="${activity.Category}" data-group="${activity.Group}">
                 <div class="modal-activity-info">
-                    <div class="modal-activity-code">${activity.Code}</div>
-                    <div class="modal-activity-name">${activity["Activity Name"]}</div>
+                    <div>
+                        <div class="modal-activity-code">${activity.Code}</div>
+                        <div class="modal-activity-name">
+                            ${activity["Activity Name"]}
+                            ${labelsHtml}
+                        </div>
+                    </div>
                 </div>
                     <div class="modal-activity-checkbox ${isSelected ? 'checked' : ''}">
                         <span class="check-icon">✓</span>
@@ -5963,8 +6005,8 @@
                 searchResultsDropdown.style.display = 'block';
             
             const query = searchTerm === "*" ? 
-                supabase.from('Activity List').select('Code, "Activity Name", Category, Group').limit(40) : 
-                supabase.from('Activity List').select('Code, "Activity Name", Category, Group')
+                supabase.from('Activity List').select('Code, "Activity Name", Category, Group, "When", DNFBP').limit(40) : 
+                supabase.from('Activity List').select('Code, "Activity Name", Category, Group, "When", DNFBP')
                     .or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`)
                     .limit(100);
             
@@ -5997,6 +6039,22 @@
                 // Check if activity is already selected
                 const isSelected = window.selectedActivities && window.selectedActivities.some(selected => selected.code === activity.Code);
                 
+                // Use the correct column names from the database
+                const preApproval = activity.When && activity.When.toUpperCase() === 'PRE';
+                const dffbp = activity.DNFBP && activity.DNFBP.toLowerCase() === 'yes';
+                
+                let labelsHtml = '';
+                if (preApproval || dffbp) {
+                    labelsHtml = '<div class="modal-activity-labels">';
+                    if (preApproval) {
+                        labelsHtml += '<span class="activity-label pre-approval">Pre Approval</span>';
+                    }
+                    if (dffbp) {
+                        labelsHtml += '<span class="activity-label dffbp">DFFBP</span>';
+                    }
+                    labelsHtml += '</div>';
+                }
+                
                 resultItem.innerHTML = `
                     <div class="modal-activity-checkbox ${isSelected ? 'checked' : ''}">
                         <div class="check-icon">
@@ -6006,8 +6064,13 @@
                         </div>
                     </div>
                     <div class="modal-activity-info">
-                        <span class="modal-activity-code">${activity.Code}</span>
-                        <span class="modal-activity-name">${activity["Activity Name"]}</span>
+                        <div>
+                            <span class="modal-activity-code">${activity.Code}</span>
+                            <span class="modal-activity-name">
+                                ${activity["Activity Name"]}
+                                ${labelsHtml}
+                            </span>
+                        </div>
                     </div>
                 `;
                 resultItem.addEventListener('click', () => selectActivityFromSearch(activity));

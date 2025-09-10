@@ -1461,10 +1461,16 @@ justify-content: center;
 
 .search-results-dropdown .modal-activity-info {
     flex: 1;
-display: flex;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.search-results-dropdown .modal-activity-info > div:first-child {
+    display: flex;
     flex-direction: row;
     gap: 16px;
-align-items: center;
+    align-items: center;
 }
 
 .search-results-dropdown .modal-activity-code {
@@ -1480,6 +1486,9 @@ align-items: center;
     color: #1c1c1c;
     font-family: "Plus Jakarta Sans";
     line-height: 1.3;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .no-results, .loading-results, .error-results {
@@ -2749,7 +2758,13 @@ background-clip: text;
 
 .modal-activity-info {
     flex: 1;
-        display: flex;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-activity-info > div:first-child {
+    display: flex;
     flex-direction: row;
     gap: 16px;
     align-items: center;
@@ -2760,6 +2775,7 @@ background-clip: text;
     font-weight: 500;
     color: #1c1c1c;
     font-family: "Plus Jakarta Sans";
+    flex-shrink: 0;
 }
 
 .modal-activity-name {
@@ -2768,7 +2784,40 @@ background-clip: text;
     color: #1c1c1c;
     font-family: "Plus Jakarta Sans";
     line-height: 1.3;
-    
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap:8px;
+}
+
+.modal-activity-labels {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.activity-label {
+    display: inline-block;
+    padding: 4px;
+    border-radius: 12px;
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 600;
+    font-family: "Plus Jakarta Sans";
+    text-transform: uppercase;
+    color: #eb5f40;
+}
+
+.activity-label.pre-approval {
+    border-radius: 6px;
+    border: 1px solid  #EB5F40;
+    background: rgba(235, 95, 64, 0.08);
+}
+
+.activity-label.dffbp {
+    border-radius: 6px;
+    border: 1px solid #EB5F40;
+    background: rgba(235, 95, 64, 0.08);
 }
 
 .modal-footer {

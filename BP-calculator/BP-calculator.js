@@ -4703,6 +4703,60 @@
 
         // Old validation code removed - using centralized FormValidator
 
+    // DataLayer push function for Google Analytics/GTM tracking
+    function pushToDataLayer(eventName, formData) {
+        try {
+            // Ensure dataLayer exists
+            window.dataLayer = window.dataLayer || [];
+            
+            // Create the event object
+            const eventData = {
+                event: eventName,
+                form_data: {
+                    form_status: formData.form_status || 'complete',
+                    full_name: formData.fullName || '',
+                    phone: formData.phone || '',
+                    email: formData.email || '',
+                    license_type: formData.license_type || '',
+                    license_duration: formData.license_duration || '',
+                    business_activities: formData.business_activities || '',
+                    shareholders_range: formData.shareholders_range || '0',
+                    investor_visas: formData.investor_visas || '0',
+                    employee_visas: formData.employee_visas || '0',
+                    dependency_visas: formData.dependency_visas || '0',
+                    selected_addons: formData.selected_addons || '',
+                    applicants_inside_uae: formData.applicants_inside_uae || '0',
+                    applicants_outside_uae: formData.applicants_outside_uae || '0',
+                    total_cost: formData.total_cost || 0,
+                    license_cost: formData.license_cost || 0,
+                    visa_cost: formData.visa_cost || 0,
+                    user_country: formData.user_country || '',
+                    user_country_name: formData.user_country_name || '',
+                    user_city: formData.user_city || '',
+                    current_url: formData.current_url || window.location.href,
+                    // Additional fields specific to BP-calculator
+                    cost_breakdown: formData.cost_breakdown || '',
+                    configuration_id: formData.configuration_id || '',
+                    client_name: formData.client_name || '',
+                    salesperson_name: formData.salesperson_name || ''
+                },
+                // Add timestamp
+                timestamp: new Date().toISOString(),
+                // Add page info
+                page_title: document.title,
+                page_url: window.location.href
+            };
+            
+            // Push to dataLayer
+            window.dataLayer.push(eventData);
+            
+            console.log('Form data pushed to dataLayer:', eventData);
+            
+        } catch (error) {
+            console.error('Error pushing to dataLayer:', error);
+        }
+    }
+
     // Get a Call buttons - handles form submission
     function initializeGetCallButtons() {
         const getCallButtons = document.querySelectorAll('.get-call-btn');
@@ -5020,6 +5074,9 @@
         // Submit to webhook
         submitToWebhook(completeFormData)
             .then(() => {
+                // Push form data to dataLayer for tracking
+                pushToDataLayer('form_submit_success', completeFormData);
+                
                 // Show success message on successful submission
                 setTimeout(function() {
                     // Hide the Get Call buttons and show success messages in their place
@@ -5035,6 +5092,13 @@
             .catch((error) => {
                 // Handle submission error
                 console.error('Form submission failed:', error);
+                
+                // Push error event to dataLayer
+                pushToDataLayer('form_submit_error', { 
+                    ...completeFormData, 
+                    error_message: error.message || 'Unknown error',
+                    form_status: 'error'
+                });
             submitBtn.classList.remove('button-loading');
             submitBtn.disabled = false;
                 alert("There was an issue submitting the form. Please try again.");

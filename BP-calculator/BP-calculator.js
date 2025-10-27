@@ -1243,7 +1243,7 @@
             { name: "Transportation", group: "transportation", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef5b12d754eab63acb716_truck.svg" },
             { name: "Maintenance", group: "maintenance", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51f8dbb977dc5e09a95_Maintenance.svg" },
             { name: "Realestate", group: "realestate", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51ffa37ff75e611e59e_Real%20Estate.svg" },
-            { name: "Administrative", group: "administrative", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e6800108c99cf14ab7d92_289b192ec79ecb38926fdb5e00570aef3306f5026282f58165024e31f1507bc7.png" },
+            { name: "Administrative", group: "administrative", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff40a68d15d9c4d5b93cd8_administrative.svg" },
             { name: "Agriculture", group: "agriculture", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51f2f3a67bde876b5a6_Agriculture.svg" },
             { name: "Art", group: "art", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51fea496252844584d8_Art.svg" },
             { name: "ICT", group: "ict", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51f22116abc03173482_ICT.svg" },

@@ -270,8 +270,12 @@ background-color: #f9fafb;
     /* height: 89px; */
     overflow: hidden;
     border-radius: 15px;
-    aspect-ratio: 286/187;
+    aspect-ratio: 286/87;
     }
+[data-license="fawri"] .license-card-image ,
+[data-license="regular"] .license-card-image {
+    aspect-ratio: 286/386;
+}
 
 .license-card-image img {
     width: 100%;
@@ -283,6 +287,11 @@ background-color: #f9fafb;
     .license-card-image {
        aspect-ratio: 100/25;
        min-height: 100px;
+    }
+    [data-license="fawri"] .license-card-image ,
+    [data-license="regular"] .license-card-image {
+        aspect-ratio: 100/45;
+        min-height: 150px;
     }
 }
 
@@ -4351,6 +4360,7 @@ p#addons-modal-subtitle {
   &.selected{
     background: #fff;
     box-shadow: none;
+    border-color: #f9f9fc;
     .activity-icon path{
         stroke: #fff !important;
     }
@@ -4375,7 +4385,7 @@ p#addons-modal-subtitle {
     stroke: #75B477;
   }
   &.selected{
-    background: linear-gradient(0deg, rgba(122, 248, 153, 0.20) 0%, rgba(122, 248, 153, 0.20) 100%), linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(131, 132, 132, 0.20) 93.45%);
+    background: linear-gradient(328deg, rgba(72, 157, 62, 0.00) 6.1%, rgba(84, 157, 62, 0.53) 66.65%), linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(131, 132, 132, 0.20) 93.45%);
   }
 }
 
@@ -4386,7 +4396,7 @@ p#addons-modal-subtitle {
     stroke: #8866A2;
   }
   &.selected{
-    background: linear-gradient(0deg, rgba(150, 37, 236, 0.20) 0%, rgba(150, 37, 236, 0.20) 100%), linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(131, 132, 132, 0.20) 93.45%);
+    background: linear-gradient(306deg, rgba(150, 37, 236, 0.05) 9.99%, rgba(112, 19, 183, 0.30) 64.01%), linear-gradient(136deg, rgba(0, 0, 0, 0.57) 10.01%, rgba(131, 132, 132, 0.29) 84.97%);
   }
 }
 
@@ -4397,7 +4407,7 @@ p#addons-modal-subtitle {
     stroke: #0A7A9F;
   }
   &.selected{
-    background: linear-gradient(0deg, rgba(25, 116, 201, 0.20) 0%, rgba(25, 116, 201, 0.20) 100%), linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(131, 132, 132, 0.20) 93.45%);
+    background: linear-gradient(306deg, rgba(25, 116, 201, 0.00) 10.13%, rgba(25, 116, 201, 0.44) 79.58%), linear-gradient(144deg, rgba(0, 0, 0, 0.40) 26.84%, rgba(131, 132, 132, 0.20) 75.3%);
   }
   
 }
@@ -4409,6 +4419,6 @@ p#addons-modal-subtitle {
     stroke: #E1584C;
   }
   &.selected{
-    background: linear-gradient(0deg, rgba(174, 46, 35, 0.20) 0%, rgba(174, 46, 35, 0.20) 100%), linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(131, 132, 132, 0.20) 93.45%);
+    background: linear-gradient(317deg, rgba(174, 46, 35, 0.10) 8.54%, rgba(177, 27, 57, 0.48) 54.32%), linear-gradient(130deg, rgba(0, 0, 0, 0.40) 19.34%, rgba(131, 132, 132, 0.08) 91.07%);
   }
 }

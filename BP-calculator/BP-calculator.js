@@ -1274,7 +1274,7 @@
                     </div>
                 </div>
                 <div class="activity-card-body">
-                    <img class="svg" src="${groupInfo.icon}" alt="${groupInfo.name} Icon" class="activity-icon">
+                    <img class="activity-icon svg" src="${groupInfo.icon}" alt="${groupInfo.name} Icon" class="activity-icon">
                     <h3>${groupInfo.name}</h3>
                     <a href="#" class="select-activity-link">Select your activity <span class="link-arrow"><svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M8.11881 0.658612L8.11881 6.22708C8.11881 6.40143 8.04955 6.56864 7.92627 6.69192C7.80296 6.81523 7.63575 6.8845 7.46143 6.88447C7.28707 6.88447 7.11983 6.81523 6.99655 6.69195C6.87327 6.56867 6.80404 6.40143 6.80404 6.22708L6.80478 2.24408L1.1203 7.92855C0.997234 8.05162 0.830323 8.12078 0.656277 8.12078C0.482232 8.12078 0.315289 8.05162 0.192226 7.92855C0.069163 7.80549 3.35917e-05 7.63858 3.35495e-05 7.46453C3.35074e-05 7.29049 0.0691568 7.12355 0.192226 7.00048L5.8767 1.316L1.89331 1.31486C1.71898 1.31483 1.55175 1.2456 1.42846 1.12232C1.30518 0.999031 1.23595 0.831795 1.23592 0.657474C1.23592 0.483123 1.30518 0.315911 1.42846 0.192631C1.55177 0.0693206 1.71898 5.80848e-05 1.89331 8.58807e-05L7.46176 8.00644e-05C7.54823 -1.3333e-05 7.63383 0.0169705 7.71368 0.0500416C7.79352 0.0831117 7.86607 0.131651 7.92713 0.192842C7.98817 0.254003 8.03652 0.32667 8.06944 0.406609C8.10229 0.486547 8.11909 0.572209 8.11881 0.658612Z" fill="#020202"/>
@@ -2558,14 +2558,14 @@
         // License data
         const licenseData = {
             'fawri': {
-                title: 'What Is Fawri License? 🚀',
+                title: 'What Is Fawri License?',
                 description: 'Fawri is your express route to a 60-minute, compliance-led LLC license. This 100% digital, fast-track license is designed exclusively for ambitious solo entrepreneurs and freelancers who want speed, control, and minimal setup friction.',
                 additional: 'With over 1,800 activities, Fawri gets you licensed, visa-ready, and enables bank account applications on the same day. It’s the fastest, most reliable way to launch your business in Dubai.',
                 actionText: 'Select Fawri License',
                 image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b601639b2df4bfdbec4_fawri.webp'
             },
             'regular': {
-                title: 'Regular Business License 📨',
+                title: 'Regular Business License',
                 description: 'The regular business license is built for founders who need flexibility, scalability, and full ownership. It’s a customisable license that supports multi-partner setups, cross-industry models, and long-term growth.',
                 additional: 'Choose from 2,500+ business activities across 3 groups with instant access to visa processing and banking. 100% digital, fully foreign-owned, and designed for serious entrepreneurs ready to build broad, future-ready businesses in Dubai.', 
                 actionText: 'Select Regular License',

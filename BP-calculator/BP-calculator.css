@@ -288,11 +288,6 @@ background-color: #f9fafb;
        aspect-ratio: 100/25;
        min-height: 100px;
     }
-    [data-license="fawri"] .license-card-image ,
-    [data-license="regular"] .license-card-image {
-        aspect-ratio: 100/45;
-        min-height: 150px;
-    }
 }
 
 .license-card-content {
@@ -658,7 +653,7 @@ background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
 
 @media (max-width: 768px) {
     .visa-card-image img {
-        height: 160px;
+        min-height: 160px;
     }
     .visa-cards-container {
         margin-bottom: 0;
@@ -1109,7 +1104,7 @@ align-items: center;
 }
 
 .grand-total-container {
-    margin: 24px 0 24px 0 !important;
+    margin: 36px 0 24px 0 !important;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -1145,14 +1140,15 @@ align-items: center;
     gap: 8px;
     border-radius: 40px;
     background: transparent;
-    color: white;
-    border: 1px solid #fff;
+    color: #000;
+    border: 1px solid #000;
     padding: 16px 24px !important;
     font-size: 16px;
     font-weight: 600;
     font-family: "Plus Jakarta Sans";
     cursor: pointer;
     transition: all 0.3s;
+    background-color: #fff;
 }
 
 .get-call-btn:hover {
@@ -1522,9 +1518,6 @@ justify-content: center;
     .mobile-header {
         display: block;
     }
-    .grand-total-container {
-        margin: 0 !important;
-    }
     
     #MFZ-NewCostCalForm .form-container {
         border-radius: 0;
@@ -1679,7 +1672,7 @@ font-size: 18px;
         }
     
     .visa-card-image {
-        height: 160px;
+        min-height: 160px;
         }
     
     .visa-footer {
@@ -3962,7 +3955,7 @@ form[data-name] .calc-error-message,
     .success-message-content {
         flex-direction: column-reverse;
         text-align: center;
-        gap: 16px;
+        gap: 0;
         max-width: 100%;
     }
     
@@ -4159,7 +4152,7 @@ form[data-name] .calc-error-message,
 /* Mobile specific adjustments */
 @media (max-width: 768px) {
     .back-to-top-button {
-        bottom: 85px;
+        bottom: 105px;
     }
     
     .back-to-top-button.visible {
@@ -4337,7 +4330,6 @@ p#addons-modal-subtitle {
     }
     .change-status-card .visa-card-image{
         min-height: 100px;
-        aspect-ratio: 100/25;
         height: auto;   
     }
     .visa-card-image img{
@@ -4379,8 +4371,7 @@ p#addons-modal-subtitle {
 }
 
 /* 1–2, 9–10, 17–18 ...  (GREEN) */
-.activity-cards-container > .activity-card:nth-child(8n+1),
-.activity-cards-container > .activity-card:nth-child(8n+2){
+.activity-cards-container > .activity-card:nth-child(4n+1){
   .activity-icon path{
     stroke: #75B477;
   }
@@ -4390,8 +4381,7 @@ p#addons-modal-subtitle {
 }
 
 /* 3–4, 11–12, 19–20 ... (VIOLET) */
-.activity-cards-container > .activity-card:nth-child(8n+3),
-.activity-cards-container > .activity-card:nth-child(8n+4){
+.activity-cards-container > .activity-card:nth-child(4n+2){
   .activity-icon path{
     stroke: #8866A2;
   }
@@ -4401,8 +4391,7 @@ p#addons-modal-subtitle {
 }
 
 /* 5–6, 13–14, 21–22 ... (BLUE) */
-.activity-cards-container > .activity-card:nth-child(8n+5),
-.activity-cards-container > .activity-card:nth-child(8n+6){
+.activity-cards-container > .activity-card:nth-child(4n+3){
   .activity-icon path{
     stroke: #0A7A9F;
   }
@@ -4413,12 +4402,62 @@ p#addons-modal-subtitle {
 }
 
 /* 7–8, 15–16, 23–24 ... (ORANGE) */
-.activity-cards-container > .activity-card:nth-child(8n+7),
-.activity-cards-container > .activity-card:nth-child(8n+8){
+.activity-cards-container > .activity-card:nth-child(4n+4){
   .activity-icon path{
     stroke: #E1584C;
   }
   &.selected{
     background: linear-gradient(317deg, rgba(174, 46, 35, 0.10) 8.54%, rgba(177, 27, 57, 0.48) 54.32%), linear-gradient(130deg, rgba(0, 0, 0, 0.40) 19.34%, rgba(131, 132, 132, 0.08) 91.07%);
+  }
+}
+
+
+/* Grand total sticky for Mobile  */
+
+.grand-total-container.for-mobile-sticky {
+    display: none;
+    margin: 0 !important;
+    position: fixed;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s ease;
+    pointer-events: none;
+    &.is-show{
+        opacity: 1;
+        visibility: visible;    
+        pointer-events: auto; 
+        bottom: 0;  
+    }
+    .grand-total{
+        border-radius: 0;
+    }
+}
+@media (max-width: 768px) {
+    .grand-total-container.for-mobile-sticky{
+        display: block; 
+    }
+}
+
+
+.quantity-btn {
+  position: relative;
+
+  &.pulse {
+    animation: pulse 0.5s forwards ease-out;
+    transform: scale(1);
+  }
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  70% {
+    transform: scale(1.16);
+  }
+  100% {
+    transform: scale(1);
   }
 }

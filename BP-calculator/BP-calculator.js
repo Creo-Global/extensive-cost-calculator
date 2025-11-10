@@ -1944,10 +1944,10 @@
     
     // Category images
     const categoryImages = {
-        'mCore': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0009c49b9f6e1a1b8b5_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.webp',
-        'mResidency': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6afd5ddb5f1622f99baf_775fd8f4871640146c1e5f5c6af9c273275f1e4d307c502d91bb9baf561163fc.webp',
-        'mAssist': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6aeaeb91eccdec925bcc_f03ef01cb46009b032f13938d1ce70d5c48295bb78648a5be0cff97a231d87de.webp',
-        'mAccounting': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6ae3a479cb1ee9225627_b6c212f84a314ee75c93701d8cc4a1745ef6957b2ea1458e7e33513166368c0d.webp'
+        'mCore': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff650317c623f64f2689af_mcore.webp',
+        'mResidency': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff6b6e0fa3c7b9466bc47e_mresidency.webp',
+        'mAssist': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff6b6ef7331a8fbd654c6c_shareholder-visa.webp',
+        'mAccounting': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff650317c623f64f2689af_mcore.webp'
     };
     
     // Remove any existing category image
@@ -2368,28 +2368,28 @@
                 description: 'An Investor Visa in Dubai is a type of long-term residence visa designed for foreign nationals who wish to invest in or establish a business in Dubai. It allows you to live, work, and sponsor your family in Dubai, with renewals available as long as your investment remains valid. Only one investor visa is issued per business setup, even if multiple shareholders are involved.<br><br>Unlike a standard employment visa, this is a self-sponsored visa, directly tied to your ownership or role in the company. It’s ideal for founders, co-founders, and partners who want full control over their immigration status.',
                 additional: 'At Meydan Free Zone, we streamline the process to be fast, compliant, and stress-free, allowing you to secure your visa and focus on growing your business.',
                 actionText: 'Select Investor Visa',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbfae4fc11d7f87391fb4_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.png'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff6503f76faf01240cfb63_investor%20visa.webp'
             },
             'employee': {
                 title: 'Employee Visa',
                 description: 'An Employee Visa, also known as an Employment Visa or Work Visa, is a government-issued permit that allows foreign nationals to live and work legally in Dubai.<br><br>The employer is responsible for managing the full application process, including document preparation, government approvals, medical testing, Emirates ID registration, and timely renewals.',
                 additional: 'At Meydan Free Zone, we simplify the entire process for you. Our dedicated support team ensures your Employee Visas are processed quickly, compliantly, and without delays, so your team can get to work without any administrative hassle.',
                 actionText: 'Select Employee Visa',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0004d1341d4ccb5b150_2193782fa28109786e70758b4f8700cf49d9201e377abc3571b6302582c10d9b.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff650321076a29d95f78fb_employee%20visa.webp'
             },
             'dependent': {
                 title: 'Dependent Visa',
                 description: 'A Dependent Visa in Dubai allows UAE residents to sponsor their immediate family members, including spouses, children, and parents, to legally live in the UAE. It’s a residency visa linked to the sponsor’s visa status and remains valid as long as the sponsor’s visa is active and compliant.<br> <br>This visa is ideal for those who want their loved ones to join them in the UAE, ensuring legal residency, access to essential services, and peace of mind for families relocating together.',
                 additional: 'At Meydan Free Zone, we simplify the Dependent Visa process to ensure fast, accurate submissions and full compliance, so you can bring your family over without delays or stress.',
                 actionText: 'Select Dependent Visa',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc001b0a226a76d71d00d_de8b99eed6930d3f9455605a063e0514bbbcb91427bf01dca897e5aa4b11d820.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff6503675206a13531707c_depended%20visa.webp'
             },
             'change-status': {
                 title: 'Change of Status',
                 description: 'If you\'re already in the UAE, whether on a tourist visa, family visa, or a previous employment visa, you\'ll need to apply for a Change of Status to switch to a residence visa under your new business.<br><br><strong>This applies to:</strong><br><br><span class="numbered-item">1.</span> <strong>You</strong> as a founder or shareholder moving to an Investor or Shareholder visa<br><br><span class="numbered-item">2.</span> <strong>Employees</strong> you\'re hiring who are switching jobs and changing sponsorship<br><br><span class="numbered-item">3.</span> <strong>Family members</strong> you\'re sponsoring (after obtaining your own visa) who are already in the UAE',
                 additional: 'Meydan Free Zone manages the full Change of Status process for you, so you don\'t need to exit the country or restart your visa journey. It\'s a fast, compliant way to update your visa status, whether you\'re launching or growing your team from inside the UAE.<br><br>Just let us know who\'s already here, and we\'ll handle the rest.',
                 actionText: 'Got It',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68763d4feb6dc26436a8d668_831cebae91bcfa5c27afa8ba08a0e68f314db7dbbb164f9bacbfcc9f88edc4bc.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff3ea292559851c4de9095_change-status.webp'
             }
         };
         
@@ -2562,14 +2562,14 @@
                 description: 'Fawri is your express route to a 60-minute, compliance-led LLC license. This 100% digital, fast-track license is designed exclusively for ambitious solo entrepreneurs and freelancers who want speed, control, and minimal setup friction.',
                 additional: 'With over 1,800 activities, Fawri gets you licensed, visa-ready, and enables bank account applications on the same day. It’s the fastest, most reliable way to launch your business in Dubai.',
                 actionText: 'Select Fawri License',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b601639b2df4bfdbec4_fawri.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff65033b9a144013518dba_fawri-licences.webp'
             },
             'regular': {
                 title: 'Regular Business License',
                 description: 'The regular business license is built for founders who need flexibility, scalability, and full ownership. It’s a customisable license that supports multi-partner setups, cross-industry models, and long-term growth.',
                 additional: 'Choose from 2,500+ business activities across 3 groups with instant access to visa processing and banking. 100% digital, fully foreign-owned, and designed for serious entrepreneurs ready to build broad, future-ready businesses in Dubai.', 
                 actionText: 'Select Regular License',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b602ab2cde8b87325e8_regular.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff650362c775d28eb2dcc8_reg-licences.webp'
             }
         };
         

@@ -1237,23 +1237,23 @@
     // Initialize activity groups functionality
     function initializeActivityGroups() {
         const groups = [
-            { name: "F&B, Rentals", group: "F&B,Rentals", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e641d24b90c96dfafdc34_d431eb034e1a686ed0a5ae255ad6cf5a9bbd5f8bdf1b61ed4f6d01c555ea3d78.png" },
-            { name: "Financial", group: "financial", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e642316bbf305f8e487a3_38de45a3cb52fb4ab3afc9e833ae57e84444434efed8001b01a697990d7b35ea.png" },
-            { name: "Education", group: "education", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e64260ad8af5c3d69f211_879ec5f9869afa804e916bb99888aad8ce26efbb286a02f5879c1941257397bb.png" },
-            { name: "Transportation", group: "transportation", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e64208f117b22b75ec5ef_55c616434ce274d0e445905bfb2f80866fe3201a85ff5beeb6e469373fce2ede.png" },
-            { name: "Maintenance", group: "maintenance", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e644dcfa0b9f15e914df6_89592b5bd60a9091d367ba0c123ab57389d3276ede8f8e9fc06f4540d5349b9a.png" },
-            { name: "Realestate", group: "realestate", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e645f24b90c96dfb01ada_9d419d848a5d582d7fcbdd95afb68d2afea53b1583d707f615383ab652f39f29.png" },
-            { name: "Administrative", group: "administrative", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e6800108c99cf14ab7d92_289b192ec79ecb38926fdb5e00570aef3306f5026282f58165024e31f1507bc7.png" },
-            { name: "Agriculture", group: "agriculture", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e6441d775866c5a428411_2259ef99aba05e1260ed45d53205346e30587661bb6e0ea857a59b12ee92bc61.png" },
-            { name: "Art", group: "art", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e645710be6e1a2c9c8859_3433ab633670e596ff531f10e43b4b4c4a2117b0ba5e17363b3618a5aad911eb.png" },
-            { name: "ICT", group: "ict", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e6478b5d69a994162ea64_356a5ddca879de1a0a9d8b7efb588da5474b15bb46e3833303ce91097ef8b0db.png" },
-            { name: "Health Care", group: "healthcare", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e644a7afd519c334e2dc5_ba72fb6b951ceb1bbe752d9c90d3bb4f797c9a8b711a8548d55b7774712d7e3d.png" },
-            { name: "Services", group: "services", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e647b1f864562f8be0dce_427dca92cbdac3f7d860b97c442e62841bc613a6a1be5a7bd1e99c9af25cec12.png" },
-            { name: "Professional", group: "professional", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e643e7cb5992fa0758299_841ae68fac18927fd0b0a8d3669eef41098c973cad8471d53bc4a244aaadd9a5.png" },
-            { name: "Sewerage", group: "sewerage", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e649e493fb8933a8bc29b_85b78022048b39d8b16d509165289201a5ef0973c39681cb3384025e0af0f297.png" },
-            { name: "Trading", group: "trading", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e649436c79ebb53083e4d_37610fecfe4fe44b5b17208f4ba91c4ea481fe3a1520f6d8de0c93b7422184ec.png" },
-            { name: "Waste Collection", group: "waste", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e64994001239338faf90d_cd9b5d6d70e62b356547c76722455a54e960d708ee8c8769d2f5fb4f2323ece5.png" },
-            { name: "Manufacturing", group: "manufacturing", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686e64a1516df3f972e8aff3_ec0fdf4e82cdbee6f54835bee98f804b24793be92e247687884fa73958b73e9f.png" },
+            { name: "F&B, Rentals", group: "F&B,Rentals", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51fca8288179aae11da_F%26B%2C%20Rentals.svg" },
+            { name: "Financial", group: "financial", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51fb96a229b2824af0f_Financial.svg" },
+            { name: "Education", group: "education", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51fd014459df24d3325_Education.svg" },
+            { name: "Transportation", group: "transportation", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef5b12d754eab63acb716_truck.svg" },
+            { name: "Maintenance", group: "maintenance", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51f8dbb977dc5e09a95_Maintenance.svg" },
+            { name: "Realestate", group: "realestate", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51ffa37ff75e611e59e_Real%20Estate.svg" },
+            { name: "Administrative", group: "administrative", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff40a68d15d9c4d5b93cd8_administrative.svg" },
+            { name: "Agriculture", group: "agriculture", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51f2f3a67bde876b5a6_Agriculture.svg" },
+            { name: "Art", group: "art", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51fea496252844584d8_Art.svg" },
+            { name: "ICT", group: "ict", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51f22116abc03173482_ICT.svg" },
+            { name: "Health Care", group: "healthcare", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51f61500699cd371991_hospital.svg" },
+            { name: "Services", group: "services", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51fad0908d806731555_Services.svg" },
+            { name: "Professional", group: "professional", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51fad0908d806731558_Professional.svg" },
+            { name: "Sewerage", group: "sewerage", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51f9e5c02dca8bf99cd_sewerage.svg" },
+            { name: "Trading", group: "trading", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51fedefe9b3e523bffe_status-up.svg" },
+            { name: "Waste Collection", group: "waste", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51f3695bcf980854032_Waste%20Collection.svg" },
+            { name: "Manufacturing", group: "manufacturing", icon: "https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68fef51ff278b7580bf2a277_Manufacturing.svg" },
         ];
 
         const container = document.querySelector('.activity-cards-container');
@@ -1274,16 +1274,12 @@
                     </div>
                 </div>
                 <div class="activity-card-body">
-                    <img src="${groupInfo.icon}" alt="${groupInfo.name} Icon" class="activity-icon">
+                    <img class="activity-icon svg" src="${groupInfo.icon}" alt="${groupInfo.name} Icon" class="activity-icon">
                     <h3>${groupInfo.name}</h3>
-                    <a href="#" class="select-activity-link">Select your activity <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none">
-  <path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979589 8.88906 1.05226 8.92198 1.13219C8.95483 1.21213 8.97163 1.29779 8.97135 1.3842Z" fill="url(#paint0_linear_4640_6386)"/>
-  <defs>
-    <linearGradient id="paint0_linear_4640_6386" x1="-2.20508" y1="5.4043" x2="8.75062" y2="-1.23878" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#EB5F40"/>
-      <stop offset="1" stop-color="#B5348B"/>
-    </linearGradient>
-  </defs></svg></span></a></div>
+                    <a href="#" class="select-activity-link">Select your activity <span class="link-arrow"><svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.11881 0.658612L8.11881 6.22708C8.11881 6.40143 8.04955 6.56864 7.92627 6.69192C7.80296 6.81523 7.63575 6.8845 7.46143 6.88447C7.28707 6.88447 7.11983 6.81523 6.99655 6.69195C6.87327 6.56867 6.80404 6.40143 6.80404 6.22708L6.80478 2.24408L1.1203 7.92855C0.997234 8.05162 0.830323 8.12078 0.656277 8.12078C0.482232 8.12078 0.315289 8.05162 0.192226 7.92855C0.069163 7.80549 3.35917e-05 7.63858 3.35495e-05 7.46453C3.35074e-05 7.29049 0.0691568 7.12355 0.192226 7.00048L5.8767 1.316L1.89331 1.31486C1.71898 1.31483 1.55175 1.2456 1.42846 1.12232C1.30518 0.999031 1.23595 0.831795 1.23592 0.657474C1.23592 0.483123 1.30518 0.315911 1.42846 0.192631C1.55177 0.0693206 1.71898 5.80848e-05 1.89331 8.58807e-05L7.46176 8.00644e-05C7.54823 -1.3333e-05 7.63383 0.0169705 7.71368 0.0500416C7.79352 0.0831117 7.86607 0.131651 7.92713 0.192842C7.98817 0.254003 8.03652 0.32667 8.06944 0.406609C8.10229 0.486547 8.11909 0.572209 8.11881 0.658612Z" fill="#020202"/>
+</svg>
+</span></a></div>
             `;
             
             container.appendChild(card);
@@ -1948,10 +1944,10 @@
     
     // Category images
     const categoryImages = {
-        'mCore': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0009c49b9f6e1a1b8b5_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.webp',
-        'mResidency': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6afd5ddb5f1622f99baf_775fd8f4871640146c1e5f5c6af9c273275f1e4d307c502d91bb9baf561163fc.webp',
-        'mAssist': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6aeaeb91eccdec925bcc_f03ef01cb46009b032f13938d1ce70d5c48295bb78648a5be0cff97a231d87de.webp',
-        'mAccounting': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686f6ae3a479cb1ee9225627_b6c212f84a314ee75c93701d8cc4a1745ef6957b2ea1458e7e33513166368c0d.webp'
+        'mCore': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff650317c623f64f2689af_mcore.webp',
+        'mResidency': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff6b6e0fa3c7b9466bc47e_mresidency.webp',
+        'mAssist': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff6b6ef7331a8fbd654c6c_shareholder-visa.webp',
+        'mAccounting': 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff650317c623f64f2689af_mcore.webp'
     };
     
     // Remove any existing category image
@@ -2372,28 +2368,28 @@
                 description: 'An Investor Visa in Dubai is a type of long-term residence visa designed for foreign nationals who wish to invest in or establish a business in Dubai. It allows you to live, work, and sponsor your family in Dubai, with renewals available as long as your investment remains valid. Only one investor visa is issued per business setup, even if multiple shareholders are involved.<br><br>Unlike a standard employment visa, this is a self-sponsored visa, directly tied to your ownership or role in the company. It’s ideal for founders, co-founders, and partners who want full control over their immigration status.',
                 additional: 'At Meydan Free Zone, we streamline the process to be fast, compliant, and stress-free, allowing you to secure your visa and focus on growing your business.',
                 actionText: 'Select Investor Visa',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bbfae4fc11d7f87391fb4_349223d89f5e3538a23ec152a8746c6bc72d4e815a90ba5ed0d16e70cb902552.png'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff6503f76faf01240cfb63_investor%20visa.webp'
             },
             'employee': {
                 title: 'Employee Visa',
                 description: 'An Employee Visa, also known as an Employment Visa or Work Visa, is a government-issued permit that allows foreign nationals to live and work legally in Dubai.<br><br>The employer is responsible for managing the full application process, including document preparation, government approvals, medical testing, Emirates ID registration, and timely renewals.',
                 additional: 'At Meydan Free Zone, we simplify the entire process for you. Our dedicated support team ensures your Employee Visas are processed quickly, compliantly, and without delays, so your team can get to work without any administrative hassle.',
                 actionText: 'Select Employee Visa',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc0004d1341d4ccb5b150_2193782fa28109786e70758b4f8700cf49d9201e377abc3571b6302582c10d9b.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff650321076a29d95f78fb_employee%20visa.webp'
             },
             'dependent': {
                 title: 'Dependent Visa',
                 description: 'A Dependent Visa in Dubai allows UAE residents to sponsor their immediate family members, including spouses, children, and parents, to legally live in the UAE. It’s a residency visa linked to the sponsor’s visa status and remains valid as long as the sponsor’s visa is active and compliant.<br> <br>This visa is ideal for those who want their loved ones to join them in the UAE, ensuring legal residency, access to essential services, and peace of mind for families relocating together.',
                 additional: 'At Meydan Free Zone, we simplify the Dependent Visa process to ensure fast, accurate submissions and full compliance, so you can bring your family over without delays or stress.',
                 actionText: 'Select Dependent Visa',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686bc001b0a226a76d71d00d_de8b99eed6930d3f9455605a063e0514bbbcb91427bf01dca897e5aa4b11d820.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff6503675206a13531707c_depended%20visa.webp'
             },
             'change-status': {
                 title: 'Change of Status',
                 description: 'If you\'re already in the UAE, whether on a tourist visa, family visa, or a previous employment visa, you\'ll need to apply for a Change of Status to switch to a residence visa under your new business.<br><br><strong>This applies to:</strong><br><br><span class="numbered-item">1.</span> <strong>You</strong> as a founder or shareholder moving to an Investor or Shareholder visa<br><br><span class="numbered-item">2.</span> <strong>Employees</strong> you\'re hiring who are switching jobs and changing sponsorship<br><br><span class="numbered-item">3.</span> <strong>Family members</strong> you\'re sponsoring (after obtaining your own visa) who are already in the UAE',
                 additional: 'Meydan Free Zone manages the full Change of Status process for you, so you don\'t need to exit the country or restart your visa journey. It\'s a fast, compliant way to update your visa status, whether you\'re launching or growing your team from inside the UAE.<br><br>Just let us know who\'s already here, and we\'ll handle the rest.',
                 actionText: 'Got It',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68763d4feb6dc26436a8d668_831cebae91bcfa5c27afa8ba08a0e68f314db7dbbb164f9bacbfcc9f88edc4bc.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff3ea292559851c4de9095_change-status.webp'
             }
         };
         
@@ -2562,18 +2558,18 @@
         // License data
         const licenseData = {
             'fawri': {
-                title: 'What Is Fawri License? 🚀',
+                title: 'What Is Fawri License?',
                 description: 'Fawri is your express route to a 60-minute, compliance-led LLC license. This 100% digital, fast-track license is designed exclusively for ambitious solo entrepreneurs and freelancers who want speed, control, and minimal setup friction.',
                 additional: 'With over 1,800 activities, Fawri gets you licensed, visa-ready, and enables bank account applications on the same day. It’s the fastest, most reliable way to launch your business in Dubai.',
                 actionText: 'Select Fawri License',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b601639b2df4bfdbec4_fawri.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff65033b9a144013518dba_fawri-licences.webp'
             },
             'regular': {
-                title: 'Regular Business License 📨',
+                title: 'Regular Business License',
                 description: 'The regular business license is built for founders who need flexibility, scalability, and full ownership. It’s a customisable license that supports multi-partner setups, cross-industry models, and long-term growth.',
                 additional: 'Choose from 2,500+ business activities across 3 groups with instant access to visa processing and banking. 100% digital, fully foreign-owned, and designed for serious entrepreneurs ready to build broad, future-ready businesses in Dubai.', 
                 actionText: 'Select Regular License',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/686b8b602ab2cde8b87325e8_regular.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff650362c775d28eb2dcc8_reg-licences.webp'
             }
         };
         

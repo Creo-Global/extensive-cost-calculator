@@ -859,7 +859,7 @@
         try {
             localStorage.setItem('costCalculatorData', JSON.stringify(snapshot));
         } catch (e) {
-            console.log('Unable to save form data to localStorage', e);
+            // Unable to save form data to localStorage
         }
     }
 
@@ -895,22 +895,9 @@
                 businessActivitiesCost = extraGroups * 1000;
             }
             
-            console.log("Calculated Total Cost Components:");
-            console.log("License: " + licenseComponent);
-            console.log("Visa: " + visaComponent);
-            console.log("Office: " + officeComponent);
-            console.log("Add-ons: " + addonsComponent);
-            console.log("Business Activities: " + businessActivitiesCost);
-            
             // Return the total cost
             return Math.round(licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost);
         } else {
-            console.log("Using Global Variables for Total Cost:");
-            console.log("License: " + LicenseCost);
-            console.log("Visa: " + VisaCost);
-            console.log("Add-ons: " + window.AddonsComponent);
-            console.log("Business Activities: " + window.BusinessActivitiesCost);
-            
             // Return the total cost using global variables
             return LicenseCost + VisaCost + (window.AddonsComponent || 0) + (window.BusinessActivitiesCost || 0);
         }

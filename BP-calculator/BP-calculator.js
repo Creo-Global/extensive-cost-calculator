@@ -1793,7 +1793,7 @@
                     Code: this.dataset.code, 
                     "Activity Name": this.dataset.name, 
                     Category: this.dataset.category, 
-                    Group: this.dataset.group 
+                    Group: parseInt(this.dataset.group) || this.dataset.group
                 };
                 
                 if (isCurrentlySelected) {
@@ -1801,7 +1801,10 @@
                     removeActivity(activityData.Code);
                  } else {
                     checkbox.classList.add('checked');
-                    addActivityToSelected(activityData, groupName);
+                    // Store both the actual Group ID and the category for UI purposes
+                    activityData.categoryGroup = groupName; // For UI card updates
+                    activityData.groupName = activityData.Group; // For pricing calculation
+                    addActivityToSelected(activityData, activityData.Group);
                 }
                 
                 updateActivityCountOnCard(groupName);
@@ -2322,6 +2325,42 @@
             'manufacturing': 'Manufacturing' 
         };
         return groupToCategoryMap[groupName] || groupName;
+    }
+
+    function mapCategoryToGroup(category, groupNumber) {
+        const categoryMapping = {
+            'Administrative': 'administrative',
+            'Agriculture': 'agriculture', 
+            'Art': 'art',
+            'Education': 'education',
+            'ICT': 'ict',
+            'F&B,Rentals': 'F&B,Rentals',
+            'Financial': 'financial',
+            'HealthCare': 'healthcare',
+            'Maintenance': 'maintenance',
+            'Services': 'services',
+            'Professional': 'professional',
+            'Realestate': 'realestate',
+            'Sewerage': 'sewerage',
+            'Trading': 'trading',
+            'Transportation': 'transportation',
+            'Waste Collection': 'waste',
+            'Manufacturing': 'manufacturing'
+        };
+        
+        let cleanCategory = typeof category === 'string' ? category.trim() : '';
+        if (cleanCategory && categoryMapping[cleanCategory]) {
+            return categoryMapping[cleanCategory];
+        }
+        
+        // Fallback: check for partial matches
+        for (const [key, value] of Object.entries(categoryMapping)) {
+            if (cleanCategory && (cleanCategory.includes(key) || cleanCategory.toLowerCase().includes(key.toLowerCase()))) {
+                return value;
+            }
+        }
+        
+        return 'services'; // Default fallback
     }
 
     // License Modal Functions
@@ -3275,34 +3314,40 @@
             if (window.selectedActivities && window.selectedActivities.length > 0) {
                 businessActivitySection.style.display = 'block';
                 
-                // Group activities by category
+                // Group activities by their actual Group ID
                 const activityGroups = {};
                 
                 // First, create a list of all unique groups
                 window.selectedActivities.forEach(activity => {
-                    const groupName = activity.groupName || mapCategoryToGroup(activity.Category, activity.Group);
-                    if (!activityGroups[groupName]) {
-                        activityGroups[groupName] = [];
+                    const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
+                        ? String(activity.groupName) 
+                        : String(activity.Group || activity.groupName || 'unknown');
+                        
+                    if (!activityGroups[groupId]) {
+                        activityGroups[groupId] = [];
                     }
-                    activityGroups[groupName].push(activity);
+                    activityGroups[groupId].push(activity);
                 });
                 
                 // Create table-style rows instead of tags
                 // Sort groups by activity count (descending) to show most selected first
-                const sortedGroupNames = Object.keys(activityGroups).sort((a, b) => {
+                const sortedGroupIds = Object.keys(activityGroups).sort((a, b) => {
                     return activityGroups[b].length - activityGroups[a].length;
                 });
                 
-                sortedGroupNames.forEach(groupName => {
-                    const activities = activityGroups[groupName];
+                sortedGroupIds.forEach(groupId => {
+                    const activities = activityGroups[groupId];
                     
-                    // Create a summary row instead of a tag
+                    // Create a summary row for each group
                     const row = document.createElement('div');
                     row.className = 'summary-row';
                     
                     const label = document.createElement('span');
                     label.className = 'summary-label';
-                    label.innerText = `${mapGroupToDisplayName(groupName)} (${activities.length})`;
+                    
+                    // Show activity names with Group ID in parentheses
+                    const activityNames = activities.map(a => a['Activity Name'] || a.name).join(', ');
+                    label.innerText = `${activityNames} (Group ${groupId})`;
                     
                     const value = document.createElement('span');
                     value.className = 'summary-value';
@@ -3317,24 +3362,27 @@
                 const businessActivitiesCost = document.getElementById("business-activities-cost");
                 if (businessActivitiesCost) {
                     // Calculate cost based on individual activities in additional groups
-                    const groupNames = Object.keys(activityGroups);
+                    const groupIds = Object.keys(activityGroups);
                     let activitiesCostValue = 0;
                     
-                    if (groupNames.length > 3) {
+                    if (groupIds.length > 3) {
                         // Keep track of which groups were selected first (maintain selection order)
                         const groupSelectionOrder = [];
                         window.selectedActivities.forEach(activity => {
-                            const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
-                            if (!groupSelectionOrder.includes(groupName)) {
-                                groupSelectionOrder.push(groupName);
+                            const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
+                                ? String(activity.groupName) 
+                                : String(activity.Group || activity.groupName || 'unknown');
+                                
+                            if (!groupSelectionOrder.includes(groupId)) {
+                                groupSelectionOrder.push(groupId);
                             }
                         });
                         
                         // First 3 groups in selection order are free, charge for activities in remaining groups
                         for (let i = 3; i < groupSelectionOrder.length; i++) {
-                            const groupName = groupSelectionOrder[i];
-                            if (activityGroups[groupName]) {
-                                activitiesCostValue += activityGroups[groupName].length * 1000;
+                            const groupId = groupSelectionOrder[i];
+                            if (activityGroups[groupId]) {
+                                activitiesCostValue += activityGroups[groupId].length * 1000;
                             }
                         }
                     }
@@ -3350,7 +3398,7 @@
                     // Show/hide fee warning based on number of activity groups
                     const feeWarning = document.querySelector('.fee-warning');
                     if (feeWarning) {
-                        if (groupNames.length > 3) {
+                        if (groupIds.length > 3) {
                             feeWarning.style.display = 'block';
                         } else {
                             feeWarning.style.display = 'none';
@@ -3653,36 +3701,68 @@
         let businessActivitiesCost = 0;
         if (sectionInteractions.businessActivitiesSection && 
             window.selectedActivities && window.selectedActivities.length > 0) {
-            // Group activities by category
+            // Group activities by their actual Group number (not category)
             const activityGroups = {};
             window.selectedActivities.forEach(activity => {
-                const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
-                if (!activityGroups[groupName]) {
-                    activityGroups[groupName] = [];
+                // Use groupName if it's a number (actual Group ID), otherwise use Group field
+                const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
+                    ? String(activity.groupName) 
+                    : String(activity.Group || activity.groupName || 'unknown');
+                    
+                if (!activityGroups[groupId]) {
+                    activityGroups[groupId] = [];
                 }
-                activityGroups[groupName].push(activity);
+                activityGroups[groupId].push(activity);
             });
             
             // First 3 groups are free, then 1000 AED per individual activity in additional groups
-            const groupNames = Object.keys(activityGroups);
-            if (groupNames.length > 3) {
+            const groupIds = Object.keys(activityGroups);
+            console.log('Business Activities Debug:', {
+                totalActivities: window.selectedActivities.length,
+                uniqueGroups: groupIds.length,
+                groupIds: groupIds,
+                activityGroups: activityGroups
+            });
+            
+            if (groupIds.length > 3) {
                 // Keep track of which groups were selected first (maintain selection order)
                 const groupSelectionOrder = [];
                 window.selectedActivities.forEach(activity => {
-                    const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
-                    if (!groupSelectionOrder.includes(groupName)) {
-                        groupSelectionOrder.push(groupName);
+                    const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
+                        ? String(activity.groupName) 
+                        : String(activity.Group || activity.groupName || 'unknown');
+                        
+                    if (!groupSelectionOrder.includes(groupId)) {
+                        groupSelectionOrder.push(groupId);
                     }
+                });
+                
+                console.log('Charging for groups:', {
+                    selectionOrder: groupSelectionOrder,
+                    freeGroups: groupSelectionOrder.slice(0, 3),
+                    chargedGroups: groupSelectionOrder.slice(3)
                 });
                 
                 // First 3 groups in selection order are free, charge for activities in remaining groups
                 for (let i = 3; i < groupSelectionOrder.length; i++) {
-                    const groupName = groupSelectionOrder[i];
-                    if (activityGroups[groupName]) {
-                        businessActivitiesCost += activityGroups[groupName].length * 1000;
+                    const groupId = groupSelectionOrder[i];
+                    if (activityGroups[groupId]) {
+                        const activitiesCount = activityGroups[groupId].length;
+                        const cost = activitiesCount * 1000;
+                        console.log(`Group "${groupId}": ${activitiesCount} activities × 1000 = ${cost} AED`);
+                        businessActivitiesCost += cost;
                     }
                 }
+                
+                console.log('Total business activities cost:', businessActivitiesCost);
+            } else {
+                console.log('All groups are free (≤3 groups)');
             }
+        } else {
+            console.log('Business activities cost not calculated:', {
+                sectionInteracted: sectionInteractions.businessActivitiesSection,
+                hasActivities: window.selectedActivities?.length > 0
+            });
         }
         
         // Bank account cost is now included in add-ons, so we don't add it separately
@@ -3745,35 +3825,50 @@
             // Calculate business activities cost
             let businessActivitiesCost = 0;
             if (window.selectedActivities && window.selectedActivities.length > 0) {
-                // Group activities by category
+                // Group activities by their actual Group number (not category)
                 const activityGroups = {};
                 window.selectedActivities.forEach(activity => {
-                    const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
-                    if (!activityGroups[groupName]) {
-                        activityGroups[groupName] = [];
+                    // Use groupName if it's a number (actual Group ID), otherwise use Group field
+                    const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
+                        ? String(activity.groupName) 
+                        : String(activity.Group || activity.groupName || 'unknown');
+                        
+                    if (!activityGroups[groupId]) {
+                        activityGroups[groupId] = [];
                     }
-                    activityGroups[groupName].push(activity);
+                    activityGroups[groupId].push(activity);
                 });
                 
                 // First 3 groups are free, then 1000 AED per individual activity in additional groups
-                const groupNames = Object.keys(activityGroups);
-                if (groupNames.length > 3) {
+                const groupIds = Object.keys(activityGroups);
+                console.log('[calculateTotalCost] Business Activities Debug:', {
+                    totalActivities: window.selectedActivities.length,
+                    uniqueGroups: groupIds.length,
+                    groupIds: groupIds
+                });
+                
+                if (groupIds.length > 3) {
                     // Keep track of which groups were selected first (maintain selection order)
                     const groupSelectionOrder = [];
                     window.selectedActivities.forEach(activity => {
-                        const groupName = activity.groupName || (activity.Category ? activity.Category.toLowerCase() : '');
-                        if (!groupSelectionOrder.includes(groupName)) {
-                            groupSelectionOrder.push(groupName);
+                        const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
+                            ? String(activity.groupName) 
+                            : String(activity.Group || activity.groupName || 'unknown');
+                            
+                        if (!groupSelectionOrder.includes(groupId)) {
+                            groupSelectionOrder.push(groupId);
                         }
                     });
                     
                     // First 3 groups in selection order are free, charge for activities in remaining groups
                     for (let i = 3; i < groupSelectionOrder.length; i++) {
-                        const groupName = groupSelectionOrder[i];
-                        if (activityGroups[groupName]) {
-                            businessActivitiesCost += activityGroups[groupName].length * 1000;
+                        const groupId = groupSelectionOrder[i];
+                        if (activityGroups[groupId]) {
+                            businessActivitiesCost += activityGroups[groupId].length * 1000;
                         }
                     }
+                    
+                    console.log('[calculateTotalCost] Total business activities cost:', businessActivitiesCost);
                 }
             }
             
@@ -4745,8 +4840,6 @@
             
             // Push to dataLayer
             window.dataLayer.push(eventData);
-            
-            console.log('Form data pushed to dataLayer:', eventData);
             
         } catch (error) {
             console.error('Error pushing to dataLayer:', error);

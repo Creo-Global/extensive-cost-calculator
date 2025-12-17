@@ -601,9 +601,24 @@
         }
     }
 
-    // Initialize the interaction tracker
-    const userInteractionTracker = new UserInteractionTracker();
-    window.userInteractionTracker = userInteractionTracker;
+    // Initialize the interaction tracker (guarded + deferred)
+    const initializeUserInteractionTracker = () => {
+        try {
+            if (typeof window === 'undefined' || typeof document === 'undefined') return;
+            const userInteractionTracker = new UserInteractionTracker();
+            window.userInteractionTracker = userInteractionTracker;
+        } catch (err) {
+            console.error('Error initializing UserInteractionTracker:', err);
+        }
+    };
+
+    if (typeof document !== 'undefined') {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeUserInteractionTracker);
+        } else {
+            initializeUserInteractionTracker();
+        }
+    }
 
     // Initialize user location detection when page loads
     if (typeof window !== 'undefined') {
@@ -616,9 +631,10 @@
     function showSuccessPopup(firstName) {
         const popup = document.getElementById('success-popup-modal');
         const popupFirstName = document.getElementById('popup-success-first-name');
-        const closeBtn = popup.querySelector('.success-popup-close');
-        
         if (!popup || !popupFirstName) return;
+
+        const closeBtn = popup.querySelector('.success-popup-close');
+        if (!closeBtn) return;
         
         // Set the first name
         popupFirstName.textContent = firstName;
@@ -780,6 +796,7 @@
         constructor() {
             this.errorPrefix = 'calc-';
             this.phoneInput = null;
+            this.phoneInitAttempts = 0;
             this.validationRules = this.initializeValidationRules();
             this.errorMessages = this.initializeErrorMessages();
             this.countryData = this.initializeCountryData();
@@ -956,6 +973,18 @@
             const phoneField = document.getElementById('phone');
             if (!phoneField || this.phoneInput) return;
 
+            // intl-tel-input might load slightly after our script in some embeds (e.g., Webflow).
+            // Retry briefly rather than failing silently.
+            if (typeof window.intlTelInput !== 'function') {
+                this.phoneInitAttempts += 1;
+                if (this.phoneInitAttempts <= 30) {
+                    setTimeout(() => this.initializePhoneInput(), 100);
+                } else {
+                    this.setupBasicPhoneValidation(phoneField);
+                }
+                return;
+            }
+
             try {
                 this.phoneInput = window.intlTelInput(phoneField, {
                     preferredCountries: ["ae", "sa", "kw", "bh", "om", "qa"],
@@ -1004,11 +1033,17 @@
 
         handlePhoneKeydown(e) {
             const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'];
-            const isNumber = /[0-9]/.test(e.key);
-            const isAllowedSpecial = /[\s\-\(\)\+]/.test(e.key);
             const isModifierKey = e.ctrlKey || e.metaKey || e.altKey;
 
-            if (!allowedKeys.includes(e.key) && !isNumber && !isAllowedSpecial && !isModifierKey) {
+            if (allowedKeys.includes(e.key) || isModifierKey) return;
+
+            // Don't block IME / mobile keyboards (often emit non-character keys like "Unidentified"/"Process")
+            if (typeof e.key !== 'string' || e.key.length !== 1) return;
+
+            const isNumber = /[0-9]/.test(e.key);
+            const isAllowedSpecial = /[\s\-\(\)\+]/.test(e.key);
+
+            if (!isNumber && !isAllowedSpecial) {
                 e.preventDefault();
             }
         }
@@ -1099,11 +1134,17 @@
 
         handleNameKeydown(e) {
             const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'];
-            const isLetter = /[a-zA-Z\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\u0370-\u03FF\u0400-\u04FF\u1E00-\u1EFF\u1F00-\u1FFF\u2100-\u214F\u0100-\u017F\u1EA0-\u1EF9\u00C0-\u024F\u1E00-\u1EFF]/.test(e.key);
-            const isAllowedSpecial = /[\s\-\.']/.test(e.key);
             const isModifierKey = e.ctrlKey || e.metaKey || e.altKey;
 
-            if (!allowedKeys.includes(e.key) && !isLetter && !isAllowedSpecial && !isModifierKey) {
+            if (allowedKeys.includes(e.key) || isModifierKey) return;
+
+            // Don't block IME / mobile keyboards (often emit non-character keys like "Unidentified"/"Process")
+            if (typeof e.key !== 'string' || e.key.length !== 1) return;
+
+            const isLetter = /[a-zA-Z\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\u0370-\u03FF\u0400-\u04FF\u1E00-\u1EFF\u1F00-\u1FFF\u2100-\u214F\u0100-\u017F\u1EA0-\u1EF9\u00C0-\u024F\u1E00-\u1EFF]/.test(e.key);
+            const isAllowedSpecial = /[\s\-\.']/.test(e.key);
+
+            if (!isLetter && !isAllowedSpecial) {
                 e.preventDefault();
             }
         }
@@ -1494,6 +1535,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         try {
             hasStartedForm = false;
+
+            // Initialize section locking early so the UI state is correct even if later init steps fail
+            initializeSectionLocking();
             
             document.querySelectorAll('.activity-count').forEach(count => {
                 count.style.display = 'none';
@@ -1549,9 +1593,6 @@
             
             // Initialize change status event listeners
             initializeChangeStatusEventListeners();
-            
-            // Initialize section locking
-            initializeSectionLocking();
             
             // Initialize Get a Call buttons
             initializeGetCallButtons();
@@ -1731,10 +1772,43 @@
                 });
             }
 
-    // Initialize Supabase client
+    // Initialize Supabase client - defer until library is loaded
     const supabaseUrl = 'https://sb.meydanfz.ae';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU3MjQyMDM2LCJleHAiOjIwNzI4MTgwMzZ9.5YF79Wen41bSpKNOKiT9Wcd_psXf8IV4vgK7RUjOZoI';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // IMPORTANT: do not name this variable `supabase` because the CDN library already defines a global `supabase`.
+    // Using the same identifier causes "Identifier 'supabase' has already been declared" and stops the entire script.
+    let supabaseClient = null;
+    
+    // Initialize Supabase client when library is available
+    const initSupabase = () => {
+        try {
+            // For @supabase/supabase-js@2 from CDN, it's typically available as window.supabase
+            // or as a global supabase object
+            if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+                window.supabaseClient = supabaseClient;
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error initializing Supabase:', error);
+            return false;
+        }
+    };
+    
+    // Try to initialize immediately, then retry if needed
+    if (!initSupabase()) {
+        // Wait for script to load and retry
+        const checkAndInit = setInterval(() => {
+            if (initSupabase()) {
+                clearInterval(checkAndInit);
+            }
+        }, 100);
+        
+        // Stop trying after 5 seconds
+        setTimeout(() => clearInterval(checkAndInit), 5000);
+    }
 
     window.selectedActivities = window.selectedActivities || [];
 
@@ -2122,7 +2196,7 @@
         modalList.innerHTML = '<div class="loading-results">Searching...</div>';
         
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('Activity List')
                 .select('Code, "Activity Name", Category, Group, "When", DNFBP')
                 .or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`)
@@ -2226,7 +2300,7 @@
         
         try {
             const categoryName = mapGroupToCategory(groupName);
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('Activity List')
                 .select('Code, "Activity Name", Category, Group, "When", DNFBP')
                 .eq('Category', categoryName)
@@ -5944,7 +6018,10 @@
     // Visa card toggle functionality - handles Yes/No toggle for investor visa
     function toggleVisaCard(visaType) {
         const toggle = document.getElementById(`${visaType === 'dependent' ? 'dependency' : visaType}-visa-toggle`);
+        if (!toggle) return;
+
         const card = toggle.closest('.visa-card');
+        if (!card) return;
         
         if (toggle.checked) {
             // YES state - visa is selected
@@ -6123,12 +6200,19 @@
             if (!searchResultsDropdown) return;
             
             try {
+                if (!supabaseClient) {
+                    console.error('Supabase client not initialized');
+                    searchResultsDropdown.innerHTML = '<div class="error-results">Database connection not available. Please refresh the page.</div>';
+                    searchResultsDropdown.style.display = 'block';
+                    return;
+                }
+                
                 searchResultsDropdown.innerHTML = '<div class="loading-results">Searching...</div>';
                 searchResultsDropdown.style.display = 'block';
                 
                 const query = searchTerm === "*" ? 
-                    supabase.from('Activity List').select('Code, "Activity Name", Category, Group, "When", DNFBP').limit(40) : 
-                    supabase.from('Activity List').select('Code, "Activity Name", Category, Group, "When", DNFBP')
+                    supabaseClient.from('Activity List').select('Code, "Activity Name", Category, Group, "When", DNFBP').limit(40) : 
+                    supabaseClient.from('Activity List').select('Code, "Activity Name", Category, Group, "When", DNFBP')
                         .or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`)
                         .limit(100);
                 

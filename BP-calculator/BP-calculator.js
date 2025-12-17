@@ -99,9 +99,11 @@
     function showSuccessPopup(firstName) {
         const popup = document.getElementById('success-popup-modal');
         const popupFirstName = document.getElementById('popup-success-first-name');
-        const closeBtn = popup.querySelector('.success-popup-close');
         
         if (!popup || !popupFirstName) return;
+
+        const closeBtn = popup.querySelector('.success-popup-close');
+        if (!closeBtn) return;
         
         // Set the first name
         popupFirstName.textContent = firstName;
@@ -1230,7 +1232,13 @@
     // Initialize Supabase client
     const supabaseUrl = 'https://sb.meydanfz.ae';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU3MjQyMDM2LCJleHAiOjIwNzI4MTgwMzZ9.5YF79Wen41bSpKNOKiT9Wcd_psXf8IV4vgK7RUjOZoI';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    // IMPORTANT: do not name this variable `supabase` because the CDN library already defines a global `supabase`.
+    // Using the same identifier can cause "Identifier 'supabase' has already been declared" and stop the script.
+    const supabaseClient = window.supabase?.createClient
+        ? window.supabase.createClient(supabaseUrl, supabaseKey)
+        : null;
+
+    window.supabaseClient = window.supabaseClient || supabaseClient;
 
     window.selectedActivities = window.selectedActivities || [];
 
@@ -1614,7 +1622,7 @@
         modalList.innerHTML = '<div class="loading-results">Searching...</div>';
         
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('Activity List')
                 .select('Code, "Activity Name", Category, Group, "When", DNFBP')
                 .or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`)
@@ -1718,7 +1726,7 @@
         
         try {
             const categoryName = mapGroupToCategory(groupName);
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('Activity List')
                 .select('Code, "Activity Name", Category, Group, "When", DNFBP')
                 .eq('Category', categoryName)
@@ -4935,7 +4943,7 @@
                 // Get last viewed timestamp for this configuration
                 try {
                     // First try to get last_viewed from the main config table
-                    const { data: configData, error: configError } = await supabase
+                    const { data: configData, error: configError } = await supabaseClient
                         .from('shared_configs')
                         .select('last_viewed')
                         .eq('id', uniqueConfigId)
@@ -6435,7 +6443,7 @@
         try {
             
             // Check if record exists first
-            const { data: existing } = await supabase
+            const { data: existing } = await supabaseClient
                 .from('shared_configs')
                 .select('id, created_at')
                 .eq('id', configId)
@@ -6468,7 +6476,7 @@
                 upsertData.salesperson_phone = salesData.phone;
             }
             
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('shared_configs')
                 .upsert(upsertData);
             
@@ -6488,7 +6496,7 @@
     async function loadConfiguration(configId) {
         try {
             
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('shared_configs')
                 .select('config_data, client_name, client_email, client_phone, client_id, salesperson_name, salesperson_email, salesperson_phone')
                 .eq('id', configId)
@@ -6917,7 +6925,7 @@
     async function trackLinkView(configId) {
         try {
             // Insert a new view record
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('config_views')
                 .insert({
                     config_id: configId,
@@ -6940,7 +6948,7 @@
     // Update last viewed timestamp in shared_configs table
     async function updateLastViewedTimestamp(configId) {
         try {
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('shared_configs')
                 .update({
                     last_viewed: new Date().toISOString()
@@ -6958,7 +6966,7 @@
     // Get view count for a config
     async function getViewCount(configId) {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('config_views')
                 .select('id')
                 .eq('config_id', configId);
@@ -6978,7 +6986,7 @@
     // Get detailed view analytics
     async function getViewAnalytics(configId) {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('config_views')
                 .select('*')
                 .eq('config_id', configId)
@@ -7521,8 +7529,8 @@
                 searchResultsDropdown.style.display = 'block';
             
             const query = searchTerm === "*" ? 
-                supabase.from('Activity List').select('Code, "Activity Name", Category, Group').limit(40) : 
-                supabase.from('Activity List').select('Code, "Activity Name", Category, Group')
+                supabaseClient.from('Activity List').select('Code, "Activity Name", Category, Group').limit(40) : 
+                supabaseClient.from('Activity List').select('Code, "Activity Name", Category, Group')
                     .or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`)
                     .limit(100);
             

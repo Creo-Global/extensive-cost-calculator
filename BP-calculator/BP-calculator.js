@@ -246,10 +246,9 @@
     class FormValidator {
         constructor() {
             this.errorPrefix = 'calc-';
-            this.phoneInput = null;
+            this.useMFZPhone = false;
             this.validationRules = this.initializeValidationRules();
             this.errorMessages = this.initializeErrorMessages();
-            this.countryData = this.initializeCountryData();
             this.init();
         }
 
@@ -291,81 +290,8 @@
                 },
                 phone: {
                     required: 'Phone number is required',
-                    invalid: 'Please enter a valid phone number',
-                    tooShort: 'Phone number is too short for {country}. Expected {expected} digits, got {actual}.',
-                    tooLong: 'Phone number is too long for {country}. Expected {expected} digits, got {actual}.',
-                    invalidFormat: 'Invalid phone number format for {country}',
-                    invalidChars: 'Phone number can only contain digits, spaces, hyphens, and parentheses'
+                    invalid: 'Please enter a valid phone number'
                 }
-            };
-        }
-
-        initializeCountryData() {
-            return {
-                'ae': { name: 'United Arab Emirates', digits: 9, placeholder: '50 123 4567' },
-                'sa': { name: 'Saudi Arabia', digits: 9, placeholder: '50 123 4567' },
-                'kw': { name: 'Kuwait', digits: 8, placeholder: '9999 9999' },
-                'bh': { name: 'Bahrain', digits: 8, placeholder: '9999 9999' },
-                'om': { name: 'Oman', digits: 8, placeholder: '9999 9999' },
-                'qa': { name: 'Qatar', digits: 8, placeholder: '9999 9999' },
-                'us': { name: 'United States', digits: 10, placeholder: '(201) 555-0123' },
-                'ca': { name: 'Canada', digits: 10, placeholder: '(416) 555-0123' },
-                'gb': { name: 'United Kingdom', digits: 11, placeholder: '07400 123456' },
-                'au': { name: 'Australia', digits: 9, placeholder: '0400 123 456' },
-                'nz': { name: 'New Zealand', digits: 9, placeholder: '021 123 456' },
-                'ie': { name: 'Ireland', digits: 9, placeholder: '085 123 4567' },
-                'za': { name: 'South Africa', digits: 9, placeholder: '082 123 4567' },
-                'de': { name: 'Germany', digits: 11, placeholder: '0151 12345678' },
-                'fr': { name: 'France', digits: 10, placeholder: '06 12 34 56 78' },
-                'it': { name: 'Italy', digits: 10, placeholder: '320 123 4567' },
-                'es': { name: 'Spain', digits: 9, placeholder: '612 34 56 78' },
-                'pt': { name: 'Portugal', digits: 9, placeholder: '912 345 678' },
-                'nl': { name: 'Netherlands', digits: 9, placeholder: '06 12345678' },
-                'be': { name: 'Belgium', digits: 9, placeholder: '0470 12 34 56' },
-                'at': { name: 'Austria', digits: 11, placeholder: '0664 1234567' },
-                'ch': { name: 'Switzerland', digits: 9, placeholder: '078 123 45 67' },
-                'se': { name: 'Sweden', digits: 9, placeholder: '070 123 45 67' },
-                'no': { name: 'Norway', digits: 8, placeholder: '406 12 345' },
-                'dk': { name: 'Denmark', digits: 8, placeholder: '20 12 34 56' },
-                'fi': { name: 'Finland', digits: 9, placeholder: '040 123 4567' },
-                'pl': { name: 'Poland', digits: 9, placeholder: '512 345 678' },
-                'cz': { name: 'Czech Republic', digits: 9, placeholder: '601 123 456' },
-                'hu': { name: 'Hungary', digits: 9, placeholder: '06 20 123 4567' },
-                'ro': { name: 'Romania', digits: 9, placeholder: '0712 345 678' },
-                'bg': { name: 'Bulgaria', digits: 9, placeholder: '087 123 4567' },
-                'hr': { name: 'Croatia', digits: 9, placeholder: '091 234 5678' },
-                'si': { name: 'Slovenia', digits: 8, placeholder: '031 234 567' },
-                'sk': { name: 'Slovakia', digits: 9, placeholder: '0901 123 456' },
-                'lt': { name: 'Lithuania', digits: 8, placeholder: '8612 34567' },
-                'lv': { name: 'Latvia', digits: 8, placeholder: '2012 3456' },
-                'ee': { name: 'Estonia', digits: 8, placeholder: '5123 4567' },
-                'gr': { name: 'Greece', digits: 10, placeholder: '694 123 4567' },
-                'cy': { name: 'Cyprus', digits: 8, placeholder: '9612 3456' },
-                'mt': { name: 'Malta', digits: 8, placeholder: '9912 3456' },
-                'lu': { name: 'Luxembourg', digits: 9, placeholder: '621 123 456' },
-                'jp': { name: 'Japan', digits: 11, placeholder: '090 1234 5678' },
-                'kr': { name: 'South Korea', digits: 11, placeholder: '010 1234 5678' },
-                'cn': { name: 'China', digits: 11, placeholder: '138 0013 8000' },
-                'hk': { name: 'Hong Kong', digits: 8, placeholder: '9123 4567' },
-                'tw': { name: 'Taiwan', digits: 9, placeholder: '0912 345 678' },
-                'sg': { name: 'Singapore', digits: 8, placeholder: '8123 4567' },
-                'my': { name: 'Malaysia', digits: 10, placeholder: '012 345 6789' },
-                'th': { name: 'Thailand', digits: 9, placeholder: '081 234 5678' },
-                'ph': { name: 'Philippines', digits: 10, placeholder: '0917 123 4567' },
-                'id': { name: 'Indonesia', digits: 12, placeholder: '0812 3456 7890' },
-                'vn': { name: 'Vietnam', digits: 9, placeholder: '091 234 56 78' },
-                'in': { name: 'India', digits: 10, placeholder: '91234 56789' },
-                'pk': { name: 'Pakistan', digits: 10, placeholder: '0301 2345678' },
-                'bd': { name: 'Bangladesh', digits: 10, placeholder: '01712 345678' },
-                'lk': { name: 'Sri Lanka', digits: 9, placeholder: '071 234 5678' },
-                'tr': { name: 'Turkey', digits: 10, placeholder: '0532 123 45 67' },
-                'il': { name: 'Israel', digits: 9, placeholder: '050 123 4567' },
-                'eg': { name: 'Egypt', digits: 10, placeholder: '0100 123 4567' },
-                'ng': { name: 'Nigeria', digits: 10, placeholder: '0803 123 4567' },
-                'mx': { name: 'Mexico', digits: 10, placeholder: '55 1234 5678' },
-                'br': { name: 'Brazil', digits: 11, placeholder: '11 91234 5678' },
-                'ar': { name: 'Argentina', digits: 10, placeholder: '11 1234 5678' },
-                'ru': { name: 'Russia', digits: 10, placeholder: '8 912 345 6789' }
             };
         }
 
@@ -421,107 +347,33 @@
 
         initializePhoneInput() {
             const phoneField = document.getElementById('phone');
-            if (!phoneField || this.phoneInput) return;
+            if (!phoneField) return;
 
-            try {
-                this.phoneInput = window.intlTelInput(phoneField, {
-                    preferredCountries: ["ae", "sa", "kw", "bh", "om", "qa"],
-                    initialCountry: "auto",
-                    geoIpLookup: function(success, failure) {
-                        detectUserLocation()
-                            .then(countryCode => success(countryCode))
-                            .catch(() => success('ae'));
-                    },
-                    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.2.1/js/utils.js",
-                    separateDialCode: true,
-                    formatOnDisplay: true,
-                    autoPlaceholder: "polite",
-                    formatAsYouType: true,
-                    strictMode: true
-                });
-
-                this.setupPhoneEventListeners(phoneField);
-                this.setInitialPlaceholder();
-            } catch (error) {
-                this.setupBasicPhoneValidation(phoneField);
-            }
-        }
-
-        setupPhoneEventListeners(phoneField) {
-            phoneField.addEventListener('keydown', (e) => {
-                this.handlePhoneKeydown(e);
-            });
-
-            phoneField.addEventListener('input', (e) => {
-                this.clearFieldError('phone');
-                this.restrictPhoneInput(e.target);
-            });
-
-            phoneField.addEventListener('blur', () => {
-                this.validateField('phone');
-            });
-
-            if (this.phoneInput) {
-                phoneField.addEventListener("countrychange", () => {
+            // Use MFZPhone if available (already loaded on Webflow site)
+            if (window.MFZPhone) {
+                // Ensure the phone field has the required attribute for MFZPhone
+                if (!phoneField.hasAttribute('data-mfz-phone')) {
+                    phoneField.setAttribute('data-mfz-phone', '');
+                    // Re-initialize MFZPhone to pick up the new attribute
+                    window.MFZPhone.init();
+                }
+                this.useMFZPhone = true;
+                
+                // Clear our error when MFZPhone shows valid state
+                phoneField.addEventListener('input', () => {
                     this.clearFieldError('phone');
-                    this.updatePhonePlaceholder();
                 });
-            }
-        }
-
-        handlePhoneKeydown(e) {
-            const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'];
-            const isNumber = /[0-9]/.test(e.key);
-            const isAllowedSpecial = /[\s\-\(\)\+]/.test(e.key);
-            const isModifierKey = e.ctrlKey || e.metaKey || e.altKey;
-
-            if (!allowedKeys.includes(e.key) && !isNumber && !isAllowedSpecial && !isModifierKey) {
-                e.preventDefault();
-            }
-        }
-
-        restrictPhoneInput(input) {
-            const cleaned = input.value.replace(/[^\d\s\-\(\)\+]/g, '');
-            if (cleaned !== input.value) {
-                input.value = cleaned;
+                return;
             }
 
-            const countryData = this.getCurrentCountryData();
-            const digitsOnly = cleaned.replace(/\D/g, '');
-            if (digitsOnly.length > countryData.digits + 2) {
-                const truncated = cleaned.substring(0, cleaned.length - 1);
-                input.value = truncated;
-            }
-        }
-
-        getCurrentCountryData() {
-            if (this.phoneInput) {
-                const selectedCountry = this.phoneInput.getSelectedCountryData();
-                return this.countryData[selectedCountry.iso2] || { name: 'Unknown', digits: 10, placeholder: 'Phone number' };
-            }
-            return this.countryData['ae'];
-        }
-
-        setInitialPlaceholder() {
-            const phoneField = document.getElementById('phone');
-            const countryData = this.getCurrentCountryData();
-            if (phoneField) {
-                phoneField.placeholder = countryData.placeholder;
-            }
-        }
-
-        updatePhonePlaceholder() {
-            const phoneField = document.getElementById('phone');
-            const countryData = this.getCurrentCountryData();
-            if (phoneField) {
-                phoneField.placeholder = countryData.placeholder;
-            }
+            // Fallback to basic validation if MFZPhone not available
+            this.setupBasicPhoneValidation(phoneField);
         }
 
         setupBasicPhoneValidation(phoneField) {
-            phoneField.addEventListener('input', (e) => {
+            // Basic fallback when MFZPhone is not available
+            phoneField.addEventListener('input', () => {
                 this.clearFieldError('phone');
-                this.restrictPhoneInput(e.target);
             });
 
             phoneField.addEventListener('blur', () => {
@@ -680,32 +532,34 @@
                 return false;
             }
 
-            const digitsOnly = value.replace(/\D/g, '');
-            const countryData = this.getCurrentCountryData();
-
-            if (this.phoneInput && typeof this.phoneInput.isValidNumber === 'function') {
-                try {
-                    const isValid = this.phoneInput.isValidNumber();
-                    const isPossible = this.phoneInput.isPossibleNumber ? this.phoneInput.isPossibleNumber() : true;
-
-                    if (!isValid) {
-                        if (digitsOnly.length < countryData.digits) {
-                            this.showPhoneError(field.id, 'tooShort', countryData, digitsOnly.length);
-                        } else if (digitsOnly.length > countryData.digits) {
-                            this.showPhoneError(field.id, 'tooLong', countryData, digitsOnly.length);
-                        } else if (!isPossible) {
-                            this.showPhoneError(field.id, 'invalidFormat', countryData);
-                        } else {
-                            this.showPhoneError(field.id, 'invalid', countryData);
+            // Use MFZPhone validation if available
+            if (this.useMFZPhone && window.MFZPhone) {
+                const isValid = window.MFZPhone.isValid(field);
+                const instance = window.MFZPhone.getInstance(field);
+                
+                if (!isValid) {
+                    // MFZPhone already shows visual feedback via mfz-phone.css
+                    // Check validation state to determine if we should block submission
+                    if (instance) {
+                        if (instance.validationState === 'validating') {
+                            // Still validating - don't block yet but return false
+                            return false;
                         }
-                        return false;
+                        if (instance.validationState === 'invalid') {
+                            // Invalid state - MFZPhone already shows error
+                            return false;
+                        }
                     }
-                    return true;
-                } catch (error) {
-                    // Fall back to basic validation
+                    // Fall through to show our error if MFZPhone hasn't shown one
+                    this.showFieldError(field.id, 'phone', 'invalid');
+                    return false;
                 }
+                return true;
             }
 
+            // Fallback validation (basic digit check when MFZPhone not available)
+            const digitsOnly = value.replace(/\D/g, '');
+            
             if (digitsOnly.length < this.validationRules.phone.minDigits) {
                 this.showFieldError(field.id, 'phone', 'invalid');
                 return false;
@@ -716,25 +570,7 @@
                 return false;
             }
 
-            if (digitsOnly.length !== countryData.digits) {
-                if (digitsOnly.length < countryData.digits) {
-                    this.showPhoneError(field.id, 'tooShort', countryData, digitsOnly.length);
-                } else {
-                    this.showPhoneError(field.id, 'tooLong', countryData, digitsOnly.length);
-                }
-                return false;
-            }
-
             return true;
-        }
-
-        showPhoneError(fieldId, errorType, countryData, actualLength = null) {
-            const message = this.errorMessages.phone[errorType]
-                .replace('{country}', countryData.name)
-                .replace('{expected}', countryData.digits)
-                .replace('{actual}', actualLength);
-            
-            this.displayError(fieldId, message);
         }
 
         showFieldError(fieldId, fieldType, errorType) {
@@ -889,22 +725,44 @@
                 });
             }
 
+            // Get formatted phone number from MFZPhone (E.164 format)
+            const phoneField = document.getElementById('phone');
+            let phoneValue = phoneField?.value || '';
+            
+            if (this.useMFZPhone && window.MFZPhone && phoneField) {
+                const formattedPhone = window.MFZPhone.getFormattedNumber(phoneField);
+                if (formattedPhone) {
+                    phoneValue = formattedPhone;
+                }
+            }
+
             // Also trigger the custom event for other parts of the application
             const nextStepEvent = new CustomEvent('contactFormValid', {
                 detail: {
                     name: document.getElementById('full-name').value,
                     email: document.getElementById('email').value,
-                    phone: document.getElementById('phone').value
+                    phone: phoneValue
                 }
             });
             document.dispatchEvent(nextStepEvent);
         }
 
         getFormData() {
+            const phoneField = document.getElementById('phone');
+            let phoneValue = phoneField?.value?.trim() || '';
+            
+            // Get E.164 formatted phone from MFZPhone if available
+            if (this.useMFZPhone && window.MFZPhone && phoneField) {
+                const formattedPhone = window.MFZPhone.getFormattedNumber(phoneField);
+                if (formattedPhone) {
+                    phoneValue = formattedPhone;
+                }
+            }
+            
             return {
                 name: document.getElementById('full-name')?.value?.trim() || '',
                 email: document.getElementById('email')?.value?.trim() || '',
-                phone: document.getElementById('phone')?.value?.trim() || ''
+                phone: phoneValue
             };
         }
 
@@ -2894,122 +2752,43 @@
                 let errorMessage = '';
                 
                 try {
-                    if (formValidator && formValidator.phoneInput && 
-                        typeof formValidator.phoneInput.isValidNumber === 'function') {
-                        isPhoneValid = formValidator.phoneInput.isValidNumber();
-                        
-                        // Additional check: must have actual phone number content
-                        const phoneNumber = formValidator.phoneInput.getNumber();
-                        if (!phoneNumber || phoneNumber.length < 8) {
-                            isPhoneValid = false;
-                        }
+                    // Use MFZPhone validation if available
+                    if (window.MFZPhone && formValidator && formValidator.useMFZPhone) {
+                        isPhoneValid = window.MFZPhone.isValid(input);
                         
                         if (!isPhoneValid) {
-                            const countryData = formValidator.phoneInput.getSelectedCountryData();
-                            const digitsOnly = input.value.replace(/\D/g, '');
-                            
-                            // Country-specific expected lengths
-                            const expectedLengths = {
-                                'ae': 9,  // UAE: 9 digits
-                                'sa': 9,  // Saudi Arabia: 9 digits  
-                                'kw': 8,  // Kuwait: 8 digits
-                                'bh': 8,  // Bahrain: 8 digits
-                                'om': 8,  // Oman: 8 digits
-                                'qa': 8,  // Qatar: 8 digits
-                                'us': 10, // USA: 10 digits
-                                'gb': 11, // UK: 11 digits
-                            };
-                            
-                            const expectedLength = expectedLengths[countryData.iso2] || 10;
-                            
-                            if (digitsOnly.length < expectedLength) {
-                                errorMessage = `Phone number is too short for ${countryData.name}. Expected ${expectedLength} digits, got ${digitsOnly.length}.`;
-                            } else if (digitsOnly.length > expectedLength) {
-                                errorMessage = `Phone number is too long for ${countryData.name}. Expected ${expectedLength} digits, got ${digitsOnly.length}.`;
+                            const instance = window.MFZPhone.getInstance(input);
+                            if (instance && instance.validationState === 'invalid') {
+                                errorMessage = 'Please enter a valid phone number';
+                            } else if (instance && instance.validationState === 'validating') {
+                                // Still validating, don't show error yet
+                                errorMessage = '';
                             } else {
-                                try {
-                                    if (typeof formValidator.phoneInput.isPossibleNumber === 'function' && 
-                                        !formValidator.phoneInput.isPossibleNumber()) {
-                                        errorMessage = `Invalid phone number format for ${countryData.name}`;
-                                    } else {
-                                        errorMessage = `Please enter a valid phone number for ${countryData.name}`;
-                                    }
-                                } catch (err) {
-                                    errorMessage = `Invalid phone number format for ${countryData.name}`;
-                                }
+                                errorMessage = 'Please enter a valid phone number';
                             }
                         }
                     } else {
-                        // Fallback validation if phoneInput not available
-                        const countryData = formValidator && formValidator.phoneInput ? 
-                            formValidator.phoneInput.getSelectedCountryData() : { name: 'selected country', iso2: 'ae' };
+                        // Fallback validation if MFZPhone not available
                         const phoneValue = input.value.replace(/\D/g, '');
-                        const expectedLengths = {
-                            'ae': 9, 'sa': 9, 'kw': 8, 'bh': 8, 'om': 8, 'qa': 8, 'us': 10, 'ca': 10, 'gb': 11, 'au': 9, 'nz': 9, 'ie': 9, 'za': 9,
-                            'de': 11, 'fr': 10, 'it': 10, 'es': 9, 'pt': 9, 'nl': 9, 'be': 9, 'at': 11, 'ch': 9, 'se': 9, 'no': 8, 'dk': 8, 'fi': 9,
-                            'pl': 9, 'cz': 9, 'hu': 9, 'ro': 9, 'bg': 9, 'hr': 9, 'si': 8, 'sk': 9, 'lt': 8, 'lv': 8, 'ee': 8, 'gr': 10, 'cy': 8, 'mt': 8, 'lu': 9,
-                            'jp': 11, 'kr': 11, 'cn': 11, 'hk': 8, 'tw': 9, 'sg': 8, 'my': 10, 'th': 9, 'ph': 10, 'id': 12, 'vn': 9, 'in': 10, 'pk': 10, 'bd': 10,
-                            'lk': 9, 'np': 10, 'mm': 9, 'kh': 9, 'la': 9, 'bn': 7, 'mv': 7, 'tr': 10, 'il': 9, 'ps': 9, 'jo': 9, 'lb': 8, 'sy': 9, 'iq': 10,
-                            'ir': 10, 'af': 9, 'eg': 10, 'ly': 9, 'tn': 8, 'dz': 9, 'ma': 9, 'sd': 9, 'ye': 9, 'ng': 10, 'gh': 9, 'ke': 9, 'tz': 9, 'ug': 9,
-                            'rw': 9, 'et': 9, 'zm': 9, 'zw': 9, 'bw': 8, 'mz': 9, 'ao': 9, 'cm': 9, 'ci': 10, 'sn': 9, 'ml': 8, 'bf': 8, 'mx': 10, 'br': 11,
-                            'ar': 10, 'cl': 9, 'co': 10, 'pe': 9, 've': 10, 'ec': 9, 'uy': 8, 'py': 9, 'bo': 8, 'cr': 8, 'pa': 8, 'gt': 8, 'hn': 8, 'sv': 8,
-                            'ni': 8, 'bz': 7, 'jm': 10, 'tt': 10, 'bb': 10, 'bs': 10, 'do': 10, 'pr': 10, 'cu': 8, 'ht': 8, 'ru': 10, 'ua': 9, 'by': 9,
-                            'md': 8, 'ge': 9, 'am': 8, 'az': 9, 'kz': 10, 'kg': 9, 'tj': 9, 'tm': 8, 'uz': 9, 'mn': 8, 'is': 7, 'fo': 6, 'gl': 6
-                        };
-                        const expectedLength = expectedLengths[countryData.iso2] || 10;
+                        const minDigits = 6;
+                        const maxDigits = 15;
                         
-                        if (phoneValue.length === expectedLength) {
+                        if (phoneValue.length >= minDigits && phoneValue.length <= maxDigits) {
                             isPhoneValid = true;
-                        } else if (phoneValue.length < expectedLength) {
+                        } else if (phoneValue.length < minDigits) {
                             isPhoneValid = false;
-                            errorMessage = `Phone number is too short for ${countryData.name}. Expected ${expectedLength} digits, got ${phoneValue.length}.`;
-                        } else if (phoneValue.length > expectedLength) {
-                            isPhoneValid = false;
-                            errorMessage = `Phone number is too long for ${countryData.name}. Expected ${expectedLength} digits, got ${phoneValue.length}.`;
+                            errorMessage = 'Phone number is too short';
                         } else {
                             isPhoneValid = false;
-                            errorMessage = "Invalid phone number format";
+                            errorMessage = 'Phone number is too long';
                         }
                     }
                 } catch (err) {
-                    // Fallback validation
-                    try {
-                        const countryData = formValidator && formValidator.phoneInput ? 
-                            formValidator.phoneInput.getSelectedCountryData() : { name: 'selected country', iso2: 'ae' };
-                        const phoneValue = input.value.replace(/\D/g, '');
-                        const expectedLengths = {
-                            'ae': 9, 'sa': 9, 'kw': 8, 'bh': 8, 'om': 8, 'qa': 8, 'us': 10, 'ca': 10, 'gb': 11, 'au': 9, 'nz': 9, 'ie': 9, 'za': 9,
-                            'de': 11, 'fr': 10, 'it': 10, 'es': 9, 'pt': 9, 'nl': 9, 'be': 9, 'at': 11, 'ch': 9, 'se': 9, 'no': 8, 'dk': 8, 'fi': 9,
-                            'pl': 9, 'cz': 9, 'hu': 9, 'ro': 9, 'bg': 9, 'hr': 9, 'si': 8, 'sk': 9, 'lt': 8, 'lv': 8, 'ee': 8, 'gr': 10, 'cy': 8, 'mt': 8, 'lu': 9,
-                            'jp': 11, 'kr': 11, 'cn': 11, 'hk': 8, 'tw': 9, 'sg': 8, 'my': 10, 'th': 9, 'ph': 10, 'id': 12, 'vn': 9, 'in': 10, 'pk': 10, 'bd': 10,
-                            'lk': 9, 'np': 10, 'mm': 9, 'kh': 9, 'la': 9, 'bn': 7, 'mv': 7, 'tr': 10, 'il': 9, 'ps': 9, 'jo': 9, 'lb': 8, 'sy': 9, 'iq': 10,
-                            'ir': 10, 'af': 9, 'eg': 10, 'ly': 9, 'tn': 8, 'dz': 9, 'ma': 9, 'sd': 9, 'ye': 9, 'ng': 10, 'gh': 9, 'ke': 9, 'tz': 9, 'ug': 9,
-                            'rw': 9, 'et': 9, 'zm': 9, 'zw': 9, 'bw': 8, 'mz': 9, 'ao': 9, 'cm': 9, 'ci': 10, 'sn': 9, 'ml': 8, 'bf': 8, 'mx': 10, 'br': 11,
-                            'ar': 10, 'cl': 9, 'co': 10, 'pe': 9, 've': 10, 'ec': 9, 'uy': 8, 'py': 9, 'bo': 8, 'cr': 8, 'pa': 8, 'gt': 8, 'hn': 8, 'sv': 8,
-                            'ni': 8, 'bz': 7, 'jm': 10, 'tt': 10, 'bb': 10, 'bs': 10, 'do': 10, 'pr': 10, 'cu': 8, 'ht': 8, 'ru': 10, 'ua': 9, 'by': 9,
-                            'md': 8, 'ge': 9, 'am': 8, 'az': 9, 'kz': 10, 'kg': 9, 'tj': 9, 'tm': 8, 'uz': 9, 'mn': 8, 'is': 7, 'fo': 6, 'gl': 6
-                        };
-                        const expectedLength = expectedLengths[countryData.iso2] || 10;
-                        
-                        if (phoneValue.length === expectedLength) {
-                            isPhoneValid = true;
-                        } else if (phoneValue.length < expectedLength) {
-                            isPhoneValid = false;
-                            errorMessage = `Phone number is too short. Expected ${expectedLength} digits, got ${phoneValue.length}.`;
-                        } else if (phoneValue.length > expectedLength) {
-                            isPhoneValid = false;
-                            errorMessage = `Phone number is too long. Expected ${expectedLength} digits, got ${phoneValue.length}.`;
-                        } else {
-                            isPhoneValid = false;
-                            errorMessage = "Invalid phone number format";
-                        }
-                    } catch (innerErr) {
-                        // Final fallback
-                        const phoneValue = input.value.replace(/\D/g, '');
-                        isPhoneValid = phoneValue.length >= 8 && phoneValue.length <= 15;
-                        if (!isPhoneValid) {
-                            errorMessage = "Please enter a valid phone number";
-                        }
+                    // Final fallback validation
+                    const phoneValue = input.value.replace(/\D/g, '');
+                    isPhoneValid = phoneValue.length >= 6 && phoneValue.length <= 15;
+                    if (!isPhoneValid) {
+                        errorMessage = "Please enter a valid phone number";
                     }
                 }
                 
@@ -4017,596 +3796,57 @@
     }
 
 
-
-
-
-
-
-
-
-
-
-
-    // Set custom placeholder for UAE (default country)
-    phoneInputField.placeholder = "50 123 4567";
-
-    // Strict phone input validation with physical restriction
+    // NOTE: All phone input validation is now handled by MFZPhone (mfz-phone.js)
+    // MFZPhone provides:
+    // - Automatic placeholder based on selected country
+    // - Input filtering (numbers only) and country-specific max length
+    // - Paste filtering
+    // - Real-time API validation on blur  
+    // - Visual feedback (valid/invalid/validating states via mfz-phone.css)
+    
+    // Track user interaction for form validation
     let userHasInteracted = false;
     let phoneFieldHasBeenFocused = false;
     
-    // Track when phone field gets focus for the first time
-    phoneInputField.addEventListener("focus", function() {
-        phoneFieldHasBeenFocused = true;
-    });
-    
-    // Restrict input to numbers only and enforce country-specific length limits
-    phoneInputField.addEventListener("keydown", function(e) {
-        userHasInteracted = true;
+    const phoneField = document.getElementById('phone');
+    if (phoneField) {
+        phoneField.addEventListener("focus", function() {
+            phoneFieldHasBeenFocused = true;
+        });
         
-        // Allow: backspace, delete, tab, escape, enter, home, end, left, right, up, down
-        if ([8, 9, 27, 13, 35, 36, 37, 38, 39, 40, 46].indexOf(e.keyCode) !== -1 ||
-            // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-            (e.keyCode === 65 && e.ctrlKey === true) ||
-            (e.keyCode === 67 && e.ctrlKey === true) ||
-            (e.keyCode === 86 && e.ctrlKey === true) ||
-            (e.keyCode === 88 && e.ctrlKey === true)) {
-            return;
-        }
-        
-        // Get current country data
-        const countryData = phoneInput.getSelectedCountryData();
-        const currentValue = e.target.value.replace(/\D/g, ''); // Remove non-digits for length check
-        
-        // Country-specific max lengths (national significant number length)
-        const maxLengths = {
-            'ae': 9,  // UAE: 9 digits
-            'sa': 9,  // Saudi Arabia: 9 digits  
-            'kw': 8,  // Kuwait: 8 digits
-            'bh': 8,  // Bahrain: 8 digits
-            'om': 8,  // Oman: 8 digits
-            'qa': 8,  // Qatar: 8 digits
-            'us': 10, // USA: 10 digits
-            'gb': 11, // UK: 11 digits
-        };
-        
-        const maxLength = maxLengths[countryData.iso2] || 15; // Default max 15 digits
-        
-        // If it's a number and would exceed max length, prevent it
-        if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
-            if (currentValue.length >= maxLength) {
-                e.preventDefault();
-                return;
-            }
-        }
-        
-        // Ensure that it is a number and stop other keypresses
-        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
-            e.preventDefault();
-        }
-    });
+        phoneField.addEventListener("input", function() {
+            userHasInteracted = true;
+        });
+    }
 
-    phoneInputField.addEventListener("input", function(e) {
-        userHasInteracted = true;
-        
-        // Clear any existing error styling during typing (but don't validate yet)
-        phoneInputField.classList.remove('calc-error');
-        const errorElement = document.getElementById('calc-phone-error');
-        if (errorElement) {
-            errorElement.style.display = 'none';
-        }
-        
-        // Remove any non-digit characters except formatting
-        const value = e.target.value;
-        const digitsOnly = value.replace(/\D/g, '');
-        
-        // Get country-specific max length
-        const countryData = phoneInput.getSelectedCountryData();
-        const maxLengths = {
-            'ae': 9, 'sa': 9, 'kw': 8, 'bh': 8, 'om': 8, 'qa': 8,
-            'us': 10, 'gb': 11
-        };
-        const maxLength = maxLengths[countryData.iso2] || 15;
-        
-        // If too many digits, truncate
-        if (digitsOnly.length > maxLength) {
-            const truncatedDigits = digitsOnly.slice(0, maxLength);
-            // Set the value and let intlTelInput format it
-            phoneInput.setNumber('+' + countryData.dialCode + truncatedDigits);
-        }
-        
-        // Don't validate during typing - only on blur or form submission
-    });
-
-    // Also clear errors on paste but don't validate immediately
-    phoneInputField.addEventListener("paste", function(e) {
-        userHasInteracted = true;
-        phoneInputField.classList.remove('error');
-        const errorElement = document.getElementById('phone-error');
-        if (errorElement) {
-            errorElement.style.display = 'none';
-        }
-    });
-
-    // Handle country change to clear validation and update placeholder
-    phoneInputField.addEventListener("countrychange", function() {
-        // Clear any existing validation when country changes
-        phoneInputField.classList.remove('calc-error');
-        const errorElement = document.getElementById('calc-phone-error');
-        if (errorElement) {
-            errorElement.textContent = '';
-            errorElement.style.display = 'none';
-        }
-        
-        // Update placeholder based on selected country
-        const countryData = phoneInput.getSelectedCountryData();
-        const countryPlaceholders = {
-            // GCC Countries
-            'ae': '50 123 4567',       // UAE
-            'sa': '50 123 4567',       // Saudi Arabia
-            'kw': '9999 9999',         // Kuwait
-            'bh': '9999 9999',         // Bahrain
-            'om': '9999 9999',         // Oman
-            'qa': '9999 9999',         // Qatar
-            
-            // Major English-speaking countries
-            'us': '(201) 555-0123',    // USA
-            'ca': '(416) 555-0123',    // Canada
-            'gb': '07400 123456',      // UK
-            'au': '0400 123 456',      // Australia
-            'nz': '021 123 456',       // New Zealand
-            'ie': '085 123 4567',      // Ireland
-            'za': '082 123 4567',      // South Africa
-            
-            // European Union
-            'de': '0151 12345678',     // Germany
-            'fr': '06 12 34 56 78',    // France
-            'it': '320 123 4567',      // Italy
-            'es': '612 34 56 78',      // Spain
-            'pt': '912 345 678',       // Portugal
-            'nl': '06 12345678',       // Netherlands
-            'be': '0470 12 34 56',     // Belgium
-            'at': '0664 1234567',      // Austria
-            'ch': '078 123 45 67',     // Switzerland
-            'se': '070 123 45 67',     // Sweden
-            'no': '406 12 34 56',       // Norway
-            'dk': '20 12 34 56',       // Denmark
-            'fi': '040 123 4567',      // Finland
-            'pl': '512 345 678',       // Poland
-            'cz': '601 123 456',       // Czech Republic
-            'hu': '06 20 123 4567',    // Hungary
-            'ro': '0712 345 678',      // Romania
-            'bg': '087 123 4567',      // Bulgaria
-            'hr': '091 234 5678',      // Croatia
-            'si': '031 234 567',       // Slovenia
-            'sk': '0901 123 456',      // Slovakia
-            'lt': '8612 34567',        // Lithuania
-            'lv': '2012 3456',         // Latvia
-            'ee': '5123 4567',         // Estonia
-            'gr': '694 123 4567',      // Greece
-            'cy': '9612 3456',         // Cyprus
-            'mt': '9912 3456',         // Malta
-            'lu': '621 123 456',       // Luxembourg
-            
-            // Asia-Pacific
-            'jp': '090 1234 5678',     // Japan
-            'kr': '010 1234 5678',     // South Korea
-            'cn': '138 0013 8000',     // China
-            'hk': '9123 4567',         // Hong Kong
-            'tw': '0912 345 678',      // Taiwan
-            'sg': '8123 4567',         // Singapore
-            'my': '012 345 6789',      // Malaysia
-            'th': '081 234 5678',      // Thailand
-            'ph': '0917 123 4567',     // Philippines
-            'id': '0812 3456 7890',    // Indonesia
-            'vn': '091 234 56 78',     // Vietnam
-            'in': '91234 56789',       // India
-            'pk': '0301 2345678',      // Pakistan
-            'bd': '01712 345678',      // Bangladesh
-            'lk': '071 234 5678',      // Sri Lanka
-            'np': '984 123 4567',      // Nepal
-            'mm': '09 123 456 789',    // Myanmar
-            'kh': '012 345 678',       // Cambodia
-            'la': '020 123 4567',      // Laos
-            'bn': '712 3456',          // Brunei
-            'mv': '791 2345',          // Maldives
-            
-            // Middle East & North Africa
-            'tr': '0532 123 45 67',    // Turkey
-            'il': '050 123 4567',      // Israel
-            'ps': '059 123 4567',      // Palestine
-            'jo': '079 123 4567',      // Jordan
-            'lb': '71 123 456',        // Lebanon
-            'sy': '0944 123 456',      // Syria
-            'iq': '0790 123 4567',     // Iraq
-            'ir': '0912 345 6789',     // Iran
-            'af': '070 123 4567',      // Afghanistan
-            'eg': '0100 123 4567',     // Egypt
-            'ly': '091 234 5678',      // Libya
-            'tn': '20 123 456',        // Tunisia
-            'dz': '0551 23 45 67',     // Algeria
-            'ma': '0612 345678',       // Morocco
-            'sd': '091 123 4567',      // Sudan
-            'ye': '070 123 456',       // Yemen
-            
-            // Africa
-            'ng': '0803 123 4567',     // Nigeria
-            'gh': '024 123 4567',      // Ghana
-            'ke': '0712 345678',       // Kenya
-            'tz': '0754 123456',       // Tanzania
-            'ug': '0772 123456',       // Uganda
-            'rw': '078 123 4567',      // Rwanda
-            'et': '091 123 4567',      // Ethiopia
-            'zm': '097 123 4567',      // Zambia
-            'zw': '077 123 4567',      // Zimbabwe
-            'bw': '71 123 456',        // Botswana
-            'mz': '82 123 4567',       // Mozambique
-            'ao': '923 123 456',       // Angola
-            'cm': '6123 4567',         // Cameroon
-            'ci': '0123 456789',       // Côte d'Ivoire
-            'sn': '70 123 45 67',      // Senegal
-            'ml': '65 12 34 56',       // Mali
-            'bf': '70 12 34 56',       // Burkina Faso
-            
-            // Latin America
-            'mx': '55 1234 5678',      // Mexico
-            'br': '11 91234 5678',     // Brazil
-            'ar': '11 1234 5678',      // Argentina
-            'cl': '9 1234 5678',       // Chile
-            'co': '321 123 4567',      // Colombia
-            'pe': '912 345 678',       // Peru
-            've': '0412 1234567',      // Venezuela
-            'ec': '099 123 4567',      // Ecuador
-            'uy': '094 123 456',       // Uruguay
-            'py': '0981 123456',       // Paraguay
-            'bo': '6123 4567',         // Bolivia
-            'cr': '8312 3456',         // Costa Rica
-            'pa': '6123 4567',         // Panama
-            'gt': '5123 4567',         // Guatemala
-            'hn': '9123 4567',         // Honduras
-            'sv': '7123 4567',         // El Salvador
-            'ni': '8123 4567',         // Nicaragua
-            'bz': '612 3456',          // Belize
-            'jm': '876 123 4567',      // Jamaica
-            'tt': '868 123 4567',      // Trinidad and Tobago
-            'bb': '246 123 4567',      // Barbados
-            'bs': '242 123 4567',      // Bahamas
-            'do': '809 123 4567',      // Dominican Republic
-            'pr': '787 123 4567',      // Puerto Rico
-            'cu': '5123 4567',         // Cuba
-            'ht': '3123 4567',         // Haiti
-            
-            // Eastern Europe & Russia
-            'ru': '8 912 345 6789',    // Russia
-            'ua': '050 123 45 67',     // Ukraine
-            'by': '029 123 45 67',     // Belarus
-            'md': '0621 12345',        // Moldova
-            'ge': '555 123 456',       // Georgia
-            'am': '077 123 456',       // Armenia
-            'az': '050 123 45 67',     // Azerbaijan
-            'kz': '701 123 4567',      // Kazakhstan
-            'kg': '0555 123 456',      // Kyrgyzstan
-            'tj': '93 123 45 67',      // Tajikistan
-            'tm': '65 123 456',        // Turkmenistan
-            'uz': '90 123 45 67',      // Uzbekistan
-            'mn': '8812 3456',         // Mongolia
-            
-            // Nordic & Baltic (additional)
-            'is': '611 1234',          // Iceland
-            'fo': '211234',            // Faroe Islands
-            'gl': '221234',            // Greenland
-            
-            // Pacific Islands
-            'fj': '701 2345',          // Fiji
-            'pg': '7012 3456',         // Papua New Guinea
-            'vu': '591 2345',          // Vanuatu
-            'sb': '7412345',           // Solomon Islands
-            'nc': '123456',            // New Caledonia
-            'pf': '87 12 34 56',       // French Polynesia
-            'ws': '72 12345',          // Samoa
-            'to': '771 2345',          // Tonga
-            'ki': '7312 3456',         // Kiribati
-            'tv': '901 2345',          // Tuvalu
-            'nr': '555 1234',          // Nauru
-            'pw': '620 1234',          // Palau
-            'fm': '350 1234',          // Micronesia
-            'mh': '235 1234',          // Marshall Islands
-        };
-        phoneInputField.placeholder = countryPlaceholders[countryData.iso2] || "Phone number";
-        
-        // Don't re-validate immediately - wait for blur or form submission
-    });
-
-    // Always validate on blur if there's content (more aggressive validation)
-    phoneInputField.addEventListener("blur", function() {
-        if (phoneInputField.value.trim()) {
-            phoneFieldHasBeenFocused = true; // Mark as focused when blur happens
-            validatePhoneField();
-        }
-    });
-
-    // Strict phone validation function
+    // Phone validation function - now uses MFZPhone
     function validatePhoneField() {
-        const phoneValue = phoneInputField.value.trim();
-        const errorElement = document.getElementById('calc-phone-error');
+        const phoneFieldLocal = document.getElementById('phone');
+        if (!phoneFieldLocal) return;
         
-        // Clear previous errors
-        phoneInputField.classList.remove('calc-error');
-        if (errorElement) {
-            errorElement.textContent = '';
-            errorElement.style.display = 'none';
-        }
-        
+        const phoneValue = phoneFieldLocal.value.trim();
         if (!phoneValue) return; // Don't validate empty field
         
-        // Get selected country data
-        const countryData = phoneInput.getSelectedCountryData();
-        
-        // Country-specific expected lengths (defined early for fallback validation)
-        const expectedLengths = {
-            // GCC Countries
-            'ae': 9,  // UAE: 9 digits
-            'sa': 9,  // Saudi Arabia: 9 digits  
-            'kw': 8,  // Kuwait: 8 digits
-            'bh': 8,  // Bahrain: 8 digits
-            'om': 8,  // Oman: 8 digits
-            'qa': 8,  // Qatar: 8 digits
-            
-            // Major English-speaking countries
-            'us': 10, // USA: 10 digits
-            'ca': 10, // Canada: 10 digits
-            'gb': 11, // UK: 11 digits
-            'au': 9,  // Australia: 9 digits
-            'nz': 9,  // New Zealand: 9 digits
-            'ie': 9,  // Ireland: 9 digits
-            'za': 9,  // South Africa: 9 digits
-            
-            // European Union
-            'de': 11, // Germany: 11 digits
-            'fr': 10, // France: 10 digits
-            'it': 10, // Italy: 10 digits
-            'es': 9,  // Spain: 9 digits
-            'pt': 9,  // Portugal: 9 digits
-            'nl': 9,  // Netherlands: 9 digits
-            'be': 9,  // Belgium: 9 digits
-            'at': 11, // Austria: 11 digits
-            'ch': 9,  // Switzerland: 9 digits
-            'se': 9,  // Sweden: 9 digits
-            'no': 8,  // Norway: 8 digits
-            'dk': 8,  // Denmark: 8 digits
-            'fi': 9,  // Finland: 9 digits
-            'pl': 9,  // Poland: 9 digits
-            'cz': 9,  // Czech Republic: 9 digits
-            'hu': 9,  // Hungary: 9 digits
-            'ro': 9,  // Romania: 9 digits
-            'bg': 9,  // Bulgaria: 9 digits
-            'hr': 9,  // Croatia: 9 digits
-            'si': 8,  // Slovenia: 8 digits
-            'sk': 9,  // Slovakia: 9 digits
-            'lt': 8,  // Lithuania: 8 digits
-            'lv': 8,  // Latvia: 8 digits
-            'ee': 8,  // Estonia: 8 digits
-            'gr': 10, // Greece: 10 digits
-            'cy': 8,  // Cyprus: 8 digits
-            'mt': 8,  // Malta: 8 digits
-            'lu': 9,  // Luxembourg: 9 digits
-            
-            // Asia-Pacific
-            'jp': 11, // Japan: 11 digits
-            'kr': 11, // South Korea: 11 digits
-            'cn': 11, // China: 11 digits
-            'hk': 8,  // Hong Kong: 8 digits
-            'tw': 9,  // Taiwan: 9 digits
-            'sg': 8,  // Singapore: 8 digits
-            'my': 10, // Malaysia: 10 digits
-            'th': 9,  // Thailand: 9 digits
-            'ph': 10, // Philippines: 10 digits
-            'id': 12, // Indonesia: 12 digits
-            'vn': 9,  // Vietnam: 9 digits
-            'in': 10, // India: 10 digits
-            'pk': 10, // Pakistan: 10 digits
-            'bd': 10, // Bangladesh: 10 digits
-            'lk': 9,  // Sri Lanka: 9 digits
-            'np': 10, // Nepal: 10 digits
-            'mm': 9,  // Myanmar: 9 digits
-            'kh': 9,  // Cambodia: 9 digits
-            'la': 9,  // Laos: 9 digits
-            'bn': 7,  // Brunei: 7 digits
-            'mv': 7,  // Maldives: 7 digits
-            
-            // Middle East & North Africa
-            'tr': 10, // Turkey: 10 digits
-            'il': 9,  // Israel: 9 digits
-            'ps': 9,  // Palestine: 9 digits
-            'jo': 9,  // Jordan: 9 digits
-            'lb': 8,  // Lebanon: 8 digits
-            'sy': 9,  // Syria: 9 digits
-            'iq': 10, // Iraq: 10 digits
-            'ir': 10, // Iran: 10 digits
-            'af': 9,  // Afghanistan: 9 digits
-            'eg': 10, // Egypt: 10 digits
-            'ly': 9,  // Libya: 9 digits
-            'tn': 8,  // Tunisia: 8 digits
-            'dz': 9,  // Algeria: 9 digits
-            'ma': 9,  // Morocco: 9 digits
-            'sd': 9,  // Sudan: 9 digits
-            'ye': 9,  // Yemen: 9 digits
-            
-            // Africa
-            'ng': 10, // Nigeria: 10 digits
-            'gh': 9,  // Ghana: 9 digits
-            'ke': 9,  // Kenya: 9 digits
-            'tz': 9,  // Tanzania: 9 digits
-            'ug': 9,  // Uganda: 9 digits
-            'rw': 9,  // Rwanda: 9 digits
-            'et': 9,  // Ethiopia: 9 digits
-            'ma': 9,  // Morocco: 9 digits
-            'dz': 9,  // Algeria: 9 digits
-            'tn': 8,  // Tunisia: 8 digits
-            'eg': 10, // Egypt: 10 digits
-            'zm': 9,  // Zambia: 9 digits
-            'zw': 9,  // Zimbabwe: 9 digits
-            'bw': 8,  // Botswana: 8 digits
-            'mz': 9,  // Mozambique: 9 digits
-            'ao': 9,  // Angola: 9 digits
-            'cm': 9,  // Cameroon: 9 digits
-            'ci': 10, // Côte d'Ivoire: 10 digits
-            'sn': 9,  // Senegal: 9 digits
-            'ml': 8,  // Mali: 8 digits
-            'bf': 8,  // Burkina Faso: 8 digits
-            
-            // Latin America
-            'mx': 10, // Mexico: 10 digits
-            'br': 11, // Brazil: 11 digits
-            'ar': 10, // Argentina: 10 digits
-            'cl': 9,  // Chile: 9 digits
-            'co': 10, // Colombia: 10 digits
-            'pe': 9,  // Peru: 9 digits
-            've': 10, // Venezuela: 10 digits
-            'ec': 9,  // Ecuador: 9 digits
-            'uy': 8,  // Uruguay: 8 digits
-            'py': 9,  // Paraguay: 9 digits
-            'bo': 8,  // Bolivia: 8 digits
-            'cr': 8,  // Costa Rica: 8 digits
-            'pa': 8,  // Panama: 8 digits
-            'gt': 8,  // Guatemala: 8 digits
-            'hn': 8,  // Honduras: 8 digits
-            'sv': 8,  // El Salvador: 8 digits
-            'ni': 8,  // Nicaragua: 8 digits
-            'bz': 7,  // Belize: 7 digits
-            'jm': 10, // Jamaica: 10 digits
-            'tt': 10, // Trinidad and Tobago: 10 digits
-            'bb': 10, // Barbados: 10 digits
-            'bs': 10, // Bahamas: 10 digits
-            'do': 10, // Dominican Republic: 10 digits
-            'pr': 10, // Puerto Rico: 10 digits
-            'cu': 8,  // Cuba: 8 digits
-            'ht': 8,  // Haiti: 8 digits
-            
-            // Eastern Europe & Russia
-            'ru': 10, // Russia: 10 digits
-            'ua': 9,  // Ukraine: 9 digits
-            'by': 9,  // Belarus: 9 digits
-            'md': 8,  // Moldova: 8 digits
-            'ge': 9,  // Georgia: 9 digits
-            'am': 8,  // Armenia: 8 digits
-            'az': 9,  // Azerbaijan: 9 digits
-            'kz': 10, // Kazakhstan: 10 digits
-            'kg': 9,  // Kyrgyzstan: 9 digits
-            'tj': 9,  // Tajikistan: 9 digits
-            'tm': 8,  // Turkmenistan: 8 digits
-            'uz': 9,  // Uzbekistan: 9 digits
-            'mn': 8,  // Mongolia: 8 digits
-            
-            // Nordic & Baltic (additional)
-            'is': 7,  // Iceland: 7 digits
-            'fo': 6,  // Faroe Islands: 6 digits
-            'gl': 6,  // Greenland: 6 digits
-            
-            // Pacific Islands
-            'fj': 7,  // Fiji: 7 digits
-            'pg': 8,  // Papua New Guinea: 8 digits
-            'vu': 7,  // Vanuatu: 7 digits
-            'sb': 7,  // Solomon Islands: 7 digits
-            'nc': 6,  // New Caledonia: 6 digits
-            'pf': 8,  // French Polynesia: 8 digits
-            'ws': 7,  // Samoa: 7 digits
-            'to': 7,  // Tonga: 7 digits
-            'ki': 8,  // Kiribati: 8 digits
-            'tv': 7,  // Tuvalu: 7 digits
-            'nr': 7,  // Nauru: 7 digits
-            'pw': 7,  // Palau: 7 digits
-            'fm': 7,  // Micronesia: 7 digits
-            'mh': 7,  // Marshall Islands: 7 digits
-        };
-        
-        // Check if the number is valid using Google's libphonenumber
+        // MFZPhone handles validation - just check its status
         let isValid = false;
-        let isPossible = false;
-        let validationType = null;
         
         try {
-            // Check if utils methods are available
-            if (formValidator && formValidator.phoneInput && 
-                typeof formValidator.phoneInput.isValidNumber === 'function' && 
-                typeof formValidator.phoneInput.isPossibleNumber === 'function') {
-                isValid = formValidator.phoneInput.isValidNumber();
-                isPossible = formValidator.phoneInput.isPossibleNumber();
-                if (typeof formValidator.phoneInput.getValidationError === 'function') {
-                    validationType = formValidator.phoneInput.getValidationError();
-                }
+            if (window.MFZPhone && formValidator && formValidator.useMFZPhone) {
+                isValid = window.MFZPhone.isValid(phoneFieldLocal);
             } else {
-                // Utils script not loaded yet, use country-specific validation
+                // Basic fallback validation
                 const digitsOnly = phoneValue.replace(/\D/g, '');
-                const expectedLength = expectedLengths[countryData.iso2] || 10;
-                
-                // More specific fallback validation
-                if (digitsOnly.length === expectedLength) {
-                    isValid = true;
-                    isPossible = true;
-                } else if (digitsOnly.length >= 8 && digitsOnly.length <= 15) {
-                    isValid = false;
-                    isPossible = true; // Length is possible, but not correct for country
-                } else {
-                    isValid = false;
-                    isPossible = false; // Length is completely invalid
-                }
+                isValid = digitsOnly.length >= 6 && digitsOnly.length <= 15;
             }
         } catch (err) {
-            // If any error occurs, use basic validation
+            // Basic fallback
             const digitsOnly = phoneValue.replace(/\D/g, '');
-            const expectedLength = expectedLengths[countryData.iso2] || 10;
-            
-            if (digitsOnly.length === expectedLength) {
-                isValid = true;
-                isPossible = true;
-            } else if (digitsOnly.length >= 8 && digitsOnly.length <= 15) {
-                isValid = false;
-                isPossible = true;
-            } else {
-                isValid = false;
-                isPossible = false;
-            }
+            isValid = digitsOnly.length >= 6 && digitsOnly.length <= 15;
         }
         
-        // Get number of digits entered
-        const digitsOnly = phoneValue.replace(/\D/g, '');
-        const expectedLength = expectedLengths[countryData.iso2] || 10;
-
-        
-        if (!isValid) {
-            phoneInputField.classList.add('calc-error');
-            if (errorElement) {
-                let errorMessage = '';
-                
-                if (digitsOnly.length < expectedLength) {
-                    errorMessage = `Phone number is too short for ${countryData.name}. Expected ${expectedLength} digits, got ${digitsOnly.length}.`;
-                } else if (digitsOnly.length > expectedLength) {
-                    errorMessage = `Phone number is too long for ${countryData.name}. Expected ${expectedLength} digits, got ${digitsOnly.length}.`;
-                } else if (!isPossible) {
-                    errorMessage = `Invalid phone number format for ${countryData.name}`;
-                } else {
-                    errorMessage = `Please enter a valid phone number for ${countryData.name}`;
-                }
-                
-                errorElement.textContent = errorMessage;
-                errorElement.style.display = 'block !important';
-                errorElement.style.visibility = 'visible !important';
-                errorElement.style.opacity = '1 !important';
-                errorElement.style.color = '#EB5F40';
-                errorElement.style.fontSize = '14px';
-                errorElement.style.marginTop = '5px';
-                
-                // Force error to stay visible by setting it again after a delay
-                setTimeout(() => {
-                    if (errorElement) {
-                        errorElement.style.display = 'block !important';
-                        errorElement.style.visibility = 'visible !important';
-                        errorElement.style.opacity = '1 !important';
-                    }
-                }, 50);
-                
-            }
-        }
+        // Note: MFZPhone handles visual feedback via mfz-phone.css
+        // No need for manual error display as MFZPhone shows validation states
+        return isValid;
     }
 
     // Real-time name validation with input restriction
@@ -4972,7 +4212,15 @@
         }
 
         const fullName = document.getElementById("full-name").value;
-        const phone = formValidator.phoneInput.getNumber();
+        const phoneField = document.getElementById("phone");
+        let phone = phoneField?.value || '';
+        // Get E.164 formatted phone from MFZPhone if available
+        if (window.MFZPhone && formValidator && formValidator.useMFZPhone && phoneField) {
+            const formattedPhone = window.MFZPhone.getFormattedNumber(phoneField);
+            if (formattedPhone) {
+                phone = formattedPhone;
+            }
+        }
         const email = document.getElementById("email").value;
         const bsaCode = document.getElementById("bsa-code")?.value || "";
                 const licenseType = document.getElementById("license-type")?.value || "fawri";
@@ -5237,33 +4485,20 @@
             const isNameValid = fullName && fullName.length >= 2 && /^[A-Za-z\s\-\']+$/.test(fullName);
             const isEmailValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             
-            // Phone validation using the FormValidator's phoneInput with strict validation
+            // Phone validation using MFZPhone if available
             let isPhoneValid = false;
-            if (phoneField && formValidator && formValidator.phoneInput) {
+            if (phoneField && window.MFZPhone && formValidator && formValidator.useMFZPhone) {
                 try {
-                    if (typeof formValidator.phoneInput.isValidNumber === 'function') {
-                        // Use strict Google libphonenumber validation
-                        isPhoneValid = formValidator.phoneInput.isValidNumber();
-                        
-                        // Additional check: must have actual phone number content
-                        const phoneNumber = formValidator.phoneInput.getNumber();
-                        if (!phoneNumber || phoneNumber.length < 8) {
-                            isPhoneValid = false;
-                        }
-                    } else {
-                        // Fallback to strict basic validation
-                        const phoneValue = phoneField.value?.trim();
-                        isPhoneValid = phoneValue && phoneValue.length >= 8 && phoneValue.length <= 15 && /^[\d\s\+\-\(\)]+$/.test(phoneValue);
-                    }
+                    isPhoneValid = window.MFZPhone.isValid(phoneField);
                 } catch (err) {
-                    // Fallback to strict basic validation
+                    // Fallback to basic validation
                     const phoneValue = phoneField.value?.trim();
-                    isPhoneValid = phoneValue && phoneValue.length >= 8 && phoneValue.length <= 15 && /^[\d\s\+\-\(\)]+$/.test(phoneValue);
+                    isPhoneValid = phoneValue && phoneValue.length >= 6 && phoneValue.length <= 15 && /^[\d\s\+\-\(\)]+$/.test(phoneValue);
                 }
             } else {
-                // If formValidator not available, use strict basic validation
+                // Fallback basic validation
                 const phoneValue = phoneField?.value?.trim();
-                isPhoneValid = phoneValue && phoneValue.length >= 8 && phoneValue.length <= 15 && /^[\d\s\+\-\(\)]+$/.test(phoneValue);
+                isPhoneValid = phoneValue && phoneValue.length >= 6 && phoneValue.length <= 15 && /^[\d\s\+\-\(\)]+$/.test(phoneValue);
             }
             
             return isNameValid && isEmailValid && isPhoneValid;
@@ -5670,15 +4905,20 @@
             const maxAttempts = 10;
 
             const trySetNumber = () => {
-                if (window.formValidator && window.formValidator.phoneInput && typeof window.formValidator.phoneInput.setNumber === 'function') {
-                    try {
-                        window.formValidator.phoneInput.setNumber(cleaned);
-                        return;
-                    } catch (e) {
-                        console.warn('Could not set phone number via formValidator phoneInput:', e);
+                // Try MFZPhone first
+                if (window.MFZPhone) {
+                    const instance = window.MFZPhone.getInstance(input);
+                    if (instance && instance.iti && typeof instance.iti.setNumber === 'function') {
+                        try {
+                            instance.iti.setNumber(cleaned);
+                            return;
+                        } catch (e) {
+                            console.warn('Could not set phone number via MFZPhone:', e);
+                        }
                     }
                 }
 
+                // Fallback to intl-tel-input globals
                 const iti = window.intlTelInputGlobals?.getInstance?.(input);
                 if (iti && typeof iti.setNumber === 'function') {
                     try {
@@ -5797,11 +5037,14 @@
         // Contact Information
         let phoneValue = document.getElementById("phone")?.value?.trim() || '';
         
-        // Format phone number - get the actual international number if using intl-tel-input
-        if (window.formValidator && window.formValidator.phoneInput && phoneValue) {
+        // Format phone number - get the E.164 formatted number if using MFZPhone
+        const phoneField = document.getElementById("phone");
+        if (window.MFZPhone && phoneField && phoneValue) {
             try {
-                // Get the full international number (this should already be properly formatted)
-                phoneValue = window.formValidator.phoneInput.getNumber();
+                const formattedPhone = window.MFZPhone.getFormattedNumber(phoneField);
+                if (formattedPhone) {
+                    phoneValue = formattedPhone;
+                }
             } catch (err) {
             }
         }
@@ -5951,11 +5194,16 @@
                         phoneField.dispatchEvent(new Event('input', { bubbles: true }));
                         phoneField.dispatchEvent(new Event('change', { bubbles: true }));
                     } else {
-                        // For non-UAE numbers, try the normal methods
-                        if (window.formValidator && window.formValidator.phoneInput) {
-                            try {
-                                window.formValidator.phoneInput.setNumber(phoneToSet);
-                            } catch (err) {
+                        // For non-UAE numbers, try MFZPhone first
+                        if (window.MFZPhone) {
+                            const instance = window.MFZPhone.getInstance(phoneField);
+                            if (instance && instance.iti && typeof instance.iti.setNumber === 'function') {
+                                try {
+                                    instance.iti.setNumber(phoneToSet);
+                                } catch (err) {
+                                    phoneField.value = phoneToSet;
+                                }
+                            } else {
                                 phoneField.value = phoneToSet;
                             }
                         } else {
@@ -8912,12 +8160,15 @@
                 if (phoneField) {
                     phoneField.value = userData.phone;
                     
-                    // If using international phone input, set the number properly
-                    if (window.formValidator && window.formValidator.phoneInput) {
-                        try {
-                            window.formValidator.phoneInput.setNumber(userData.phone);
-                        } catch (e) {
-                            console.warn('Could not set phone number via phoneInput:', e);
+                    // If using MFZPhone, set the number properly
+                    if (window.MFZPhone) {
+                        const instance = window.MFZPhone.getInstance(phoneField);
+                        if (instance && instance.iti && typeof instance.iti.setNumber === 'function') {
+                            try {
+                                instance.iti.setNumber(userData.phone);
+                            } catch (e) {
+                                console.warn('Could not set phone number via MFZPhone:', e);
+                            }
                         }
                     }
                 }

@@ -270,6 +270,9 @@
                     required: true,
                     minDigits: 6,
                     maxDigits: 15
+                },
+                consent: {
+                    required: true
                 }
             };
         }
@@ -291,6 +294,9 @@
                 phone: {
                     required: 'Phone number is required',
                     invalid: 'Please enter a valid phone number'
+                },
+                consent: {
+                    required: 'Please accept the terms and privacy policy to continue'
                 }
             };
         }
@@ -414,6 +420,40 @@
                     this.handleFormSubmit(e);
                 });
             }
+            
+            // Consent checkbox event listener
+            const consentCheckbox = document.getElementById('consent-checkbox');
+            if (consentCheckbox) {
+                consentCheckbox.addEventListener('change', () => {
+                    this.clearFieldError('consent-checkbox');
+                    // Remove error class from label
+                    const label = consentCheckbox.closest('.consent-label');
+                    if (label) {
+                        label.classList.remove('error');
+                    }
+                    // Update aria-checked attribute for accessibility
+                    const parentLabel = consentCheckbox.closest('.consent-label');
+                    if (parentLabel) {
+                        parentLabel.setAttribute('aria-checked', consentCheckbox.checked ? 'true' : 'false');
+                    }
+                    // Trigger section lock state update
+                    if (typeof updateSectionLockState === 'function') {
+                        updateSectionLockState();
+                    }
+                });
+                
+                // Handle keyboard interaction on the label
+                const consentLabel = consentCheckbox.closest('.consent-label');
+                if (consentLabel) {
+                    consentLabel.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            consentCheckbox.checked = !consentCheckbox.checked;
+                            consentCheckbox.dispatchEvent(new Event('change'));
+                        }
+                    });
+                }
+            }
         }
 
         handleNameKeydown(e) {
@@ -453,6 +493,12 @@
             if (!field) return true;
 
             const fieldType = this.getFieldType(fieldId);
+            
+            // Handle consent checkbox separately (it's a checkbox, not text input)
+            if (fieldType === 'consent') {
+                return this.validateConsent(field);
+            }
+            
             const value = field.value.trim();
             const rules = this.validationRules[fieldType];
 
@@ -481,7 +527,29 @@
             if (fieldId === 'full-name') return 'name';
             if (fieldId === 'email') return 'email';
             if (fieldId === 'phone') return 'phone';
+            if (fieldId === 'consent-checkbox') return 'consent';
             return 'text';
+        }
+        
+        validateConsent(field) {
+            this.clearFieldError(field.id);
+            
+            if (!field.checked) {
+                this.showFieldError(field.id, 'consent', 'required');
+                // Add error class to the label for visual feedback
+                const label = field.closest('.consent-label');
+                if (label) {
+                    label.classList.add('error');
+                }
+                return false;
+            }
+            
+            // Remove error class from label if valid
+            const label = field.closest('.consent-label');
+            if (label) {
+                label.classList.remove('error');
+            }
+            return true;
         }
 
         validateName(field, value) {
@@ -628,6 +696,13 @@
 
             if (field) {
                 field.classList.remove(`${this.errorPrefix}error`);
+                // Also clear consent label error class if this is the consent checkbox
+                if (fieldId === 'consent-checkbox') {
+                    const label = field.closest('.consent-label');
+                    if (label) {
+                        label.classList.remove('error');
+                    }
+                }
             }
 
             if (errorElement) {
@@ -647,12 +722,18 @@
             errorFields.forEach(field => {
                 field.classList.remove(`${this.errorPrefix}error`);
             });
+            
+            // Also clear consent label error class
+            const consentLabel = document.querySelector('.consent-label');
+            if (consentLabel) {
+                consentLabel.classList.remove('error');
+            }
         }
 
         validateContactForm() {
             this.clearAllErrors();
             
-            const fields = ['full-name', 'email', 'phone'];
+            const fields = ['full-name', 'email', 'phone', 'consent-checkbox'];
             let isValid = true;
 
             fields.forEach(fieldId => {
@@ -662,6 +743,43 @@
             });
 
             return isValid;
+        }
+        
+        // Silent validation - checks validity without showing errors (for real-time state checks)
+        validateContactFormSilent() {
+            const fullName = document.getElementById('full-name')?.value?.trim();
+            const email = document.getElementById('email')?.value?.trim();
+            const phoneField = document.getElementById('phone');
+            const consentCheckbox = document.getElementById('consent-checkbox');
+            
+            // Name validation
+            const isNameValid = fullName && fullName.length >= 2 && this.validationRules.name.pattern.test(fullName);
+            
+            // Email validation
+            const isEmailValid = email && this.validationRules.email.pattern.test(email);
+            
+            // Consent validation
+            const isConsentValid = consentCheckbox?.checked === true;
+            
+            // Phone validation using MFZPhone if available
+            let isPhoneValid = false;
+            if (phoneField && this.useMFZPhone && window.MFZPhone) {
+                try {
+                    isPhoneValid = window.MFZPhone.isValid(phoneField);
+                } catch (err) {
+                    const phoneValue = phoneField.value?.trim();
+                    const digitsOnly = phoneValue?.replace(/\D/g, '') || '';
+                    isPhoneValid = digitsOnly.length >= this.validationRules.phone.minDigits && 
+                                   digitsOnly.length <= this.validationRules.phone.maxDigits;
+                }
+            } else {
+                const phoneValue = phoneField?.value?.trim();
+                const digitsOnly = phoneValue?.replace(/\D/g, '') || '';
+                isPhoneValid = digitsOnly.length >= this.validationRules.phone.minDigits && 
+                               digitsOnly.length <= this.validationRules.phone.maxDigits;
+            }
+            
+            return isNameValid && isEmailValid && isPhoneValid && isConsentValid;
         }
 
         handleFormSubmit(e) {
@@ -677,12 +795,25 @@
             // First, trigger validation for any prefilled fields
             triggerFormValidationAfterProgrammaticFill();
 
-            setTimeout(() => {
+            // Check if MFZPhone is still validating and wait for it
+            const phoneField = document.getElementById('phone');
+            const checkAndValidate = (retryCount = 0) => {
+                // Check if phone is still in validating state
+                if (this.useMFZPhone && window.MFZPhone && phoneField) {
+                    const instance = window.MFZPhone.getInstance(phoneField);
+                    if (instance?.validationState === 'validating' && retryCount < 10) {
+                        // Still validating, wait and retry (max 5 seconds total)
+                        setTimeout(() => checkAndValidate(retryCount + 1), 500);
+                        return;
+                    }
+                }
+                
                 const isValid = this.validateContactForm();
                 
                 if (isValid) {
                     submitBtn.innerHTML = '✓ Valid';
                     submitBtn.classList.add('validated');
+                    submitBtn.disabled = false;
                     
                     // Ensure sections are revealed if they haven't been already
                     if (!isContactFormCompleted) {
@@ -702,13 +833,75 @@
                         this.handleSuccessfulSubmission();
                     }
                 } else {
-                    submitBtn.innerHTML = 'Please fix errors';
+                    // Get specific invalid fields for better error messaging
+                    const invalidFields = this.getInvalidFieldNames();
+                    let errorMessage = 'Please complete all required fields';
+                    
+                    if (invalidFields.length > 0) {
+                        if (invalidFields.length === 1) {
+                            errorMessage = `Please complete ${invalidFields[0]}`;
+                        } else if (invalidFields.length === 2) {
+                            errorMessage = `Please complete ${invalidFields[0]} and ${invalidFields[1]}`;
+                        } else {
+                            errorMessage = `Please complete ${invalidFields.slice(0, -1).join(', ')} and ${invalidFields[invalidFields.length - 1]}`;
+                        }
+                    }
+                    
+                    submitBtn.innerHTML = errorMessage;
                     setTimeout(() => {
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
-                    }, 2000);
+                    }, 3000);
                 }
-            }, 200);
+            };
+            
+            // Start validation after a brief delay
+            setTimeout(() => checkAndValidate(), 200);
+        }
+        
+        // Helper method to get human-readable names of invalid fields
+        getInvalidFieldNames() {
+            const invalidFields = [];
+            
+            // Check name
+            const fullName = document.getElementById('full-name')?.value?.trim();
+            if (!fullName || fullName.length < 2 || !this.validationRules.name.pattern.test(fullName)) {
+                invalidFields.push('your name');
+            }
+            
+            // Check email
+            const email = document.getElementById('email')?.value?.trim();
+            if (!email || !this.validationRules.email.pattern.test(email)) {
+                invalidFields.push('email');
+            }
+            
+            // Check phone
+            const phoneField = document.getElementById('phone');
+            let isPhoneValid = false;
+            if (phoneField && this.useMFZPhone && window.MFZPhone) {
+                try {
+                    isPhoneValid = window.MFZPhone.isValid(phoneField);
+                } catch (err) {
+                    const phoneValue = phoneField.value?.trim();
+                    const digitsOnly = phoneValue?.replace(/\D/g, '') || '';
+                    isPhoneValid = digitsOnly.length >= this.validationRules.phone.minDigits;
+                }
+            } else {
+                const phoneValue = phoneField?.value?.trim();
+                const digitsOnly = phoneValue?.replace(/\D/g, '') || '';
+                isPhoneValid = digitsOnly.length >= this.validationRules.phone.minDigits;
+            }
+            if (!isPhoneValid) {
+                invalidFields.push('phone number');
+            }
+            
+            // Check consent
+            const consentCheckbox = document.getElementById('consent-checkbox');
+            if (!consentCheckbox?.checked) {
+                invalidFields.push('consent');
+            }
+            
+            return invalidFields;
         }
 
         handleSuccessfulSubmission() {
@@ -4468,6 +4661,12 @@
                 }
             });
             
+            // Add listener for consent checkbox
+            const consentCheckbox = document.getElementById('consent-checkbox');
+            if (consentCheckbox) {
+                consentCheckbox.addEventListener('change', updateSectionLockState);
+            }
+            
             // Initial validation check
             updateSectionLockState();
         } catch (err) {
@@ -4477,13 +4676,24 @@
 
     function validateContactForm() {
         try {
+            // Use FormValidator if available for consistent validation
+            if (window.formValidator && typeof window.formValidator.validateContactForm === 'function') {
+                // Don't show errors during passive validation checks
+                const result = window.formValidator.validateContactFormSilent();
+                return result;
+            }
+            
             const fullName = document.getElementById('full-name')?.value?.trim();
             const email = document.getElementById('email')?.value?.trim();
             const phoneField = document.getElementById('phone');
+            const consentCheckbox = document.getElementById('consent-checkbox');
             
             // Strict validation - ALL fields must be valid
             const isNameValid = fullName && fullName.length >= 2 && /^[A-Za-z\s\-\']+$/.test(fullName);
             const isEmailValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            
+            // Consent validation
+            const isConsentValid = consentCheckbox?.checked === true;
             
             // Phone validation using MFZPhone if available
             let isPhoneValid = false;
@@ -4501,7 +4711,7 @@
                 isPhoneValid = phoneValue && phoneValue.length >= 6 && phoneValue.length <= 15 && /^[\d\s\+\-\(\)]+$/.test(phoneValue);
             }
             
-            return isNameValid && isEmailValid && isPhoneValid;
+            return isNameValid && isEmailValid && isPhoneValid && isConsentValid;
         } catch (err) {
             console.error("Error validating contact form:", err);
             return false;

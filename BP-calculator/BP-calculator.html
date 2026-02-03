@@ -35,6 +35,20 @@
                 <input type="email" id="email" placeholder="Email address" required>
                                         <div class="calc-error-message" id="calc-email-error"></div>
                     </div>
+
+                    <div class="form-group consent-group">
+                        <label class="consent-label" for="consent-checkbox" tabindex="0" role="checkbox" aria-checked="false" aria-label="Consent to terms and privacy policy">
+                            <input type="checkbox" id="consent-checkbox" name="consent" required aria-required="true">
+                            <span class="consent-checkmark" aria-hidden="true"></span>
+                            <span class="consent-text">
+                                I confirm that I have read and understood Meydan Free Zone's <a href="https://meydanfz.ae/terms-and-conditions" target="_blank" rel="noopener noreferrer">Terms</a> and <a href="https://meydanfz.ae/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and consent to the processing of my personal data for the purposes of communication and service delivery. I agree to be contacted via email, phone, or WhatsApp. I acknowledge that Meydan Free Zone operates 24/7 and that contact may occur outside standard business hours, including after 6:00 PM UAE time.
+                                <br><br>
+                                I further acknowledge that Meydan Free Zone will never request passwords, one-time passcodes (OTPs), or payments to personal or unknown bank accounts and that I should verify any suspicious or unexpected communication by calling <strong>800 FZ1 (800 391)</strong> before taking any action.
+                            </span>
+                        </label>
+                        <div class="calc-error-message" id="calc-consent-error"></div>
+                    </div>
+
                             <button type="button" id="submitBtn" class="submit-button">
                                 <span>Calculate</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

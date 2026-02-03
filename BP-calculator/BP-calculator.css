@@ -746,13 +746,10 @@ font-family: "Plus Jakarta Sans";
   border-radius: 15px;
   transition: all 0.3s ease;
   box-shadow: 1px 1px 30.993px 0 rgba(39, 67, 103, 0.13);
-  Colors
-Color format
-Hex
-Selection colors
 
 
-Text Primary 1;
+
+
 }
 
 .visa-toggle-slider:before {
@@ -772,10 +769,7 @@ Text Primary 1;
     isolation: isolate;
 }
 
-.visa-toggle-switch input:checked + .visa-toggle-slider {background: linear-gradient(90deg, #000 -25.41%, #2E2E2E 30.48%, #666 99.59%);Colors
-Color format
-Hex
-Background colors;}
+.visa-toggle-switch input:checked + .visa-toggle-slider {background: linear-gradient(90deg, #000 -25.41%, #2E2E2E 30.48%, #666 99.59%);}
 
 .visa-toggle-switch input:checked + .visa-toggle-slider:before {
     transform: translateX(20px);
@@ -1867,17 +1861,17 @@ background-clip: text;
     gap: 8px;
     padding: 10px 15px !important;
     border-radius: 40px;
-    \: #ffffff;
-    \: 1px solid #EDEDED;
+    background: #ffffff;
+    border: 1px solid #EDEDED;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
-    \: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
-    \: text;
-    \: text;
-    \: transparent;
+    background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     background: rgb(255 255 255 / 7%);
     backdrop-filter: blur(22px) saturate(180%);
     -webkit-backdrop-filter: blur(22px) saturate(180%);
@@ -3464,6 +3458,148 @@ backdrop-filter: blur(24px);
     box-shadow: 0 0 0 3px rgba(235, 95, 64, 0.2) !important;
 }
 
+/* Consent Checkbox Styles */
+.consent-group {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.consent-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    position: relative;
+    padding: 16px;
+    background: #F9FAFB;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    transition: all 0.2s ease;
+}
+
+.consent-label:hover {
+    background: #F3F4F6;
+    border-color: #D1D5DB;
+}
+
+.consent-label:focus {
+    outline: none;
+    border-color: #000;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.consent-label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.consent-checkmark {
+    position: relative;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #D1D5DB;
+    border-radius: 6px;
+    background: white;
+    transition: all 0.2s ease;
+    margin-top: 2px;
+}
+
+.consent-checkmark::after {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 11px;
+    border: solid white;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+}
+
+.consent-label input[type="checkbox"]:checked + .consent-checkmark {
+    background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+    border-color: transparent;
+}
+
+.consent-label input[type="checkbox"]:checked + .consent-checkmark::after {
+    display: block;
+}
+
+.consent-label input[type="checkbox"]:focus + .consent-checkmark {
+    border-color: #000;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.consent-text {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: #4B5563;
+    flex: 1;
+}
+
+.consent-text a {
+    color: #EB5F40;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.consent-text a:hover {
+    color: #B5348B;
+}
+
+.consent-text strong {
+    font-weight: 600;
+    color: #1C1C1C;
+}
+
+/* Consent checkbox error state */
+.consent-label.error {
+    border-color: #EB5F40;
+    background-color: #FEF2F2;
+}
+
+.consent-label.error .consent-checkmark {
+    border-color: #EB5F40;
+}
+
+.consent-group .calc-error-message {
+    margin-top: 8px;
+    padding-left: 0;
+}
+
+/* Mobile responsive for consent */
+@media (max-width: 768px) {
+    .consent-label {
+        padding: 12px;
+        gap: 10px;
+    }
+    
+    .consent-text {
+        font-size: 11px;
+        line-height: 1.5;
+    }
+    
+    .consent-checkmark {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .consent-checkmark::after {
+        left: 5px;
+        top: 1px;
+        width: 5px;
+        height: 10px;
+    }
+}
+
 /* Summary pricing blur/hidden state */
 .summary-pricing-hidden .summary-price,
 .summary-pricing-hidden .grand-total-amount,
@@ -4310,6 +4446,7 @@ body:has(.success-message-container.show) .sticky-summary-container.summary-pric
     height: 100%;
     z-index: 1;
     border-radius: 20px;
+    -webkit-backdrop-filter: blur(24px);
     backdrop-filter: blur(24px);
 }
 

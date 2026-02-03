@@ -3460,79 +3460,33 @@ backdrop-filter: blur(24px);
 
 /* Consent Checkbox Styles */
 .consent-group {
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
 .consent-label {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 10px;
     cursor: pointer;
-    position: relative;
-    padding: 16px;
-    background: #F9FAFB;
-    border-radius: 12px;
-    border: 1px solid #E5E7EB;
-    transition: all 0.2s ease;
 }
 
-.consent-label:hover {
-    background: #F3F4F6;
-    border-color: #D1D5DB;
-}
-
-.consent-label:focus {
-    outline: none;
-    border-color: #000;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-}
-
-.consent-label input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    pointer-events: none;
-}
-
-.consent-checkmark {
-    position: relative;
+.consent-checkbox {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
     flex-shrink: 0;
-    width: 22px;
-    height: 22px;
-    border: 2px solid #D1D5DB;
-    border-radius: 6px;
-    background: white;
-    transition: all 0.2s ease;
-    margin-top: 2px;
+    margin: 2px 0 0 0 !important;
+    padding: 0 !important;
+    cursor: pointer;
+    accent-color: #000;
 }
 
-.consent-checkmark::after {
-    content: '';
-    position: absolute;
-    display: none;
-    left: 6px;
-    top: 2px;
-    width: 6px;
-    height: 11px;
-    border: solid white;
-    border-width: 0 2.5px 2.5px 0;
-    transform: rotate(45deg);
-}
-
-.consent-label input[type="checkbox"]:checked + .consent-checkmark {
-    background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
-    border-color: transparent;
-}
-
-.consent-label input[type="checkbox"]:checked + .consent-checkmark::after {
-    display: block;
-}
-
-.consent-label input[type="checkbox"]:focus + .consent-checkmark {
-    border-color: #000;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+.consent-checkbox.error {
+    outline: 2px solid #EB5F40;
+    outline-offset: 1px;
 }
 
 .consent-text {
@@ -3548,7 +3502,6 @@ backdrop-filter: blur(24px);
     color: #EB5F40;
     text-decoration: underline;
     font-weight: 500;
-    transition: color 0.2s ease;
 }
 
 .consent-text a:hover {
@@ -3560,43 +3513,16 @@ backdrop-filter: blur(24px);
     color: #1C1C1C;
 }
 
-/* Consent checkbox error state */
-.consent-label.error {
-    border-color: #EB5F40;
-    background-color: #FEF2F2;
-}
-
-.consent-label.error .consent-checkmark {
-    border-color: #EB5F40;
-}
-
 .consent-group .calc-error-message {
     margin-top: 8px;
-    padding-left: 0;
+    padding-left: 28px;
 }
 
 /* Mobile responsive for consent */
 @media (max-width: 768px) {
-    .consent-label {
-        padding: 12px;
-        gap: 10px;
-    }
-    
     .consent-text {
         font-size: 11px;
         line-height: 1.5;
-    }
-    
-    .consent-checkmark {
-        width: 20px;
-        height: 20px;
-    }
-    
-    .consent-checkmark::after {
-        left: 5px;
-        top: 1px;
-        width: 5px;
-        height: 10px;
     }
 }
 

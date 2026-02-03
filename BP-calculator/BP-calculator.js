@@ -426,33 +426,13 @@
             if (consentCheckbox) {
                 consentCheckbox.addEventListener('change', () => {
                     this.clearFieldError('consent-checkbox');
-                    // Remove error class from label
-                    const label = consentCheckbox.closest('.consent-label');
-                    if (label) {
-                        label.classList.remove('error');
-                    }
-                    // Update aria-checked attribute for accessibility
-                    const parentLabel = consentCheckbox.closest('.consent-label');
-                    if (parentLabel) {
-                        parentLabel.setAttribute('aria-checked', consentCheckbox.checked ? 'true' : 'false');
-                    }
+                    // Remove error class from checkbox
+                    consentCheckbox.classList.remove('error');
                     // Trigger section lock state update
                     if (typeof updateSectionLockState === 'function') {
                         updateSectionLockState();
                     }
                 });
-                
-                // Handle keyboard interaction on the label
-                const consentLabel = consentCheckbox.closest('.consent-label');
-                if (consentLabel) {
-                    consentLabel.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            consentCheckbox.checked = !consentCheckbox.checked;
-                            consentCheckbox.dispatchEvent(new Event('change'));
-                        }
-                    });
-                }
             }
         }
 
@@ -536,19 +516,13 @@
             
             if (!field.checked) {
                 this.showFieldError(field.id, 'consent', 'required');
-                // Add error class to the label for visual feedback
-                const label = field.closest('.consent-label');
-                if (label) {
-                    label.classList.add('error');
-                }
+                // Add error class to checkbox for visual feedback
+                field.classList.add('error');
                 return false;
             }
             
-            // Remove error class from label if valid
-            const label = field.closest('.consent-label');
-            if (label) {
-                label.classList.remove('error');
-            }
+            // Remove error class from checkbox if valid
+            field.classList.remove('error');
             return true;
         }
 
@@ -696,13 +670,7 @@
 
             if (field) {
                 field.classList.remove(`${this.errorPrefix}error`);
-                // Also clear consent label error class if this is the consent checkbox
-                if (fieldId === 'consent-checkbox') {
-                    const label = field.closest('.consent-label');
-                    if (label) {
-                        label.classList.remove('error');
-                    }
-                }
+                field.classList.remove('error');
             }
 
             if (errorElement) {
@@ -723,10 +691,10 @@
                 field.classList.remove(`${this.errorPrefix}error`);
             });
             
-            // Also clear consent label error class
-            const consentLabel = document.querySelector('.consent-label');
-            if (consentLabel) {
-                consentLabel.classList.remove('error');
+            // Also clear consent checkbox error class
+            const consentCheckbox = document.getElementById('consent-checkbox');
+            if (consentCheckbox) {
+                consentCheckbox.classList.remove('error');
             }
         }
 
@@ -789,6 +757,13 @@
 
             const submitBtn = e.target;
             const originalText = submitBtn.innerHTML;
+            
+            // If form is already completed and valid, just scroll to next section
+            if (isContactFormCompleted && this.validateContactFormSilent()) {
+                this.handleSuccessfulSubmission();
+                return;
+            }
+            
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Validating...';
 
@@ -818,7 +793,49 @@
                     // Ensure sections are revealed if they haven't been already
                     if (!isContactFormCompleted) {
                         isContactFormCompleted = true;
-                        updateSectionLockState();
+                        
+                        // Reveal sections
+                        revealSections();
+                        
+                        // Update UI state
+                        const contactSection = document.querySelector('.contact-form-section');
+                        if (contactSection) {
+                            contactSection.classList.add('validated', 'completed');
+                        }
+                        
+                        // Update progress indicator
+                        const progressIndicator = document.getElementById('contact-progress');
+                        if (progressIndicator) {
+                            progressIndicator.classList.add('completed');
+                            const progressText = progressIndicator.querySelector('p');
+                            if (progressText) {
+                                progressText.innerHTML = `
+                                    <span class="progress-icon" id="progress-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20,6 9,17 4,12"/>
+                                        </svg>
+                                    </span>
+                                    You're all set. Let's explore your business setup options.
+                                `;
+                            }
+                        }
+                        
+                        // Reveal pricing
+                        if (!pricingRevealed) {
+                            pricingRevealed = true;
+                            const summaryContainer = document.querySelector('.sticky-summary-container');
+                            const mobileFooter = document.getElementById('mobile-sticky-footer');
+                            
+                            if (summaryContainer) {
+                                summaryContainer.classList.remove('summary-pricing-hidden');
+                                summaryContainer.classList.add('summary-pricing-revealed');
+                            }
+                            
+                            if (mobileFooter) {
+                                mobileFooter.classList.remove('summary-pricing-hidden');
+                                mobileFooter.classList.add('summary-pricing-revealed');
+                            }
+                        }
                         
                         // Mark license section as interacted for pricing display
                         setTimeout(() => {
@@ -827,11 +844,7 @@
                         }, 1000);
                     }
                     
-                    if (typeof window.handleContactFormSubmit === 'function') {
-                        window.handleContactFormSubmit();
-                    } else {
-                        this.handleSuccessfulSubmission();
-                    }
+                    this.handleSuccessfulSubmission();
                 } else {
                     // Get specific invalid fields for better error messaging
                     const invalidFields = this.getInvalidFieldNames();
@@ -4921,7 +4934,22 @@
                 }
                 
             } else if (!isValid && isContactFormCompleted) {
-                // Form was valid but now invalid - hide sections again
+                // Form was valid but now invalid - only hide if user actually changed a field to invalid
+                // Check if any field is actively being edited (has focus)
+                const activeElement = document.activeElement;
+                const isEditingContactField = activeElement && 
+                    (activeElement.id === 'full-name' || 
+                     activeElement.id === 'email' || 
+                     activeElement.id === 'phone' ||
+                     activeElement.id === 'consent-checkbox');
+                
+                // Only hide sections if user is actively editing and made a field invalid
+                // Don't hide on button clicks or other events
+                if (!isEditingContactField) {
+                    // Not editing - don't hide sections, keep them revealed
+                    return;
+                }
+                
                 isContactFormCompleted = false;
                 
                 // Remove validation glow

@@ -3673,11 +3673,6 @@
 
 
     function calculateCosts() {
-        // Don't calculate during shared configuration loading to prevent glitchy calculations
-        if (typeof isLoadingSharedConfiguration !== 'undefined' && isLoadingSharedConfiguration) {
-            return;
-        }
-        
         const snapshot = getFormSnapshot();
         
         // Calculate costs for sections that have been interacted with

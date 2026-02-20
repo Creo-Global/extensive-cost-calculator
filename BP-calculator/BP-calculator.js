@@ -6621,6 +6621,38 @@
     // No need for immediate initialization here
 
     let currentStep = 1;
+    // Keep step constants resilient even if not provided by another script.
+    var totalSteps = typeof window.totalSteps === 'number' ? window.totalSteps : 5;
+    var displayTotalSteps = typeof window.displayTotalSteps === 'number' ? window.displayTotalSteps : totalSteps + 1;
+
+    function updateStepDisplay(step = currentStep) {
+        const stepDisplay = document.getElementById("heading-top-right-numbs-steps-1");
+        if (!stepDisplay) return;
+
+        const normalizedStep = Math.min(Math.max(Number(step) || 1, 1), displayTotalSteps);
+        stepDisplay.innerHTML = `<span class="step-word">Step</span> <span id="current-step">${normalizedStep}</span>/${displayTotalSteps}`;
+    }
+
+    if (typeof window.updateButtonsDisplay !== 'function') {
+        window.updateButtonsDisplay = function(stepNumber = currentStep) {
+            const prevButton = document.getElementById('prev-btn') || document.getElementById('prevBtn');
+            const nextButton = document.getElementById('next-btn') || document.getElementById('nextBtn');
+            const isSummaryStep = stepNumber >= totalSteps + 1;
+
+            if (prevButton) {
+                prevButton.style.display = stepNumber <= 1 ? 'none' : '';
+            }
+            if (nextButton) {
+                nextButton.style.display = isSummaryStep ? 'none' : '';
+            }
+        };
+    }
+
+    if (typeof window.changeHeading !== 'function') {
+        window.changeHeading = function(stepNumber = currentStep) {
+            updateStepDisplay(stepNumber);
+        };
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
         

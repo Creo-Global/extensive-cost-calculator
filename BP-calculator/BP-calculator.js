@@ -1016,11 +1016,6 @@
         }
     };
     
-    // Add missing functions to prevent JavaScript errors
-    function updateProgressBar(step) {
-        // This function may not be needed anymore but prevents errors
-    }
-    
     function initializePricingVisibility() {
         // This function may not be needed anymore but prevents errors
     }
@@ -2230,7 +2225,7 @@
                     name: 'Medical & Emirates ID',
                     price: 2250,
                     image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80',
-                    description: 'Get step-by-step help from a manager for medical test and Emirates ID processing.'
+                    description: 'Get personalized help from a manager for medical test and Emirates ID processing.'
                 },
                 {
                     id: 'medical-insurance',
@@ -3090,7 +3085,7 @@
             investorVisas: investorVisaCount,
             employeeVisas: employeeVisaCount,
             dependencyVisas: dependencyVisaCount,
-            // officeType removed as step 5 was removed
+            // officeType removed from current calculator flow
             selectedAddons: selectedAddonsList,
             applicantsInsideUAE: parseInt(document.getElementById("applicants-inside-uae")?.value) || 0,
             applicantsOutsideUAE: parseInt(document.getElementById("applicants-outside-uae")?.value) || 0,
@@ -3142,7 +3137,7 @@
         return cost;
     }
 
-    // Office cost calculation removed as step 5 was removed
+    // Office cost calculation removed from current calculator flow
     function calculateOfficeCost() {
         return 0;
     }
@@ -4932,7 +4927,7 @@
                     if (progressText) {
                         progressText.innerHTML = `
                             <span class="progress-icon" id="progress-icon"></span>
-                            This is a required step to calculate your business setup cost.
+                            This is a required section to calculate your business setup cost.
                         `;
                     }
                 }
@@ -6620,40 +6615,6 @@
     // Unified initialization is now handled in initializeCalculator()
     // No need for immediate initialization here
 
-    let currentStep = 1;
-    // Keep step constants resilient even if not provided by another script.
-    var totalSteps = typeof window.totalSteps === 'number' ? window.totalSteps : 5;
-    var displayTotalSteps = typeof window.displayTotalSteps === 'number' ? window.displayTotalSteps : totalSteps + 1;
-
-    function updateStepDisplay(step = currentStep) {
-        const stepDisplay = document.getElementById("heading-top-right-numbs-steps-1");
-        if (!stepDisplay) return;
-
-        const normalizedStep = Math.min(Math.max(Number(step) || 1, 1), displayTotalSteps);
-        stepDisplay.innerHTML = `<span class="step-word">Step</span> <span id="current-step">${normalizedStep}</span>/${displayTotalSteps}`;
-    }
-
-    if (typeof window.updateButtonsDisplay !== 'function') {
-        window.updateButtonsDisplay = function(stepNumber = currentStep) {
-            const prevButton = document.getElementById('prev-btn') || document.getElementById('prevBtn');
-            const nextButton = document.getElementById('next-btn') || document.getElementById('nextBtn');
-            const isSummaryStep = stepNumber >= totalSteps + 1;
-
-            if (prevButton) {
-                prevButton.style.display = stepNumber <= 1 ? 'none' : '';
-            }
-            if (nextButton) {
-                nextButton.style.display = isSummaryStep ? 'none' : '';
-            }
-        };
-    }
-
-    if (typeof window.changeHeading !== 'function') {
-        window.changeHeading = function(stepNumber = currentStep) {
-            updateStepDisplay(stepNumber);
-        };
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
         
         // Reset all section interactions to false on page load
@@ -6704,21 +6665,6 @@
             }
         }
         
-        updateProgressBar(currentStep);
-        updateStepDisplay();
-        
-        if (currentStep === 1) {
-            document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
-            document.getElementById('step-1').classList.add('active');
-        }
-        
-        const stepDisplay = document.getElementById("heading-top-right-numbs-steps-1");
-        if (stepDisplay) {
-            stepDisplay.innerHTML = `<span class="step-word">Step</span> <span id="current-step">1</span>/${displayTotalSteps}`;
-        }
-        
-        updateButtonsDisplay(currentStep);
-
         // Scroll event listener for addon viewport detection is set up at script load
         
         // Ensure Fawri license is selected by default for calculations
@@ -6810,82 +6756,15 @@
 
     // Toggle inline edit mode for summary items
     function toggleEditMode(editType) {
-    // Instead of showing edit forms, navigate to the respective step
-    switch(editType) {
-        case 'package-type':
-            // Navigate to step 2 (Company Setup)
-            goToStep(2);
-            break;
-        case 'business-activities':
-            // Navigate to step 3 (Business Activities)
-            goToStep(3);
-            break;
-        case 'visa-info':
-            // Navigate to step 4 (Visa Options)
-            goToStep(4);
-            break;
-        // case 'office-type' removed as step 5 was removed
-        case 'addons':
-            // Navigate to step 5 (Add-ons, previously step 6)
-            goToStep(5);
-            break;
-    }
-    // Store that we're in edit mode and the original step we came from
-    sessionStorage.setItem('editMode', 'true');
-    sessionStorage.setItem('returnToStep', '7');
-}
-    
-    // Edit form functions removed as we now navigate to steps directly
-    
-    // Function to navigate to a specific step
-    function goToStep(stepNumber) {
-        if (stepNumber < 1 || stepNumber > totalSteps + 1) {
-            return;
-        }
-        
-        // Hide all steps
-        document.querySelectorAll('.form-step').forEach(step => {
-            step.classList.remove('active');
-        });
-        
-        // Show the selected step
-        let targetStepId = `step-${stepNumber}`;
-        // Special handling for summary step (still using step-7 ID for backward compatibility)
-        if (stepNumber === 6) {
-            targetStepId = 'step-7';
-        }
-        
-        const targetStep = document.getElementById(targetStepId);
-        if (targetStep) {
-            targetStep.classList.add('active');
-            currentStep = stepNumber;
-            
-            // Update progress bar
-            updateProgressBar(stepNumber);
-            
-            // If coming from summary page, set edit mode
-            if (stepNumber < 6 && !sessionStorage.getItem('editMode') && currentStep !== 1) {
-                sessionStorage.setItem('editMode', 'true');
-                sessionStorage.setItem('returnToStep', '6'); // Changed from 7 to 6
-            }
-            
-            // If going to the summary step, recalculate costs
-            if (stepNumber === 6) { // Changed from 7 to 6
-                calculateCosts();
-            }
-            
-            // Update navigation buttons and heading after setting edit mode
-            changeHeading(stepNumber);
-            updateStepDisplay();
-            updateButtonsDisplay(stepNumber);
-            
-            // Scroll to top of form
-            const formContainer = document.querySelector('#MFZ-NewCostCalForm');
-            if (formContainer) {
-                formContainer.scrollIntoView({ behavior: 'smooth' });
-            }
-            
-
+        const editTargetMap = {
+            'package-type': 'company-setup-section',
+            'business-activities': 'business-activities-section',
+            'visa-info': 'visa-options-section',
+            'addons': 'addons-section'
+        };
+        const targetSectionId = editTargetMap[editType];
+        if (targetSectionId) {
+            scrollToSection(targetSectionId);
         }
     }
     

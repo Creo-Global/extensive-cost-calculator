@@ -70,7 +70,6 @@
             
             
         } catch (error) {
-            console.error('Error during calculator initialization:', error);
         }
     }
 
@@ -1120,7 +1119,6 @@
             calculateCosts();
             
         } catch (err) {
-            console.error("Error during DOMContentLoaded initialization:", err);
         }
     });
 
@@ -1700,7 +1698,6 @@
                 modalList.innerHTML = '<div class="no-results">No activities found matching your search.</div>';
             }
         } catch (error) {
-            console.error('Search error:', error);
             modalList.innerHTML = '<div class="error-results">Error searching activities.</div>';
         }
     }
@@ -1802,7 +1799,6 @@
             displayActivitiesInModal(data, groupName);
 
         } catch (err) {
-            console.error('Error fetching activities for modal:', err);
             modalList.innerHTML = '<div class="error-results">Error fetching activities.</div>';
         }
     }
@@ -3705,13 +3701,6 @@
             
             // First 3 groups are free, then 1000 AED per individual activity in additional groups
             const groupIds = Object.keys(activityGroups);
-            console.log('Business Activities Debug:', {
-                totalActivities: window.selectedActivities.length,
-                uniqueGroups: groupIds.length,
-                groupIds: groupIds,
-                activityGroups: activityGroups
-            });
-            
             if (groupIds.length > 3) {
                 // Keep track of which groups were selected first (maintain selection order)
                 const groupSelectionOrder = [];
@@ -3724,33 +3713,19 @@
                         groupSelectionOrder.push(groupId);
                     }
                 });
-                
-                console.log('Charging for groups:', {
-                    selectionOrder: groupSelectionOrder,
-                    freeGroups: groupSelectionOrder.slice(0, 3),
-                    chargedGroups: groupSelectionOrder.slice(3)
-                });
-                
                 // First 3 groups in selection order are free, charge for activities in remaining groups
                 for (let i = 3; i < groupSelectionOrder.length; i++) {
                     const groupId = groupSelectionOrder[i];
                     if (activityGroups[groupId]) {
                         const activitiesCount = activityGroups[groupId].length;
                         const cost = activitiesCount * 1000;
-                        console.log(`Group "${groupId}": ${activitiesCount} activities × 1000 = ${cost} AED`);
                         businessActivitiesCost += cost;
                     }
                 }
                 
-                console.log('Total business activities cost:', businessActivitiesCost);
             } else {
-                console.log('All groups are free (≤3 groups)');
             }
         } else {
-            console.log('Business activities cost not calculated:', {
-                sectionInteracted: sectionInteractions.businessActivitiesSection,
-                hasActivities: window.selectedActivities?.length > 0
-            });
         }
         
         // Bank account cost is now included in add-ons, so we don't add it separately
@@ -3829,12 +3804,6 @@
                 
                 // First 3 groups are free, then 1000 AED per individual activity in additional groups
                 const groupIds = Object.keys(activityGroups);
-                console.log('[calculateTotalCost] Business Activities Debug:', {
-                    totalActivities: window.selectedActivities.length,
-                    uniqueGroups: groupIds.length,
-                    groupIds: groupIds
-                });
-                
                 if (groupIds.length > 3) {
                     // Keep track of which groups were selected first (maintain selection order)
                     const groupSelectionOrder = [];
@@ -3856,7 +3825,6 @@
                         }
                     }
                     
-                    console.log('[calculateTotalCost] Total business activities cost:', businessActivitiesCost);
                 }
             }
             
@@ -3887,7 +3855,6 @@
                     });
                 
             } catch (error) {
-                console.error('Webhook submission failed:', error);
                 reject(error);
             }
         });
@@ -3952,7 +3919,6 @@
                 form.submit();
                 
             } catch (error) {
-                console.error('Iframe submission failed:', error);
                 reject(error);
             }
         });
@@ -4291,7 +4257,6 @@
             window.dataLayer.push(eventData);
             
         } catch (error) {
-            console.error('Error pushing to dataLayer:', error);
         }
     }
 
@@ -4403,12 +4368,10 @@
                         }
                     }
                 } catch (timestampError) {
-                    console.error('Error getting last viewed timestamp:', timestampError);
                     lastViewedTimestamp = new Date().toISOString();
                 }
             }
         } catch (error) {
-            console.error('Error generating shareable link:', error);
             // Continue with submission even if shareable link generation fails
         }
 
@@ -4637,7 +4600,6 @@
             })
             .catch((error) => {
                 // Handle submission error
-                console.error('Form submission failed:', error);
                 
                 // Push error event to dataLayer
                 pushToDataLayer('form_submit_error', { 
@@ -4678,7 +4640,6 @@
             // Initial validation check
             updateSectionLockState();
         } catch (err) {
-            console.error("Error initializing section locking:", err);
         }
     }
 
@@ -4721,7 +4682,6 @@
             
             return isNameValid && isEmailValid && isPhoneValid && isConsentValid;
         } catch (err) {
-            console.error("Error validating contact form:", err);
             return false;
         }
     }
@@ -4752,7 +4712,6 @@
                 }
             });
         } catch (err) {
-            console.error("Error hiding sections:", err);
         }
     }
 
@@ -4793,7 +4752,6 @@
             }, sectionsToReveal.length * 100 + 400);
             
         } catch (err) {
-            console.error("Error revealing sections:", err);
         }
     }
     
@@ -4825,7 +4783,6 @@
             }, 1200);
             
         } catch (err) {
-            console.error("Error showing reveal message:", err);
         }
     }
 
@@ -4981,7 +4938,6 @@
                 }
             }
         } catch (err) {
-            console.error("Error updating section lock state:", err);
         }
     }
 
@@ -4996,7 +4952,6 @@
         try {
             return decodeURIComponent(escape(atob(str)));
         } catch (e) {
-            console.error("Base64 decode error", e);
             return '';
         }
     }
@@ -5146,7 +5101,6 @@
                             instance.iti.setNumber(cleaned);
                             return;
                         } catch (e) {
-                            console.warn('Could not set phone number via MFZPhone:', e);
                         }
                     }
                 }
@@ -5158,7 +5112,6 @@
                         iti.setNumber(cleaned);
                         return;
                     } catch (e) {
-                        console.warn('Could not set phone number via intl-tel-input:', e);
                     }
                 } else if (attempts < maxAttempts) {
                     attempts++;
@@ -5190,7 +5143,6 @@
             });
             
         } catch (error) {
-            console.error('Error sending webhook notification:', error);
         }
     }
 
@@ -5341,7 +5293,6 @@
             // Use escape() + encodeURIComponent() like your existing system
             return btoa(unescape(encodeURIComponent(jsonString)));
         } catch (e) {
-            console.error("Configuration encode error", e);
             return '';
         }
     }
@@ -5356,7 +5307,6 @@
             const jsonString = decodeURIComponent(escape(atob(encodedString)));
             return JSON.parse(jsonString);
         } catch (e) {
-            console.error("Configuration decode error", e);
             return null;
         }
     }
@@ -5369,7 +5319,6 @@
         const encodedConfig = encodeConfigurationToBase64(configData);
         
         if (!encodedConfig) {
-            console.error("Failed to encode configuration");
             return null;
         }
 
@@ -5746,7 +5695,6 @@
             }, 800); // Increased delay to ensure all form updates are complete
 
         } catch (error) {
-            console.error("Error applying shared configuration:", error);
             // Re-enable scrolling and updates even if there was an error
             mobileUserHasInteracted = true;
             isLoadingSharedConfiguration = false;
@@ -5789,7 +5737,6 @@
                 document.execCommand('copy');
                 showShareSuccessMessage();
             } catch (fallbackErr) {
-                console.error('Could not copy URL: ', fallbackErr); 
                 alert("Unable to copy URL automatically. Please copy this URL manually:\n\n" + shareableURL);
             }
             
@@ -5962,13 +5909,11 @@
                 .upsert(upsertData);
             
             if (error) {
-                console.error('Error storing configuration:', error);
                 return false;
             }
             
             return true;
         } catch (error) {
-            console.error('Error storing configuration:', error);
             return false;
         }
     }
@@ -5984,7 +5929,6 @@
                 .single();
             
             if (error) {
-                console.error('Error loading configuration:', error);
                 return null;
             }
             
@@ -6003,7 +5947,6 @@
                 } : null
             };
         } catch (error) {
-            console.error('Error loading configuration:', error);
             return null;
         }
     }
@@ -6022,7 +5965,6 @@
             // Store configuration
             const stored = await storeConfiguration(currentConfigId, configData);
             if (!stored) {
-                console.error('Failed to store configuration');
                 return null;
             }
             
@@ -6046,7 +5988,6 @@
             
             return shareableURL;
         } catch (error) {
-            console.error('Error generating dynamic shareable URL:', error);
             return null;
         }
     }
@@ -6058,7 +5999,6 @@
                 const configData = collectFormConfiguration();
                 await storeConfiguration(currentConfigId, configData);
             } catch (error) {
-                console.error('Error updating dynamic configuration:', error);
             }
         }
     }, 1500); // 1.5 second calcDebounce
@@ -6160,14 +6100,12 @@
                     document.execCommand('copy');
                     showShareSuccessMessage();
                 } catch (err) {
-                    console.error('Fallback copy failed:', err);
                     alert("Copy failed. Please copy the URL manually: " + shareableURL);
                 }
                 
                 document.body.removeChild(textArea);
             }
         } catch (err) {
-            console.error('Error copying to clipboard:', err);
             alert("Copy failed. Please copy the URL manually: " + shareableURL);
         }
     }
@@ -6232,7 +6170,6 @@
             }, 3000);
             
         } catch (err) {
-            console.error('Error in handleShareClick:', err);
             
             // Reset to normal state on error
             shareBtn.classList.remove('loading');
@@ -6293,7 +6230,6 @@
             
             return newConfigId;
         } catch (error) {
-            console.error('Error creating new configuration:', error);
             return null;
         }
     }
@@ -6358,7 +6294,6 @@
             setupManualRealTimeSystem();
             
         } catch (error) {
-            console.error('Error in unified sharing initialization:', error);
         }
     }
     
@@ -6395,10 +6330,8 @@
                     }, 1000);
                 }
             } else {
-                console.warn('No configuration data found for ID:', dynamicConfigId);
             }
         } catch (error) {
-            console.error('Error handling dynamic configuration:', error);
         }
     }
     
@@ -6416,13 +6349,11 @@
                 });
             
             if (error) {
-                console.error('Error tracking view:', error);
             } else {
                 // Also update the last_viewed timestamp in the main shared_configs table
                 await updateLastViewedTimestamp(configId);
             }
         } catch (error) {
-            console.error('Error in trackLinkView:', error);
         }
     }
     
@@ -6437,10 +6368,8 @@
                 .eq('id', configId);
             
             if (error) {
-                console.error('Error updating last viewed timestamp:', error);
             }
         } catch (error) {
-            console.error('Error in updateLastViewedTimestamp:', error);
         }
     }
     
@@ -6453,13 +6382,11 @@
                 .eq('config_id', configId);
             
             if (error) {
-                console.error('Error getting view count:', error);
                 return 0;
             }
             
             return data ? data.length : 0;
         } catch (error) {
-            console.error('Error in getViewCount:', error);
             return 0;
         }
     }
@@ -6474,7 +6401,6 @@
                 .order('viewed_at', { ascending: false });
             
             if (error) {
-                console.error('Error getting view analytics:', error);
                 return null;
             }
             
@@ -6486,7 +6412,6 @@
                 unique_referrers: [...new Set(data.map(v => v.referrer).filter(r => r))]
             };
         } catch (error) {
-            console.error('Error in getViewAnalytics:', error);
             return null;
         }
     }
@@ -6502,7 +6427,6 @@
             } else {
             }
         } catch (error) {
-            console.error('Error handling static configuration:', error);
         }
     }
     
@@ -6530,7 +6454,6 @@
         try {
             return currentConfigId || sessionStorage.getItem('currentConfigId') || null;
         } catch (error) {
-            console.error('Error getting config ID:', error);
             return null;
         }
     };
@@ -6545,7 +6468,6 @@
             }
 
         } catch (error) {
-            console.error('Error setting config ID:', error);
         }
     };
     
@@ -6581,11 +6503,9 @@
                             await storeConfiguration(configId, configData);
                         }
                     } catch (error) {
-                        console.error('Auto-update error:', error);
                     }
                 }, 500); // Add delay to ensure form is stable
             } catch (error) {
-                console.error('Auto-update error:', error);
             }
         }
     }
@@ -6595,11 +6515,9 @@
         // Check for negative values that shouldn't be negative
         if (config.changeStatus) {
             if (config.changeStatus.applicantsOutsideUAE < 0) {
-                console.warn('Invalid configuration: negative applicantsOutsideUAE', config.changeStatus.applicantsOutsideUAE);
                 return false;
             }
             if (config.changeStatus.applicantsInsideUAE < 0) {
-                console.warn('Invalid configuration: negative applicantsInsideUAE', config.changeStatus.applicantsInsideUAE);
                 return false;
             }
         }
@@ -6607,7 +6525,6 @@
         // Check for invalid visa counts
         if (config.visa) {
             if (config.visa.employeeVisas < 0 || config.visa.investorVisas < 0 || config.visa.dependencyVisas < 0) {
-                console.warn('Invalid configuration: negative visa counts', config.visa);
                 return false;
             }
         }
@@ -6686,7 +6603,6 @@
             sessionStorage.setItem('currentConfigId', id);
 
         } catch (error) {
-            console.error('Error setting config ID:', error);
         }
     };
     
@@ -6697,13 +6613,14 @@
             window.setCurrentConfigId(dynamicConfig);
         }
     } catch (error) {
-        console.error('Error setting config from URL:', error);
     }
     
     // Initialize from URL parameters if available
     
     // Unified initialization is now handled in initializeCalculator()
     // No need for immediate initialization here
+
+    let currentStep = 1;
 
     document.addEventListener('DOMContentLoaded', function() {
         
@@ -6752,7 +6669,6 @@
                 localStorage.removeItem('formHasPartialData');
                 localStorage.removeItem('formPartialData');
             } catch (err) {
-                console.error("Error clearing localStorage:", err);
             }
         }
         
@@ -7020,7 +6936,6 @@
             
                 displaySearchResults(data);
             } catch (err) {
-                console.error('Error searching activities:', err);
                 searchResultsDropdown.innerHTML = '<div class="error-results">Error fetching results</div>';
             }
         }
@@ -7423,7 +7338,6 @@
                 if (targetSectionId) {
                     scrollToSection(targetSectionId);
                 } else {
-                    console.warn('No section mapping found for edit button:', ariaLabel);
                 }
             });
         });
@@ -7433,7 +7347,6 @@
         const section = document.getElementById(sectionId);
         
         if (!section) {
-            console.warn('Section not found:', sectionId);
             return;
         }
 
@@ -7645,7 +7558,6 @@
         const quantityElement = document.getElementById('inside-quantity');
         
         if (!quantityElement) {
-            console.error('inside-quantity element not found!');
             return;
         }
         
@@ -7898,7 +7810,6 @@
                 document.addEventListener('touchstart', unlock, { once: true, capture: true });
             }
         } catch (err) { 
-            console.error('Error in shared link scroll handling:', err);
         }
         
         // Function to scroll to next card by ID
@@ -8301,7 +8212,6 @@
         setTimeout(updateProgress, 100);
         
         } catch (error) {
-            console.error('Error initializing back to top button:', error);
         }
     }
 
@@ -8370,7 +8280,6 @@
             }
                         
         } catch (error) {
-            console.error('Error triggering form validation:', error);
         }
     }
 
@@ -8400,7 +8309,6 @@
                             try {
                                 instance.iti.setNumber(userData.phone);
                             } catch (e) {
-                                console.warn('Could not set phone number via MFZPhone:', e);
                             }
                         }
                     }
@@ -8411,7 +8319,6 @@
             triggerFormValidationAfterProgrammaticFill();
             
         } catch (error) {
-            console.error('Error filling form and triggering validation:', error);
         }
     }
 

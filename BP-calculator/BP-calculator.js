@@ -5907,7 +5907,7 @@
     }
     
     // Debounce function to prevent excessive updates
-    function debounce(func, wait) {
+    function calcDebounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
             const later = () => {
@@ -6052,7 +6052,7 @@
     }
     
     // Update configuration in real-time
-    const updateDynamicConfiguration = debounce(async () => {
+    const updateDynamicConfiguration = calcDebounce(async () => {
         if (currentConfigId) {
             try {
                 const configData = collectFormConfiguration();
@@ -6061,7 +6061,7 @@
                 console.error('Error updating dynamic configuration:', error);
             }
         }
-    }, 1500); // 1.5 second debounce
+    }, 1500); // 1.5 second calcDebounce
     
     // Initialize dynamic sharing on page load
     async function initializeDynamicSharing() {
@@ -6974,11 +6974,11 @@
         window.addEventListener('resize', updateDropdownDimensions);
         }
         
-        let debounceTimer;
+        let calcDebounceTimer;
         if (searchInput) {
         searchInput.addEventListener('input', function(e) {
             const searchTerm = e.target.value.trim();
-            clearTimeout(debounceTimer);
+            clearTimeout(calcDebounceTimer);
             
             if (searchTerm === '') {
                 searchResultsDropdown.style.display = 'none';
@@ -6988,7 +6988,7 @@
             }
             
             updateDropdownDimensions();
-            debounceTimer = setTimeout(() => searchActivities(searchTerm), 300);
+            calcDebounceTimer = setTimeout(() => searchActivities(searchTerm), 300);
             });
         }
         

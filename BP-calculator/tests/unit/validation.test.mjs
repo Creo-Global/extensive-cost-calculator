@@ -33,10 +33,15 @@ describe('Validation Logic', () => {
     runtime = await bootCalculator();
     seedValidContactForm(runtime.window);
 
-    runtime.document.getElementById('full-name').value = 'محمد علي';
+    const nameField = runtime.document.getElementById('full-name');
+    nameField.value = 'محمد علي';
+    nameField.dispatchEvent(new runtime.window.Event('input', { bubbles: true }));
+    expect(nameField.value).toBe('محمد علي');
     expect(runtime.window.validateContactForm()).toBe(true);
 
-    runtime.document.getElementById('full-name').value = 'John123@@';
+    nameField.value = '123@@';
+    nameField.dispatchEvent(new runtime.window.Event('input', { bubbles: true }));
+    expect(nameField.value).toBe('');
     expect(runtime.window.validateContactForm()).toBe(false);
   });
 });

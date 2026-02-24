@@ -51,6 +51,9 @@
         return Math.max(minValue, toInteger(value, fallback));
     }
 
+    const NAME_ALLOWED_CHAR_REGEX = /[a-zA-Z\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\u0370-\u03FF\u0400-\u04FF\u1E00-\u1EFF\u1F00-\u1FFF\u2100-\u214F\u0100-\u017F\u1EA0-\u1EF9\u00C0-\u024F'-]/;
+    const NAME_VALIDATION_REGEX = /^[a-zA-Z\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\u0370-\u03FF\u0400-\u04FF\u1E00-\u1EFF\u1F00-\u1FFF\u2100-\u214F\u0100-\u017F\u1EA0-\u1EF9\u00C0-\u024F'-]+$/;
+
     window.addEventListener('error', function(event) {
         logNonProdError('Unhandled error', event.error || event.message);
     });
@@ -319,7 +322,7 @@
                     required: true,
                     minLength: 2,
                     maxLength: 50,
-                    pattern: /^[a-zA-Z\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\u0370-\u03FF\u0400-\u04FF\u1E00-\u1EFF\u1F00-\u1FFF\u2100-\u214F\u0100-\u017F\u1EA0-\u1EF9\u00C0-\u024F\u1E00-\u1EFF.-]+$/,
+                    pattern: NAME_VALIDATION_REGEX,
                     forbiddenChars: /[0-9!@#$%^&*()_+=\[\]{};':"\\|,.<>?/~`]/
                 },
                 email: {
@@ -3882,19 +3885,15 @@
         nameField.addEventListener("keydown", function(e) {
             nameUserHasInteracted = true;
             
-            // Allow: backspace, delete, tab, escape, enter, home, end, left, right, up, down
-            if ([8, 9, 27, 13, 35, 36, 37, 38, 39, 40, 46].indexOf(e.keyCode) !== -1 ||
-                // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                (e.keyCode === 65 && e.ctrlKey === true) ||
-                (e.keyCode === 67 && e.ctrlKey === true) ||
-                (e.keyCode === 86 && e.ctrlKey === true) ||
-                (e.keyCode === 88 && e.ctrlKey === true)) {
+            const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+            const key = e.key || '';
+            const isClipboardShortcut = (e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(key.toLowerCase());
+            
+            if (allowedKeys.includes(key) || isClipboardShortcut || key.length !== 1) {
                 return;
             }
             
-            // Allow letters (A-Z, a-z), space, hyphen, apostrophe
-            const key = String.fromCharCode(e.keyCode);
-            if (!/[A-Za-z\s\-\']/.test(key)) {
+            if (!NAME_ALLOWED_CHAR_REGEX.test(key)) {
                 e.preventDefault();
             }
         });
@@ -3909,10 +3908,8 @@
                 errorElement.style.display = 'none';
             }
             
-            // Allow only letters, spaces, hyphens, and apostrophes (backup cleanup)
-            const allowedChars = /[A-Za-z\s\-\']/g;
             const value = e.target.value;
-            const cleanValue = value.match(allowedChars)?.join('') || '';
+            const cleanValue = Array.from(value).filter(char => NAME_ALLOWED_CHAR_REGEX.test(char)).join('');
             
             if (value !== cleanValue) {
                 e.target.value = cleanValue;
@@ -3954,7 +3951,7 @@
         if (!nameValue) return; // Don't validate empty field
         
         // Validate name: only letters, spaces, hyphens, apostrophes, minimum 2 characters
-        const namePattern = /^[A-Za-z\s\-\']{2,}$/;
+        const namePattern = NAME_VALIDATION_REGEX;
 
         
         if (!namePattern.test(nameValue)) {
@@ -4524,7 +4521,7 @@
             const consentCheckbox = document.getElementById('consent-checkbox');
             
             // Strict validation - ALL fields must be valid
-            const isNameValid = fullName && fullName.length >= 2 && /^[A-Za-z\s\-\']+$/.test(fullName);
+            const isNameValid = fullName && fullName.length >= 2 && NAME_VALIDATION_REGEX.test(fullName);
             const isEmailValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             
             // Consent validation

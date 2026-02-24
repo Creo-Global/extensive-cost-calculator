@@ -1384,27 +1384,18 @@
     }
 
     function toggleActivityGroup(card, forceSelect = false) {
-        if (forceSelect) {
-            card.classList.add('selected');
-        } else {
-            card.classList.toggle('selected');
-        }
-        
-        const isSelected = card.classList.contains('selected');
-        const countElement = card.querySelector('.selected-activities-count');
-        const linkElement = card.querySelector('.select-activity-link');
+        if (!card) return;
+        const group = card.dataset.group;
 
-        if (isSelected) {
-            countElement.style.display = 'block';
-            linkElement.innerHTML = 'Select more activities <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979589 8.88906 1.05226 8.92198 1.13219C8.95483 1.21213 8.97163 1.29779 8.97135 1.3842Z" fill="url(#paint0_linear_4640_6386)"/><defs><linearGradient id="paint0_linear_4640_6386" x1="-2.20508" y1="5.4043" x2="8.75062" y2="-1.23878" gradientUnits="userSpaceOnUse"><stop stop-color="#EB5F40"/><stop offset="1" stop-color="#B5348B"/></linearGradient></defs></svg></span>';
-        } else {
-            countElement.style.display = 'none';
-            // Also deselect all activities within this group
-            const group = card.dataset.group;
-            window.selectedActivities = window.selectedActivities.filter(act => act.groupName !== group);
-            updateActivityCountOnCard(group);
+        if (!forceSelect) {
+            const isCurrentlySelected = card.classList.contains('selected');
+            if (isCurrentlySelected) {
+                // Deselect this card and remove all activities in this UI group.
+                window.selectedActivities = window.selectedActivities.filter(act => getActivityUiGroup(act) !== group);
+            }
         }
-        
+
+        updateActivityCountOnCard(group);
         updateSelectedGroupsCount();
         calculateCosts();
     }
@@ -1518,42 +1509,8 @@
         // Check if the current group has any selected activities
         if (window.currentModalGroup) {
             const groupName = window.currentModalGroup.group;
-            const groupCard = document.querySelector(`.activity-card[data-group="${groupName}"]`);
-            
-            // Count activities selected for this group
-            const activitiesInGroup = window.selectedActivities ? 
-                window.selectedActivities.filter(activity => {
-                    const activityGroupName = activity.groupName || mapCategoryToGroup(activity.Category, activity.Group);
-                    return activityGroupName === groupName;
-                }).length : 0;
-            
-            if (groupCard) {
-                if (activitiesInGroup > 0) {
-                    // Ensure group is selected and show count
-                    groupCard.classList.add('selected');
-                    const countElement = groupCard.querySelector('.selected-activities-count');
-                    const linkElement = groupCard.querySelector('.select-activity-link');
-                    if (countElement) {
-                        countElement.style.display = 'block';
-                        countElement.textContent = `Selected Activities: ${activitiesInGroup}`;
-                    }
-                    if (linkElement) {
-                        linkElement.innerHTML = 'Select more activities <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979589 8.88906 1.05226 8.92198 1.13219C8.95483 1.21213 8.97163 1.29779 8.97135 1.3842Z" fill="url(#paint0_linear_4640_6386)"/><defs><linearGradient id="paint0_linear_4640_6386" x1="-2.20508" y1="5.4043" x2="8.75062" y2="-1.23878" gradientUnits="userSpaceOnUse"><stop stop-color="#EB5F40"/><stop offset="1" stop-color="#B5348B"/></linearGradient></defs></svg></span>';
-                    }
-                } else {
-                    // No activities selected, ensure group is deselected
-                    groupCard.classList.remove('selected');
-                    const countElement = groupCard.querySelector('.selected-activities-count');
-                    const linkElement = groupCard.querySelector('.select-activity-link');
-                    if (countElement) {
-                        countElement.style.display = 'none';
-                    }
-                    if (linkElement) {
-                        linkElement.innerHTML = 'Select activities <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979589 8.88906 1.05226 8.92198 1.13219C8.95483 1.21213 8.97163 1.29779 8.97135 1.3842Z" fill="url(#paint0_linear_4640_6386)"/><defs><linearGradient id="paint0_linear_4640_6386" x1="-2.20508" y1="5.4043" x2="8.75062" y2="-1.23878" gradientUnits="userSpaceOnUse"><stop stop-color="#EB5F40"/><stop offset="1" stop-color="#B5348B"/></linearGradient></defs></svg></span>';
-                    }
-                }
-            }
-            
+            updateActivityCountOnCard(groupName);
+
             // Update counts and costs
             updateSelectedGroupsCount();
             calculateCosts();
@@ -1674,9 +1631,9 @@
             
             if (searchTerm === '') {
                 // If search is cleared, show activities for currently selected category
-                const selectedPill = document.querySelector('.modal-category-pill.selected');
-                if (selectedPill) {
-                    fetchActivitiesForModal(selectedPill.dataset.group);
+                const selectedGroup = document.getElementById('modal-category-select')?.value || window.currentModalGroup?.group;
+                if (selectedGroup) {
+                    fetchActivitiesForModal(selectedGroup);
                 }
                 return;
             }
@@ -1764,7 +1721,7 @@
                     Group: this.dataset.group 
                 };
                 
-                const groupName = this.dataset.group;
+                const groupName = mapCategoryToGroup(activityData.Category, activityData.Group);
                 
                 if (isCurrentlySelected) {
                     checkbox.classList.remove('checked');
@@ -1772,12 +1729,6 @@
             } else {
                     checkbox.classList.add('checked');
                     addActivityToSelected(activityData, groupName);
-                    
-                    // Ensure the group card is selected
-                    const groupCard = document.querySelector(`.activity-card[data-group="${groupName}"]`);
-                    if (groupCard && !groupCard.classList.contains('selected')) {
-                        toggleActivityGroup(groupCard, true);
-                    }
                 }
                 
                 updateActivityCountOnCard(groupName);
@@ -1819,7 +1770,7 @@
         }
 
         const selectedActivityCodes = window.selectedActivities
-            .filter(a => a.groupName === groupName)
+            .filter(a => getActivityUiGroup(a) === groupName)
             .map(a => a.Code);
 
         let html = '';
@@ -1877,10 +1828,7 @@
                     removeActivity(activityData.Code);
                  } else {
                     checkbox.classList.add('checked');
-                    // Store both the actual Group ID and the category for UI purposes
-                    activityData.categoryGroup = groupName; // For UI card updates
-                    activityData.groupName = activityData.Group; // For pricing calculation
-                    addActivityToSelected(activityData, activityData.Group);
+                    addActivityToSelected(activityData, groupName);
                 }
                 
                 updateActivityCountOnCard(groupName);
@@ -1893,8 +1841,19 @@
     }
     
     function addActivityToSelected(activity, groupName) {
-        if (!window.selectedActivities.some(item => item.Code === activity.Code)) {
-            window.selectedActivities.push({ ...activity, groupName, Group: activity.Group });
+        const normalizedActivity = normalizeSelectedActivity(activity, groupName);
+        const normalizedCode = normalizedActivity.Code ? String(normalizedActivity.Code) : '';
+        const existingIndex = window.selectedActivities.findIndex(item => String(item.Code) === normalizedCode);
+        if (existingIndex === -1) {
+            window.selectedActivities.push(normalizedActivity);
+        } else {
+            window.selectedActivities[existingIndex] = {
+                ...window.selectedActivities[existingIndex],
+                ...normalizedActivity
+            };
+        }
+
+        if (normalizedActivity.Code) {
             // Mark business activities section and all previous sections as interacted
             markPreviousSectionsAsInteracted('businessActivitiesSection');
         }
@@ -1906,24 +1865,35 @@
         
         // If activity was removed, update the card count and reorder
         if (activityToRemove) {
-            updateActivityCountOnCard(activityToRemove.groupName);
+            updateActivityCountOnCard(getActivityUiGroup(activityToRemove));
         }
     }
     
     function getSelectedActivitiesCountForGroup(groupName) {
         if (!window.selectedActivities) return 0;
-        // Filter by both Group and groupName to handle different data sources
-        return window.selectedActivities.filter(activity => 
-            activity.Group === groupName || activity.groupName === groupName
-        ).length;
+        return window.selectedActivities.filter(activity => getActivityUiGroup(activity) === groupName).length;
+    }
+
+    function setActivityCardLinkState(linkElement, hasSelection) {
+        if (!linkElement) return;
+        const arrowMarkup = linkElement.querySelector('.link-arrow')?.outerHTML || '';
+        const label = hasSelection ? 'Select more activities' : 'Select your activity';
+        linkElement.innerHTML = arrowMarkup ? `${label} ${arrowMarkup}` : label;
     }
 
     function updateActivityCountOnCard(groupName) {
         const card = document.querySelector(`.activity-card[data-group="${groupName}"]`);
         if (card) {
-            const count = window.selectedActivities.filter(a => a.groupName === groupName).length;
+            const count = getSelectedActivitiesCountForGroup(groupName);
             const countElement = card.querySelector('.selected-activities-count');
-            countElement.textContent = `Selected Activities: ${count}`;
+            const linkElement = card.querySelector('.select-activity-link');
+
+            card.classList.toggle('selected', count > 0);
+            if (countElement) {
+                countElement.style.display = count > 0 ? 'block' : 'none';
+                countElement.textContent = `Selected Activities: ${count}`;
+            }
+            setActivityCardLinkState(linkElement, count > 0);
         }
         
         // Also update the modal category select count if modal is open
@@ -1944,8 +1914,8 @@
             const aGroupName = a.dataset.group;
             const bGroupName = b.dataset.group;
             
-            const aCount = window.selectedActivities.filter(activity => activity.groupName === aGroupName).length;
-            const bCount = window.selectedActivities.filter(activity => activity.groupName === bGroupName).length;
+            const aCount = getSelectedActivitiesCountForGroup(aGroupName);
+            const bCount = getSelectedActivitiesCountForGroup(bGroupName);
             
             const aSelected = a.classList.contains('selected');
             const bSelected = b.classList.contains('selected');
@@ -2388,6 +2358,7 @@
             'art': 'Art', 
             'education': 'Education', 
             'ict': 'ICT', 
+            'F&B,Rentals': 'F&B,Rentals',
             'F&B, Rentals': 'F&B,Rentals', 
             'financial': 'Financial', 
             'healthcare': 'HealthCare', 
@@ -2425,19 +2396,86 @@
             'Manufacturing': 'manufacturing'
         };
         
-        let cleanCategory = typeof category === 'string' ? category.trim() : '';
+        const cleanCategory = typeof category === 'string' ? category.trim() : '';
         if (cleanCategory && categoryMapping[cleanCategory]) {
             return categoryMapping[cleanCategory];
         }
-        
-        // Fallback: check for partial matches
-        for (const [key, value] of Object.entries(categoryMapping)) {
-            if (cleanCategory && (cleanCategory.includes(key) || cleanCategory.toLowerCase().includes(key.toLowerCase()))) {
-                return value;
+
+        const normalizeKey = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const normalizedCategory = normalizeKey(cleanCategory);
+        if (normalizedCategory) {
+            for (const [key, value] of Object.entries(categoryMapping)) {
+                const normalizedKey = normalizeKey(key);
+                if (normalizedCategory === normalizedKey) {
+                    return value;
+                }
+            }
+
+            // Fallback: allow approximate matches after normalization
+            for (const [key, value] of Object.entries(categoryMapping)) {
+                const normalizedKey = normalizeKey(key);
+                if (normalizedCategory.includes(normalizedKey) || normalizedKey.includes(normalizedCategory)) {
+                    return value;
+                }
             }
         }
         
         return 'services'; // Default fallback
+    }
+
+    function getActivityUiGroup(activity, fallbackGroup = null) {
+        if (fallbackGroup) {
+            return fallbackGroup;
+        }
+        if (!activity || typeof activity !== 'object') {
+            return 'services';
+        }
+
+        const explicitUiGroup = activity.uiGroup || activity.categoryGroup;
+        if (typeof explicitUiGroup === 'string' && explicitUiGroup.trim()) {
+            return explicitUiGroup.trim();
+        }
+
+        if (typeof activity.groupName === 'string' && activity.groupName.trim() && isNaN(activity.groupName)) {
+            return activity.groupName.trim();
+        }
+
+        const category = activity.Category || activity.category || '';
+        const groupNumber = activity.pricingGroupId ?? activity.Group ?? activity.group ?? activity.groupName;
+        return mapCategoryToGroup(category, groupNumber);
+    }
+
+    function getActivityPricingGroupId(activity) {
+        if (!activity || typeof activity !== 'object') {
+            return 'unknown';
+        }
+
+        const candidates = [activity.pricingGroupId, activity.Group, activity.group];
+        for (const candidate of candidates) {
+            if (candidate !== undefined && candidate !== null && candidate !== '') {
+                return String(candidate);
+            }
+        }
+
+        if (activity.groupName !== undefined && activity.groupName !== null && !Number.isNaN(Number(activity.groupName))) {
+            return String(activity.groupName);
+        }
+
+        return 'unknown';
+    }
+
+    function normalizeSelectedActivity(activity, fallbackUiGroup = null) {
+        const normalized = { ...activity };
+        if (!normalized.Code && normalized.code) {
+            normalized.Code = normalized.code;
+        }
+
+        const uiGroup = getActivityUiGroup(normalized, fallbackUiGroup);
+        normalized.groupName = uiGroup;
+        normalized.uiGroup = uiGroup;
+        normalized.pricingGroupId = getActivityPricingGroupId(normalized);
+
+        return normalized;
     }
 
     // License Modal Functions
@@ -2902,7 +2940,9 @@
     }
 
     function updateSelectedGroupsCount() {
-        const selectedGroups = document.querySelectorAll('.activity-card.selected').length;
+        const selectedGroups = new Set(
+            (window.selectedActivities || []).map(activity => getActivityUiGroup(activity))
+        ).size;
         const groupsCountElement = document.getElementById('groups-selected-count');
         if (groupsCountElement) {
             groupsCountElement.textContent = selectedGroups;
@@ -3319,9 +3359,7 @@
                 
                 // First, create a list of all unique groups
                 window.selectedActivities.forEach(activity => {
-                    const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
-                        ? String(activity.groupName) 
-                        : String(activity.Group || activity.groupName || 'unknown');
+                    const groupId = getActivityPricingGroupId(activity);
                         
                     if (!activityGroups[groupId]) {
                         activityGroups[groupId] = [];
@@ -3369,9 +3407,7 @@
                         // Keep track of which groups were selected first (maintain selection order)
                         const groupSelectionOrder = [];
                         window.selectedActivities.forEach(activity => {
-                            const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
-                                ? String(activity.groupName) 
-                                : String(activity.Group || activity.groupName || 'unknown');
+                            const groupId = getActivityPricingGroupId(activity);
                                 
                             if (!groupSelectionOrder.includes(groupId)) {
                                 groupSelectionOrder.push(groupId);
@@ -3699,10 +3735,7 @@
             // Group activities by their actual Group number (not category)
             const activityGroups = {};
             window.selectedActivities.forEach(activity => {
-                // Use groupName if it's a number (actual Group ID), otherwise use Group field
-                const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
-                    ? String(activity.groupName) 
-                    : String(activity.Group || activity.groupName || 'unknown');
+                const groupId = getActivityPricingGroupId(activity);
                     
                 if (!activityGroups[groupId]) {
                     activityGroups[groupId] = [];
@@ -3716,9 +3749,7 @@
                 // Keep track of which groups were selected first (maintain selection order)
                 const groupSelectionOrder = [];
                 window.selectedActivities.forEach(activity => {
-                    const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
-                        ? String(activity.groupName) 
-                        : String(activity.Group || activity.groupName || 'unknown');
+                    const groupId = getActivityPricingGroupId(activity);
                         
                     if (!groupSelectionOrder.includes(groupId)) {
                         groupSelectionOrder.push(groupId);
@@ -3802,10 +3833,7 @@
                 // Group activities by their actual Group number (not category)
                 const activityGroups = {};
                 window.selectedActivities.forEach(activity => {
-                    // Use groupName if it's a number (actual Group ID), otherwise use Group field
-                    const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
-                        ? String(activity.groupName) 
-                        : String(activity.Group || activity.groupName || 'unknown');
+                    const groupId = getActivityPricingGroupId(activity);
                         
                     if (!activityGroups[groupId]) {
                         activityGroups[groupId] = [];
@@ -3819,9 +3847,7 @@
                     // Keep track of which groups were selected first (maintain selection order)
                     const groupSelectionOrder = [];
                     window.selectedActivities.forEach(activity => {
-                        const groupId = (typeof activity.groupName === 'number' || !isNaN(activity.groupName)) 
-                            ? String(activity.groupName) 
-                            : String(activity.Group || activity.groupName || 'unknown');
+                        const groupId = getActivityPricingGroupId(activity);
                             
                         if (!groupSelectionOrder.includes(groupId)) {
                             groupSelectionOrder.push(groupId);
@@ -5559,51 +5585,21 @@
             }
 
             // Apply business activities
-                if (configData.activities && configData.activities.selectedActivities && configData.activities.selectedActivities.length > 0) {
-                window.selectedActivities = configData.activities.selectedActivities;
-                
-                // Update activities display - manually update each group card
-                configData.activities.selectedActivities.forEach(activity => {
-                    const groupName = activity.groupName || mapCategoryToGroup(activity.Category, activity.Group);
-                    
-                    // Find the corresponding group card
-                    const groupCard = document.querySelector(`.activity-card[data-group="${groupName}"]`);
-                    if (groupCard) {
-                        
-                        // Count activities in this group
-                        const activitiesInGroup = window.selectedActivities.filter(act => {
-                            const activityGroupName = act.groupName || mapCategoryToGroup(act.Category, act.Group);
-                            return activityGroupName === groupName;
-                        }).length;
-                        
-                        
-                        if (activitiesInGroup > 0) {
-                            // Mark group as selected
-                            groupCard.classList.add('selected');
-                            
-                            // Update count display
-                            const countElement = groupCard.querySelector('.selected-activities-count');
-                            const linkElement = groupCard.querySelector('.select-activity-link');
-                            
-                            if (countElement) {
-                                countElement.style.display = 'block';
-                                countElement.textContent = `Selected Activities: ${activitiesInGroup}`;
-                            }
-                            
-                            if (linkElement) {
-                                linkElement.innerHTML = 'Select more activities <span class="link-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8.97135 1.3842L8.97135 6.95266C8.97135 7.12702 8.90209 7.29423 8.77881 7.41751C8.6555 7.54082 8.48829 7.61008 8.31396 7.61005C8.13961 7.61005 7.97237 7.54082 7.84909 7.41754C7.72581 7.29426 7.65658 7.12702 7.65658 6.95266L7.65732 2.96966L1.97284 8.65414C1.84977 8.77721 1.68286 8.84636 1.50882 8.84636C1.33477 8.84636 1.16783 8.7772 1.04477 8.65414C0.921702 8.53108 0.852573 8.36417 0.852573 8.19012C0.852573 8.01607 0.921696 7.84913 1.04477 7.72606L6.72924 2.04159L2.74584 2.04045C2.57152 2.04042 2.40428 1.97119 2.281 1.8479C2.15772 1.72462 2.08848 1.55738 2.08846 1.38306C2.08846 1.20871 2.15772 1.0415 2.281 0.918217C2.40431 0.794907 2.57152 0.725644 2.74584 0.725672L8.3143 0.725666C8.40077 0.725573 8.48637 0.742556 8.56622 0.775628C8.64606 0.808698 8.71861 0.857237 8.77967 0.918428C8.84071 0.979636 8.88925 1.05219 8.92232 1.13203C8.95539 1.21188 8.97237 1.29748 8.97235 1.38395L8.97135 1.3842Z" fill="#000" fill-opacity="0.6"/></svg></span>';
-                            }
-                        }
-                    } else {
-                    }
+            if (configData.activities && configData.activities.selectedActivities && configData.activities.selectedActivities.length > 0) {
+                window.selectedActivities = configData.activities.selectedActivities
+                    .map(activity => normalizeSelectedActivity(activity));
+                document.querySelectorAll('.activity-card').forEach(card => {
+                    updateActivityCountOnCard(card.dataset.group);
                 });
-                
-                // Update the selected groups count
+
                 if (typeof updateSelectedGroupsCount === 'function') {
                     updateSelectedGroupsCount();
                 }
-                
             } else {
+                window.selectedActivities = [];
+                document.querySelectorAll('.activity-card').forEach(card => {
+                    updateActivityCountOnCard(card.dataset.group);
+                });
             }
 
             // First, clear all existing add-ons to ensure only shared configuration is applied
@@ -6884,7 +6880,7 @@
                 resultItem.className = 'search-result-items';
                 
                 // Check if activity is already selected
-                const isSelected = window.selectedActivities && window.selectedActivities.some(selected => selected.code === activity.Code);
+                const isSelected = window.selectedActivities && window.selectedActivities.some(selected => selected.Code === activity.Code);
                 
                 resultItem.innerHTML = `
                     <div class="modal-activity-checkbox ${isSelected ? 'checked' : ''}">
@@ -6911,11 +6907,6 @@
         const groupCard = document.querySelector(`.activity-card[data-group="${groupName}"]`);
         
         if (groupCard) {
-            // Make sure group is selected
-            if (!groupCard.classList.contains('selected')) {
-                toggleActivityGroup(groupCard, true);
-            }
-            
             // Add activity to selected list
                 addActivityToSelected(activity, groupName);
             
@@ -6940,49 +6931,13 @@
             }
         }
         
-        function mapCategoryToGroup(category, groupNumber) {
-        const categoryMapping = {
-            'Administrative': 'administrative',
-            'Agriculture': 'agriculture', 
-            'Art': 'art',
-            'Education': 'education',
-            'ICT': 'ict',
-            'F&B,Rentals': 'F&B,Rentals',
-            'Financial': 'financial',
-            'HealthCare': 'healthcare',
-            'Maintenance': 'maintenance',
-            'Services': 'services',
-            'Professional': 'professional',
-            'Realestate': 'realestate',
-            'Sewerage': 'sewerage',
-            'Trading': 'trading',
-            'Transportation': 'transportation',
-            'Waste Collection': 'waste',
-            'Manufacturing': 'manufacturing'
-        };
-        
-            let cleanCategory = typeof category === 'string' ? category.trim() : '';
-        if (cleanCategory && categoryMapping[cleanCategory]) {
-            return categoryMapping[cleanCategory];
-        }
-        
-        // Fallback: check for partial matches
-            for (const [key, value] of Object.entries(categoryMapping)) {
-            if (cleanCategory && (cleanCategory.includes(key) || cleanCategory.toLowerCase().includes(key.toLowerCase()))) {
-                return value;
-            }
-        }
-        
-        return 'services'; // Default fallback
-        }
-        
         function updateSelectionSummary() {
             const groupsSelectedCount = document.getElementById('groups-selected-count');
             const activitiesSelectedCount = document.getElementById('activities-selected-count');
             if (!groupsSelectedCount || !activitiesSelectedCount) return;
             
             const totalActivities = window.selectedActivities.length;
-            const activeGroups = new Set(window.selectedActivities.map(a => a.groupName));
+            const activeGroups = new Set(window.selectedActivities.map(a => getActivityUiGroup(a)));
             const numActiveGroups = activeGroups.size;
             
             groupsSelectedCount.textContent = numActiveGroups;

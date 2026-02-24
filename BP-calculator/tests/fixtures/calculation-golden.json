@@ -1,0 +1,60 @@
+{
+  "scenarios": [
+    {
+      "name": "baseline_fawri_minimal",
+      "expected": {
+        "licenseCost": 15000,
+        "visaCost": 0,
+        "addonsCost": 0,
+        "businessActivitiesCost": 0,
+        "changeStatusCost": 0,
+        "totalFromComponents": 15000,
+        "totalFromCalculator": 15000,
+        "renderedGrandTotalValue": 15000,
+        "renderedGrandTotalText": "AED 15,000.00"
+      }
+    },
+    {
+      "name": "regular_growth_package",
+      "expected": {
+        "licenseCost": 29362.5,
+        "visaCost": 30435,
+        "addonsCost": 9750,
+        "businessActivitiesCost": 2000,
+        "changeStatusCost": 3000,
+        "totalFromComponents": 74548,
+        "totalFromCalculator": 74548,
+        "renderedGrandTotalValue": 74547.5,
+        "renderedGrandTotalText": "AED 74,547.50"
+      }
+    },
+    {
+      "name": "high_volume_multi_group",
+      "expected": {
+        "licenseCost": 74418.75,
+        "visaCost": 153262.5,
+        "addonsCost": 46750,
+        "businessActivitiesCost": 2000,
+        "changeStatusCost": 0,
+        "totalFromComponents": 276431,
+        "totalFromCalculator": 276432,
+        "renderedGrandTotalValue": 276431.25,
+        "renderedGrandTotalText": "AED 276,431.25"
+      }
+    },
+    {
+      "name": "parsing_edge_case_inputs",
+      "expected": {
+        "licenseCost": 12500,
+        "visaCost": 39450,
+        "addonsCost": 15750,
+        "businessActivitiesCost": 1000,
+        "changeStatusCost": 7500,
+        "totalFromComponents": 76200,
+        "totalFromCalculator": 76200,
+        "renderedGrandTotalValue": 76200,
+        "renderedGrandTotalText": "AED 76,200.00"
+      }
+    }
+  ]
+}

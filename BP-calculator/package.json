@@ -1,0 +1,20 @@
+{
+  "name": "bp-calculator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "BP-calculator.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "jsdom": "^28.1.0",
+    "vitest": "^4.0.18"
+  }
+}

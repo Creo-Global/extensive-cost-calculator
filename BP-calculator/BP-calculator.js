@@ -29,6 +29,36 @@
         timezone: null
     };
 
+    let hasInitializedCalculator = false;
+
+    function isProductionEnvironment() {
+        const host = window.location.hostname;
+        return host !== 'localhost' && host !== '127.0.0.1' && !host.endsWith('.local');
+    }
+
+    function logNonProdError(context, error) {
+        if (!isProductionEnvironment()) {
+            console.error(`[BP Calculator] ${context}`, error);
+        }
+    }
+
+    function toInteger(value, fallback = 0) {
+        const parsed = Number.parseInt(value, 10);
+        return Number.isFinite(parsed) ? parsed : fallback;
+    }
+
+    function toMinInteger(value, minValue, fallback = minValue) {
+        return Math.max(minValue, toInteger(value, fallback));
+    }
+
+    window.addEventListener('error', function(event) {
+        logNonProdError('Unhandled error', event.error || event.message);
+    });
+
+    window.addEventListener('unhandledrejection', function(event) {
+        logNonProdError('Unhandled promise rejection', event.reason);
+    });
+
     // Robust initialization function for Webflow compatibility
     // Function to handle BSA code input
     function setupBsaCodeInput() {
@@ -53,6 +83,7 @@
     }
 
     function initializeCalculator() {
+        if (hasInitializedCalculator) return;
         try {
             moveActivityModalsToBody();
 
@@ -79,9 +110,12 @@
 
             // Initialize sharing functionality
             initializeUnifiedSharing();
-            
+
+            hasInitializedCalculator = true;
             
         } catch (error) {
+            hasInitializedCalculator = false;
+            logNonProdError('initializeCalculator failed', error);
         }
     }
 
@@ -138,18 +172,19 @@
             clearTimeout(autoCloseTimer);
             closeSuccessPopup(firstName);
         };
-        
-        closeBtn.addEventListener('click', closeHandler);
-        
-        // Close on overlay click
-        popup.addEventListener('click', (e) => {
+
+        const overlayClickHandler = (e) => {
             if (e.target === popup) {
                 closeHandler();
             }
-        });
+        };
         
-        // Store close handler for cleanup
+        closeBtn.addEventListener('click', closeHandler);
+        popup.addEventListener('click', overlayClickHandler);
+        
+        // Store handlers for cleanup
         popup._closeHandler = closeHandler;
+        popup._overlayClickHandler = overlayClickHandler;
     }
     
     function closeSuccessPopup(firstName) {
@@ -159,9 +194,12 @@
         
         // Remove event listeners
         if (popup._closeHandler) {
-            popup.querySelector('.success-popup-close').removeEventListener('click', popup._closeHandler);
-            popup.removeEventListener('click', popup._closeHandler);
+            popup.querySelector('.success-popup-close')?.removeEventListener('click', popup._closeHandler);
             delete popup._closeHandler;
+        }
+        if (popup._overlayClickHandler) {
+            popup.removeEventListener('click', popup._overlayClickHandler);
+            delete popup._overlayClickHandler;
         }
         
         // Hide popup with animation
@@ -185,7 +223,10 @@
         // Desktop/sticky summary success message
         if (getCallBtn) getCallBtn.style.display = 'none';
         if (successMessage) {
-            document.getElementById('success-first-name').textContent = firstName;
+            const successFirstName = document.getElementById('success-first-name');
+            if (successFirstName) {
+                successFirstName.textContent = firstName;
+            }
             successMessage.classList.remove('d-none');
             successMessage.style.display = 'block';
             
@@ -198,7 +239,10 @@
         // Mobile footer success message
         if (mobileGetCallBtn) mobileGetCallBtn.style.display = 'none';
         if (mobileSuccessMessage) {
-            document.getElementById('mobile-success-first-name').textContent = firstName;
+            const mobileSuccessFirstName = document.getElementById('mobile-success-first-name');
+            if (mobileSuccessFirstName) {
+                mobileSuccessFirstName.textContent = firstName;
+            }
             mobileSuccessMessage.classList.remove('d-none');
             mobileSuccessMessage.style.display = 'block';
             
@@ -232,7 +276,12 @@
     // Function to detect user's location and update phone country
     function detectUserLocation() {
         return fetch('https://ipapi.co/json/')
-            .then(response => response.json())
+            .then(response => {
+                if (!response || !response.ok) {
+                    throw new Error('Location request failed');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data && !data.error) {
                     userLocationInfo = {
@@ -249,6 +298,7 @@
                 }
             })
             .catch(error => {
+                logNonProdError('detectUserLocation failed', error);
                 return 'ae';
             });
     }
@@ -1126,6 +1176,7 @@
             calculateCosts();
             
         } catch (err) {
+            logNonProdError('DOMContentLoaded initialization failed', err);
         }
     });
 
@@ -1309,6 +1360,16 @@
 
     window.supabaseClient = window.supabaseClient || supabaseClient;
 
+    function hasSupabaseClient() {
+        return Boolean(supabaseClient && typeof supabaseClient.from === 'function');
+    }
+
+    let modalSearchRequestId = 0;
+    let modalCategoryRequestId = 0;
+    let activitySearchRequestId = 0;
+    let hasInitializedMobileAutoScroll = false;
+    let hasInitializedBackToTopButton = false;
+
     window.selectedActivities = window.selectedActivities || [];
 
     // Initialize activity groups functionality
@@ -1334,6 +1395,7 @@
         ];
 
         const container = document.querySelector('.activity-cards-container');
+        if (!container) return;
         container.innerHTML = ''; // Clear existing content
 
         groups.forEach(groupInfo => {
@@ -1372,32 +1434,19 @@
 
         const closeModalBtn = document.getElementById('close-modal-btn');
         const modalOverlay = document.getElementById('activity-search-modal');
-        closeModalBtn.addEventListener('click', closeActivityModal);
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                closeActivityModal();
-            }
-        });
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', closeActivityModal);
+        }
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeActivityModal();
+                }
+            });
+        }
 
         // Setup scroll indicator
         setupScrollIndicator();
-    }
-
-    function toggleActivityGroup(card, forceSelect = false) {
-        if (!card) return;
-        const group = card.dataset.group;
-
-        if (!forceSelect) {
-            const isCurrentlySelected = card.classList.contains('selected');
-            if (isCurrentlySelected) {
-                // Deselect this card and remove all activities in this UI group.
-                window.selectedActivities = window.selectedActivities.filter(act => getActivityUiGroup(act) !== group);
-            }
-        }
-
-        updateActivityCountOnCard(group);
-        updateSelectedGroupsCount();
-        calculateCosts();
     }
 
     function setupScrollIndicator() {
@@ -1598,6 +1647,7 @@
         const backBtn = document.getElementById('modal-back-btn');
         const continueBtn = document.getElementById('modal-continue-btn');
         const searchInput = document.getElementById('modal-search-input');
+        if (!closeBtn || !modal || !backBtn || !continueBtn || !searchInput) return;
         
         // Remove any existing listeners
         const newCloseBtn = closeBtn.cloneNode(true);
@@ -1617,11 +1667,14 @@
         document.getElementById('modal-back-btn').addEventListener('click', closeActivityModal);
         document.getElementById('modal-continue-btn').addEventListener('click', closeActivityModal);
         
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeActivityModal();
-            }
-        });
+        if (!modal._overlayCloseBound) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeActivityModal();
+                }
+            });
+            modal._overlayCloseBound = true;
+        }
 
         // Search input handler
         let searchDebounce;
@@ -1646,6 +1699,13 @@
 
     async function searchActivitiesInModal(searchTerm) {
         const modalList = document.getElementById('modal-activities-list');
+        if (!modalList) return;
+        if (!hasSupabaseClient()) {
+            modalList.innerHTML = '<div class="error-results">Activity search is currently unavailable.</div>';
+            return;
+        }
+
+        const requestId = ++modalSearchRequestId;
         modalList.innerHTML = '<div class="loading-results">Searching...</div>';
         
         try {
@@ -1656,6 +1716,7 @@
                 .limit(50);
 
             if (error) throw error;
+            if (requestId !== modalSearchRequestId) return;
 
             if (data && data.length > 0) {
                 displaySearchResultsInModal(data);
@@ -1663,6 +1724,8 @@
                 modalList.innerHTML = '<div class="no-results">No activities found matching your search.</div>';
             }
         } catch (error) {
+            if (requestId !== modalSearchRequestId) return;
+            logNonProdError('searchActivitiesInModal failed', error);
             modalList.innerHTML = '<div class="error-results">Error searching activities.</div>';
         }
     }
@@ -1742,6 +1805,13 @@
 
     async function fetchActivitiesForModal(groupName) {
         const modalList = document.getElementById('modal-activities-list');
+        if (!modalList) return;
+        if (!hasSupabaseClient()) {
+            modalList.innerHTML = '<div class="error-results">Activities are currently unavailable.</div>';
+            return;
+        }
+
+        const requestId = ++modalCategoryRequestId;
         modalList.innerHTML = '<div class="loading-results">Loading activities...</div>';
         
         try {
@@ -1754,10 +1824,13 @@
                 .limit(200);
 
             if (error) throw error;
+            if (requestId !== modalCategoryRequestId) return;
             
             displayActivitiesInModal(data, groupName);
 
         } catch (err) {
+            if (requestId !== modalCategoryRequestId) return;
+            logNonProdError('fetchActivitiesForModal failed', err);
             modalList.innerHTML = '<div class="error-results">Error fetching activities.</div>';
         }
     }
@@ -2073,6 +2146,7 @@
         const modal = document.getElementById('addons-modal');
         const backBtn = document.getElementById('addons-modal-back-btn');
         const continueBtn = document.getElementById('addons-modal-continue-btn');
+        if (!closeBtn || !modal || !backBtn || !continueBtn) return;
         
         // Remove existing listeners
         const newCloseBtn = closeBtn.cloneNode(true);
@@ -2089,15 +2163,19 @@
         document.getElementById('addons-modal-back-btn').addEventListener('click', closeAddonModal);
         document.getElementById('addons-modal-continue-btn').addEventListener('click', closeAddonModal);
         
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeAddonModal();
-            }
-        });
+        if (!modal._overlayCloseBound) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeAddonModal();
+                }
+            });
+            modal._overlayCloseBound = true;
+        }
     }
 
     function loadServicesForCategory(categoryName) {
     const servicesList = document.getElementById('addons-modal-services-list');
+    if (!servicesList) return;
     const services = getServicesForCategory(categoryName);
     
     // Find existing services container or create one
@@ -2812,31 +2890,11 @@
         }
     }
 
-    function closeLicenseModal() {
-        const modal = document.getElementById('license-modal');
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        
-        // Remove sheet-view-active class
-        document.body.classList.remove('sheet-view-active');
-        const overlay = document.getElementById('bottom-sheet-overlay');
-        if (overlay) {
-            overlay.classList.remove('active');
-        }
-        
-        // Restore scroll position after a brief delay to ensure body is properly unlocked
-        if (typeof window.scrollPositionBeforeModal !== 'undefined') {
-            setTimeout(() => {
-                window.scrollTo(0, window.scrollPositionBeforeModal);
-            }, 10);
-        }
-        
-    }
-
     function setupLicenseModalEventListeners() {
         const closeBtn = document.getElementById('license-close-modal-btn');
         const modal = document.getElementById('license-modal');
         const backBtn = document.getElementById('license-modal-back-btn');
+        if (!closeBtn || !modal || !backBtn) return;
         
         // Remove existing listeners
         const newCloseBtn = closeBtn.cloneNode(true);
@@ -2894,31 +2952,34 @@
             return false;
         });
         
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Directly close the modal
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-                document.body.classList.remove('sheet-view-active');
-                
-                const overlay = document.getElementById('bottom-sheet-overlay');
-                if (overlay) {
-                    overlay.classList.remove('active');
+        if (!modal._overlayCloseBound) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Directly close the modal
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    document.body.classList.remove('sheet-view-active');
+                    
+                    const overlay = document.getElementById('bottom-sheet-overlay');
+                    if (overlay) {
+                        overlay.classList.remove('active');
+                    }
+                    
+                    // Restore scroll position
+                    if (typeof window.scrollPositionBeforeModal !== 'undefined') {
+                        setTimeout(() => {
+                            window.scrollTo(0, window.scrollPositionBeforeModal);
+                        }, 10);
+                    }
+                    
+                    return false;
                 }
-                
-                // Restore scroll position
-                if (typeof window.scrollPositionBeforeModal !== 'undefined') {
-                    setTimeout(() => {
-                        window.scrollTo(0, window.scrollPositionBeforeModal);
-                    }, 10);
-                }
-                
-                return false;
-            }
-        });
+            });
+            modal._overlayCloseBound = true;
+        }
     }
 
 
@@ -2957,171 +3018,6 @@
             }
         }
     }
-    // Validate entire form before submission - now uses centralized FormValidator
-    function validateForm() {
-        // Use the new centralized validation system first
-        if (window.formValidator && typeof window.formValidator.validateContactForm === 'function') {
-            return window.formValidator.validateContactForm();
-        }
-        
-        // Use global formValidator if available
-        if (typeof formValidator !== 'undefined' && typeof formValidator.validateContactForm === 'function') {
-            return formValidator.validateContactForm();
-        }
-        
-        // Fallback for backwards compatibility
-        return window.validateContactForm ? window.validateContactForm() : true;
-    }
-
-    function validateContactForm() {
-        let valid = true;
-        
-        // Clear previous error messages
-        document.querySelectorAll('.calc-error-message').forEach(el => {
-            el.style.display = 'none';
-        });
-        
-        document.querySelectorAll('.calc-error').forEach(el => {
-            el.classList.remove('calc-error');
-        });
-        
-        // Validate required fields
-        document.querySelectorAll('.calc-required').forEach(input => {
-            const errorElement = input.nextElementSibling;
-            
-            if (!input.value.trim()) {
-                input.classList.add('calc-error');
-                if (errorElement) {
-                    errorElement.textContent = "This field is required";
-                    errorElement.style.display = 'block !important';
-                    errorElement.style.visibility = 'visible !important';
-                    errorElement.style.opacity = '1 !important';
-                }
-                valid = false;
-            }
-
-            if (input.type === "tel" && input.value) {
-                let isPhoneValid = false;
-                let errorMessage = '';
-                
-                try {
-                    // Use MFZPhone validation if available
-                    if (window.MFZPhone && formValidator && formValidator.useMFZPhone) {
-                        isPhoneValid = window.MFZPhone.isValid(input);
-                        
-                        if (!isPhoneValid) {
-                            const instance = window.MFZPhone.getInstance(input);
-                            if (instance && instance.validationState === 'invalid') {
-                                errorMessage = 'Please enter a valid phone number';
-                            } else if (instance && instance.validationState === 'validating') {
-                                // Still validating, don't show error yet
-                                errorMessage = '';
-                            } else {
-                                errorMessage = 'Please enter a valid phone number';
-                            }
-                        }
-                    } else {
-                        // Fallback validation if MFZPhone not available
-                        const phoneValue = input.value.replace(/\D/g, '');
-                        const minDigits = 6;
-                        const maxDigits = 15;
-                        
-                        if (phoneValue.length >= minDigits && phoneValue.length <= maxDigits) {
-                            isPhoneValid = true;
-                        } else if (phoneValue.length < minDigits) {
-                            isPhoneValid = false;
-                            errorMessage = 'Phone number is too short';
-                        } else {
-                            isPhoneValid = false;
-                            errorMessage = 'Phone number is too long';
-                        }
-                    }
-                } catch (err) {
-                    // Final fallback validation
-                    const phoneValue = input.value.replace(/\D/g, '');
-                    isPhoneValid = phoneValue.length >= 6 && phoneValue.length <= 15;
-                    if (!isPhoneValid) {
-                        errorMessage = "Please enter a valid phone number";
-                    }
-                }
-                
-                if (!isPhoneValid) {
-                    input.classList.add('calc-error');
-                    if (errorElement) {
-                        errorElement.textContent = errorMessage;
-                        errorElement.style.display = 'block !important';
-                        errorElement.style.visibility = 'visible !important';
-                        errorElement.style.opacity = '1 !important';
-                    }
-                    valid = false;
-                }
-            }
-
-            if (input.id === "full-name" && input.value && !/^[A-Za-z\s\-\']{2,}$/.test(input.value)) {
-                input.classList.add('calc-error');
-                if (errorElement) {
-                    let errorMessage = '';
-                    if (input.value.trim().length < 2) {
-                        errorMessage = "Name must be at least 2 characters long";
-                    } else {
-                        errorMessage = "Name should contain only letters, spaces, hyphens, and apostrophes";
-                    }
-                    
-                    errorElement.textContent = errorMessage;
-                    errorElement.style.display = 'block !important';
-                    errorElement.style.visibility = 'visible !important';
-                    errorElement.style.opacity = '1 !important';
-                }
-                valid = false;
-            }
-        });
-
-        // Validate license type selection (now using hidden input)
-        const licenseTypeInput = document.getElementById("license-type");
-        if (!licenseTypeInput.value) {
-            const licenseCardsContainer = document.querySelector('.license-cards-container');
-            if (licenseCardsContainer && !licenseCardsContainer.querySelector('.calc-error-message')) {
-                const licenseErrorElement = document.createElement('div');
-                licenseErrorElement.className = 'calc-error-message';
-                licenseErrorElement.textContent = "Please select a license type";
-                licenseErrorElement.style.textAlign = "center";
-                licenseErrorElement.style.marginTop = "15px";
-                licenseErrorElement.style.color = "#EB5F40";
-                licenseCardsContainer.appendChild(licenseErrorElement);
-            }
-            valid = false;
-        }
-        
-        // Validate business activities
-        if (window.selectedActivities.length === 0) {
-            const activitiesContainer = document.getElementById('business-activities-section');
-            if (activitiesContainer && !activitiesContainer.querySelector('.activity-error')) {
-                const activityErrorElement = document.createElement('div');
-                activityErrorElement.className = 'calc-error-message activity-error';
-                activityErrorElement.textContent = "Please select at least one business activity";
-                activityErrorElement.style.textAlign = "center";
-                activityErrorElement.style.marginTop = "15px";
-                activityErrorElement.style.padding = "10px";
-                activityErrorElement.style.borderRadius = "8px";
-                activityErrorElement.style.backgroundColor = "rgba(235, 95, 64, 0.1)";
-                activityErrorElement.style.color = "#EB5F40";
-                activityErrorElement.style.fontWeight = "500";
-                activityErrorElement.style.fontSize = "14px";
-                activityErrorElement.style.fontFamily = "Plus Jakarta Sans";
-                activityErrorElement.style.width = "100%";
-                
-                activitiesContainer.appendChild(activityErrorElement);
-            }
-            valid = false;
-        }
-
-        return valid;
-    }
-
-    function updateShareholderNationalities() {
-        // Function now empty - we're removing the nationality fields
-        // and only keeping the shareholder count
-    }
         
     function getFormSnapshot() {
         const selectedAddonsList = [];
@@ -3130,21 +3026,21 @@
         });
 
         // For the new visa card system, check the hidden inputs directly
-        const employeeVisaCount = parseInt(document.getElementById("employee-visa-count")?.value) || 0;
-        const dependencyVisaCount = parseInt(document.getElementById("dependency-visas")?.value) || 0;
-        const investorVisaCount = parseInt(document.getElementById("investor-visa-count")?.value) || 0;
+        const employeeVisaCount = toMinInteger(document.getElementById("employee-visa-count")?.value, 0, 0);
+        const dependencyVisaCount = toMinInteger(document.getElementById("dependency-visas")?.value, 0, 0);
+        const investorVisaCount = toMinInteger(document.getElementById("investor-visa-count")?.value, 0, 0);
 
         return {
             licenseType: document.getElementById("license-type")?.value || "fawri",
-            licenseDuration: parseInt(document.getElementById("license-duration")?.value) || 1,
-            shareholdersCount: parseInt(document.getElementById("shareholders-range")?.value) || 1,
+            licenseDuration: toMinInteger(document.getElementById("license-duration")?.value, 1, 1),
+            shareholdersCount: toMinInteger(document.getElementById("shareholders-range")?.value, 1, 1),
             investorVisas: investorVisaCount,
             employeeVisas: employeeVisaCount,
             dependencyVisas: dependencyVisaCount,
             // officeType removed from current calculator flow
             selectedAddons: selectedAddonsList,
-            applicantsInsideUAE: parseInt(document.getElementById("applicants-inside-uae")?.value) || 0,
-            applicantsOutsideUAE: parseInt(document.getElementById("applicants-outside-uae")?.value) || 0,
+            applicantsInsideUAE: toMinInteger(document.getElementById("applicants-inside-uae")?.value, 0, 0),
+            applicantsOutsideUAE: toMinInteger(document.getElementById("applicants-outside-uae")?.value, 0, 0),
         };
     }
 
@@ -3279,8 +3175,46 @@
        
         window.immigrationCardFee = immigrationCardTotal;
         
-      
+       
         return licenseAfterDiscount;
+    }
+
+    function calculateBusinessActivitiesCost(selectedActivities = window.selectedActivities) {
+        if (!Array.isArray(selectedActivities) || selectedActivities.length === 0) {
+            return 0;
+        }
+
+        const activityGroups = {};
+        selectedActivities.forEach(activity => {
+            const groupId = getActivityPricingGroupId(activity);
+            if (!activityGroups[groupId]) {
+                activityGroups[groupId] = [];
+            }
+            activityGroups[groupId].push(activity);
+        });
+
+        const groupIds = Object.keys(activityGroups);
+        if (groupIds.length <= 3) {
+            return 0;
+        }
+
+        const groupSelectionOrder = [];
+        selectedActivities.forEach(activity => {
+            const groupId = getActivityPricingGroupId(activity);
+            if (!groupSelectionOrder.includes(groupId)) {
+                groupSelectionOrder.push(groupId);
+            }
+        });
+
+        let activitiesCostValue = 0;
+        for (let i = 3; i < groupSelectionOrder.length; i++) {
+            const groupId = groupSelectionOrder[i];
+            if (activityGroups[groupId]) {
+                activitiesCostValue += activityGroups[groupId].length * 1000;
+            }
+        }
+
+        return activitiesCostValue;
     }
 
     function updateSummaryUI(costs, snapshot) {
@@ -3399,29 +3333,8 @@
                 // Update business activities cost
                 const businessActivitiesCost = document.getElementById("business-activities-cost");
                 if (businessActivitiesCost) {
-                    // Calculate cost based on individual activities in additional groups
                     const groupIds = Object.keys(activityGroups);
-                    let activitiesCostValue = 0;
-                    
-                    if (groupIds.length > 3) {
-                        // Keep track of which groups were selected first (maintain selection order)
-                        const groupSelectionOrder = [];
-                        window.selectedActivities.forEach(activity => {
-                            const groupId = getActivityPricingGroupId(activity);
-                                
-                            if (!groupSelectionOrder.includes(groupId)) {
-                                groupSelectionOrder.push(groupId);
-                            }
-                        });
-                        
-                        // First 3 groups in selection order are free, charge for activities in remaining groups
-                        for (let i = 3; i < groupSelectionOrder.length; i++) {
-                            const groupId = groupSelectionOrder[i];
-                            if (activityGroups[groupId]) {
-                                activitiesCostValue += activityGroups[groupId].length * 1000;
-                            }
-                        }
-                    }
+                    const activitiesCostValue = calculateBusinessActivitiesCost(window.selectedActivities);
                     
                     businessActivitiesCost.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
                     
@@ -3447,30 +3360,6 @@
             }
         }
         
-        // Helper function to map group names to display names
-        function mapGroupToDisplayName(groupName) {
-            const groupDisplayNames = {
-                'administrative': 'Administrative',
-                'agriculture': 'Agriculture',
-                'art': 'Art',
-                'education': 'Education',
-                'ict': 'ICT',
-                'F&B,Rentals': 'F&B,Rentals',
-                'financial': 'Financial',
-                'healthcare': 'Health Care',
-                'maintenance': 'Maintenance',
-                'services': 'Services',
-                'professional': 'Professional',
-                'realestate': 'Real Estate',
-                'sewerage': 'Sewerage',
-                'trading': 'Trading',
-                'transportation': 'Transportation',
-                'waste': 'Waste Collection',
-                'manufacturing': 'Manufacturing'
-            };
-            return groupDisplayNames[groupName] || groupName;
-        }
-        
         // Update visa information and show/hide section
         const visaSection = document.querySelector('.summary-section:nth-child(3)');
         const allocationFeePerYear = 1850;
@@ -3488,9 +3377,9 @@
                 visaSection.style.display = 'block';
                 
                 // Update visa displays and show/hide individual rows
-                const investorRow = document.querySelector('.summary-row:has(#investor-visa-cost)');
-                const employeeRow = document.querySelector('.summary-row:has(#employee-visa-cost)');
-                const dependencyRow = document.querySelector('.summary-row:has(#dependency-visa-cost)');
+                const investorRow = document.getElementById('investor-visa-cost')?.closest('.summary-row');
+                const employeeRow = document.getElementById('employee-visa-cost')?.closest('.summary-row');
+                const dependencyRow = document.getElementById('dependency-visa-cost')?.closest('.summary-row');
                 
                 // Show/hide investor visa row
                 if (investorRow) {
@@ -3716,101 +3605,64 @@
 
 
     function calculateCosts() {
-        const snapshot = getFormSnapshot();
-        
-        // Calculate costs for sections that have been interacted with
-        
-        // Only calculate costs for sections that have been interacted with
-        // Form being unlocked is no longer a condition for showing prices
-        const licenseComponent = sectionInteractions.licenseSection ? calculateLicenseCost(snapshot) : 0;
-        const visaComponent = sectionInteractions.visaSection ? calculateVisaCost(snapshot) : 0;
-        const officeComponent = calculateOfficeCost(snapshot); // Office component is always 0 now
-        const addonsComponent = sectionInteractions.addonsSection ? calculateAddonsCost(snapshot) : 0;
-        const changeStatusComponent = sectionInteractions.visaSection ? calculateChangeStatusCost(snapshot) : 0;
-        
-        // Calculate business activities cost
-        let businessActivitiesCost = 0;
-        if (sectionInteractions.businessActivitiesSection && 
-            window.selectedActivities && window.selectedActivities.length > 0) {
-            // Group activities by their actual Group number (not category)
-            const activityGroups = {};
-            window.selectedActivities.forEach(activity => {
-                const groupId = getActivityPricingGroupId(activity);
-                    
-                if (!activityGroups[groupId]) {
-                    activityGroups[groupId] = [];
-                }
-                activityGroups[groupId].push(activity);
-            });
-            
-            // First 3 groups are free, then 1000 AED per individual activity in additional groups
-            const groupIds = Object.keys(activityGroups);
-            if (groupIds.length > 3) {
-                // Keep track of which groups were selected first (maintain selection order)
-                const groupSelectionOrder = [];
-                window.selectedActivities.forEach(activity => {
-                    const groupId = getActivityPricingGroupId(activity);
-                        
-                    if (!groupSelectionOrder.includes(groupId)) {
-                        groupSelectionOrder.push(groupId);
-                    }
-                });
-                // First 3 groups in selection order are free, charge for activities in remaining groups
-                for (let i = 3; i < groupSelectionOrder.length; i++) {
-                    const groupId = groupSelectionOrder[i];
-                    if (activityGroups[groupId]) {
-                        const activitiesCount = activityGroups[groupId].length;
-                        const cost = activitiesCount * 1000;
-                        businessActivitiesCost += cost;
-                    }
-                }
-                
-            } else {
-            }
-        } else {
-        }
-        
-        // Bank account cost is now included in add-ons, so we don't add it separately
-        const totalCost = licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost + changeStatusComponent;
-        
-        const costs = {
-            licenseCost: licenseComponent,
-            visaCost: visaComponent,
-            bankAccountCost: 0, // Set to 0 as it's included in add-ons
-            officeCost: officeComponent,
-            addonsCost: addonsComponent,
-            businessActivitiesCost: businessActivitiesCost,
-            changeStatusCost: changeStatusComponent,
-            totalCost: totalCost
-        };
-        
-        // Set global variables for access in other functions
-        LicenseCost = Math.round(licenseComponent);
-        VisaCost = Math.round(visaComponent);
-        window.AddonsComponent = Math.round(addonsComponent);
-        window.BusinessActivitiesCost = Math.round(businessActivitiesCost);
-        window.ChangeStatusCost = Math.round(changeStatusComponent);
-
-        // Update change status section visibility
-        updateChangeStatusVisibility();
-        updateMResidencyVisibility();
-        updateInvestorDependentDisclaimer();
-
-        updateSummaryUI(costs, snapshot);
-        
-        // Update basic package price
-        updateBasicPackagePrice(totalCost);
-        
-        // Always update the grand total (including mobile)
-        updateGrandTotal(totalCost);
-        
-        // Save form data to localStorage for potential recovery
         try {
-            localStorage.setItem('costCalculatorData', JSON.stringify(snapshot));
-        } catch (e) {
-        }
+            const snapshot = getFormSnapshot();
+            
+            // Only calculate costs for sections that have been interacted with
+            // Form being unlocked is no longer a condition for showing prices
+            const licenseComponent = sectionInteractions.licenseSection ? calculateLicenseCost(snapshot) : 0;
+            const visaComponent = sectionInteractions.visaSection ? calculateVisaCost(snapshot) : 0;
+            const officeComponent = calculateOfficeCost(snapshot); // Office component is always 0 now
+            const addonsComponent = sectionInteractions.addonsSection ? calculateAddonsCost(snapshot) : 0;
+            const changeStatusComponent = sectionInteractions.visaSection ? calculateChangeStatusCost(snapshot) : 0;
+            const businessActivitiesCost = sectionInteractions.businessActivitiesSection
+                ? calculateBusinessActivitiesCost(window.selectedActivities)
+                : 0;
+            
+            // Bank account cost is now included in add-ons, so we don't add it separately
+            const totalCost = licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost + changeStatusComponent;
+            
+            const costs = {
+                licenseCost: licenseComponent,
+                visaCost: visaComponent,
+                bankAccountCost: 0, // Set to 0 as it's included in add-ons
+                officeCost: officeComponent,
+                addonsCost: addonsComponent,
+                businessActivitiesCost: businessActivitiesCost,
+                changeStatusCost: changeStatusComponent,
+                totalCost: totalCost
+            };
+            
+            // Set global variables for access in other functions
+            LicenseCost = Math.round(licenseComponent);
+            VisaCost = Math.round(visaComponent);
+            window.AddonsComponent = Math.round(addonsComponent);
+            window.BusinessActivitiesCost = Math.round(businessActivitiesCost);
+            window.ChangeStatusCost = Math.round(changeStatusComponent);
 
-        updateGrandTotal(totalCost);
+            // Update change status section visibility
+            updateChangeStatusVisibility();
+            updateMResidencyVisibility();
+            updateInvestorDependentDisclaimer();
+
+            updateSummaryUI(costs, snapshot);
+            
+            // Update basic package price
+            updateBasicPackagePrice(totalCost);
+            
+            // Always update the grand total (including mobile)
+            updateGrandTotal(totalCost);
+            
+            // Save form data to localStorage for potential recovery
+            try {
+                localStorage.setItem('costCalculatorData', JSON.stringify(snapshot));
+            } catch (e) {
+                logNonProdError('Failed saving costCalculatorData', e);
+            }
+        } catch (error) {
+            logNonProdError('calculateCosts failed', error);
+            updateGrandTotal(0);
+        }
     }
 
     function calculateTotalCost() {
@@ -3826,44 +3678,7 @@
             const officeComponent = calculateOfficeCost(snapshot);
             const addonsComponent = calculateAddonsCost(snapshot);
             const changeStatusComponent = calculateChangeStatusCost(snapshot);
-            
-            // Calculate business activities cost
-            let businessActivitiesCost = 0;
-            if (window.selectedActivities && window.selectedActivities.length > 0) {
-                // Group activities by their actual Group number (not category)
-                const activityGroups = {};
-                window.selectedActivities.forEach(activity => {
-                    const groupId = getActivityPricingGroupId(activity);
-                        
-                    if (!activityGroups[groupId]) {
-                        activityGroups[groupId] = [];
-                    }
-                    activityGroups[groupId].push(activity);
-                });
-                
-                // First 3 groups are free, then 1000 AED per individual activity in additional groups
-                const groupIds = Object.keys(activityGroups);
-                if (groupIds.length > 3) {
-                    // Keep track of which groups were selected first (maintain selection order)
-                    const groupSelectionOrder = [];
-                    window.selectedActivities.forEach(activity => {
-                        const groupId = getActivityPricingGroupId(activity);
-                            
-                        if (!groupSelectionOrder.includes(groupId)) {
-                            groupSelectionOrder.push(groupId);
-                        }
-                    });
-                    
-                    // First 3 groups in selection order are free, charge for activities in remaining groups
-                    for (let i = 3; i < groupSelectionOrder.length; i++) {
-                        const groupId = groupSelectionOrder[i];
-                        if (activityGroups[groupId]) {
-                            businessActivitiesCost += activityGroups[groupId].length * 1000;
-                        }
-                    }
-                    
-                }
-            }
+            const businessActivitiesCost = calculateBusinessActivitiesCost(window.selectedActivities);
             
             // Return the total cost
             return Math.round(licenseComponent + visaComponent + officeComponent + addonsComponent + businessActivitiesCost + changeStatusComponent);
@@ -4058,71 +3873,74 @@
     let nameUserHasInteracted = false;
     let nameFieldHasBeenFocused = false;
     
-    // Track when name field gets focus for the first time
-    nameField.addEventListener("focus", function() {
-        nameFieldHasBeenFocused = true;
-    });
-    
-    nameField.addEventListener("keydown", function(e) {
-        nameUserHasInteracted = true;
+    if (nameField) {
+        // Track when name field gets focus for the first time
+        nameField.addEventListener("focus", function() {
+            nameFieldHasBeenFocused = true;
+        });
         
-        // Allow: backspace, delete, tab, escape, enter, home, end, left, right, up, down
-        if ([8, 9, 27, 13, 35, 36, 37, 38, 39, 40, 46].indexOf(e.keyCode) !== -1 ||
-            // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-            (e.keyCode === 65 && e.ctrlKey === true) ||
-            (e.keyCode === 67 && e.ctrlKey === true) ||
-            (e.keyCode === 86 && e.ctrlKey === true) ||
-            (e.keyCode === 88 && e.ctrlKey === true)) {
-            return;
-        }
-        
-        // Allow letters (A-Z, a-z), space, hyphen, apostrophe
-        const key = String.fromCharCode(e.keyCode);
-        if (!/[A-Za-z\s\-\']/.test(key)) {
-            e.preventDefault();
-        }
-    });
+        nameField.addEventListener("keydown", function(e) {
+            nameUserHasInteracted = true;
+            
+            // Allow: backspace, delete, tab, escape, enter, home, end, left, right, up, down
+            if ([8, 9, 27, 13, 35, 36, 37, 38, 39, 40, 46].indexOf(e.keyCode) !== -1 ||
+                // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                (e.keyCode === 65 && e.ctrlKey === true) ||
+                (e.keyCode === 67 && e.ctrlKey === true) ||
+                (e.keyCode === 86 && e.ctrlKey === true) ||
+                (e.keyCode === 88 && e.ctrlKey === true)) {
+                return;
+            }
+            
+            // Allow letters (A-Z, a-z), space, hyphen, apostrophe
+            const key = String.fromCharCode(e.keyCode);
+            if (!/[A-Za-z\s\-\']/.test(key)) {
+                e.preventDefault();
+            }
+        });
 
-    nameField.addEventListener("input", function(e) {
-        nameUserHasInteracted = true;
-        
-        // Clear any existing error styling during typing (but don't validate yet)
-        nameField.classList.remove('calc-error');
-        const errorElement = document.getElementById('calc-full-name-error');
-        if (errorElement) {
-            errorElement.style.display = 'none';
-        }
-        
-        // Allow only letters, spaces, hyphens, and apostrophes (backup cleanup)
-        const allowedChars = /[A-Za-z\s\-\']/g;
-        const value = e.target.value;
-        const cleanValue = value.match(allowedChars)?.join('') || '';
-        
-        if (value !== cleanValue) {
-            e.target.value = cleanValue;
-        }
-        
-        // Don't validate during typing - only on blur or form submission
-    });
+        nameField.addEventListener("input", function(e) {
+            nameUserHasInteracted = true;
+            
+            // Clear any existing error styling during typing (but don't validate yet)
+            nameField.classList.remove('calc-error');
+            const errorElement = document.getElementById('calc-full-name-error');
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
+            
+            // Allow only letters, spaces, hyphens, and apostrophes (backup cleanup)
+            const allowedChars = /[A-Za-z\s\-\']/g;
+            const value = e.target.value;
+            const cleanValue = value.match(allowedChars)?.join('') || '';
+            
+            if (value !== cleanValue) {
+                e.target.value = cleanValue;
+            }
+            
+            // Don't validate during typing - only on blur or form submission
+        });
 
-    // Also clear errors on paste but don't validate immediately for name
-    nameField.addEventListener("paste", function(e) {
-        nameUserHasInteracted = true;
-        nameField.classList.remove('error');
-        const errorElement = document.getElementById('full-name-error');
-        if (errorElement) {
-            errorElement.style.display = 'none';
-        }
-    });
+        // Also clear errors on paste but don't validate immediately for name
+        nameField.addEventListener("paste", function() {
+            nameUserHasInteracted = true;
+            nameField.classList.remove('error');
+            const errorElement = document.getElementById('full-name-error');
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
+        });
 
-    nameField.addEventListener("blur", function() {
-        if (nameField.value.trim()) {
-            nameFieldHasBeenFocused = true; // Mark as focused when blur happens
-            validateNameField();
-        }
-    });
+        nameField.addEventListener("blur", function() {
+            if (nameField.value.trim()) {
+                nameFieldHasBeenFocused = true; // Mark as focused when blur happens
+                validateNameField();
+            }
+        });
+    }
 
     function validateNameField() {
+        if (!nameField) return true;
         const nameValue = nameField.value.trim();
         const errorElement = document.getElementById('calc-full-name-error');
         
@@ -4175,33 +3993,36 @@
     let emailUserHasInteracted = false;
     let emailFieldHasBeenFocused = false;
     
-    // Track when email field gets focus for the first time
-    emailField.addEventListener("focus", function() {
-        emailFieldHasBeenFocused = true;
-    });
+    if (emailField) {
+        // Track when email field gets focus for the first time
+        emailField.addEventListener("focus", function() {
+            emailFieldHasBeenFocused = true;
+        });
 
-    emailField.addEventListener("input", function(e) {
-        emailUserHasInteracted = true;
-        
-        // Clear any existing error styling during typing (but don't validate yet)
-        emailField.classList.remove('calc-error');
-        const errorElement = document.getElementById('calc-email-error');
-        if (errorElement) {
-            errorElement.style.display = 'none';
-        }
-        
-        // Don't validate during typing - only on blur or form submission
-    });
+        emailField.addEventListener("input", function() {
+            emailUserHasInteracted = true;
+            
+            // Clear any existing error styling during typing (but don't validate yet)
+            emailField.classList.remove('calc-error');
+            const errorElement = document.getElementById('calc-email-error');
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
+            
+            // Don't validate during typing - only on blur or form submission
+        });
 
-    emailField.addEventListener("blur", function() {
-        if (emailField.value.trim()) {
-            emailFieldHasBeenFocused = true; // Mark as focused when blur happens
-            validateEmailField();
-        }
-    });
+        emailField.addEventListener("blur", function() {
+            if (emailField.value.trim()) {
+                emailFieldHasBeenFocused = true; // Mark as focused when blur happens
+                validateEmailField();
+            }
+        });
+    }
 
     // Email validation function
     function validateEmailField() {
+        if (!emailField) return true;
         const emailValue = emailField.value.trim();
         const errorElement = document.getElementById('calc-email-error');
         
@@ -4294,8 +4115,11 @@
             window.dataLayer.push(eventData);
             
         } catch (error) {
-        }
+     logNonProdError('pushToDataLayer suppressed error', error);
+ }
     }
+
+    let isQuoteSubmissionInProgress = false;
 
     // Get a Call buttons - handles form submission
     function initializeGetCallButtons() {
@@ -4306,7 +4130,7 @@
         e.preventDefault();
         const submitBtn = this;
 
-        if (submitBtn.classList.contains('button-loading')) return;
+        if (submitBtn.classList.contains('button-loading') || isQuoteSubmissionInProgress) return;
 
                 // Check if contact form is valid before submitting
                 if (!validateContactForm()) {
@@ -4324,7 +4148,7 @@
                     
                     fields.forEach(field => {
                         const element = document.getElementById(field.id);
-                        const errorElement = document.getElementById(field.id + '-error');
+                        const errorElement = document.getElementById(`calc-${field.id}-error`);
                         
                         if (element && !element.value?.trim()) {
                             element.classList.add('error');
@@ -4345,6 +4169,7 @@
 
  
 
+        isQuoteSubmissionInProgress = true;
         submitBtn.classList.add('button-loading');
         submitBtn.disabled = true;
 
@@ -4397,19 +4222,20 @@
                     } else {
                         // Fallback to analytics table
                         const analytics = await getViewAnalytics(uniqueConfigId);
-                        if (analytics && analytics.length > 0) {
-                            const sortedViews = analytics.sort((a, b) => new Date(b.viewed_at) - new Date(a.viewed_at));
-                            lastViewedTimestamp = sortedViews[0].viewed_at;
+                        if (analytics?.views?.length > 0) {
+                            lastViewedTimestamp = analytics.views[0].viewed_at;
                         } else {
                             lastViewedTimestamp = new Date().toISOString();
                         }
                     }
                 } catch (timestampError) {
+                    logNonProdError('Failed to load last viewed timestamp', timestampError);
                     lastViewedTimestamp = new Date().toISOString();
                 }
             }
         } catch (error) {
             // Continue with submission even if shareable link generation fails
+            logNonProdError('Failed while preparing share metadata', error);
         }
 
         const fullName = document.getElementById("full-name").value;
@@ -4633,6 +4459,7 @@
                     
                     submitBtn.classList.remove('button-loading');
                     submitBtn.disabled = false;
+                    isQuoteSubmissionInProgress = false;
             }, 1000);
             })
             .catch((error) => {
@@ -4646,6 +4473,7 @@
                 });
             submitBtn.classList.remove('button-loading');
             submitBtn.disabled = false;
+                isQuoteSubmissionInProgress = false;
                 alert("There was an issue submitting the form. Please try again.");
             });
     });
@@ -4677,7 +4505,8 @@
             // Initial validation check
             updateSectionLockState();
         } catch (err) {
-        }
+     logNonProdError('initializeSectionLocking suppressed error', err);
+ }
     }
 
     function validateContactForm() {
@@ -4749,7 +4578,8 @@
                 }
             });
         } catch (err) {
-        }
+     logNonProdError('hideSections suppressed error', err);
+ }
     }
 
     function revealSections() {
@@ -4789,7 +4619,8 @@
             }, sectionsToReveal.length * 100 + 400);
             
         } catch (err) {
-        }
+     logNonProdError('revealSections suppressed error', err);
+ }
     }
     
     function showRevealMessage() {
@@ -4820,7 +4651,8 @@
             }, 1200);
             
         } catch (err) {
-        }
+     logNonProdError('showRevealMessage suppressed error', err);
+ }
     }
 
 
@@ -4975,7 +4807,8 @@
                 }
             }
         } catch (err) {
-        }
+     logNonProdError('updateSectionLockState suppressed error', err);
+ }
     }
 
     // Countries array removed as we no longer need nationality selection
@@ -5138,7 +4971,8 @@
                             instance.iti.setNumber(cleaned);
                             return;
                         } catch (e) {
-                        }
+     logNonProdError('setPhoneInputValue suppressed error', e);
+ }
                     }
                 }
 
@@ -5149,7 +4983,8 @@
                         iti.setNumber(cleaned);
                         return;
                     } catch (e) {
-                    }
+     logNonProdError('setPhoneInputValue suppressed error', e);
+ }
                 } else if (attempts < maxAttempts) {
                     attempts++;
                     setTimeout(trySetNumber, 200);
@@ -5180,7 +5015,8 @@
             });
             
         } catch (error) {
-        }
+     logNonProdError('notifySharedLinkOpened suppressed error', error);
+ }
     }
 
     /**
@@ -5268,7 +5104,8 @@
                     phoneValue = formattedPhone;
                 }
             } catch (err) {
-            }
+     logNonProdError('collectFormConfiguration suppressed error', err);
+ }
         }
         
         const contactData = {
@@ -5875,6 +5712,9 @@
     
     // Store configuration in Supabase
     async function storeConfiguration(configId, configData, clientData = null, salesData = null) {
+        if (!hasSupabaseClient()) {
+            return false;
+        }
         try {
             
             // Check if record exists first
@@ -5916,17 +5756,22 @@
                 .upsert(upsertData);
             
             if (error) {
+                logNonProdError('storeConfiguration upsert failed', error);
                 return false;
             }
             
             return true;
         } catch (error) {
+            logNonProdError('storeConfiguration failed', error);
             return false;
         }
     }
     
     // Load configuration from Supabase
     async function loadConfiguration(configId) {
+        if (!hasSupabaseClient()) {
+            return null;
+        }
         try {
             
             const { data, error } = await supabaseClient
@@ -5936,6 +5781,7 @@
                 .single();
             
             if (error) {
+                logNonProdError('loadConfiguration query failed', error);
                 return null;
             }
             
@@ -5954,6 +5800,7 @@
                 } : null
             };
         } catch (error) {
+            logNonProdError('loadConfiguration failed', error);
             return null;
         }
     }
@@ -6006,7 +5853,8 @@
                 const configData = collectFormConfiguration();
                 await storeConfiguration(currentConfigId, configData);
             } catch (error) {
-            }
+     logNonProdError('generateDynamicShareableURL suppressed error', error);
+ }
         }
     }, 1500); // 1.5 second calcDebounce
     
@@ -6120,10 +5968,12 @@
     // New share button handler with animations
     async function handleShareClick() {
         const shareBtn = document.getElementById('share-btn');
+        if (!shareBtn) return;
         const shareText = shareBtn.querySelector('.share-text');
         const shareLoading = shareBtn.querySelector('.share-loading');
         const shareCopied = shareBtn.querySelector('.share-copied');
         const shareIcon = shareBtn.querySelector('.share-icon');
+        if (!shareText || !shareLoading || !shareCopied || !shareIcon) return;
         
         // Show loading state
         shareBtn.classList.add('loading');
@@ -6301,7 +6151,8 @@
             setupManualRealTimeSystem();
             
         } catch (error) {
-        }
+     logNonProdError('initializeUnifiedSharing suppressed error', error);
+ }
     }
     
     // Handle dynamic configuration
@@ -6339,11 +6190,13 @@
             } else {
             }
         } catch (error) {
-        }
+     logNonProdError('handleDynamicConfiguration suppressed error', error);
+ }
     }
     
     // Track link views
     async function trackLinkView(configId) {
+        if (!hasSupabaseClient()) return;
         try {
             // Insert a new view record
             const { error } = await supabaseClient
@@ -6356,16 +6209,19 @@
                 });
             
             if (error) {
+                logNonProdError('trackLinkView insert failed', error);
             } else {
                 // Also update the last_viewed timestamp in the main shared_configs table
                 await updateLastViewedTimestamp(configId);
             }
         } catch (error) {
+            logNonProdError('trackLinkView failed', error);
         }
     }
     
     // Update last viewed timestamp in shared_configs table
     async function updateLastViewedTimestamp(configId) {
+        if (!hasSupabaseClient()) return;
         try {
             const { error } = await supabaseClient
                 .from('shared_configs')
@@ -6375,13 +6231,16 @@
                 .eq('id', configId);
             
             if (error) {
+                logNonProdError('updateLastViewedTimestamp failed', error);
             }
         } catch (error) {
+            logNonProdError('updateLastViewedTimestamp exception', error);
         }
     }
     
     // Get view count for a config
     async function getViewCount(configId) {
+        if (!hasSupabaseClient()) return 0;
         try {
             const { data, error } = await supabaseClient
                 .from('config_views')
@@ -6389,17 +6248,20 @@
                 .eq('config_id', configId);
             
             if (error) {
+                logNonProdError('getViewCount failed', error);
                 return 0;
             }
             
             return data ? data.length : 0;
         } catch (error) {
+            logNonProdError('getViewCount exception', error);
             return 0;
         }
     }
     
     // Get detailed view analytics
     async function getViewAnalytics(configId) {
+        if (!hasSupabaseClient()) return null;
         try {
             const { data, error } = await supabaseClient
                 .from('config_views')
@@ -6408,6 +6270,7 @@
                 .order('viewed_at', { ascending: false });
             
             if (error) {
+                logNonProdError('getViewAnalytics failed', error);
                 return null;
             }
             
@@ -6419,6 +6282,7 @@
                 unique_referrers: [...new Set(data.map(v => v.referrer).filter(r => r))]
             };
         } catch (error) {
+            logNonProdError('getViewAnalytics exception', error);
             return null;
         }
     }
@@ -6434,7 +6298,8 @@
             } else {
             }
         } catch (error) {
-        }
+     logNonProdError('handleStaticConfiguration suppressed error', error);
+ }
     }
     
     // Set up share button event listeners
@@ -6475,6 +6340,7 @@
             }
 
         } catch (error) {
+            logNonProdError('setCurrentConfigId failed', error);
         }
     };
     
@@ -6510,10 +6376,12 @@
                             await storeConfiguration(configId, configData);
                         }
                     } catch (error) {
-                    }
+     logNonProdError('manualUpdateConfig suppressed error', error);
+ }
                 }, 500); // Add delay to ensure form is stable
             } catch (error) {
-            }
+     logNonProdError('manualUpdateConfig suppressed error', error);
+ }
         }
     }
     
@@ -6593,26 +6461,6 @@
     window.getViewCount = getViewCount;
     window.getViewAnalytics = getViewAnalytics;
     
-    // Add fallback functions that work
-    window.getCurrentConfigId = function() {
-        try {
-            return currentConfigId || sessionStorage.getItem('currentConfigId') || null;
-        } catch (error) {
-            return sessionStorage.getItem('currentConfigId');
-        }
-    };
-    
-    window.setCurrentConfigId = function(id) {
-        try {
-            if (typeof currentConfigId !== 'undefined') {
-                currentConfigId = id;
-            }
-            sessionStorage.setItem('currentConfigId', id);
-
-        } catch (error) {
-        }
-    };
-    
     // Ensure config ID is set from URL if available
     try {
         const dynamicConfig = new URLSearchParams(window.location.search).get('share');
@@ -6620,6 +6468,7 @@
             window.setCurrentConfigId(dynamicConfig);
         }
     } catch (error) {
+        logNonProdError('Initial config-id URL parse failed', error);
     }
     
     // Initialize from URL parameters if available
@@ -6674,6 +6523,7 @@
                 localStorage.removeItem('formHasPartialData');
                 localStorage.removeItem('formPartialData');
             } catch (err) {
+                logNonProdError('Failed clearing partial form localStorage', err);
             }
         }
         
@@ -6736,12 +6586,6 @@
         updateMResidencyVisibility();
         updateInvestorDependentDisclaimer();
     }
-         // Legacy function for backward compatibility
-     function toggleVisaOptions(visaType) {
-         // This function is kept for any remaining references
-         toggleVisaCard(visaType);
-     }
-
      // Make functions globally available for onclick handlers
      window.toggleVisaCard = toggleVisaCard;
     
@@ -6766,20 +6610,6 @@
         calculateCosts();
     }
 
-    // Toggle inline edit mode for summary items
-    function toggleEditMode(editType) {
-        const editTargetMap = {
-            'package-type': 'company-setup-section',
-            'business-activities': 'business-activities-section',
-            'visa-info': 'visa-options-section',
-            'addons': 'addons-section'
-        };
-        const targetSectionId = editTargetMap[editType];
-        if (targetSectionId) {
-            scrollToSection(targetSectionId);
-        }
-    }
-    
     document.addEventListener('DOMContentLoaded', function() {
         const placeholder = document.querySelector('#activities-list-placeholder');
         if (placeholder) {
@@ -6843,7 +6673,13 @@
         async function searchActivities(searchTerm) {
         const searchResultsDropdown = document.querySelector('.search-results-dropdown');
         if (!searchResultsDropdown) return;
-        
+        if (!hasSupabaseClient()) {
+            searchResultsDropdown.innerHTML = '<div class="error-results">Activity search is currently unavailable.</div>';
+            searchResultsDropdown.style.display = 'block';
+            return;
+        }
+
+            const requestId = ++activitySearchRequestId;
             try {
                 searchResultsDropdown.innerHTML = '<div class="loading-results">Searching...</div>';
                 searchResultsDropdown.style.display = 'block';
@@ -6856,9 +6692,12 @@
             
                 const { data, error } = await query;
                 if (error) throw error;
+                if (requestId !== activitySearchRequestId) return;
             
-                displaySearchResults(data);
+                displaySearchResults(Array.isArray(data) ? data : []);
             } catch (err) {
+                if (requestId !== activitySearchRequestId) return;
+                logNonProdError('searchActivities failed', err);
                 searchResultsDropdown.innerHTML = '<div class="error-results">Error fetching results</div>';
             }
         }
@@ -6869,7 +6708,7 @@
         
             searchResultsDropdown.innerHTML = '';
             
-            if (results.length === 0) {
+            if (!Array.isArray(results) || results.length === 0) {
                 searchResultsDropdown.innerHTML = '<div class="no-results">No activities found</div>';
                 searchResultsDropdown.style.display = 'block';
                 return;
@@ -6949,109 +6788,15 @@
         }
     }
 
-    // Function to initialize accordion functionality
-    function initAccordion() {
-        const accordionHeaders = document.querySelectorAll('.accordion-header');
-        
-        // Make sure all accordions are collapsed by default
-        accordionHeaders.forEach(header => {
-            header.classList.remove('active');
-            const toggleButton = header.querySelector('.accordion-toggle');
-            if (toggleButton) {
-                toggleButton.setAttribute('aria-expanded', 'false');
-            }
-        });
-        
-        // Hide all accordion contents
-        document.querySelectorAll('.accordion-content').forEach(content => {
-            content.style.display = 'none';
-        });
-        
-        accordionHeaders.forEach(header => {
-            header.addEventListener('click', function(e) {
-                // Don't trigger if clicking on the edit button
-                if (e.target.closest('.card-edit-button')) {
-                    return;
-                }
-                
-                // Toggle active class
-                this.classList.toggle('active');
-                
-                // Get the content element
-                const content = this.nextElementSibling;
-                if (content && (content.classList.contains('accordion-content') || content.id === 'business-activities-summary')) {
-                    // Toggle display
-                    if (this.classList.contains('active')) {
-                        content.style.display = content.id === 'business-activities-summary' ? 'flex' : 'block';
-                    } else {
-                        content.style.display = 'none';
-                    }
-                }
-                
-                // Update aria-expanded attribute for accessibility
-                const toggleButton = this.querySelector('.accordion-toggle');
-                if (toggleButton) {
-                    const isExpanded = this.classList.contains('active');
-                    toggleButton.setAttribute('aria-expanded', isExpanded);
-                }
-            });
-        });
-        
-        // Add click handler specifically for the toggle buttons
-        const toggleButtons = document.querySelectorAll('.accordion-toggle');
-        toggleButtons.forEach(button => {
-            button.setAttribute('aria-expanded', 'false');
-            button.addEventListener('click', function(e) {
-                // Prevent event bubbling to the header
-                e.stopPropagation();
-                
-                const header = this.closest('.accordion-header');
-                if (header) {
-                    header.classList.toggle('active');
-                    
-                    // Get the content element
-                    const content = header.nextElementSibling;
-                    if (content && (content.classList.contains('accordion-content') || content.id === 'business-activities-summary')) {
-                        // Toggle display
-                        if (header.classList.contains('active')) {
-                            content.style.display = content.id === 'business-activities-summary' ? 'flex' : 'block';
-                        } else {
-                            content.style.display = 'none';
-                        }
-                    }
-                    
-                    // Update aria-expanded attribute
-                    const isExpanded = header.classList.contains('active');
-                    this.setAttribute('aria-expanded', isExpanded);
-                }
-            });
-        });
+    function getShareholdersVisaFooter() {
+        return document.getElementById('shareholders-selected-controls')?.closest('.visa-footer') || null;
     }
-
-    // Update accordion state on window resize
-    window.addEventListener('resize', function() {
-        
-        const accordionHeaders = document.querySelectorAll('.accordion-header');
-        
-        accordionHeaders.forEach(header => {
-            const content = header.nextElementSibling;
-            if (content && (content.classList.contains('accordion-content') || content.id === 'business-activities-summary')) {
-                if (header.classList.contains('active')) {
-                    // If accordion is active, show the content
-                    content.style.display = content.id === 'business-activities-summary' ? 'flex' : 'block';
-                } else {
-                    // If accordion is not active, hide the content
-                    content.style.display = 'none';
-                }
-            }
-        });
-    });
 
     // Select visa card function (for employee and dependent visas) - unified approach
     function selectVisaCard(visaType) {
         if (visaType === 'shareholders') {
             // Special handling for shareholders since it's not a visa card
-            const visaFooter = document.querySelector('.license-option-group:has(#shareholders-selected-controls) .visa-footer');
+            const visaFooter = getShareholdersVisaFooter();
             const selectBtn = visaFooter?.querySelector('.select-btn');
             const selectedControls = document.getElementById('shareholders-selected-controls');
             const quantityValue = document.getElementById('shareholders-quantity');
@@ -7178,11 +6923,6 @@
         updateInvestorDependentDisclaimer();
     }
 
-    // Shareholder quantity selector functions
-    function toggleShareholderSelector() {
-
-    }
-
     function initializeShareholderSelector() {
         // Initialize the minus button state - shareholders start unselected
         const minusBtn = document.querySelector('#shareholders-selected-controls .quantity-btn.minus');
@@ -7265,7 +7005,6 @@
     function adjustShareholderQuantity(change) {
         // If shareholders are not selected, select them first
         const selectedControls = document.getElementById('shareholders-selected-controls');
-        const selectBtn = document.querySelector('.license-option-group:has(#shareholders-selected-controls) .visa-footer .select-btn');
         
         if (selectedControls && selectedControls.style.display === 'none') {
             selectVisaCard('shareholders');
@@ -7365,7 +7104,7 @@
     function deselectVisaCard(visaType) {
         if (visaType === 'shareholders') {
             // Special handling for shareholders since it's not a visa card
-            const visaFooter = document.querySelector('.license-option-group:has(#shareholders-selected-controls) .visa-footer');
+            const visaFooter = getShareholdersVisaFooter();
             const selectBtn = visaFooter?.querySelector('.select-btn');
             const selectedControls = document.getElementById('shareholders-selected-controls');
             const quantityValue = document.getElementById('shareholders-quantity');
@@ -7484,8 +7223,8 @@
     }
 
     function getTotalVisaCount() {
-        const investorVisas = parseInt(document.getElementById('investor-visa-count').value) || 0;
-        const employeeVisas = parseInt(document.getElementById('employee-visa-count').value) || 0;
+        const investorVisas = toMinInteger(document.getElementById('investor-visa-count')?.value, 0, 0);
+        const employeeVisas = toMinInteger(document.getElementById('employee-visa-count')?.value, 0, 0);
         // Dependency visas don't require change of status, so they're excluded
         return investorVisas + employeeVisas;
     }
@@ -7550,9 +7289,9 @@
     }
 
     function updateMResidencyVisibility() {
-        const investorVisas = parseInt(document.getElementById('investor-visa-count').value) || 0;
-        const employeeVisas = parseInt(document.getElementById('employee-visa-count').value) || 0;
-        const dependencyVisas = parseInt(document.getElementById('dependency-visas').value) || 0;
+        const investorVisas = toMinInteger(document.getElementById('investor-visa-count')?.value, 0, 0);
+        const employeeVisas = toMinInteger(document.getElementById('employee-visa-count')?.value, 0, 0);
+        const dependencyVisas = toMinInteger(document.getElementById('dependency-visas')?.value, 0, 0);
         const totalVisas = investorVisas + employeeVisas + dependencyVisas;
         
         // Find the mResidency addon category card by ID
@@ -7563,8 +7302,8 @@
     }
 
     function updateInvestorDependentDisclaimer() {
-        const investorVisas = parseInt(document.getElementById('investor-visa-count').value) || 0;
-        const dependencyVisas = parseInt(document.getElementById('dependency-visas').value) || 0;
+        const investorVisas = toMinInteger(document.getElementById('investor-visa-count')?.value, 0, 0);
+        const dependencyVisas = toMinInteger(document.getElementById('dependency-visas')?.value, 0, 0);
         
         const disclaimer = document.getElementById('investor-dependent-disclaimer');
         if (disclaimer) {
@@ -7646,6 +7385,8 @@
     function initializeMobileAutoScroll() {
         // Only run on mobile devices
         if (window.innerWidth > 768) return;
+        if (hasInitializedMobileAutoScroll) return;
+        hasInitializedMobileAutoScroll = true;
         
         // Detect shared-link session and gate auto-scroll until first interaction
         try {
@@ -7692,6 +7433,7 @@
                 document.addEventListener('touchstart', unlock, { once: true, capture: true });
             }
         } catch (err) { 
+            logNonProdError('initializeMobileAutoScroll setup failed', err);
         }
         
         // Function to scroll to next card by ID
@@ -8016,7 +7758,8 @@
     }
 
     function initializeBackToTopButton() {
-                try {
+        if (hasInitializedBackToTopButton) return;
+        try {
             const backToTopBtn = document.getElementById('back-to-top-btn');
             const progressRing = document.querySelector('.progress-ring-progress');
             const contactSection = document.getElementById('personal-details-section');
@@ -8086,6 +7829,7 @@
         window.addEventListener('scroll', updateProgress, { passive: true });
         window.addEventListener('resize', updateProgress, { passive: true });
         backToTopBtn.addEventListener('click', scrollToSectionTop);
+        hasInitializedBackToTopButton = true;
         
         // Initial progress update
         updateProgress();
@@ -8094,6 +7838,7 @@
         setTimeout(updateProgress, 100);
         
         } catch (error) {
+            logNonProdError('initializeBackToTopButton failed', error);
         }
     }
 
@@ -8162,7 +7907,8 @@
             }
                         
         } catch (error) {
-        }
+     logNonProdError('triggerFormValidationAfterProgrammaticFill suppressed error', error);
+ }
     }
 
     // Helper function to fill form AND trigger validation
@@ -8191,7 +7937,8 @@
                             try {
                                 instance.iti.setNumber(userData.phone);
                             } catch (e) {
-                            }
+     logNonProdError('fillFormAndTriggerValidation suppressed error', e);
+ }
                         }
                     }
                 }
@@ -8201,7 +7948,8 @@
             triggerFormValidationAfterProgrammaticFill();
             
         } catch (error) {
-        }
+     logNonProdError('fillFormAndTriggerValidation suppressed error', error);
+ }
     }
 
     // Function to handle sticky buttons visibility based on calculator viewport

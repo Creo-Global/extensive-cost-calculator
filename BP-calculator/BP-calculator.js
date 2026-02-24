@@ -5839,6 +5839,7 @@
             
             return shareableURL;
         } catch (error) {
+            logNonProdError('generateDynamicShareableURL failed', error);
             return null;
         }
     }
@@ -5850,8 +5851,8 @@
                 const configData = collectFormConfiguration();
                 await storeConfiguration(currentConfigId, configData);
             } catch (error) {
-     logNonProdError('generateDynamicShareableURL suppressed error', error);
- }
+                logNonProdError('updateDynamicConfiguration failed', error);
+            }
         }
     }, 1500); // 1.5 second calcDebounce
     

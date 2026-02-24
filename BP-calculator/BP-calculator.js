@@ -503,7 +503,7 @@
         handleNameKeydown(e) {
             const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'Home', 'End', 'ArrowLeft', 'ArrowRight'];
             const isLetter = /[a-zA-Z\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\u0370-\u03FF\u0400-\u04FF\u1E00-\u1EFF\u1F00-\u1FFF\u2100-\u214F\u0100-\u017F\u1EA0-\u1EF9\u00C0-\u024F\u1E00-\u1EFF]/.test(e.key);
-            const isAllowedSpecial = /[\s\-\.']/.test(e.key);
+            const isAllowedSpecial = /[\s\-']/.test(e.key);
             const isModifierKey = e.ctrlKey || e.metaKey || e.altKey;
 
             if (!allowedKeys.includes(e.key) && !isLetter && !isAllowedSpecial && !isModifierKey) {
@@ -7328,9 +7328,6 @@
         // This function is now just for updating button states
         updateStatusButtonStates();
     }
-
-    // Make function globally available
-    window.deselectVisaCard = deselectVisaCard;
 
     // Unified function to create select/selected button with consistent styling
     function createSelectedButton() {

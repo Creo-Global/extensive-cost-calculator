@@ -42,8 +42,20 @@
         }
     }
 
+    // Move modal overlays out of embed containers so fixed positioning uses the viewport.
+    function moveActivityModalsToBody() {
+        const overlays = document.querySelectorAll('.activity-modal-overlay');
+        overlays.forEach(overlay => {
+            if (overlay.parentElement !== document.body) {
+                document.body.appendChild(overlay);
+            }
+        });
+    }
+
     function initializeCalculator() {
         try {
+            moveActivityModalsToBody();
+
             // Initialize user location detection
             if (typeof detectUserLocation === 'function') {
                 detectUserLocation();
@@ -1457,6 +1469,7 @@
     function openActivityModal(groupInfo) {
         const modal = document.getElementById('activity-search-modal');
         const modalTitle = document.getElementById('modal-title');
+        moveActivityModalsToBody();
         
         // Store current scroll position before opening modal
         window.scrollPositionBeforeModal = window.pageYOffset || document.documentElement.scrollTop;
@@ -2007,6 +2020,7 @@
     const modalTitle = document.getElementById('addons-modal-title');
     const modalSubtitle = document.getElementById('addons-modal-subtitle');
     const modalHeader = document.querySelector('#addons-modal .activity-modal-header');
+    moveActivityModalsToBody();
     
     // Category images
     const categoryImages = {
@@ -2462,6 +2476,7 @@
         const modalAdditional = document.getElementById('license-modal-additional');
         const modalActionBtn = document.getElementById('license-modal-action-btn');
         const modalHeader = document.querySelector('#license-modal .activity-modal-header');
+        moveActivityModalsToBody();
         
         // Visa data
         const visaData = {
@@ -2656,6 +2671,7 @@
         const modalAdditional = document.getElementById('license-modal-additional');
         const modalActionBtn = document.getElementById('license-modal-action-btn');
         const modalHeader = document.querySelector('#license-modal .activity-modal-header');
+        moveActivityModalsToBody();
         
         // License data
         const licenseData = {

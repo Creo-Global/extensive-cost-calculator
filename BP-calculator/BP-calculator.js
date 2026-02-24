@@ -323,7 +323,7 @@
                     minLength: 2,
                     maxLength: 50,
                     pattern: NAME_VALIDATION_REGEX,
-                    forbiddenChars: /[0-9!@#$%^&*()_+=\[\]{};':"\\|,.<>?/~`]/
+                    forbiddenChars: /[0-9!@#$%^&*()_+=\[\]{};:"\\|,.<>?/~`]/
                 },
                 email: {
                     required: true,

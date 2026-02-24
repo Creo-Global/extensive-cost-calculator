@@ -44,4 +44,17 @@ describe('Validation Logic', () => {
     expect(nameField.value).toBe('');
     expect(runtime.window.validateContactForm()).toBe(false);
   });
+
+  it('accepts apostrophes in names', async () => {
+    runtime = await bootCalculator();
+    seedValidContactForm(runtime.window);
+
+    const nameField = runtime.document.getElementById('full-name');
+    nameField.value = "O'Neil";
+    nameField.dispatchEvent(new runtime.window.Event('input', { bubbles: true }));
+
+    expect(nameField.value).toBe("O'Neil");
+    expect(runtime.window.validateContactForm()).toBe(true);
+    expect(runtime.window.formValidator.validateContactForm()).toBe(true);
+  });
 });

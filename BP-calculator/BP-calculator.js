@@ -1354,7 +1354,7 @@
 
     // Initialize Supabase client
     const supabaseUrl = 'https://sb.meydanfz.ae';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzU3MjQyMDM2LCJleHAiOjIwNzI4MTgwMzZ9.5YF79Wen41bSpKNOKiT9Wcd_psXf8IV4vgK7RUjOZoI';
+    const supabaseKey = 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJyb2xlIjogImFub24iLCAiaXNzIjogInN1cGFiYXNlIiwgImlhdCI6IDE3MzU2ODk2MDAsICJleHAiOiAxODkzNDU2MDAwfQ.aBe8_k56hke4Yk8KmoEVrVIh1eGD5m583N3k66j-uww';
     // IMPORTANT: do not name this variable `supabase` because the CDN library already defines a global `supabase`.
     // Using the same identifier can cause "Identifier 'supabase' has already been declared" and stop the script.
     const supabaseClient = window.supabase?.createClient

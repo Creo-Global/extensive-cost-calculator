@@ -107,9 +107,6 @@
                 initializeStickyButtonsControl();
             }
             
-            if (typeof initializeBackToTopButton === 'function') {
-                initializeBackToTopButton();
-            }
 
             // Initialize sharing functionality
             initializeUnifiedSharing();
@@ -850,9 +847,8 @@
                 const isValid = this.validateContactForm();
                 
                 if (isValid) {
-                    submitBtn.innerHTML = '✓ Valid';
-                    submitBtn.classList.add('validated');
                     submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
                     
                     // Ensure sections are revealed if they haven't been already
                     if (!isContactFormCompleted) {
@@ -910,25 +906,8 @@
                     
                     this.handleSuccessfulSubmission();
                 } else {
-                    // Get specific invalid fields for better error messaging
-                    const invalidFields = this.getInvalidFieldNames();
-                    let errorMessage = 'Please complete all required fields';
-                    
-                    if (invalidFields.length > 0) {
-                        if (invalidFields.length === 1) {
-                            errorMessage = `Please complete ${invalidFields[0]}`;
-                        } else if (invalidFields.length === 2) {
-                            errorMessage = `Please complete ${invalidFields[0]} and ${invalidFields[1]}`;
-                        } else {
-                            errorMessage = `Please complete ${invalidFields.slice(0, -1).join(', ')} and ${invalidFields[invalidFields.length - 1]}`;
-                        }
-                    }
-                    
-                    submitBtn.innerHTML = errorMessage;
-                    setTimeout(() => {
-                        submitBtn.innerHTML = originalText;
-                        submitBtn.disabled = false;
-                    }, 3000);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                 }
             };
             
@@ -936,51 +915,6 @@
             setTimeout(() => checkAndValidate(), 200);
         }
         
-        // Helper method to get human-readable names of invalid fields
-        getInvalidFieldNames() {
-            const invalidFields = [];
-            
-            // Check name
-            const fullName = document.getElementById('full-name')?.value?.trim();
-            if (!fullName || fullName.length < 2 || !this.validationRules.name.pattern.test(fullName)) {
-                invalidFields.push('your name');
-            }
-            
-            // Check email
-            const email = document.getElementById('email')?.value?.trim();
-            if (!email || !this.validationRules.email.pattern.test(email)) {
-                invalidFields.push('email');
-            }
-            
-            // Check phone
-            const phoneField = document.getElementById('phone');
-            let isPhoneValid = false;
-            if (phoneField && this.useMFZPhone && window.MFZPhone) {
-                try {
-                    isPhoneValid = window.MFZPhone.isValid(phoneField);
-                } catch (err) {
-                    const phoneValue = phoneField.value?.trim();
-                    const digitsOnly = phoneValue?.replace(/\D/g, '') || '';
-                    isPhoneValid = digitsOnly.length >= this.validationRules.phone.minDigits;
-                }
-            } else {
-                const phoneValue = phoneField?.value?.trim();
-                const digitsOnly = phoneValue?.replace(/\D/g, '') || '';
-                isPhoneValid = digitsOnly.length >= this.validationRules.phone.minDigits;
-            }
-            if (!isPhoneValid) {
-                invalidFields.push('phone number');
-            }
-            
-            // Check consent
-            const consentCheckbox = document.getElementById('consent-checkbox');
-            if (!consentCheckbox?.checked) {
-                invalidFields.push('consent');
-            }
-            
-            return invalidFields;
-        }
-
         handleSuccessfulSubmission() {
             // Scroll to the next section (company setup)
             const nextSection = document.getElementById('company-setup-section');
@@ -1172,9 +1106,6 @@
             
             // Initialize edit button functionality
             initializeEditButtons();
-            
-            // Initialize back to top button
-            initializeBackToTopButton();
             
             calculateCosts();
             
@@ -1371,7 +1302,7 @@
     let modalCategoryRequestId = 0;
     let activitySearchRequestId = 0;
     let hasInitializedMobileAutoScroll = false;
-    let hasInitializedBackToTopButton = false;
+    
 
     window.selectedActivities = window.selectedActivities || [];
 
@@ -4658,26 +4589,7 @@
         try {
             const isValid = validateContactForm();
             const contactSection = document.querySelector('.contact-form-section');
-            const submitBtn = document.getElementById('submitBtn');
             const progressIndicator = document.getElementById('contact-progress');
-            const progressIcon = document.getElementById('progress-icon');
-            
-            // Update button text based on whether form fields have values
-            if (submitBtn && isValid) {
-                const nameField = document.getElementById('full-name');
-                const emailField = document.getElementById('email');
-                const phoneField = document.getElementById('phone');
-                const submitBtnSpan = submitBtn.querySelector('span');
-                
-                if (submitBtnSpan) {
-                    const hasValues = nameField?.value?.trim() && emailField?.value?.trim() && phoneField?.value?.trim();
-                    if (hasValues && !isContactFormCompleted) {
-                        submitBtnSpan.textContent = 'Calculate';
-                    } else if (!isContactFormCompleted) {
-                        submitBtnSpan.textContent = 'Calculate';
-                    }
-                }
-            }
             
             if (isValid && !isContactFormCompleted) {
                 // Form is now valid - reveal sections with elegant animation
@@ -4726,15 +4638,6 @@
                     contactSection.classList.add('completed');
                 }
                 
-                // Update submit button
-                if (submitBtn) {
-                    submitBtn.classList.add('validated');
-                    const submitBtnSpan = submitBtn.querySelector('span');
-                    if (submitBtnSpan) {
-                        submitBtnSpan.textContent = 'Continue to Calculator';
-                    }
-                }
-                
                 // Update progress indicator
                 if (progressIndicator) {
                     progressIndicator.classList.add('completed');
@@ -4780,15 +4683,6 @@
                 // Update contact section styling
                 if (contactSection) {
                     contactSection.classList.remove('completed');
-                }
-                
-                // Update submit button
-                if (submitBtn) {
-                    submitBtn.classList.remove('validated');
-                    const submitBtnSpan = submitBtn.querySelector('span');
-                    if (submitBtnSpan) {
-                        submitBtnSpan.textContent = 'Next';
-                    }
                 }
                 
                 // Update progress indicator
@@ -7750,91 +7644,6 @@
                 }
             });
         });
-    }
-
-    function initializeBackToTopButton() {
-        if (hasInitializedBackToTopButton) return;
-        try {
-            const backToTopBtn = document.getElementById('back-to-top-btn');
-            const progressRing = document.querySelector('.progress-ring-progress');
-            const contactSection = document.getElementById('personal-details-section');
-            
-            if (!backToTopBtn || !progressRing || !contactSection) {
-                return;
-            }
-            
-            // Calculate the circumference of the progress ring
-            const radius = 28; // From CSS - updated for border positioning
-            const circumference = 2 * Math.PI * radius;
-            
-            // Set up initial state
-            progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
-            progressRing.style.strokeDashoffset = circumference;
-        
-        // Function to update progress based on scroll
-        const updateProgress = () => {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const calculatorSection = document.getElementById('MFZ-NewCostCalForm');
-            
-            if (!calculatorSection) return;
-            
-            // Get calculator section boundaries
-            const sectionRect = calculatorSection.getBoundingClientRect();
-            const sectionTop = sectionRect.top + scrollTop;
-            const sectionBottom = sectionTop + sectionRect.height;
-            
-            // Check if user is within the calculator section
-            const isInSection = scrollTop >= sectionTop - 100 && scrollTop < sectionBottom - 100;
-            const isMobile = window.innerWidth <= 768;
-            
-            if (isInSection && isMobile) {
-                // Calculate progress within the calculator section
-                const sectionProgress = Math.min(Math.max((scrollTop - sectionTop) / (sectionRect.height * 0.8), 0), 1);
-                
-                // Update the progress ring
-                const offset = circumference - (sectionProgress * circumference);
-                progressRing.style.strokeDashoffset = offset;
-                
-                // Show button
-                backToTopBtn.classList.add('visible');
-            } else {
-                // Hide button when outside section or on desktop
-                backToTopBtn.classList.remove('visible');
-            }
-        };
-        
-        // Function to scroll to top of calculator section
-        const scrollToSectionTop = (e) => {
-            e.preventDefault();
-            
-            const calculatorSection = document.getElementById('MFZ-NewCostCalForm');
-            if (!calculatorSection) return;
-            
-            const headerOffset = 80;
-            const elementPosition = calculatorSection.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: 'smooth'
-            });
-        };
-        
-        // Event listeners
-        window.addEventListener('scroll', updateProgress, { passive: true });
-        window.addEventListener('resize', updateProgress, { passive: true });
-        backToTopBtn.addEventListener('click', scrollToSectionTop);
-        hasInitializedBackToTopButton = true;
-        
-        // Initial progress update
-        updateProgress();
-        
-        // Force initial check after a short delay
-        setTimeout(updateProgress, 100);
-        
-        } catch (error) {
-            logNonProdError('initializeBackToTopButton failed', error);
-        }
     }
 
     // Helper function to trigger form validation after programmatic field filling

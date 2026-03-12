@@ -2765,15 +2765,6 @@ backdrop-filter: blur(24px);
     position: relative;
 }
 
-/* Enhanced submit button states */
-.submit-button.validated {
-    background: linear-gradient(100deg, #61A60E 7.85%, #004A98 94.23%);
-}
-
-.submit-button.validated:hover {
-    background: linear-gradient(135deg, #004A98 0%, #61A60E 100%);
-}
-
 /* Progress indicator enhancement */
 .contact-form-progress {
     margin-top: 16px;
@@ -2907,88 +2898,6 @@ backdrop-filter: blur(24px);
         font-size: 11px;
         line-height: 1.5;
     }
-}
-
-/* Summary pricing blur/hidden state */
-.summary-pricing-hidden .summary-price,
-.summary-pricing-hidden .grand-total-amount,
-.summary-pricing-hidden #mobile-grand-total-price,
-.summary-pricing-hidden .summary-value {
-    filter: blur(8px);
-    transition: filter 0.5s ease;
-    -webkit-user-select: none;
-    user-select: none;
-    pointer-events: none;
-}
-
-.summary-pricing-hidden .summary-price::after,
-.summary-pricing-hidden .grand-total-amount::after,
-.summary-pricing-hidden #mobile-grand-total-price::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    background: rgba(249, 250, 251, 0.8);
-    z-index: 1;
-    pointer-events: none;
-}
-
-/* Pricing reveal overlay */
-.pricing-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(249, 250, 251, 0.95);
-    -webkit-backdrop-filter: blur(4px);
-    backdrop-filter: blur(4px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    z-index: 10;
-    transition: opacity 0.5s ease;
-}
-
-.pricing-overlay-content {
-    text-align: center;
-    padding: 20px;
-}
-
-.pricing-overlay h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 8px !important;
-    margin-top: 0 !important;
-}
-
-.pricing-overlay p {
-    font-size: 14px;
-    color: #6B7280;
-    margin: 0;
-    line-height: 1.4;
-}
-
-/* Hide overlay when pricing is revealed */
-.summary-pricing-revealed .pricing-overlay {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.summary-pricing-revealed .summary-price,
-.summary-pricing-revealed .grand-total-amount,
-.summary-pricing-revealed #mobile-grand-total-price,
-.summary-pricing-revealed .summary-value {
-    filter: none;
-    -webkit-user-select: text;
-    user-select: text;
-    pointer-events: auto;
 }
 
 /* Position relative for overlay positioning */
@@ -3166,19 +3075,6 @@ form[data-name] .calc-error-message,
 
 .calc-error-message:not(:empty) {
     animation: errorFadeIn 0.3s ease-out !important;
-}
-
-/* Validation states for submit button */
-.submit-button.validated {
-    background: #fff !important;
-    color: #75B477 !important;
-    border-color: #75B477 !important;
-}
-
-.submit-button.validated:hover {
-    background: #15803d !important;
-    transform: translateY(-1px) !important;
-    color: #fff !important;
 }
 
 /* Loading state for buttons */
@@ -3438,82 +3334,6 @@ form[data-name] .calc-error-message,
     background-color: #fff !important;
 }
 
-/* Back to Top Button with Progress (Mobile Only) */
-.back-to-top-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.98);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(20px) scale(0.8);
-    pointer-events: none;
-    padding: 2px;
-}
-
-.back-to-top-button.visible {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(247, 191, 179, 0.2);
-}
-
-.back-to-top-button:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16);
-    background: rgba(255, 255, 255, 1);
-}
-
-.back-to-top-button:active {
-    transform: translateY(0) scale(0.95);
-}
-
-.progress-ring {
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    width: 64px;
-    height: 64px;
-    transform: rotate(-90deg);
-    z-index: 1;
-}
-
-.progress-ring-circle {
-    stroke: #F7BFB3;
-    stroke-width: 4;
-    opacity: 0.4;
-}
-
-.progress-ring-progress {
-    stroke-dasharray: 175.93; /* Circumference: 2 * π * 28 */
-    stroke-dashoffset: 175.93;
-    transition: stroke-dashoffset 0.2s ease;
-    filter: drop-shadow(0 0 2px rgba(235, 95, 64, 0.3));
-}
-
-/* Hide on desktop */
-@media (min-width: 769px) {
-    .back-to-top-button {
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-    }
-}
-
 /* Sticky buttons/navbar hiding animation */
 .sticky-buttons.hidden,
 .navbar1_container-3.mobile-nav.hidden {
@@ -3526,19 +3346,6 @@ form[data-name] .calc-error-message,
 .sticky-buttons,
 .navbar1_container-3.mobile-nav {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Mobile specific adjustments */
-@media (max-width: 768px) {
-    .back-to-top-button {
-        bottom: 105px;
-    }
-    
-    .back-to-top-button.visible {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-    }
 }
 
 #investor-dependent-disclaimer {

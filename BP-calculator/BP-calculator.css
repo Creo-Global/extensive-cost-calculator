@@ -3781,3 +3781,100 @@ p#addons-modal-subtitle {
 .quantity-btn {
   position: relative;
 }
+
+
+
+
+
+
+/* For CTA color update to blue  added in - 12-03-2026*/
+
+.modal-footer{
+    .modal-continue-btn,
+    .modal-continue-btn{
+        background-color: #0171E3;
+        border-color: #0171E3;
+        color: #fff;
+        &:hover{
+            background-color: #3498FF;
+        }
+    }
+}
+.sec-cc-v2 .cc-form{
+    .select-btn.selected,
+    .pill-option.selected{
+        background-color: rgba(1, 113, 227, 1);
+
+    }
+    .modal-search-icon{
+        top: 50%;
+        transform: translateY(-90%);
+    }
+    .visa-toggle-switch input:checked + .visa-toggle-slider {
+        background: #0171E3;
+    }
+    .visa-toggle-switch input:checked + .visa-toggle-slider:before {
+        background: transparent;
+    }
+    .visa-toggle-label{
+        left: 2px;
+        top: -7px;
+    }
+    .service-pill.selected{
+        background-color: rgba(1, 113, 227, 1);
+        color: #fff;
+    }
+    .service-pill:hover {
+        color: #ffffff;
+        background: #3498FF;
+    }
+    .addon-service-toggle-label.selected{
+        color: #0171E3;
+    }
+    .addon-service-toggle.checked{
+        background-color: #0171E3;
+    }
+    .addon-service-toggle-slider{
+        background: linear-gradient(0deg, rgba(53, 98, 141, 0.20) 0%, rgba(53, 98, 141, 0.20) 100%), linear-gradient(180deg, #0171e366 0%, rgba(252, 255, 253, 0.20) 93.45%);
+    }
+    .addon-service-toggle.checked .addon-service-toggle-slider{
+        box-shadow: none;
+    }
+    #summary-package-type.summary-value,
+    .summary-total .summary-label,
+    .summary-price,
+    .grand-total-amount {
+        color: #0171E3;
+    }
+
+    .share-btn svg path{
+        stroke: #0171E3;
+    }
+    .summary-pricing-revealed .get-call-btn{
+        background-color: #0171E3;
+        border-color: #0171E3;
+        color: #fff;
+        &:hover{
+            background-color: #3498FF;
+            border-color: #3498FF;
+            color: #fff;
+        }
+    }
+    #addons-summary-section.expanded .summary-content {
+        display: flex;
+    }
+}
+.activity-modal-content{
+    .addon-service-toggle-label.selected{
+        color: #0171E3;
+    }
+    .addon-service-toggle.checked{
+        background-color: #0171E3;
+    }
+    .addon-service-toggle-slider{
+        background: linear-gradient(0deg, rgba(53, 98, 141, 0.20) 0%, rgba(53, 98, 141, 0.20) 100%), linear-gradient(180deg, #0171e366 0%, rgba(252, 255, 253, 0.20) 93.45%);
+    }
+    .addon-service-toggle.checked .addon-service-toggle-slider{
+        box-shadow: none;
+    }
+}

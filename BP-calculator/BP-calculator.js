@@ -30,6 +30,16 @@
     };
 
     let hasInitializedCalculator = false;
+    const paymentIntegration = window.BPCalculatorPayment || null;
+    let isPaymentSubmissionInProgress = false;
+    let paymentHealthRequestPromise = null;
+    let paymentHealthState = {
+        status: 'idle',
+        isHealthy: null,
+        message: '',
+        checkedAt: 0
+    };
+    let currentPaymentOrderId = '';
 
     function isProductionEnvironment() {
         const host = window.location.hostname;
@@ -332,8 +342,11 @@
                 },
                 phone: {
                     required: true,
-                    minDigits: 6,
+                    minDigits: 8,
                     maxDigits: 15
+                },
+                country: {
+                    required: true
                 },
                 consent: {
                     required: true
@@ -357,10 +370,14 @@
                 },
                 phone: {
                     required: 'Phone number is required',
-                    invalid: 'Please enter a valid phone number'
+                    invalid: 'Please enter a valid phone number',
+                    validating: 'Please wait while we validate your phone number'
+                },
+                country: {
+                    required: 'Current country of residence is required'
                 },
                 consent: {
-                    required: 'Please accept the terms and privacy policy to continue'
+                    required: 'You must agree to the terms and privacy policy'
                 }
             };
         }
@@ -405,6 +422,7 @@
             window.validatePhoneField = () => this.validateField('phone');
             window.validateNameField = () => this.validateField('full-name');
             window.validateEmailField = () => this.validateField('email');
+            window.validateCountryField = () => this.validateField('Country-of-Residence');
             
             // Handle successful contact form submission globally
             window.handleContactFormSubmit = () => this.handleSuccessfulSubmission();
@@ -475,6 +493,17 @@
 
                 emailField.addEventListener('blur', () => {
                     this.validateField('email');
+                });
+            }
+
+            const countryField = document.getElementById('Country-of-Residence');
+            if (countryField) {
+                countryField.addEventListener('change', () => {
+                    this.clearFieldError('Country-of-Residence');
+                });
+
+                countryField.addEventListener('blur', () => {
+                    this.validateField('Country-of-Residence');
                 });
             }
 
@@ -574,6 +603,8 @@
                     return this.validateEmail(field, value);
                 case 'phone':
                     return this.validatePhone(field, value);
+                case 'country':
+                    return this.validateCountry(field, value);
                 default:
                     return true;
             }
@@ -583,8 +614,49 @@
             if (fieldId === 'full-name') return 'name';
             if (fieldId === 'email') return 'email';
             if (fieldId === 'phone') return 'phone';
+            if (fieldId === 'Country-of-Residence') return 'country';
             if (fieldId === 'consent-checkbox') return 'consent';
             return 'text';
+        }
+
+        getErrorElementId(fieldId) {
+            if (fieldId === 'Country-of-Residence') return 'calc-error-message';
+            if (fieldId === 'consent-checkbox') return 'calc-consent-error';
+            return `${this.errorPrefix}${fieldId}-error`;
+        }
+
+        getPhoneValidationMeta(field) {
+            const digitsOnly = String(field?.value || '').replace(/\D/g, '');
+            let validationState = 'idle';
+            let message = '';
+
+            if (this.useMFZPhone && window.MFZPhone && field) {
+                try {
+                    const instance = window.MFZPhone.getInstance(field);
+                    if (window.MFZPhone.isValid(field)) {
+                        validationState = 'valid';
+                    } else if (instance?.validationState) {
+                        validationState = instance.validationState;
+                    }
+
+                    message =
+                        instance?.validationMessage ||
+                        instance?.errorMessage ||
+                        instance?.lastError ||
+                        '';
+                } catch (err) {
+                    validationState = digitsOnly.length >= this.validationRules.phone.minDigits ? 'valid' : 'idle';
+                }
+            } else if (digitsOnly.length >= this.validationRules.phone.minDigits &&
+                       digitsOnly.length <= this.validationRules.phone.maxDigits) {
+                validationState = 'valid';
+            }
+
+            return {
+                digitsOnly,
+                validationState,
+                message
+            };
         }
         
         validateConsent(field) {
@@ -644,47 +716,48 @@
             return true;
         }
 
+        validateCountry(field, value) {
+            if (!value) {
+                this.showFieldError(field.id, 'country', 'required');
+                return false;
+            }
+
+            return true;
+        }
+
         validatePhone(field, value) {
             if (!value) {
                 this.showFieldError(field.id, 'phone', 'required');
                 return false;
             }
 
-            // Use MFZPhone validation if available
-            if (this.useMFZPhone && window.MFZPhone) {
-                const isValid = window.MFZPhone.isValid(field);
-                const instance = window.MFZPhone.getInstance(field);
-                
-                if (!isValid) {
-                    // MFZPhone already shows visual feedback via mfz-phone.css
-                    // Check validation state to determine if we should block submission
-                    if (instance) {
-                        if (instance.validationState === 'validating') {
-                            // Still validating - don't block yet but return false
-                            return false;
-                        }
-                        if (instance.validationState === 'invalid') {
-                            // Invalid state - MFZPhone already shows error
-                            return false;
-                        }
-                    }
-                    // Fall through to show our error if MFZPhone hasn't shown one
-                    this.showFieldError(field.id, 'phone', 'invalid');
-                    return false;
-                }
-                return true;
+            const phoneMeta = this.getPhoneValidationMeta(field);
+            let errorMessage = '';
+
+            if (paymentIntegration && typeof paymentIntegration.validateContactState === 'function') {
+                const validation = paymentIntegration.validateContactState({
+                    fullName: 'Validated User',
+                    email: 'validated.user@example.com',
+                    phone: value,
+                    phoneValidationStatus: phoneMeta.validationState,
+                    phoneValidationMessage: phoneMeta.message,
+                    country: 'AE',
+                    consentChecked: true,
+                    countryRequired: false,
+                    countryVisible: false
+                });
+                errorMessage = validation.errors.phone || '';
+            } else if (phoneMeta.digitsOnly.length < this.validationRules.phone.minDigits ||
+                       phoneMeta.digitsOnly.length > this.validationRules.phone.maxDigits) {
+                errorMessage = this.errorMessages.phone.invalid;
+            } else if (phoneMeta.validationState === 'validating') {
+                errorMessage = this.errorMessages.phone.validating;
+            } else if (phoneMeta.validationState === 'invalid') {
+                errorMessage = phoneMeta.message || this.errorMessages.phone.invalid;
             }
 
-            // Fallback validation (basic digit check when MFZPhone not available)
-            const digitsOnly = value.replace(/\D/g, '');
-            
-            if (digitsOnly.length < this.validationRules.phone.minDigits) {
-                this.showFieldError(field.id, 'phone', 'invalid');
-                return false;
-            }
-
-            if (digitsOnly.length > this.validationRules.phone.maxDigits) {
-                this.showFieldError(field.id, 'phone', 'invalid');
+            if (errorMessage) {
+                this.displayError(field.id, errorMessage);
                 return false;
             }
 
@@ -698,7 +771,7 @@
 
         displayError(fieldId, message) {
             const field = document.getElementById(fieldId);
-            const errorId = `${this.errorPrefix}${fieldId}-error`;
+            const errorId = this.getErrorElementId(fieldId);
             const errorElement = document.getElementById(errorId);
 
             if (field) {
@@ -741,7 +814,7 @@
 
         clearFieldError(fieldId) {
             const field = document.getElementById(fieldId);
-            const errorId = `${this.errorPrefix}${fieldId}-error`;
+            const errorId = this.getErrorElementId(fieldId);
             const errorElement = document.getElementById(errorId);
 
             if (field) {
@@ -777,7 +850,7 @@
         validateContactForm() {
             this.clearAllErrors();
             
-            const fields = ['full-name', 'email', 'phone', 'consent-checkbox'];
+            const fields = ['full-name', 'email', 'phone', 'Country-of-Residence', 'consent-checkbox'];
             let isValid = true;
 
             fields.forEach(fieldId => {
@@ -794,36 +867,47 @@
             const fullName = document.getElementById('full-name')?.value?.trim();
             const email = document.getElementById('email')?.value?.trim();
             const phoneField = document.getElementById('phone');
+            const country = document.getElementById('Country-of-Residence')?.value?.trim();
             const consentCheckbox = document.getElementById('consent-checkbox');
             
             // Name validation
-            const isNameValid = fullName && fullName.length >= 2 && this.validationRules.name.pattern.test(fullName);
+            const isNameValid = !paymentIntegration || typeof paymentIntegration.validateNameValue !== 'function'
+                ? Boolean(fullName && fullName.length >= 2 && this.validationRules.name.pattern.test(fullName))
+                : !paymentIntegration.validateNameValue(fullName || '');
             
             // Email validation
-            const isEmailValid = email && this.validationRules.email.pattern.test(email);
+            const isEmailValid = !paymentIntegration || typeof paymentIntegration.validateEmailValue !== 'function'
+                ? Boolean(email && this.validationRules.email.pattern.test(email))
+                : !paymentIntegration.validateEmailValue(email || '');
             
             // Consent validation
             const isConsentValid = consentCheckbox?.checked === true;
+            const isCountryValid = Boolean(country);
             
             // Phone validation using MFZPhone if available
+            const phoneMeta = this.getPhoneValidationMeta(phoneField);
             let isPhoneValid = false;
-            if (phoneField && this.useMFZPhone && window.MFZPhone) {
-                try {
-                    isPhoneValid = window.MFZPhone.isValid(phoneField);
-                } catch (err) {
-                    const phoneValue = phoneField.value?.trim();
-                    const digitsOnly = phoneValue?.replace(/\D/g, '') || '';
-                    isPhoneValid = digitsOnly.length >= this.validationRules.phone.minDigits && 
-                                   digitsOnly.length <= this.validationRules.phone.maxDigits;
-                }
+            if (paymentIntegration && typeof paymentIntegration.validateContactState === 'function') {
+                const validation = paymentIntegration.validateContactState({
+                    fullName: fullName || 'Validated User',
+                    email: email || 'validated.user@example.com',
+                    phone: phoneField?.value?.trim() || '',
+                    phoneValidationStatus: phoneMeta.validationState,
+                    phoneValidationMessage: phoneMeta.message,
+                    country: country || 'AE',
+                    consentChecked: true,
+                    countryRequired: false,
+                    countryVisible: false
+                });
+                isPhoneValid = !validation.errors.phone;
             } else {
-                const phoneValue = phoneField?.value?.trim();
-                const digitsOnly = phoneValue?.replace(/\D/g, '') || '';
-                isPhoneValid = digitsOnly.length >= this.validationRules.phone.minDigits && 
-                               digitsOnly.length <= this.validationRules.phone.maxDigits;
+                isPhoneValid = phoneMeta.digitsOnly.length >= this.validationRules.phone.minDigits &&
+                               phoneMeta.digitsOnly.length <= this.validationRules.phone.maxDigits &&
+                               phoneMeta.validationState !== 'validating' &&
+                               phoneMeta.validationState !== 'invalid';
             }
             
-            return isNameValid && isEmailValid && isPhoneValid && isConsentValid;
+            return isNameValid && isEmailValid && isPhoneValid && isCountryValid && isConsentValid;
         }
 
         handleFormSubmit(e) {
@@ -1115,6 +1199,9 @@
             
             // Initialize Pay For License button
             initializePayForLicense();
+            initializePaymentStatusModal();
+            handlePaymentCallbackFromUrl();
+            checkPaymentHealth();
             
             // Initialize pricing visibility
             initializePricingVisibility();
@@ -3606,6 +3693,7 @@
             
             // Always update the grand total (including mobile)
             updateGrandTotal(totalCost);
+            updatePaymentButtonsAvailability();
 
             if (typeof window.updateMobileSummaryFooterGradient === 'function') {
                 window.updateMobileSummaryFooterGradient();
@@ -3620,6 +3708,7 @@
         } catch (error) {
             logNonProdError('calculateCosts failed', error);
             updateGrandTotal(0);
+            updatePaymentButtonsAvailability();
         }
     }
 
@@ -3772,6 +3861,768 @@
         });
     }
 
+    function getPaymentConfig() {
+        return paymentIntegration?.PAYMENT_CONFIG || null;
+    }
+
+    function collectSubmissionMetadata() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+        const utmParameters = {};
+
+        utmKeys.forEach((key) => {
+            const value = urlParams.get(key);
+            if (value) {
+                utmParameters[key] = value;
+            }
+        });
+
+        return {
+            utm_source: utmParameters.utm_source || '',
+            utm_medium: utmParameters.utm_medium || '',
+            utm_campaign: utmParameters.utm_campaign || '',
+            utm_term: utmParameters.utm_term || '',
+            utm_content: utmParameters.utm_content || '',
+            page_url: window.location.href,
+            page_referrer: document.referrer || '',
+            browser_info: `${navigator.platform || ''} - ${navigator.language || ''}`.trim(),
+            screen_resolution: `${window.screen?.width || 0}x${window.screen?.height || 0}`,
+            submission_time: new Date().toLocaleString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZoneName: 'short',
+            }),
+        };
+    }
+
+    function getFormattedPhoneValue() {
+        const phoneField = document.getElementById('phone');
+        let phoneValue = phoneField?.value?.trim() || '';
+
+        if (window.MFZPhone && formValidator && formValidator.useMFZPhone && phoneField) {
+            try {
+                const formattedPhone = window.MFZPhone.getFormattedNumber(phoneField);
+                if (formattedPhone) {
+                    phoneValue = formattedPhone;
+                }
+            } catch (err) {
+                logNonProdError('getFormattedPhoneValue failed', err);
+            }
+        }
+
+        return phoneValue;
+    }
+
+    function getPhoneValidationStateForPayment() {
+        const phoneField = document.getElementById('phone');
+        if (!phoneField) {
+            return { phoneValidationStatus: 'idle', phoneValidationMessage: '' };
+        }
+
+        if (formValidator && typeof formValidator.getPhoneValidationMeta === 'function') {
+            const phoneMeta = formValidator.getPhoneValidationMeta(phoneField);
+            return {
+                phoneValidationStatus: phoneMeta.validationState,
+                phoneValidationMessage: phoneMeta.message || '',
+            };
+        }
+
+        const digitsOnly = String(phoneField.value || '').replace(/\D/g, '');
+        return {
+            phoneValidationStatus: digitsOnly.length >= 8 ? 'valid' : 'idle',
+            phoneValidationMessage: '',
+        };
+    }
+
+    function getContactFormState() {
+        const phoneState = getPhoneValidationStateForPayment();
+        return {
+            fullName: document.getElementById('full-name')?.value?.trim() || '',
+            email: document.getElementById('email')?.value?.trim() || '',
+            phone: getFormattedPhoneValue(),
+            country: document.getElementById('Country-of-Residence')?.value?.trim() || '',
+            consentChecked: document.getElementById('consent-checkbox')?.checked === true,
+            phoneValidationStatus: phoneState.phoneValidationStatus,
+            phoneValidationMessage: phoneState.phoneValidationMessage,
+            countryRequired: true,
+            countryVisible: true,
+        };
+    }
+
+    function formatAedAmount(value) {
+        return `AED ${Number(value || 0).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}`;
+    }
+
+    function getSelectedActivitiesText() {
+        return window.selectedActivities && window.selectedActivities.length > 0
+            ? window.selectedActivities
+                .map(activity => activity['Activity Name'] || activity.Name || activity.Description || '')
+                .filter(Boolean)
+                .join(', ')
+            : '';
+    }
+
+    function getSelectedAddonsText() {
+        const selectedAddons = [];
+        document.querySelectorAll('.service-checkbox:checked').forEach((checkbox) => {
+            selectedAddons.push(checkbox.value);
+        });
+
+        return selectedAddons.join(',');
+    }
+
+    function getPaymentButtons() {
+        return [
+            document.getElementById('pay-for-license-btn'),
+            document.getElementById('summary-payment-submit-btn'),
+            document.getElementById('mobile-payment-submit-btn'),
+        ].filter(Boolean);
+    }
+
+    function getPaymentMessageElements() {
+        return [
+            document.getElementById('summary-payment-message'),
+            document.getElementById('mobile-payment-message'),
+        ].filter(Boolean);
+    }
+
+    function clearPaymentMessages() {
+        getPaymentMessageElements().forEach((element) => {
+            element.hidden = true;
+            element.textContent = '';
+            element.classList.remove('is-success');
+        });
+    }
+
+    function showPaymentMessage(message, type = 'error') {
+        getPaymentMessageElements().forEach((element) => {
+            element.textContent = message;
+            element.hidden = !message;
+            element.classList.toggle('is-success', type === 'success');
+        });
+    }
+
+    function setPaymentButtonsLoading(isLoading, label) {
+        getPaymentButtons().forEach((button) => {
+            const labelElement = button.querySelector('span');
+            if (!button.dataset.originalLabel && labelElement) {
+                button.dataset.originalLabel = labelElement.textContent;
+            }
+
+            if (labelElement) {
+                if (isLoading && label) {
+                    labelElement.textContent = label;
+                } else if (!isLoading && button.dataset.originalLabel) {
+                    labelElement.textContent = button.dataset.originalLabel;
+                }
+            }
+
+            if (isLoading) {
+                button.disabled = true;
+            }
+        });
+    }
+
+    function renderPaymentSummary(orderId) {
+        const config = getPaymentConfig();
+        if (!config || !paymentIntegration || typeof paymentIntegration.createSetupFeeSummary !== 'function') {
+            return null;
+        }
+
+        const summary = paymentIntegration.createSetupFeeSummary();
+        currentPaymentOrderId = orderId || currentPaymentOrderId || paymentIntegration.generateOrderId();
+
+        const fields = {
+            'summary-payment-license-fee': formatAedAmount(summary.licenseFee),
+            'summary-payment-innovation-fee': formatAedAmount(summary.innovationFee),
+            'summary-payment-knowledge-fee': formatAedAmount(summary.knowledgeFee),
+            'summary-payment-grand-total': formatAedAmount(summary.total),
+            'summary-payment-payable-amount': formatAedAmount(summary.total),
+            'summary-payment-order-id': currentPaymentOrderId,
+            'mobile-payment-license-fee': formatAedAmount(summary.licenseFee),
+            'mobile-payment-innovation-fee': formatAedAmount(summary.innovationFee),
+            'mobile-payment-knowledge-fee': formatAedAmount(summary.knowledgeFee),
+            'mobile-payment-grand-total': formatAedAmount(summary.total),
+            'mobile-payment-payable-amount': formatAedAmount(summary.total),
+            'mobile-payment-order-id': currentPaymentOrderId,
+        };
+
+        Object.keys(fields).forEach((id) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = fields[id];
+            }
+        });
+
+        return {
+            orderId: currentPaymentOrderId,
+            amount: summary.total,
+            licenseFee: summary.licenseFee,
+            innovationFee: summary.innovationFee,
+            knowledgeFee: summary.knowledgeFee,
+        };
+    }
+
+    function getPaymentGuardState() {
+        const contactState = getContactFormState();
+        const paymentSummary = paymentIntegration?.createSetupFeeSummary?.() || { total: 0 };
+
+        return {
+            fullName: contactState.fullName,
+            email: contactState.email,
+            phone: contactState.phone,
+            country: contactState.country,
+            consentChecked: contactState.consentChecked,
+            phoneValidationStatus: contactState.phoneValidationStatus,
+            phoneValidationMessage: contactState.phoneValidationMessage,
+            countryRequired: true,
+            countryVisible: true,
+            totalVisas: getTotalVisaCount(),
+            amount: paymentSummary.total,
+            isSubmitting: isPaymentSubmissionInProgress,
+            paymentHealth: paymentHealthState.isHealthy,
+            paymentHealthMessage: paymentHealthState.message,
+        };
+    }
+
+    function updatePaymentButtonsAvailability() {
+        const totalVisas = getTotalVisaCount();
+        const disableForVisas = totalVisas > 6;
+        const disableForHealth = paymentHealthState.isHealthy === false;
+
+        getPaymentButtons().forEach((button) => {
+            if (isPaymentSubmissionInProgress) {
+                button.disabled = true;
+                return;
+            }
+
+            button.disabled = disableForVisas || disableForHealth;
+        });
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+        const controller = typeof AbortController === 'function' ? new AbortController() : null;
+        const timeout = controller
+            ? setTimeout(() => controller.abort(), timeoutMs)
+            : null;
+
+        try {
+            const requestOptions = Object.assign({}, options);
+            if (controller) {
+                requestOptions.signal = controller.signal;
+            }
+
+            return await fetch(url, requestOptions);
+        } finally {
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+        }
+    }
+
+    async function checkPaymentHealth({ force = false } = {}) {
+        const config = getPaymentConfig();
+        if (!config) {
+            paymentHealthState = {
+                status: 'error',
+                isHealthy: false,
+                message: 'Payment is temporarily unavailable. Please try again later.',
+                checkedAt: Date.now(),
+            };
+            updatePaymentButtonsAvailability();
+            return paymentHealthState;
+        }
+
+        const isFresh = paymentHealthState.checkedAt && (Date.now() - paymentHealthState.checkedAt) < 30000;
+        if (!force && isFresh && paymentHealthState.isHealthy !== null) {
+            return paymentHealthState;
+        }
+
+        if (!force && paymentHealthRequestPromise) {
+            return paymentHealthRequestPromise;
+        }
+
+        paymentHealthState.status = 'checking';
+        updatePaymentButtonsAvailability();
+
+        paymentHealthRequestPromise = (async () => {
+            try {
+                let response = await fetchWithTimeout(config.healthUrl, {
+                    method: 'GET',
+                    headers: {
+                        Accept: 'application/json',
+                    },
+                }, config.timeouts.healthMs);
+
+                if (!response.ok) {
+                    response = await fetchWithTimeout(config.healthUrl, {
+                        method: 'POST',
+                        headers: {
+                            Accept: 'application/json',
+                        },
+                    }, config.timeouts.healthMs);
+                }
+
+                const result = await response.json();
+                const isHealthy = response.ok && String(result.status || '').toLowerCase() === 'healthy';
+
+                paymentHealthState = {
+                    status: isHealthy ? 'healthy' : 'error',
+                    isHealthy,
+                    message: isHealthy ? '' : 'Payment is temporarily unavailable. Please try again later.',
+                    checkedAt: Date.now(),
+                };
+            } catch (error) {
+                logNonProdError('checkPaymentHealth failed', error);
+                paymentHealthState = {
+                    status: 'error',
+                    isHealthy: false,
+                    message: 'Payment is temporarily unavailable. Please try again later.',
+                    checkedAt: Date.now(),
+                };
+            } finally {
+                paymentHealthRequestPromise = null;
+                updatePaymentButtonsAvailability();
+            }
+
+            return paymentHealthState;
+        })();
+
+        return paymentHealthRequestPromise;
+    }
+
+    function storePaymentSession(orderId, paymentAmount) {
+        if (!paymentIntegration || typeof paymentIntegration.buildPaymentSessionData !== 'function') {
+            return;
+        }
+
+        const contactState = getContactFormState();
+        try {
+            const sessionData = paymentIntegration.buildPaymentSessionData({
+                name: contactState.fullName,
+                email: contactState.email,
+                phone: contactState.phone,
+                country: contactState.country,
+                orderId,
+                paymentAmount,
+                paymentType: paymentIntegration.PAYMENT_CONFIG.paymentType,
+            });
+            sessionStorage.setItem(`payment_session_${orderId}`, JSON.stringify(sessionData));
+            sessionStorage.setItem('latest_payment_order_id', orderId);
+        } catch (error) {
+            logNonProdError('storePaymentSession failed', error);
+        }
+    }
+
+    function restorePaymentSession(orderId) {
+        try {
+            let storedData = orderId ? sessionStorage.getItem(`payment_session_${orderId}`) : '';
+
+            if (!storedData) {
+                const latestOrderId = sessionStorage.getItem('latest_payment_order_id');
+                if (latestOrderId) {
+                    storedData = sessionStorage.getItem(`payment_session_${latestOrderId}`);
+                }
+            }
+
+            return storedData ? JSON.parse(storedData) : null;
+        } catch (error) {
+            logNonProdError('restorePaymentSession failed', error);
+            return null;
+        }
+    }
+
+    function clearPaymentSession(orderId, storedOrderId) {
+        try {
+            if (orderId) {
+                sessionStorage.removeItem(`payment_session_${orderId}`);
+            }
+            if (storedOrderId) {
+                sessionStorage.removeItem(`payment_session_${storedOrderId}`);
+            }
+            sessionStorage.removeItem('latest_payment_order_id');
+        } catch (error) {
+            logNonProdError('clearPaymentSession failed', error);
+        }
+    }
+
+    function getPaymentProcessedKey(dedupeKey) {
+        return `bp_payment_callback_${dedupeKey}`;
+    }
+
+    function wasPaymentCallbackProcessed(dedupeKey) {
+        return Boolean(sessionStorage.getItem(getPaymentProcessedKey(dedupeKey)));
+    }
+
+    function markPaymentCallbackProcessed(dedupeKey) {
+        sessionStorage.setItem(getPaymentProcessedKey(dedupeKey), new Date().toISOString());
+    }
+
+    function submitLifecyclePayload(payload) {
+        const submitFn = typeof window.submitToWebhook === 'function' ? window.submitToWebhook : submitToWebhook;
+        return Promise.resolve(submitFn(payload));
+    }
+
+    function buildPaymentInitiatedPayload(orderId, paymentAmount) {
+        const contactState = getContactFormState();
+        const snapshot = getFormSnapshot();
+        const licenseDuration = document.getElementById('license-duration')?.value || '1';
+
+        return paymentIntegration.buildPaymentLifecyclePayload({
+            actionType: 'payment_initiated',
+            contact: {
+                name: contactState.fullName,
+                email: contactState.email,
+                phone: contactState.phone,
+                country: contactState.country,
+                consent: contactState.consentChecked ? 'Yes' : 'No',
+            },
+            calculator: {
+                officeSpace: paymentIntegration.PAYMENT_CONFIG.defaultOfficeSpace,
+                shareholders: snapshot.shareholdersCount,
+                selectedActivities: getSelectedActivitiesText(),
+                investorVisa: 0,
+                employeeVisa: 0,
+                businessBankAccount: 'No',
+                vipMedicalEid: 'No',
+                totalCost: paymentAmount,
+                licenseCost: paymentIntegration.PAYMENT_CONFIG.licenseAmount,
+                businessActivitiesCost: 0,
+                licenseDuration: licenseDuration,
+                visaCost: 0,
+                knowledgeFee:
+                    paymentIntegration.PAYMENT_CONFIG.knowledgeFee +
+                    paymentIntegration.PAYMENT_CONFIG.innovationFee,
+                investorVisaNeeded: 'No',
+                employeeVisaNeeded: 'No',
+                addons: getSelectedAddonsText(),
+                addonsCost: window.AddonsComponent || 0,
+                changeStatusInsideUAE: document.getElementById('applicants-inside-uae')?.value || '',
+                changeStatusOutsideUAE: document.getElementById('applicants-outside-uae')?.value || '',
+                changeStatusCost: window.ChangeStatusCost || 0,
+            },
+            payment: {
+                orderId,
+                paymentInitiated: 'yes',
+                formStatus: 'payment',
+                paymentType: paymentIntegration.PAYMENT_CONFIG.paymentType,
+                paymentAmount,
+            },
+            form: {
+                formId: document.getElementById('multiStepForm')?.id || 'multiStepForm',
+                formName: 'BP Calculator',
+            },
+            metadata: collectSubmissionMetadata(),
+            poweredBy: 'Webflow',
+        });
+    }
+
+    function buildPaymentResultPayload(parsedResult, restoredSession) {
+        return paymentIntegration.buildPaymentLifecyclePayload({
+            actionType: parsedResult.actionType,
+            contact: {
+                name: restoredSession?.name || parsedResult.billingName,
+                email: restoredSession?.email || parsedResult.billingEmail,
+                phone: restoredSession?.phone || parsedResult.billingTel,
+                country: restoredSession?.country || '',
+                consent: '',
+            },
+            payment: {
+                orderId: parsedResult.orderId,
+                trackingId: parsedResult.trackingId,
+                paymentStatus: parsedResult.status,
+                paymentAmount: restoredSession?.payment_amount || parsedResult.amount,
+                paymentMode: parsedResult.paymentMode,
+                transDate: parsedResult.transDate,
+                bankRefNo: parsedResult.bankRefNo,
+                failureMessage: parsedResult.failureMessage,
+                statusMessage: parsedResult.statusMessage,
+                cardName: parsedResult.cardName,
+                currency: parsedResult.currency,
+                responseCode: parsedResult.responseCode,
+                billingName: parsedResult.billingName,
+                billingEmail: parsedResult.billingEmail,
+                billingTel: parsedResult.billingTel,
+                paymentType: restoredSession?.payment_type || paymentIntegration.PAYMENT_CONFIG.paymentType,
+                formStatus: parsedResult.formStatus,
+            },
+            form: {
+                formId: document.getElementById('multiStepForm')?.id || 'multiStepForm',
+                formName: 'BP Calculator',
+            },
+            metadata: collectSubmissionMetadata(),
+            poweredBy: 'Webflow',
+        });
+    }
+
+    function showPaymentStatusModal(data) {
+        const modal = document.getElementById('payment-status-modal');
+        const badge = document.getElementById('payment-status-badge');
+        const title = document.getElementById('payment-status-title');
+        const description = document.getElementById('payment-status-description');
+        if (!modal || !badge || !title || !description) return;
+
+        const isSuccess = data.status === 'Success';
+        const isCancelled = data.status === 'Cancelled' || data.status === 'Aborted';
+
+        badge.classList.remove('is-failed', 'is-cancelled');
+        if (isSuccess) {
+            badge.textContent = 'Payment Successful';
+            title.textContent = 'Payment Successful!';
+            description.textContent = 'Your transaction has been completed successfully.';
+        } else if (isCancelled) {
+            badge.textContent = 'Payment Cancelled';
+            badge.classList.add('is-cancelled');
+            title.textContent = 'Payment Cancelled';
+            description.textContent = 'Your payment was cancelled. No charges have been made.';
+        } else {
+            badge.textContent = 'Payment Failed';
+            badge.classList.add('is-failed');
+            title.textContent = 'Payment Failed';
+            description.textContent = 'Unfortunately, your transaction could not be completed.';
+        }
+
+        const mappings = {
+            'payment-status-order-id': data.orderId || 'N/A',
+            'payment-status-amount': formatAedAmount(data.amount || 0),
+            'payment-status-tracking-id': data.trackingId || 'N/A',
+            'payment-status-mode': data.paymentMode || 'N/A',
+            'payment-status-date': data.transDate || 'N/A',
+        };
+
+        Object.keys(mappings).forEach((id) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = mappings[id];
+            }
+        });
+
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+        });
+    }
+
+    function closePaymentStatusModal() {
+        const modal = document.getElementById('payment-status-modal');
+        if (!modal) return;
+
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 250);
+    }
+
+    function initializePaymentStatusModal() {
+        const modal = document.getElementById('payment-status-modal');
+        if (!modal || modal.dataset.initialized === 'true') return;
+
+        modal.dataset.initialized = 'true';
+        modal.querySelector('.payment-status-close')?.addEventListener('click', closePaymentStatusModal);
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closePaymentStatusModal();
+            }
+        });
+    }
+
+    async function initiateSecurePayment(orderId, amount) {
+        const config = getPaymentConfig();
+        if (!config || !paymentIntegration || typeof paymentIntegration.buildSecurePaymentRequest !== 'function') {
+            return { success: false };
+        }
+
+        try {
+            const requestData = paymentIntegration.buildSecurePaymentRequest({
+                orderId,
+                amount,
+                fullName: document.getElementById('full-name')?.value?.trim() || '',
+                email: document.getElementById('email')?.value?.trim() || '',
+                phone: getFormattedPhoneValue(),
+                selectedLicense: 'Setup Fee Only (License + Co-working + Knowledge Fee)',
+                businessActivitiesText: getSelectedActivitiesText() || 'N/A',
+                totalVisasText: `Investor: 0, Employee: 0 (Total: 0)`,
+                visaAmount: 0,
+                currentUrl: window.location.href,
+            });
+
+            const response = await fetchWithTimeout(config.initiateUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify(requestData),
+            }, config.timeouts.initiateMs);
+
+            const result = await response.json();
+            if (!response.ok || !result.success || !result.data?.gatewayUrl || !result.data?.encRequest || !result.data?.accessCode) {
+                logNonProdError('Payment initiation failed', result);
+                return { success: false };
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = result.data.gatewayUrl;
+            form.style.display = 'none';
+
+            [
+                { name: 'encRequest', value: result.data.encRequest },
+                { name: 'access_code', value: result.data.accessCode },
+            ].forEach((field) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = field.name;
+                input.value = field.value;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+            return { success: true };
+        } catch (error) {
+            logNonProdError('initiateSecurePayment failed', error);
+            return { success: false };
+        }
+    }
+
+    function scrollToContactSection() {
+        const contactSection = document.getElementById('personal-details-section');
+        if (contactSection) {
+            contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    async function handleSetupFeePayment(event) {
+        if (event?.preventDefault) {
+            event.preventDefault();
+        }
+
+        if (!paymentIntegration || typeof paymentIntegration.evaluatePaymentStepGuard !== 'function') {
+            showPaymentMessage('Payment is temporarily unavailable. Please try again later.');
+            return;
+        }
+
+        clearPaymentMessages();
+        const phoneField = document.getElementById('phone');
+        if (phoneField) {
+            phoneField.dispatchEvent(new Event('blur', { bubbles: true }));
+        }
+        const isFormValid = window.formValidator && typeof window.formValidator.validateContactForm === 'function'
+            ? window.formValidator.validateContactForm()
+            : validateContactForm();
+        const initialGuardState = getPaymentGuardState();
+        initialGuardState.paymentHealth = null;
+        initialGuardState.paymentHealthMessage = '';
+        const initialGuard = paymentIntegration.evaluatePaymentStepGuard(initialGuardState);
+
+        if (!isFormValid || !initialGuard.allowed) {
+            const message = initialGuard.message ||
+                'Please complete your name, email, phone, country of residence and consent before payment.';
+            showPaymentMessage(message);
+            scrollToContactSection();
+            return;
+        }
+
+        const paymentSummary = renderPaymentSummary(paymentIntegration.generateOrderId());
+        const orderId = paymentSummary?.orderId || paymentIntegration.generateOrderId();
+        const amount = paymentSummary?.amount || paymentIntegration.PAYMENT_CONFIG.setupFeeAmount;
+        const contactState = getContactFormState();
+
+        const confirmMessage =
+            `You are about to pay the setup fee only: AED ${amount.toLocaleString()}.\n\n` +
+            `Order ID: ${orderId}\n` +
+            `Name: ${contactState.fullName}\n` +
+            `Email: ${contactState.email}\n` +
+            `Includes: License, CoWorking, Knowledge Fee\n\n` +
+            `Do you want to continue?`;
+
+        if (!window.confirm(confirmMessage)) {
+            return;
+        }
+
+        isPaymentSubmissionInProgress = true;
+        setPaymentButtonsLoading(true, 'Redirecting...');
+        updatePaymentButtonsAvailability();
+
+        const health = await checkPaymentHealth({ force: true });
+        if (!health.isHealthy) {
+            isPaymentSubmissionInProgress = false;
+            setPaymentButtonsLoading(false);
+            updatePaymentButtonsAvailability();
+            showPaymentMessage(health.message || 'Payment is temporarily unavailable. Please try again later.');
+            return;
+        }
+
+        storePaymentSession(orderId, amount);
+
+        const initiatedPayload = buildPaymentInitiatedPayload(orderId, amount);
+        submitLifecyclePayload(initiatedPayload).catch((error) => {
+            logNonProdError('Payment initiated webhook submission failed', error);
+        });
+
+        const paymentResult = await initiateSecurePayment(orderId, amount);
+        if (!paymentResult.success) {
+            isPaymentSubmissionInProgress = false;
+            setPaymentButtonsLoading(false);
+            updatePaymentButtonsAvailability();
+            showPaymentMessage('Payment initiation failed. Please try again or contact support.');
+            return;
+        }
+
+        showPaymentMessage('Redirecting to the secure payment page...', 'success');
+    }
+
+    function handlePaymentCallbackFromUrl() {
+        if (!paymentIntegration || typeof paymentIntegration.parsePaymentCallbackParams !== 'function') {
+            return;
+        }
+
+        const parsedResult = paymentIntegration.parsePaymentCallbackParams(window.location.search);
+        if (!parsedResult.hasPaymentStatus) {
+            return;
+        }
+
+        const restoredSession = restorePaymentSession(parsedResult.orderId);
+        const submissionPayload = buildPaymentResultPayload(parsedResult, restoredSession);
+
+        if (!wasPaymentCallbackProcessed(parsedResult.dedupeKey)) {
+            markPaymentCallbackProcessed(parsedResult.dedupeKey);
+            submitLifecyclePayload(submissionPayload).catch((error) => {
+                logNonProdError('Payment callback webhook submission failed', error);
+            });
+        }
+
+        showPaymentStatusModal({
+            status: parsedResult.status,
+            orderId: parsedResult.orderId,
+            amount: restoredSession?.payment_amount || parsedResult.amount,
+            trackingId: parsedResult.trackingId,
+            paymentMode: parsedResult.paymentMode,
+            transDate: parsedResult.transDate,
+        });
+
+        clearPaymentSession(parsedResult.orderId, restoredSession?.order_id);
+        currentPaymentOrderId = '';
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+    }
+
+    window.checkPaymentHealth = checkPaymentHealth;
+    window.handleSetupFeePayment = handleSetupFeePayment;
+    window.closePaymentStatusModal = closePaymentStatusModal;
+    window.submitToWebhook = submitToWebhook;
+
 
     // NOTE: All phone input validation is now handled by MFZPhone (mfz-phone.js)
     // MFZPhone provides:
@@ -3813,12 +4664,12 @@
             } else {
                 // Basic fallback validation
                 const digitsOnly = phoneValue.replace(/\D/g, '');
-                isValid = digitsOnly.length >= 6 && digitsOnly.length <= 15;
+                isValid = digitsOnly.length >= 8 && digitsOnly.length <= 15;
             }
         } catch (err) {
             // Basic fallback
             const digitsOnly = phoneValue.replace(/\D/g, '');
-            isValid = digitsOnly.length >= 6 && digitsOnly.length <= 15;
+            isValid = digitsOnly.length >= 8 && digitsOnly.length <= 15;
         }
         
         // Note: MFZPhone handles visual feedback via mfz-phone.css
@@ -4085,37 +4936,17 @@
         if (submitBtn.classList.contains('button-loading') || isQuoteSubmissionInProgress) return;
 
                 // Check if contact form is valid before submitting
-                if (!validateContactForm()) {
+                const isContactFormValid = window.formValidator && typeof window.formValidator.validateContactForm === 'function'
+                    ? window.formValidator.validateContactForm()
+                    : validateContactForm();
+
+                if (!isContactFormValid) {
                     // Scroll to contact form and show errors
                     const contactSection = document.getElementById('personal-details-section');
                     if (contactSection) {
                         contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-                    
-                    const fields = [
-                        { id: 'full-name', name: 'Full Name' },
-                        { id: 'email', name: 'Email' },
-                        { id: 'phone', name: 'Phone' }
-                    ];
-                    
-                    fields.forEach(field => {
-                        const element = document.getElementById(field.id);
-                        const errorElement = document.getElementById(`calc-${field.id}-error`);
-                        
-                        if (element && !element.value?.trim()) {
-                            element.classList.add('error');
-                            if (errorElement) {
-                                errorElement.textContent = `${field.name} is required`;
-                                errorElement.style.display = 'block';
-                            }
-                        } else {
-                            element?.classList.remove('error');
-                            if (errorElement) {
-                                errorElement.style.display = 'none';
-                            }
-                        }
-                    });
-                    
+
                     return; // Don't proceed with form submission
                 }
 
@@ -4437,12 +5268,16 @@
     function initializePayForLicense() {
         var payBtn = document.getElementById('pay-for-license-btn');
         var backBtn = document.getElementById('summary-payment-back-btn');
-        if (!payBtn) return;
+        var summarySubmitBtn = document.getElementById('summary-payment-submit-btn');
+        var mobileSubmitBtn = document.getElementById('mobile-payment-submit-btn');
 
-        payBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            openSummaryPaymentView();
-        });
+        if (payBtn && payBtn.dataset.initialized !== 'true') {
+            payBtn.dataset.initialized = 'true';
+            payBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openSummaryPaymentView();
+            });
+        }
 
         if (backBtn) {
             backBtn.addEventListener('click', function (e) {
@@ -4450,55 +5285,40 @@
                 closeSummaryPaymentView();
             });
         }
+
+        [summarySubmitBtn, mobileSubmitBtn].filter(Boolean).forEach(function (button) {
+            if (button.dataset.initialized === 'true') return;
+            button.dataset.initialized = 'true';
+            button.addEventListener('click', handleSetupFeePayment);
+        });
     }
 
     function openSummaryPaymentView() {
         var container = document.querySelector('.sticky-summary-container');
         if (!container) return;
+        clearPaymentMessages();
+        if (paymentIntegration && typeof paymentIntegration.generateOrderId === 'function') {
+            renderPaymentSummary(paymentIntegration.generateOrderId());
+        }
+        container.classList.add('payment-view-active');
+        updatePaymentButtonsAvailability();
 
-        var INNOVATION_FEE = 10;
-        var KNOWLEDGE_FEE = 10;
-
-        var totalEl = document.getElementById('total-cost-display');
-        var totalText = totalEl ? totalEl.textContent : '0';
-        var licenseSubtotal = 0;
-        var cleaned = String(totalText).replace(/AED/gi, '').replace(/,/g, '').trim();
-        var parsed = parseFloat(cleaned);
-        if (!isNaN(parsed)) licenseSubtotal = parsed;
-
-        var paymentGrandTotal = licenseSubtotal + INNOVATION_FEE + KNOWLEDGE_FEE;
-
-        function fmtAed(n) {
-            return 'AED ' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (getTotalVisaCount() > 6) {
+            showPaymentMessage('Pay options are unavailable when total visas exceed 6.');
+            return;
         }
 
-        var el;
-        el = document.getElementById('summary-payment-license-fee');
-        if (el) el.textContent = fmtAed(licenseSubtotal);
-
-        el = document.getElementById('summary-payment-innovation-fee');
-        if (el) el.textContent = fmtAed(INNOVATION_FEE);
-
-        el = document.getElementById('summary-payment-knowledge-fee');
-        if (el) el.textContent = fmtAed(KNOWLEDGE_FEE);
-
-        var grandStr = fmtAed(paymentGrandTotal);
-
-        el = document.getElementById('summary-payment-grand-total');
-        if (el) el.textContent = grandStr;
-
-        el = document.getElementById('summary-payment-payable-amount');
-        if (el) el.textContent = grandStr;
-
-        el = document.getElementById('summary-payment-order-id');
-        if (el) el.textContent = String(Date.now()) + String(Math.floor(Math.random() * 900) + 100);
-
-        container.classList.add('payment-view-active');
+        checkPaymentHealth().then(function (health) {
+            if (container.classList.contains('payment-view-active') && health && health.isHealthy === false) {
+                showPaymentMessage(health.message || 'Payment is temporarily unavailable. Please try again later.');
+            }
+        });
     }
 
     function closeSummaryPaymentView() {
         var container = document.querySelector('.sticky-summary-container');
         if (container) container.classList.remove('payment-view-active');
+        clearPaymentMessages();
     }
 
     window.openSummaryPaymentView = openSummaryPaymentView;
@@ -4511,7 +5331,7 @@
             hideSections();
             
             // Add real-time validation listeners to contact form fields
-            const contactFields = ['full-name', 'phone', 'email'];
+            const contactFields = ['full-name', 'phone', 'email', 'Country-of-Residence'];
             contactFields.forEach(fieldId => {
                 const field = document.getElementById(fieldId);
                 if (field) {
@@ -4545,6 +5365,7 @@
             const fullName = document.getElementById('full-name')?.value?.trim();
             const email = document.getElementById('email')?.value?.trim();
             const phoneField = document.getElementById('phone');
+            const country = document.getElementById('Country-of-Residence')?.value?.trim();
             const consentCheckbox = document.getElementById('consent-checkbox');
             
             // Strict validation - ALL fields must be valid
@@ -4553,24 +5374,31 @@
             
             // Consent validation
             const isConsentValid = consentCheckbox?.checked === true;
+            const isCountryValid = Boolean(country);
             
             // Phone validation using MFZPhone if available
             let isPhoneValid = false;
             if (phoneField && window.MFZPhone && formValidator && formValidator.useMFZPhone) {
                 try {
                     isPhoneValid = window.MFZPhone.isValid(phoneField);
+                    const instance = window.MFZPhone.getInstance(phoneField);
+                    if (instance?.validationState === 'validating') {
+                        isPhoneValid = false;
+                    }
                 } catch (err) {
                     // Fallback to basic validation
                     const phoneValue = phoneField.value?.trim();
-                    isPhoneValid = phoneValue && phoneValue.length >= 6 && phoneValue.length <= 15 && /^[\d\s\+\-\(\)]+$/.test(phoneValue);
+                    const digitsOnly = phoneValue?.replace(/\D/g, '') || '';
+                    isPhoneValid = digitsOnly.length >= 8 && digitsOnly.length <= 15;
                 }
             } else {
                 // Fallback basic validation
                 const phoneValue = phoneField?.value?.trim();
-                isPhoneValid = phoneValue && phoneValue.length >= 6 && phoneValue.length <= 15 && /^[\d\s\+\-\(\)]+$/.test(phoneValue);
+                const digitsOnly = phoneValue?.replace(/\D/g, '') || '';
+                isPhoneValid = digitsOnly.length >= 8 && digitsOnly.length <= 15;
             }
             
-            return isNameValid && isEmailValid && isPhoneValid && isConsentValid;
+            return isNameValid && isEmailValid && isPhoneValid && isCountryValid && isConsentValid;
         } catch (err) {
             return false;
         }

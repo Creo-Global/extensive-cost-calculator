@@ -4195,8 +4195,9 @@
             }
         }
         const email = document.getElementById("email").value;
+        const countryOfResidence = document.getElementById("Country-of-Residence").value;
         const bsaCode = document.getElementById("bsa-code")?.value || "";
-                const licenseType = document.getElementById("license-type")?.value || "fawri";
+        const licenseType = document.getElementById("license-type")?.value || "fawri";
         
         const shareholdersCount = parseInt(document.getElementById("shareholders-range").value) || 0;
         // Prepare complete form data for webhook
@@ -4214,6 +4215,7 @@
             phone: phone,
             email: email,
             bsa_code: bsaCode,
+            country_of_residence: countryOfResidence,
             
             // License information
             license_type: licenseType,

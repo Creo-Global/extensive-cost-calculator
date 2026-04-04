@@ -781,13 +781,82 @@
         </div>
 
         
-        <button class="get-call-btn" type="button">
-            Get Instant Quote
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14"></path>
-                <path d="m12 5 7 7-7 7"></path>
-            </svg>
-        </button>
+        <div class="summary-cta-group">
+          <button class="pay-for-license-btn" type="button" id="pay-for-license-btn">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M2 8.50391H22" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 16.5039H8" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10.5 16.5039H14.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6.44 3.50391H17.55C21.11 3.50391 22 4.38391 22 7.89391V16.1039C22 19.6139 21.11 20.4939 17.56 20.4939H6.44C2.89 20.5039 2 19.6239 2 16.1139V7.89391C2 4.38391 2.89 3.50391 6.44 3.50391Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Pay For License</span>
+          </button>
+          <button class="get-call-btn" type="button">
+              Get Instant Quote
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14"></path>
+                  <path d="m12 5 7 7-7 7"></path>
+              </svg>
+          </button>
+        </div>
+
+        <div class="summary-payment-view" id="summary-payment-view">
+          <div class="summary-payment-header">
+            <button type="button" class="summary-payment-back-btn" id="summary-payment-back-btn" aria-label="Back to estimate">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.0038 19.9181L8.48375 13.3981C7.71375 12.6281 7.71375 11.3681 8.48375 10.5981L15.0038 4.07812" stroke="black" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <h3 class="summary-payment-title">Payment</h3>
+          </div>
+
+          <div class="summary-payment-card">
+            <ul class="summary-payment-fee-list" aria-label="Price breakdown">
+              <li class="summary-payment-fee-row">
+                <span class="summary-payment-fee-label">License Fee</span>
+                <span class="summary-payment-fee-value" id="summary-payment-license-fee">AED 0.00</span>
+              </li>
+              <li class="summary-payment-fee-row">
+                <span class="summary-payment-fee-label">Innovation Fee</span>
+                <span class="summary-payment-fee-value" id="summary-payment-innovation-fee">AED 10.00</span>
+              </li>
+              <li class="summary-payment-fee-row">
+                <span class="summary-payment-fee-label">Knowledge Fee</span>
+                <span class="summary-payment-fee-value" id="summary-payment-knowledge-fee">AED 10.00</span>
+              </li>
+            </ul>
+            <div class="summary-payment-divider" role="presentation"></div>
+            <div class="summary-payment-grand-row">
+              <span class="summary-payment-gt-label">Grand Total</span>
+              <span class="summary-payment-gt-amount" id="summary-payment-grand-total">AED 0.00</span>
+            </div>
+            <p class="summary-payment-order">Order #: <span id="summary-payment-order-id"></span></p>
+            <p class="summary-payment-footnote">*Remaining charges will be billed on a pay-as-you-go basis.</p>
+          </div>
+
+          <div class="summary-payment-section">
+            <h4 class="summary-payment-section-title">Buy Now, Pay Later</h4>
+            <div class="summary-payment-method-row summary-payment-method-row-tall">
+              <span class="summary-payment-method-icon">
+                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/69d089dae5ddef82e22ecc1a_pay-later.webp" alt="Pay Later" />
+              </span>
+              <div class="summary-payment-method-stack">
+                <span class="summary-payment-method-text">Pay with Tamara</span>
+                <span class="summary-payment-method-sub">If its your first order with Tabby, they may verify your ID</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-payment-footer">
+            <p class="summary-payment-payable" id="summary-payment-payable-line">
+              <span id="summary-payment-payable-amount">AED 0.00</span><span class="summary-payment-payable-suffix"> (Total Payable Amount)</span>
+            </p>
+            <button type="button" class="summary-payment-submit" id="summary-payment-submit-btn">
+              <span>Make Payment</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
         
         <!-- Success message positioned in sticky summary -->
         <div id="theFinalSuccessMessage" class="success-message-container d-none">
@@ -1020,6 +1089,3 @@
 <link rel="stylesheet" href="/BP-calculator/BP-calculator.css" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/BP-calculator/BP-calculator.js"></script>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Creo-Global/extensive-cost-calculator@054d40c/BP-calculator/BP-calculator.css" />
-<script src="https://cdn.jsdelivr.net/gh/Creo-Global/extensive-cost-calculator@054d40c/BP-calculator/BP-calculator.js"></script>

@@ -222,6 +222,9 @@
         
         // Desktop/sticky summary success message
         if (getCallBtn) getCallBtn.style.display = 'none';
+        var payLicBtn = document.getElementById('pay-for-license-btn');
+        if (payLicBtn) payLicBtn.style.display = 'none';
+        if (typeof window.closeSummaryPaymentView === 'function') window.closeSummaryPaymentView();
         if (successMessage) {
             const successFirstName = document.getElementById('success-first-name');
             if (successFirstName) {
@@ -1109,6 +1112,9 @@
             
             // Initialize Get a Call buttons
             initializeGetCallButtons();
+            
+            // Initialize Pay For License button
+            initializePayForLicense();
             
             // Initialize pricing visibility
             initializePricingVisibility();
@@ -4427,6 +4433,76 @@
     });
         });
     }
+
+    function initializePayForLicense() {
+        var payBtn = document.getElementById('pay-for-license-btn');
+        var backBtn = document.getElementById('summary-payment-back-btn');
+        if (!payBtn) return;
+
+        payBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            openSummaryPaymentView();
+        });
+
+        if (backBtn) {
+            backBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                closeSummaryPaymentView();
+            });
+        }
+    }
+
+    function openSummaryPaymentView() {
+        var container = document.querySelector('.sticky-summary-container');
+        if (!container) return;
+
+        var INNOVATION_FEE = 10;
+        var KNOWLEDGE_FEE = 10;
+
+        var totalEl = document.getElementById('total-cost-display');
+        var totalText = totalEl ? totalEl.textContent : '0';
+        var licenseSubtotal = 0;
+        var cleaned = String(totalText).replace(/AED/gi, '').replace(/,/g, '').trim();
+        var parsed = parseFloat(cleaned);
+        if (!isNaN(parsed)) licenseSubtotal = parsed;
+
+        var paymentGrandTotal = licenseSubtotal + INNOVATION_FEE + KNOWLEDGE_FEE;
+
+        function fmtAed(n) {
+            return 'AED ' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        var el;
+        el = document.getElementById('summary-payment-license-fee');
+        if (el) el.textContent = fmtAed(licenseSubtotal);
+
+        el = document.getElementById('summary-payment-innovation-fee');
+        if (el) el.textContent = fmtAed(INNOVATION_FEE);
+
+        el = document.getElementById('summary-payment-knowledge-fee');
+        if (el) el.textContent = fmtAed(KNOWLEDGE_FEE);
+
+        var grandStr = fmtAed(paymentGrandTotal);
+
+        el = document.getElementById('summary-payment-grand-total');
+        if (el) el.textContent = grandStr;
+
+        el = document.getElementById('summary-payment-payable-amount');
+        if (el) el.textContent = grandStr;
+
+        el = document.getElementById('summary-payment-order-id');
+        if (el) el.textContent = String(Date.now()) + String(Math.floor(Math.random() * 900) + 100);
+
+        container.classList.add('payment-view-active');
+    }
+
+    function closeSummaryPaymentView() {
+        var container = document.querySelector('.sticky-summary-container');
+        if (container) container.classList.remove('payment-view-active');
+    }
+
+    window.openSummaryPaymentView = openSummaryPaymentView;
+    window.closeSummaryPaymentView = closeSummaryPaymentView;
 
     // Section Hiding/Revealing System
     function initializeSectionLocking() {
@@ -8161,6 +8237,7 @@
 
           function closeSheet() {
             summary.classList.remove('sheet-open');
+            summary.classList.remove('payment-view-active');
             if (overlay) overlay.classList.remove('active');
             document.body.style.overflow = '';
             detachFooterGradientResizeObserver();
@@ -8238,20 +8315,16 @@
             if (!root || !root.classList.contains('mobile-steps-active')) return;
             var btn = e.target.closest && e.target.closest('.sticky-summary-container .get-call-btn');
             if (!btn) return;
+            var summary = self._getStickySummary();
+            var sheetOpen = summary && summary.classList.contains('sheet-open');
+            if (sheetOpen) return;
             e.preventDefault();
             e.stopImmediatePropagation();
-            var summary = self._getStickySummary();
             var total = self._getVisibleModals().length;
-            var sheetOpen = summary && summary.classList.contains('sheet-open');
-            if (sheetOpen) {
-              self._openPaymentStep();
-              return;
-            }
             if (self.currentStep < total) {
               self.nextStep();
               return;
             }
-            /* Last step, collapsed: open estimate sheet first; user taps Pay For License to open payment */
             if (typeof window.openMobileSheet === 'function') {
               window.openMobileSheet();
             }
@@ -8308,82 +8381,14 @@
         };
 
         MobileStepManager.prototype._openPaymentStep = function () {
-          var self = this;
-          if (!self._isMobile()) {
-            self._showCheckout();
-            return;
+          if (typeof window.openSummaryPaymentView === 'function') {
+            window.openSummaryPaymentView();
           }
-          /* Close estimate sheet and clear Learn-More overlay state; otherwise
-             .mobile-payment-detail-from-payment keeps sticky summary visible (higher specificity than payment hide rule). */
-          if (typeof window.closeMobileSheet === 'function') {
-            window.closeMobileSheet();
-          } else {
-            var summaryFallback = self._getStickySummary();
-            if (summaryFallback) {
-              summaryFallback.classList.remove('sheet-open');
-              summaryFallback.style.removeProperty('--summary-footer-gradient-height');
-            }
-            var overlayFb = document.getElementById('bottom-sheet-overlay');
-            if (overlayFb) overlayFb.classList.remove('active');
-          }
-          var formClear = document.getElementById('MFZ-NewCostCalForm');
-          var rootClear = self._getWizardRoot();
-          if (rootClear) rootClear.classList.remove('mobile-payment-detail-from-payment');
-          if (formClear) {
-            var ccClear = formClear.closest('.cc-form');
-            if (ccClear) ccClear.classList.remove('mobile-payment-detail-from-payment');
-          }
-
-          var panel = document.getElementById('mobile-payment-step');
-          if (!panel) return;
-
-          var totalEl = document.getElementById('total-cost-display');
-          var licenseSubtotal = parseAedDisplayText(totalEl ? totalEl.textContent : '0');
-          var innovationFee = MOBILE_PAYMENT_INNOVATION_FEE_AED;
-          var knowledgeFee = MOBILE_PAYMENT_KNOWLEDGE_FEE_AED;
-          var paymentGrandTotal = licenseSubtotal + innovationFee + knowledgeFee;
-
-          var licenseLine = document.getElementById('mobile-payment-license-fee');
-          if (licenseLine) licenseLine.textContent = formatAedPaymentAmount(licenseSubtotal);
-
-          var innEl = document.getElementById('mobile-payment-innovation-fee');
-          if (innEl) innEl.textContent = formatAedPaymentAmount(innovationFee);
-
-          var knEl = document.getElementById('mobile-payment-knowledge-fee');
-          if (knEl) knEl.textContent = formatAedPaymentAmount(knowledgeFee);
-
-          var payGrand = document.getElementById('mobile-payment-grand-total');
-          var grandStr = formatAedPaymentAmount(paymentGrandTotal);
-          if (payGrand) payGrand.textContent = grandStr;
-
-          var payableAmountEl = document.getElementById('mobile-payment-payable-amount');
-          if (payableAmountEl) payableAmountEl.textContent = grandStr;
-
-          var orderEl = document.getElementById('mobile-payment-order-id');
-          if (orderEl) orderEl.textContent = String(Date.now()) + String(Math.floor(Math.random() * 900) + 100);
-
-          panel.classList.add('is-active');
-          panel.removeAttribute('hidden');
-          panel.setAttribute('aria-hidden', 'false');
-
-          var form = document.getElementById('MFZ-NewCostCalForm');
-          var root = self._getWizardRoot();
-          if (root) root.classList.add('mobile-payment-step-active');
-          if (form) {
-            var cc = form.closest('.cc-form');
-            if (cc && cc !== root) cc.classList.add('mobile-payment-step-active');
-          }
-
-          document.body.style.overflow = 'hidden';
         };
 
         MobileStepManager.prototype._closePaymentStep = function () {
-          if (
-            typeof window.isMobileSheetOpen === 'function' &&
-            typeof window.closeMobileSheet === 'function' &&
-            window.isMobileSheetOpen()
-          ) {
-            window.closeMobileSheet();
+          if (typeof window.closeSummaryPaymentView === 'function') {
+            window.closeSummaryPaymentView();
           }
           var panel = document.getElementById('mobile-payment-step');
           if (panel) {
@@ -8456,6 +8461,7 @@
           var summary = this._getStickySummary();
           if (summary) {
             summary.classList.remove('sheet-open');
+            summary.classList.remove('payment-view-active');
             summary.style.removeProperty('--summary-footer-gradient-height');
             var btn = summary.querySelector('.get-call-btn');
             if (btn && this._savedGetCallBtnHTML) {
@@ -8611,20 +8617,15 @@
             '<svg class="get-call-btn-icon-wizard" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
               '<path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>' +
             '</svg>';
-          var cardSvg =
-            '<svg class="get-call-btn-icon-sheet" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-              '<path d="M2 8.50391H22" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>' +
-              '<path d="M6 16.5039H8" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>' +
-              '<path d="M10.5 16.5039H14.5" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>' +
-              '<path d="M6.44 3.50391H17.55C21.11 3.50391 22 4.38391 22 7.89391V16.1039C22 19.6139 21.11 20.4939 17.56 20.4939H6.44C2.89 20.5039 2 19.6239 2 16.1139V7.89391C2 4.38391 2.89 3.50391 6.44 3.50391Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
-            '</svg>';
-          /* Expanded sheet: icon left + "Pay For License" (design). Collapsed bar: label + arrow right. */
           if (sheetOpen) {
-            btn.innerHTML = cardSvg + '<span class="get-call-btn-label">Pay For License</span>';
+            if (this._savedGetCallBtnHTML) {
+              btn.innerHTML = this._savedGetCallBtnHTML;
+            }
+            btn.classList.remove('mobile-wizard-cta');
           } else {
             btn.innerHTML = '<span class="get-call-btn-label">' + collapsedLabel + '</span>' + arrowSvg;
+            btn.classList.add('mobile-wizard-cta');
           }
-          btn.classList.add('mobile-wizard-cta');
         };
       
         /* ── Bootstrap ── */

@@ -826,22 +826,22 @@ align-items: center;
     justify-content: center;
     gap: 8px;
     border-radius: 40px;
-    background: #0171E3;
-    color: #fff;
-    border: 1px solid #0171E3;
+    background: transparent;
+    color: #0171E3;
+    border: 1.5px solid #0171E3;
     padding: 16px 24px !important;
     font-size: 16px;
     font-weight: 600;
     font-family: "Plus Jakarta Sans";
     cursor: pointer;
     transition: all 0.3s;
-    background-color: #0171E3;
+    box-sizing: border-box;
 }
 
 .get-call-btn:hover {
-    background: #3498FF;
+    background: #0171E3;
     color: #fff;
-    border-color: #3498FF;
+    border-color: #0171E3;
 }
 
 .get-call-btn svg {
@@ -3609,7 +3609,7 @@ margin-bottom: 16px;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 220px;
+    height: 290px;
     border-radius: 20px;
     z-index: 0;
     background: linear-gradient(0deg, rgb(187 201 219) 0%, rgba(25, 116, 201, 0.20) 100%), linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(131, 132, 132, 0.20) 93.45%);
@@ -3644,7 +3644,7 @@ h3#addons-modal-title {
     line-height: 1.5;
 }
 body:has(.success-message-container.show) .sticky-summary-container.summary-pricing-revealed:after{
- height: 300px;   
+ height: 350px;   
 }
 
 .activity-card.selected .activity-checkbox .check-icon path {
@@ -3990,23 +3990,18 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
       flex: 0 0 auto;
     }
 
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .summary-cta-group,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .summary-cta-group {
+      flex: 0 0 auto;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px !important;
+    }
+
     .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn,
     .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn {
-      flex: 0 0 auto;
       width: 100% !important;
-      margin-top: 8px !important;
       justify-content: center !important;
-    }
-
-    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn .get-call-btn-icon-sheet,
-    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn .get-call-btn-icon-sheet {
-      flex-shrink: 0;
-      display: block;
-    }
-
-    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn:hover .get-call-btn-icon-sheet,
-    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn:hover .get-call-btn-icon-sheet {
-      transform: none;
     }
 
     /* Overlay when sheet expanded */
@@ -4030,12 +4025,14 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
       gap: 8px;
     }
 
-    /* Expanded sheet CTA: wins over .mobile-wizard-cta (Pay For License + card icon) */
-    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn.mobile-wizard-cta,
-    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn.mobile-wizard-cta {
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn {
       font-size: 15px !important;
       padding: 14px 22px !important;
       justify-content: center !important;
+      background: transparent !important;
+      color: #0171E3 !important;
+      border: 1.5px solid #0171E3 !important;
     }
   
     /* ── All form-modal panels: default off-screen right (hidden steps / pre-class) ── */
@@ -4905,5 +4902,383 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   .b2c-costcalculator.mobile-payment-step-active .sticky-summary-container,
   .cc-form.mobile-payment-step-active .sticky-summary-container {
     display: block !important;
+  }
+}
+
+/* ── Summary CTA button group (Get Instant Quote + Pay For License) ── */
+.summary-cta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.summary-cta-group .get-call-btn {
+  margin: 0;
+}
+
+.pay-for-license-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 40px;
+  background: #0171E3;
+  color: #fff;
+  border: 1.5px solid #0171E3;
+  padding: 14px 24px !important;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+
+.pay-for-license-btn:hover {
+  background: #3498FF;
+  color: #fff;
+  border-color: #3498FF;
+}
+
+.pay-for-license-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.pay-for-license-btn:hover svg {
+  transform: translateX(2px);
+}
+
+/* ── Summary Payment View ── */
+.summary-payment-view {
+  display: none;
+}
+
+.sticky-summary-container.payment-view-active .summary-payment-view {
+  display: block;
+}
+
+.sticky-summary-container.payment-view-active .summary-header,
+.sticky-summary-container.payment-view-active .simplified-summary,
+.sticky-summary-container.payment-view-active .detailed-summary,
+.sticky-summary-container.payment-view-active .grand-total-container,
+.sticky-summary-container.payment-view-active .summary-cta-group {
+  display: none !important;
+}
+
+.sticky-summary-container.payment-view-active {
+  overflow: visible !important;
+}
+
+.sticky-summary-container.payment-view-active::after {
+  display: none !important;
+}
+
+.summary-payment-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.summary-payment-back-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.summary-payment-back-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.summary-payment-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.summary-payment-card {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.summary-payment-fee-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.summary-payment-fee-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.summary-payment-fee-row + .summary-payment-fee-row {
+  margin-top: 6px;
+}
+
+.summary-payment-fee-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.summary-payment-fee-value {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.summary-payment-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 16px 0;
+}
+
+.summary-payment-grand-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-payment-gt-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.summary-payment-gt-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0171E3;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.summary-payment-order {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: #6b7280;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.summary-payment-footnote {
+  margin: 12px 0 0;
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1.4;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.summary-payment-section {
+  margin-bottom: 16px;
+}
+
+.summary-payment-section-title {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.summary-payment-method-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.summary-payment-method-row-tall {
+  align-items: flex-start;
+}
+
+.summary-payment-method-icon {
+  aspect-ratio: 58 / 38;
+  max-width: 50px;
+  flex-shrink: 0;
+}
+
+.summary-payment-method-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.summary-payment-method-text {
+  flex: 1 1 auto;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.summary-payment-method-stack {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.summary-payment-method-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #9ca3af;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.summary-payment-add-btn {
+  flex-shrink: 0;
+  border: none;
+  background: #0171E3;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  transition: background 0.2s;
+}
+
+.summary-payment-add-btn:hover {
+  background: #005bb5;
+}
+
+.summary-payment-between-sections {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 16px 0;
+}
+
+.summary-payment-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.summary-payment-payable {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.5;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.summary-payment-payable .summary-payment-payable-suffix {
+  font-size: 11px;
+  font-weight: 400;
+  color: #6b7280;
+}
+
+.summary-payment-submit {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: none;
+  border-radius: 40px;
+  background: #0171E3;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  padding: 14px 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.summary-payment-submit:hover {
+  background: #005bb5;
+}
+
+/* ── Mobile overrides for summary payment view ── */
+@media (max-width: 640px) {
+  .pay-for-license-btn {
+    font-size: 14px;
+    padding: 12px 20px !important;
+  }
+
+  .summary-cta-group {
+    gap: 8px;
+  }
+
+  .sticky-summary-container.payment-view-active .sheet-close-handle {
+    display: flex !important;
+  }
+
+  .sticky-summary-container.payment-view-active {
+    overflow-y: auto;
+  }
+
+  .summary-payment-card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .summary-payment-footer {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+    margin-top: 16px;
+    z-index: 2;
+  }
+
+  .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .pay-for-license-btn,
+  .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .pay-for-license-btn {
+    display: none !important;
+  }
+
+  .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .summary-cta-group,
+  .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .summary-cta-group {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    width: auto !important;
+    flex-direction: row;
+    gap: 0;
+  }
+
+  .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .summary-cta-group,
+  .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .summary-cta-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .pay-for-license-btn,
+  .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .pay-for-license-btn {
+    display: flex !important;
+  }
+
+  .sticky-summary-container.sheet-open.payment-view-active .summary-payment-view {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

@@ -6,6 +6,7 @@ import { JSDOM } from 'jsdom';
 const __filename = fileURLToPath(import.meta.url);
 const ROOT_DIR = path.resolve(path.dirname(__filename), '..', '..');
 const HTML_PATH = path.join(ROOT_DIR, 'BP-calculator.html');
+const PAYMENT_HELPER_PATH = path.join(ROOT_DIR, 'BP-calculator-payment.js');
 const SCRIPT_PATH = path.join(ROOT_DIR, 'BP-calculator.js');
 
 function defaultSupabaseResult(op, table, state) {
@@ -83,8 +84,9 @@ export function createMFZPhoneMock() {
   };
 }
 
-function stubBrowserAPIs(window, supabaseState) {
+function stubBrowserAPIs(window, supabaseState, options = {}) {
   window.alert = () => {};
+  window.confirm = () => true;
   window.scrollTo = () => {};
   if (!window.requestAnimationFrame) {
     window.requestAnimationFrame = (cb) => setTimeout(cb, 0);
@@ -104,7 +106,13 @@ function stubBrowserAPIs(window, supabaseState) {
     window.Element.prototype.scrollIntoView = () => {};
   }
 
-  window.fetch = async (input) => {
+  var customFetch = typeof options.fetchImpl === 'function' ? options.fetchImpl : null;
+
+  window.fetch = async (input, init) => {
+    if (customFetch) {
+      return customFetch(input, init);
+    }
+
     const url = String(input || '');
     if (url.includes('ipapi.co')) {
       return {
@@ -133,8 +141,15 @@ function stubBrowserAPIs(window, supabaseState) {
   window.dataLayer = [];
 }
 
-export async function bootCalculator({ url = 'https://example.com/', supabaseState = {} } = {}) {
+export async function bootCalculator({
+  url = 'https://example.com/',
+  supabaseState = {},
+  fetchImpl,
+  beforeEval,
+  beforeDOMContentLoaded,
+} = {}) {
   const html = fs.readFileSync(HTML_PATH, 'utf8');
+  const paymentHelper = fs.readFileSync(PAYMENT_HELPER_PATH, 'utf8');
   const script = fs.readFileSync(SCRIPT_PATH, 'utf8');
 
   const dom = new JSDOM(html, {
@@ -144,9 +159,17 @@ export async function bootCalculator({ url = 'https://example.com/', supabaseSta
   });
 
   const { window } = dom;
-  stubBrowserAPIs(window, supabaseState);
+  stubBrowserAPIs(window, supabaseState, { fetchImpl });
 
+  if (typeof beforeEval === 'function') {
+    beforeEval(window);
+  }
+
+  window.eval(paymentHelper);
   window.eval(script);
+  if (typeof beforeDOMContentLoaded === 'function') {
+    beforeDOMContentLoaded(window);
+  }
   window.document.dispatchEvent(new window.Event('DOMContentLoaded', { bubbles: true }));
   window.dispatchEvent(new window.Event('load'));
 
@@ -164,6 +187,17 @@ export async function bootCalculator({ url = 'https://example.com/', supabaseSta
 function setFieldValue(window, id, value) {
   const field = window.document.getElementById(id);
   if (!field) return;
+
+  if (field.tagName === 'SELECT') {
+    const optionValue = String(value);
+    const existingOption = Array.from(field.options || []).find((option) => option.value === optionValue);
+    if (!existingOption) {
+      const option = window.document.createElement('option');
+      option.value = optionValue;
+      option.textContent = optionValue;
+      field.appendChild(option);
+    }
+  }
 
   field.value = String(value);
   field.dispatchEvent(new window.Event('input', { bubbles: true }));
@@ -250,6 +284,7 @@ export function seedValidContactForm(window, overrides = {}) {
     fullName: 'Test User',
     email: 'test.user@example.com',
     phone: '971501234567',
+    country: 'AE',
     consent: true,
     ...overrides,
   };
@@ -257,5 +292,6 @@ export function seedValidContactForm(window, overrides = {}) {
   setFieldValue(window, 'full-name', values.fullName);
   setFieldValue(window, 'email', values.email);
   setFieldValue(window, 'phone', values.phone);
+  setFieldValue(window, 'Country-of-Residence', values.country);
   setCheckbox(window, 'consent-checkbox', values.consent);
 }

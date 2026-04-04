@@ -19,6 +19,8 @@ describe('Validation Logic', () => {
     expect(runtime.document.getElementById('calc-full-name-error').textContent).toContain('required');
     expect(runtime.document.getElementById('calc-email-error').textContent).toContain('required');
     expect(runtime.document.getElementById('calc-phone-error').textContent).toContain('required');
+    expect(runtime.document.getElementById('calc-error-message').textContent).toContain('Current country of residence is required');
+    expect(runtime.document.getElementById('calc-consent-error').textContent).toContain('terms and privacy policy');
   });
 
   it('accepts a fully valid contact form', async () => {

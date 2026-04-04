@@ -83,6 +83,7 @@
             <span>Make Payment</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </button>
+          <div class="payment-inline-message" id="mobile-payment-message" hidden aria-live="polite"></div>
         </div>
       </div>
     </div>
@@ -855,6 +856,7 @@
               <span>Make Payment</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </button>
+            <div class="payment-inline-message" id="summary-payment-message" hidden aria-live="polite"></div>
           </div>
         </div>
         
@@ -884,6 +886,41 @@
               <div class="success-popup-image">
                   <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68874640ab4845b1ab8b20d5_thanks.webp" alt="Team member" class="popup-team-photo">
               </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="payment-status-modal" class="success-popup-overlay payment-status-overlay" style="display: none;">
+        <div class="success-popup-content payment-status-content">
+          <button class="success-popup-close payment-status-close" aria-label="Close payment status">&times;</button>
+          <div class="success-popup-inner payment-status-inner">
+            <div class="success-popup-text payment-status-text">
+              <span id="payment-status-badge" class="payment-status-badge">Payment</span>
+              <h2 class="success-popup-title payment-status-title" id="payment-status-title">Payment update</h2>
+              <p class="success-popup-description payment-status-description" id="payment-status-description"></p>
+              <div class="payment-status-meta">
+                <div class="payment-status-row">
+                  <span class="payment-status-label">Order ID</span>
+                  <span class="payment-status-value" id="payment-status-order-id">N/A</span>
+                </div>
+                <div class="payment-status-row">
+                  <span class="payment-status-label">Amount</span>
+                  <span class="payment-status-value" id="payment-status-amount">AED 0.00</span>
+                </div>
+                <div class="payment-status-row">
+                  <span class="payment-status-label">Tracking ID</span>
+                  <span class="payment-status-value" id="payment-status-tracking-id">N/A</span>
+                </div>
+                <div class="payment-status-row">
+                  <span class="payment-status-label">Payment Mode</span>
+                  <span class="payment-status-value" id="payment-status-mode">N/A</span>
+                </div>
+                <div class="payment-status-row">
+                  <span class="payment-status-label">Transaction Date</span>
+                  <span class="payment-status-value" id="payment-status-date">N/A</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1088,4 +1125,5 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <link rel="stylesheet" href="/BP-calculator/BP-calculator.css" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/BP-calculator/BP-calculator-payment.js"></script>
 <script src="/BP-calculator/BP-calculator.js"></script>

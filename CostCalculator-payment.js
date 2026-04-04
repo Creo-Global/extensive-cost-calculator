@@ -19,6 +19,7 @@
       language: 'EN',
       setupFeeAmount: 12520,
       licenseAmount: 12500,
+      fawriLicenseAmount: 15000,
       knowledgeFee: 10,
       innovationFee: 10,
       paymentType: 'setup_fee',
@@ -60,6 +61,10 @@
 
     function stripPhoneDigits(value) {
       return normalizeString(value).replace(/\D/g, '');
+    }
+
+    function normalizeLicenseType(value) {
+      return normalizeString(value).toLowerCase() === 'fawri' ? 'fawri' : 'regular';
     }
 
     function validateNameValue(value) {
@@ -274,12 +279,22 @@
       return 'payment_failed';
     }
 
-    function createSetupFeeSummary() {
+    function createSetupFeeSummary(input) {
+      var nextInput = input || {};
+      var licenseType = normalizeLicenseType(nextInput.licenseType);
+      var licenseFee =
+        licenseType === 'fawri'
+          ? Number(PAYMENT_CONFIG.fawriLicenseAmount || 15000)
+          : Number(PAYMENT_CONFIG.licenseAmount || 12500);
+      var innovationFee = Number(PAYMENT_CONFIG.innovationFee || 0);
+      var knowledgeFee = Number(PAYMENT_CONFIG.knowledgeFee || 0);
+
       return {
-        licenseFee: PAYMENT_CONFIG.licenseAmount,
-        innovationFee: PAYMENT_CONFIG.innovationFee,
-        knowledgeFee: PAYMENT_CONFIG.knowledgeFee,
-        total: PAYMENT_CONFIG.setupFeeAmount,
+        licenseType: licenseType,
+        licenseFee: licenseFee,
+        innovationFee: innovationFee,
+        knowledgeFee: knowledgeFee,
+        total: licenseFee + innovationFee + knowledgeFee,
       };
     }
 

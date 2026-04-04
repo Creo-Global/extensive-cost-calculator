@@ -4067,13 +4067,39 @@
         });
     }
 
+    function getSelectedLicenseTypeForPayment() {
+        return document.getElementById('license-type')?.value || 'fawri';
+    }
+
+    function getCurrentSetupFeeSummary() {
+        if (!paymentIntegration || typeof paymentIntegration.createSetupFeeSummary !== 'function') {
+            const config = paymentIntegration?.PAYMENT_CONFIG || {};
+            const licenseFee = getSelectedLicenseTypeForPayment() === 'fawri'
+                ? Number(config.fawriLicenseAmount || 15000)
+                : Number(config.licenseAmount || 12500);
+            const innovationFee = Number(config.innovationFee || 0);
+            const knowledgeFee = Number(config.knowledgeFee || 0);
+
+            return {
+                licenseFee,
+                innovationFee,
+                knowledgeFee,
+                total: licenseFee + innovationFee + knowledgeFee,
+            };
+        }
+
+        return paymentIntegration.createSetupFeeSummary({
+            licenseType: getSelectedLicenseTypeForPayment(),
+        });
+    }
+
     function renderPaymentSummary(orderId) {
         const config = getPaymentConfig();
         if (!config || !paymentIntegration || typeof paymentIntegration.createSetupFeeSummary !== 'function') {
             return null;
         }
 
-        const summary = paymentIntegration.createSetupFeeSummary();
+        const summary = getCurrentSetupFeeSummary();
         currentPaymentOrderId = orderId || currentPaymentOrderId || paymentIntegration.generateOrderId();
 
         const fields = {
@@ -4109,7 +4135,7 @@
 
     function getPaymentGuardState() {
         const contactState = getContactFormState();
-        const paymentSummary = paymentIntegration?.createSetupFeeSummary?.() || { total: 0 };
+        const paymentSummary = getCurrentSetupFeeSummary();
 
         return {
             fullName: contactState.fullName,
@@ -4311,6 +4337,7 @@
         const contactState = getContactFormState();
         const snapshot = getFormSnapshot();
         const licenseDuration = document.getElementById('license-duration')?.value || '1';
+        const paymentSummary = getCurrentSetupFeeSummary();
 
         return paymentIntegration.buildPaymentLifecyclePayload({
             actionType: 'payment_initiated',
@@ -4330,13 +4357,11 @@
                 businessBankAccount: 'No',
                 vipMedicalEid: 'No',
                 totalCost: paymentAmount,
-                licenseCost: paymentIntegration.PAYMENT_CONFIG.licenseAmount,
+                licenseCost: paymentSummary.licenseFee,
                 businessActivitiesCost: 0,
                 licenseDuration: licenseDuration,
                 visaCost: 0,
-                knowledgeFee:
-                    paymentIntegration.PAYMENT_CONFIG.knowledgeFee +
-                    paymentIntegration.PAYMENT_CONFIG.innovationFee,
+                knowledgeFee: paymentSummary.knowledgeFee + paymentSummary.innovationFee,
                 investorVisaNeeded: 'No',
                 employeeVisaNeeded: 'No',
                 addons: getSelectedAddonsText(),
@@ -4571,8 +4596,9 @@
         }
 
         const paymentSummary = renderPaymentSummary(paymentIntegration.generateOrderId());
+        const currentSetupFeeSummary = paymentSummary || getCurrentSetupFeeSummary();
         const orderId = paymentSummary?.orderId || paymentIntegration.generateOrderId();
-        const amount = paymentSummary?.amount || paymentIntegration.PAYMENT_CONFIG.setupFeeAmount;
+        const amount = currentSetupFeeSummary?.amount || currentSetupFeeSummary?.total || paymentIntegration.PAYMENT_CONFIG.setupFeeAmount;
         const contactState = getContactFormState();
 
         const confirmMessage =

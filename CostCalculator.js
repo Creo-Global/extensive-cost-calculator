@@ -321,6 +321,7 @@
         constructor() {
             this.errorPrefix = 'calc-';
             this.useMFZPhone = false;
+            this.lastValidatedPhoneKey = '';
             this.validationRules = this.initializeValidationRules();
             this.errorMessages = this.initializeErrorMessages();
             this.init();
@@ -382,6 +383,27 @@
             };
         }
 
+        getPhoneValidationKey(field) {
+            const digitsOnly = String(field?.value || '').replace(/\D/g, '');
+            if (!digitsOnly) return '';
+
+            let selectedCountryCode = '';
+            if (this.useMFZPhone && window.MFZPhone && field) {
+                try {
+                    const instance = window.MFZPhone.getInstance(field);
+                    selectedCountryCode = instance?.iti?.getSelectedCountryData?.().iso2 || '';
+                } catch (err) {
+                    selectedCountryCode = '';
+                }
+            }
+
+            return `${selectedCountryCode}:${digitsOnly}`;
+        }
+
+        clearCachedPhoneValidation() {
+            this.lastValidatedPhoneKey = '';
+        }
+
         init() {
             this.setupGlobalErrorHandling();
             this.initializePhoneInput();
@@ -437,6 +459,11 @@
             const phoneField = document.getElementById('phone');
             if (!phoneField) return;
 
+            const resetPhoneValidationState = () => {
+                this.clearCachedPhoneValidation();
+                this.clearFieldError('phone');
+            };
+
             // Use MFZPhone if available (already loaded on Webflow site)
             if (window.MFZPhone) {
                 // Ensure the phone field has the required attribute for MFZPhone
@@ -448,9 +475,9 @@
                 this.useMFZPhone = true;
                 
                 // Clear our error when MFZPhone shows valid state
-                phoneField.addEventListener('input', () => {
-                    this.clearFieldError('phone');
-                });
+                phoneField.addEventListener('input', resetPhoneValidationState);
+                phoneField.addEventListener('change', resetPhoneValidationState);
+                phoneField.addEventListener('countrychange', resetPhoneValidationState);
                 return;
             }
 
@@ -461,6 +488,7 @@
         setupBasicPhoneValidation(phoneField) {
             // Basic fallback when MFZPhone is not available
             phoneField.addEventListener('input', () => {
+                this.clearCachedPhoneValidation();
                 this.clearFieldError('phone');
             });
 
@@ -627,6 +655,7 @@
 
         getPhoneValidationMeta(field) {
             const digitsOnly = String(field?.value || '').replace(/\D/g, '');
+            const phoneValidationKey = this.getPhoneValidationKey(field);
             let validationState = 'idle';
             let message = '';
 
@@ -635,8 +664,15 @@
                     const instance = window.MFZPhone.getInstance(field);
                     if (window.MFZPhone.isValid(field)) {
                         validationState = 'valid';
+                        this.lastValidatedPhoneKey = phoneValidationKey;
                     } else if (instance?.validationState) {
                         validationState = instance.validationState;
+                        if (validationState === 'validating' && phoneValidationKey && phoneValidationKey === this.lastValidatedPhoneKey) {
+                            validationState = 'valid';
+                        }
+                        if (validationState === 'invalid' && phoneValidationKey === this.lastValidatedPhoneKey) {
+                            this.clearCachedPhoneValidation();
+                        }
                     }
 
                     message =
@@ -937,8 +973,8 @@
             const checkAndValidate = (retryCount = 0) => {
                 // Check if phone is still in validating state
                 if (this.useMFZPhone && window.MFZPhone && phoneField) {
-                    const instance = window.MFZPhone.getInstance(phoneField);
-                    if (instance?.validationState === 'validating' && retryCount < 10) {
+                    const phoneMeta = this.getPhoneValidationMeta(phoneField);
+                    if (phoneMeta.validationState === 'validating' && retryCount < 10) {
                         // Still validating, wait and retry (max 5 seconds total)
                         setTimeout(() => checkAndValidate(retryCount + 1), 500);
                         return;
@@ -5380,11 +5416,11 @@
             let isPhoneValid = false;
             if (phoneField && window.MFZPhone && formValidator && formValidator.useMFZPhone) {
                 try {
-                    isPhoneValid = window.MFZPhone.isValid(phoneField);
-                    const instance = window.MFZPhone.getInstance(phoneField);
-                    if (instance?.validationState === 'validating') {
-                        isPhoneValid = false;
-                    }
+                    const phoneMeta = formValidator.getPhoneValidationMeta(phoneField);
+                    isPhoneValid = phoneMeta.digitsOnly.length >= 8 &&
+                        phoneMeta.digitsOnly.length <= 15 &&
+                        phoneMeta.validationState !== 'validating' &&
+                        phoneMeta.validationState !== 'invalid';
                 } catch (err) {
                     // Fallback to basic validation
                     const phoneValue = phoneField.value?.trim();

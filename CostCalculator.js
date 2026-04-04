@@ -4030,6 +4030,29 @@
         ].filter(Boolean);
     }
 
+    function isContactFormReadyForPayment() {
+        if (window.formValidator && typeof window.formValidator.validateContactFormSilent === 'function') {
+            return window.formValidator.validateContactFormSilent();
+        }
+
+        return validateContactForm();
+    }
+
+    function ensureContactFormReadyForPayment() {
+        if (isContactFormReadyForPayment()) {
+            return true;
+        }
+
+        if (window.formValidator && typeof window.formValidator.validateContactForm === 'function') {
+            window.formValidator.validateContactForm();
+        } else {
+            validateContactForm();
+        }
+
+        scrollToContactSection();
+        return false;
+    }
+
     function clearPaymentMessages() {
         getPaymentMessageElements().forEach((element) => {
             element.hidden = true;
@@ -4156,6 +4179,7 @@
     }
 
     function updatePaymentButtonsAvailability() {
+        const disableForContact = !isContactFormReadyForPayment();
         const totalVisas = getTotalVisaCount();
         const disableForVisas = totalVisas > 6;
         const disableForHealth = paymentHealthState.isHealthy === false;
@@ -4166,7 +4190,7 @@
                 return;
             }
 
-            button.disabled = disableForVisas || disableForHealth;
+            button.disabled = disableForContact || disableForVisas || disableForHealth;
         });
     }
 
@@ -5358,6 +5382,9 @@
     function openSummaryPaymentView() {
         var container = document.querySelector('.sticky-summary-container');
         if (!container) return;
+        if (!ensureContactFormReadyForPayment()) {
+            return;
+        }
         clearPaymentMessages();
         if (paymentIntegration && typeof paymentIntegration.generateOrderId === 'function') {
             renderPaymentSummary(paymentIntegration.generateOrderId());

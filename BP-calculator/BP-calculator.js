@@ -495,6 +495,18 @@
                     }
                 });
             }
+
+            const consentWrap = document.getElementById('consent-text-wrap');
+            const consentReadToggle = document.getElementById('consent-read-toggle');
+            if (consentWrap && consentReadToggle) {
+                consentReadToggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var expanded = consentWrap.classList.toggle('consent-text-wrap--expanded');
+                    consentReadToggle.textContent = expanded ? 'Read less' : 'Read more';
+                    consentReadToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                });
+            }
         }
 
         handleNameKeydown(e) {
@@ -819,8 +831,10 @@
             const submitBtn = e.target;
             const originalText = submitBtn.innerHTML;
             
-            // If form is already completed and valid, just scroll to next section
+            // If form is already completed and valid, refresh pricing from current defaults then continue
             if (isContactFormCompleted && this.validateContactFormSilent()) {
+                markPreviousSectionsAsInteracted('shareholdersSection');
+                calculateCosts();
                 this.handleSuccessfulSubmission();
                 return;
             }
@@ -897,11 +911,9 @@
                             }
                         }
                         
-                        // Mark license section as interacted for pricing display
-                        setTimeout(() => {
-                            sectionInteractions.licenseSection = true;
-                            calculateCosts();
-                        }, 1000);
+                        /* Default selections (license, duration, shareholders) exist in the DOM — mark through company setup so grand total and summary update immediately (no delayed / missing calculate). */
+                        markPreviousSectionsAsInteracted('shareholdersSection');
+                        calculateCosts();
                     }
                     
                     this.handleSuccessfulSubmission();
@@ -1348,11 +1360,13 @@
                 </div>
                 <div class="activity-card-body">
                     <img class="activity-icon svg" src="${groupInfo.icon}" alt="${groupInfo.name} Icon" class="activity-icon">
+                    <div class="activity-card-content">
                     <h3>${groupInfo.name}</h3>
                     <a href="#" class="select-activity-link">Select your activity <span class="link-arrow"><svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M8.11881 0.658612L8.11881 6.22708C8.11881 6.40143 8.04955 6.56864 7.92627 6.69192C7.80296 6.81523 7.63575 6.8845 7.46143 6.88447C7.28707 6.88447 7.11983 6.81523 6.99655 6.69195C6.87327 6.56867 6.80404 6.40143 6.80404 6.22708L6.80478 2.24408L1.1203 7.92855C0.997234 8.05162 0.830323 8.12078 0.656277 8.12078C0.482232 8.12078 0.315289 8.05162 0.192226 7.92855C0.069163 7.80549 3.35917e-05 7.63858 3.35495e-05 7.46453C3.35074e-05 7.29049 0.0691568 7.12355 0.192226 7.00048L5.8767 1.316L1.89331 1.31486C1.71898 1.31483 1.55175 1.2456 1.42846 1.12232C1.30518 0.999031 1.23595 0.831795 1.23592 0.657474C1.23592 0.483123 1.30518 0.315911 1.42846 0.192631C1.55177 0.0693206 1.71898 5.80848e-05 1.89331 8.58807e-05L7.46176 8.00644e-05C7.54823 -1.3333e-05 7.63383 0.0169705 7.71368 0.0500416C7.79352 0.0831117 7.86607 0.131651 7.92713 0.192842C7.98817 0.254003 8.03652 0.32667 8.06944 0.406609C8.10229 0.486547 8.11909 0.572209 8.11881 0.658612Z" fill="#020202"/>
 </svg>
 </span></a></div>
+</div>
             `;
             
             container.appendChild(card);
@@ -3586,6 +3600,10 @@
             
             // Always update the grand total (including mobile)
             updateGrandTotal(totalCost);
+
+            if (typeof window.updateMobileSummaryFooterGradient === 'function') {
+                window.updateMobileSummaryFooterGradient();
+            }
             
             // Save form data to localStorage for potential recovery
             try {
@@ -6447,11 +6465,28 @@
         checkTaxCompliance();
     });
 
-    // Visa card toggle functionality - handles Yes/No toggle for investor visa
+    function syncInvestorVisaFooterFromToggle() {
+        const toggle = document.getElementById('investor-visa-toggle');
+        const selectBtn = document.getElementById('investor-visa-select-btn');
+        const selectedControls = document.getElementById('investor-selected-controls');
+        if (!toggle || !selectBtn || !selectedControls) return;
+        if (toggle.checked) {
+            selectBtn.style.display = 'none';
+            selectedControls.style.display = 'flex';
+        } else {
+            selectBtn.style.display = '';
+            selectedControls.style.display = 'none';
+        }
+    }
+
+    // Visa card toggle — investor uses hidden checkbox + Select/Selected UI (sync footer here)
     function toggleVisaCard(visaType) {
-        const toggle = document.getElementById(`${visaType === 'dependent' ? 'dependency' : visaType}-visa-toggle`);
+        const toggleId = visaType === 'dependent' ? 'dependency' : visaType;
+        const toggle = document.getElementById(`${toggleId}-visa-toggle`);
+        if (!toggle) return;
         const card = toggle.closest('.visa-card');
-        
+        if (!card) return;
+
         if (toggle.checked) {
             // YES state - visa is selected
             card.classList.add('selected');
@@ -6477,6 +6512,10 @@
         updateChangeStatusVisibility();
         updateMResidencyVisibility();
         updateInvestorDependentDisclaimer();
+
+        if (visaType === 'investor') {
+            syncInvestorVisaFooterFromToggle();
+        }
     }
      // Make functions globally available for onclick handlers
      window.toggleVisaCard = toggleVisaCard;
@@ -6718,6 +6757,29 @@
             }
             return;
         }
+
+        if (visaType === 'investor') {
+            const card = document.querySelector('[data-visa="investor"]');
+            const selectBtn = document.getElementById('investor-visa-select-btn');
+            const selectedControls = document.getElementById('investor-selected-controls');
+            const selectedBtn = selectedControls?.querySelector('.select-btn');
+            if (card && selectBtn && selectedControls) {
+                card.classList.add('selected');
+                selectBtn.style.display = 'none';
+                selectedControls.style.display = 'flex';
+                if (selectedBtn) selectedBtn.classList.add('selected');
+                const invCount = document.getElementById('investor-visa-count');
+                if (invCount) invCount.value = '1';
+                const invToggle = document.getElementById('investor-visa-toggle');
+                if (invToggle) invToggle.checked = true;
+                markPreviousSectionsAsInteracted('visaSection');
+                calculateCosts();
+                updateChangeStatusVisibility();
+                updateMResidencyVisibility();
+                updateInvestorDependentDisclaimer();
+            }
+            return;
+        }
         
         const card = document.querySelector(`[data-visa="${visaType}"]`);
         const selectBtn = card?.querySelector('.select-btn');
@@ -6836,23 +6898,40 @@
         // Map edit button aria-labels to their corresponding section IDs
         const editButtonMap = {
             'Edit company setup': 'company-setup-section',
-            'Edit business activities': 'business-activities-section', 
+            'Edit business activities': 'business-activities-section',
             'Edit visa selections': 'visa-options-section',
             'Edit additional services': 'addons-section'
         };
+
+        const MOBILE_WIZARD_EDIT_BREAKPOINT = 640;
+
+        function isMobileWizardActive() {
+            if (window.innerWidth > MOBILE_WIZARD_EDIT_BREAKPOINT) return false;
+            return !!document.querySelector(
+                '.cc-form.mobile-steps-active, .b2c-costcalculator.mobile-steps-active, #MFZ-NewCostCalForm.mobile-steps-active'
+            );
+        }
 
         // Add click listeners to all edit buttons
         document.querySelectorAll('.edit-btn').forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
-                
+
                 const ariaLabel = this.getAttribute('aria-label');
                 const targetSectionId = editButtonMap[ariaLabel];
-                
-                if (targetSectionId) {
-                    scrollToSection(targetSectionId);
-                } else {
+
+                if (!targetSectionId) {
+                    return;
                 }
+
+                const mgr = window._mobileStepMgr;
+                if (isMobileWizardActive() && mgr && typeof mgr.goToSectionId === 'function') {
+                    if (mgr.goToSectionId(targetSectionId)) {
+                        return;
+                    }
+                }
+
+                scrollToSection(targetSectionId);
             });
         });
     }
@@ -7020,6 +7099,28 @@
                 
                 // Trigger calculation
                 calculateCosts();
+            }
+            return;
+        }
+
+        if (visaType === 'investor') {
+            const card = document.querySelector('[data-visa="investor"]');
+            const selectBtn = document.getElementById('investor-visa-select-btn');
+            const selectedControls = document.getElementById('investor-selected-controls');
+            const selectedBtn = selectedControls?.querySelector('.select-btn');
+            if (card && selectBtn && selectedControls) {
+                card.classList.remove('selected');
+                selectBtn.style.display = '';
+                selectedControls.style.display = 'none';
+                if (selectedBtn) selectedBtn.classList.remove('selected');
+                const invCount = document.getElementById('investor-visa-count');
+                if (invCount) invCount.value = '0';
+                const invToggle = document.getElementById('investor-visa-toggle');
+                if (invToggle) invToggle.checked = false;
+                calculateCosts();
+                updateChangeStatusVisibility();
+                updateMResidencyVisibility();
+                updateInvestorDependentDisclaimer();
             }
             return;
         }
@@ -7270,6 +7371,19 @@
     function canAutoScroll() {
         return !isSharedLinkSession || mobileUserHasInteracted;
     }
+
+    /** Skip guided scroll when the user is interacting with real form fields (not card chrome). */
+    function shouldSuppressMobileAutoScrollFromTarget(target) {
+        if (!target || typeof target.closest !== 'function') return false;
+        if (target.closest('textarea, select')) return true;
+        if (target.closest('.visa-toggle-switch')) return true;
+        if (target.closest('label')) return true;
+        var inp = target.closest('input');
+        if (!inp) return false;
+        var type = (inp.type || '').toLowerCase();
+        if (type === 'hidden' || type === 'button' || type === 'submit' || type === 'reset' || type === 'image') return false;
+        return true;
+    }
     
     function initializeMobileAutoScroll() {
         // Only run on mobile devices
@@ -7348,41 +7462,11 @@
             }
         };
         
-        // Special scroll for form completion - go to next section
-        const scrollToNextSection = () => {
-            if (!canAutoScroll()) return;
-            const companySetupSection = document.getElementById('company-setup-section');
-            if (companySetupSection && !companySetupSection.classList.contains('locked')) {
-                setTimeout(() => {
-                    const headerOffset = 20;
-                    const elementPosition = companySetupSection.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }, 500);
-            }
-        };
-        
-        // Personal Details Section - scroll to next section after form validation
-        const personalDetailsSection = document.getElementById('personal-details-section');
-        if (personalDetailsSection) {
-            const inputs = personalDetailsSection.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.addEventListener('blur', () => {
-                    if (validateContactForm() && isContactFormCompleted) {
-                        scrollToNextSection();
-                    }
-                });
-            });
-        }
-        
         // Company Setup Section - License Cards
         const licenseCards = document.querySelectorAll('.license-card');
         licenseCards.forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
+                if (shouldSuppressMobileAutoScrollFromTarget(e.target)) return;
                 scrollToNextCard(card, '.license-card');
             });
         });
@@ -7543,7 +7627,8 @@
         // Visa Options Section - scroll to next visa card or change status section
         const visaCards = document.querySelectorAll('.visa-card:not(.change-status-card)');
         visaCards.forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
+                if (shouldSuppressMobileAutoScrollFromTarget(e.target)) return;
                 if (!canAutoScroll()) return;
                 const allVisaCards = Array.from(document.querySelectorAll('.visa-card:not(.change-status-card)'));
                 const currentIndex = allVisaCards.indexOf(card);
@@ -7603,31 +7688,34 @@
             });
         });
         
-        // Change Status Section - quantity buttons
-        const quantityButtons = document.querySelectorAll('.quantity-btn');
-        quantityButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                if (!canAutoScroll()) return;
-                const addonsSection = document.getElementById('addons-section');
-                if (addonsSection && !addonsSection.classList.contains('locked')) {
-                    setTimeout(() => {
-                        const headerOffset = 80;
-                        const elementPosition = addonsSection.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        // Change Status Section only — do not bind all .quantity-btn (visa/shareholder +/- would scroll here too)
+        const changeStatusSection = document.getElementById('change-status-section');
+        if (changeStatusSection) {
+            changeStatusSection.querySelectorAll('.quantity-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    if (!canAutoScroll()) return;
+                    const addonsSection = document.getElementById('addons-section');
+                    if (addonsSection && !addonsSection.classList.contains('locked')) {
+                        setTimeout(() => {
+                            const headerOffset = 80;
+                            const elementPosition = addonsSection.getBoundingClientRect().top;
+                            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        });
-                    }, 300);
-                }
+                            window.scrollTo({
+                                top: offsetPosition,
+                                behavior: 'smooth'
+                            });
+                        }, 300);
+                    }
+                });
             });
-        });
+        }
         
         // Add-ons Section - scroll to next addon category
         const addonCategories = document.querySelectorAll('.addon-category-card');
         addonCategories.forEach(category => {
-            category.addEventListener('click', () => {
+            category.addEventListener('click', (e) => {
+                if (shouldSuppressMobileAutoScrollFromTarget(e.target)) return;
                 if (!canAutoScroll()) return;
                 scrollToNextCard(category, '.addon-category-card');
             });
@@ -7796,3 +7884,761 @@
             initializeMobileAutoScroll();
         }
     });
+
+
+
+    // for mobile design
+    (function () {
+        'use strict';
+      
+        var BREAKPOINT = 640;
+        var MOBILE_PAYMENT_INNOVATION_FEE_AED = 10;
+        var MOBILE_PAYMENT_KNOWLEDGE_FEE_AED = 10;
+
+        function parseAedDisplayText(text) {
+          if (!text) return 0;
+          var cleaned = String(text).replace(/AED/gi, '').replace(/,/g, '').trim();
+          var n = parseFloat(cleaned);
+          return isNaN(n) ? 0 : n;
+        }
+
+        function formatAedPaymentAmount(n) {
+          return 'AED ' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        /** True if step content should be excluded from the mobile wizard (inline/CSS/hidden attr). */
+        function isWizardStepContentHidden(el) {
+          if (!el || el.nodeType !== 1) return true;
+          if (el.hasAttribute('hidden')) return true;
+          var attr = el.getAttribute('style');
+          if (attr && /display\s*:\s*none/i.test(attr)) return true;
+          var sd = el.style && el.style.display;
+          if (sd && String(sd).toLowerCase() === 'none') return true;
+          try {
+            return window.getComputedStyle(el).display === 'none';
+          } catch (err) {
+            return false;
+          }
+        }
+
+        /* ───────────────────────────────────────────────
+           MobileStepManager
+        ─────────────────────────────────────────────── */
+        function MobileStepManager() {
+          this.currentStep = 0; // 1-based index into _getVisibleModals()
+          this.isActive    = false;
+          this._domReady   = false;
+          this._init();
+        }
+      
+        MobileStepManager.prototype._isMobile = function () {
+          return window.innerWidth <= BREAKPOINT;
+        };
+      
+        /**
+         * Returns only the form-modal elements whose inner .form-section (or the modal itself)
+         * is not hidden: inline display:none, hidden attribute, or computed display none.
+         */
+        MobileStepManager.prototype._getVisibleModals = function () {
+          var result = [];
+          document.querySelectorAll('.form-modal[data-step]').forEach(function (modal) {
+            var inner = modal.querySelector('.form-section');
+            if (isWizardStepContentHidden(modal)) return;
+            if (inner && isWizardStepContentHidden(inner)) return;
+            result.push(modal);
+          });
+          return result;
+        };
+      
+        MobileStepManager.prototype._init = function () {
+          var self = this;
+      
+          if (self._isMobile()) {
+            self._setupDOM();
+          }
+      
+          window.addEventListener('resize', function () {
+            if (self._isMobile() && !self._domReady) {
+              self._setupDOM();
+            }
+            if (window.innerWidth > BREAKPOINT) {
+              self._closePaymentStep();
+            }
+          });
+      
+          document.addEventListener('contactFormValid', function () {
+            if (self._isMobile()) {
+              if (!self._domReady) self._setupDOM();
+              self._activate();
+              self.goToStep(1);
+            }
+          });
+        };
+      
+        MobileStepManager.prototype._getWizardRoot = function () {
+          var form = document.getElementById('MFZ-NewCostCalForm');
+          if (!form) return null;
+          return form.closest('.b2c-costcalculator') || form.closest('.cc-form') || document.body;
+        };
+
+        MobileStepManager.prototype._getStickySummary = function () {
+          var root = this._getWizardRoot();
+          if (root && root.querySelector) {
+            var el = root.querySelector('.sticky-summary-container');
+            if (el) return el;
+          }
+          return document.querySelector('.sticky-summary-container');
+        };
+
+        MobileStepManager.prototype._setupDOM = function () {
+          if (this._domReady) return;
+          this._domReady = true;
+          this._injectStepHeaders();
+          this._bindStickySummaryBar();
+          this._bindPaymentStep();
+
+          var selfSetup = this;
+          if (!this._mobileHeaderResizeBound) {
+            this._mobileHeaderResizeBound = true;
+            window.addEventListener('resize', function () {
+              if (selfSetup.isActive) selfSetup._syncMobileStepHeaderOffset();
+            });
+          }
+        };
+      
+        MobileStepManager.prototype._syncMobileStepHeaderOffset = function () {
+          if (!this._isMobile()) return;
+          var modal = document.querySelector('#MFZ-NewCostCalForm .form-modal.step-active');
+          if (!modal) return;
+          var header = modal.querySelector('.mobile-step-header');
+          if (!header) return;
+          var h = Math.ceil(header.getBoundingClientRect().height);
+          modal.style.setProperty('--mobile-step-header-offset', h + 'px');
+        };
+
+        MobileStepManager.prototype._injectStepHeaders = function () {
+          var self = this;
+          // Inject into every form-modal; counter text + progress segments updated dynamically in goToStep
+          document.querySelectorAll('.form-modal[data-step]').forEach(function (modal) {
+            if (modal.querySelector('.mobile-step-header')) return;
+      
+            var header = document.createElement('div');
+            header.className = 'mobile-step-header';
+            header.innerHTML =
+              '<div class="mobile-step-header-row">' +
+                '<div class="mobile-step-header-left">' +
+                  '<button type="button" class="mobile-step-back-btn" aria-label="Go back">' +
+                    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                      '<path d="M15.0038 19.9181L8.48375 13.3981C7.71375 12.6281 7.71375 11.3681 8.48375 10.5981L15.0038 4.07812" stroke="black" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>' +
+                    '</svg>' +
+                  '</button>' +
+                '</div>' +
+                '<span class="mobile-step-counter">Step <span class="step-current"></span> of <span class="step-total"></span></span>' +
+                '<div class="mobile-step-header-right">' +
+                  '<button type="button" class="mobile-step-close-btn" aria-label="Close">' +
+                    '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+                      '<path d="M1 1L13 13" stroke="black" stroke-width="2" stroke-linecap="round"/>' +
+                      '<path d="M13 1L0.999999 13" stroke="black" stroke-width="2" stroke-linecap="round"/>' +
+                    '</svg>' +
+                  '</button>' +
+                '</div>' +
+              '</div>' +
+              '<div class="mobile-step-progress"></div>';
+      
+            header.querySelector('.mobile-step-back-btn').addEventListener('click', function () {
+              self.prevStep();
+            });
+
+            var closeBtn = header.querySelector('.mobile-step-close-btn');
+            if (closeBtn) {
+              closeBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                self._deactivate();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                try {
+                  document.dispatchEvent(new CustomEvent('costCalculatorMobileWizardClose', { bubbles: true }));
+                } catch (err) { /* ignore */ }
+              });
+            }
+      
+            modal.insertBefore(header, modal.firstChild);
+          });
+        };
+      
+        MobileStepManager.prototype._bindStickySummaryBar = function () {
+          var self = this;
+          if (this._stickyBarBound) return;
+          this._stickyBarBound = true;
+
+          var summary = this._getStickySummary();
+          if (!summary) return;
+
+          var handle = summary.querySelector('.sheet-close-handle');
+          var overlay = document.getElementById('bottom-sheet-overlay');
+
+          var footerGradientRaf = null;
+          function updateSummaryFooterGradientHeight() {
+            if (!summary.classList.contains('sheet-open')) return;
+            var root = self._getWizardRoot();
+            if (
+              !root ||
+              (!root.classList.contains('mobile-steps-active') &&
+                !root.classList.contains('mobile-payment-detail-from-payment'))
+            ) {
+              return;
+            }
+
+            var grandWrap = summary.querySelector('.grand-total-container');
+            var cta = summary.querySelector('.get-call-btn');
+            if (!grandWrap && !cta) return;
+
+            var sRect = summary.getBoundingClientRect();
+            /* Full footer band: top of grand-total → bottom of sheet (includes margin between grand-total & CTA + bottom padding). */
+            var footerTop = grandWrap
+              ? grandWrap.getBoundingClientRect().top
+              : cta.getBoundingClientRect().top;
+            var h = sRect.bottom - footerTop + 20;
+
+            h = Math.max(Math.ceil(h), 140);
+            summary.style.setProperty('--summary-footer-gradient-height', h + 'px');
+          }
+
+          function scheduleFooterGradientUpdate() {
+            if (footerGradientRaf) cancelAnimationFrame(footerGradientRaf);
+            footerGradientRaf = requestAnimationFrame(function () {
+              footerGradientRaf = requestAnimationFrame(updateSummaryFooterGradientHeight);
+            });
+          }
+
+          function attachFooterGradientResizeObserver() {
+            if (typeof ResizeObserver === 'undefined') return;
+            if (!self._footerGradientRO) {
+              self._footerGradientRO = new ResizeObserver(function () {
+                if (summary.classList.contains('sheet-open')) scheduleFooterGradientUpdate();
+              });
+            }
+            var gt = summary.querySelector('.grand-total-container');
+            var btn = summary.querySelector('.get-call-btn');
+            if (gt) self._footerGradientRO.observe(gt);
+            if (btn) self._footerGradientRO.observe(btn);
+            self._footerGradientRO.observe(summary);
+          }
+
+          function detachFooterGradientResizeObserver() {
+            if (self._footerGradientRO) {
+              self._footerGradientRO.disconnect();
+            }
+          }
+
+          if (!self._footerGradientWindowResize) {
+            self._footerGradientWindowResize = function () {
+              var s = self._getStickySummary();
+              if (s && s.classList.contains('sheet-open')) scheduleFooterGradientUpdate();
+            };
+            window.addEventListener('resize', self._footerGradientWindowResize);
+          }
+
+          window.updateMobileSummaryFooterGradient = scheduleFooterGradientUpdate;
+
+          function refreshWizardCtaIconForSheet() {
+            var root = self._getWizardRoot();
+            if (root && root.classList.contains('mobile-steps-active')) {
+              self._updateNextBtn(self._getVisibleModals().length);
+            }
+          }
+
+          function openSheet() {
+            summary.classList.add('sheet-open');
+            if (overlay) overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            attachFooterGradientResizeObserver();
+            scheduleFooterGradientUpdate();
+            refreshWizardCtaIconForSheet();
+          }
+
+          function closeSheet() {
+            summary.classList.remove('sheet-open');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            detachFooterGradientResizeObserver();
+            summary.style.removeProperty('--summary-footer-gradient-height');
+            refreshWizardCtaIconForSheet();
+            var rootClose = self._getWizardRoot();
+            if (rootClose) rootClose.classList.remove('mobile-payment-detail-from-payment');
+            var formClose = document.getElementById('MFZ-NewCostCalForm');
+            if (formClose) {
+              var ccClose = formClose.closest('.cc-form');
+              if (ccClose) ccClose.classList.remove('mobile-payment-detail-from-payment');
+            }
+          }
+
+          function toggleSheet() {
+            if (summary.classList.contains('sheet-open')) closeSheet();
+            else openSheet();
+          }
+
+          window.openMobileSheet = openSheet;
+          window.closeMobileSheet = closeSheet;
+          window.isMobileSheetOpen = function () {
+            return summary.classList.contains('sheet-open');
+          };
+
+          if (handle) {
+            handle.style.cursor = 'pointer';
+            handle.addEventListener('click', function (e) {
+              e.preventDefault();
+              if (!self._getWizardRoot() || !self._getWizardRoot().classList.contains('mobile-steps-active')) return;
+              toggleSheet();
+            });
+
+            var touchStartY = null;
+            handle.addEventListener('touchstart', function (e) {
+              if (!self._getWizardRoot() || !self._getWizardRoot().classList.contains('mobile-steps-active')) return;
+              touchStartY = e.changedTouches[0].clientY;
+            }, { passive: true });
+            handle.addEventListener('touchend', function (e) {
+              if (touchStartY == null) return;
+              var dy = e.changedTouches[0].clientY - touchStartY;
+              touchStartY = null;
+              if (!self._getWizardRoot() || !self._getWizardRoot().classList.contains('mobile-steps-active')) return;
+              if (dy < -28) openSheet();
+              else if (dy > 28) closeSheet();
+            }, { passive: true });
+          }
+
+          if (overlay) {
+            overlay.addEventListener('click', function () {
+              var rootOv = self._getWizardRoot();
+              if (!rootOv) return;
+              if (
+                rootOv.classList.contains('mobile-steps-active') ||
+                rootOv.classList.contains('mobile-payment-detail-from-payment')
+              ) {
+                closeSheet();
+              }
+            });
+          }
+
+          var grandRow = summary.querySelector('#grand-total-clickable') || summary.querySelector('.grand-total');
+          if (grandRow) {
+            grandRow.style.cursor = 'pointer';
+            grandRow.addEventListener('click', function (e) {
+              if (!self._getWizardRoot() || !self._getWizardRoot().classList.contains('mobile-steps-active')) return;
+              if (summary.classList.contains('sheet-open')) return;
+              e.preventDefault();
+              openSheet();
+            });
+          }
+
+          this._wizardNextCapture = function (e) {
+            var root = self._getWizardRoot();
+            if (!root || !root.classList.contains('mobile-steps-active')) return;
+            var btn = e.target.closest && e.target.closest('.sticky-summary-container .get-call-btn');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var summary = self._getStickySummary();
+            var total = self._getVisibleModals().length;
+            var sheetOpen = summary && summary.classList.contains('sheet-open');
+            if (sheetOpen) {
+              self._openPaymentStep();
+              return;
+            }
+            if (self.currentStep < total) {
+              self.nextStep();
+              return;
+            }
+            /* Last step, collapsed: open estimate sheet first; user taps Pay For License to open payment */
+            if (typeof window.openMobileSheet === 'function') {
+              window.openMobileSheet();
+            }
+          };
+          document.addEventListener('click', this._wizardNextCapture, true);
+        };
+
+        MobileStepManager.prototype._bindPaymentStep = function () {
+          var self = this;
+          var panel = document.getElementById('mobile-payment-step');
+          if (!panel || panel._mobilePaymentStepBound) return;
+          panel._mobilePaymentStepBound = true;
+          var back = panel.querySelector('.mobile-payment-back-btn');
+          if (back) {
+            back.addEventListener('click', function () {
+              self._closePaymentStep();
+            });
+          }
+
+          var learnMore = panel.querySelector('#mobile-payment-estimate-toggle, .mobile-payment-learn-more');
+          if (learnMore) {
+            learnMore.addEventListener('click', function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              var root = self._getWizardRoot();
+              if (root) root.classList.add('mobile-payment-detail-from-payment');
+              var formLm = document.getElementById('MFZ-NewCostCalForm');
+              if (formLm) {
+                var ccLm = formLm.closest('.cc-form');
+                if (ccLm) ccLm.classList.add('mobile-payment-detail-from-payment');
+              }
+              var det = document.getElementById('detailed-summary');
+              var sim = document.getElementById('simplified-summary');
+              if (det) det.style.display = 'block';
+              if (sim) sim.style.display = 'none';
+              var sumHdr = document.querySelector('.sticky-summary-container .summary-header');
+              if (sumHdr) sumHdr.classList.add('expanded');
+              if (typeof window.openMobileSheet === 'function') {
+                window.openMobileSheet();
+              } else {
+                var sumNow = self._getStickySummary();
+                if (sumNow) {
+                  sumNow.classList.add('sheet-open');
+                  var ovNow = document.getElementById('bottom-sheet-overlay');
+                  if (ovNow) ovNow.classList.add('active');
+                  document.body.style.overflow = 'hidden';
+                }
+              }
+              if (typeof window.updateMobileSummaryFooterGradient === 'function') {
+                window.updateMobileSummaryFooterGradient();
+              }
+            });
+          }
+        };
+
+        MobileStepManager.prototype._openPaymentStep = function () {
+          var self = this;
+          if (!self._isMobile()) {
+            self._showCheckout();
+            return;
+          }
+          /* Close estimate sheet and clear Learn-More overlay state; otherwise
+             .mobile-payment-detail-from-payment keeps sticky summary visible (higher specificity than payment hide rule). */
+          if (typeof window.closeMobileSheet === 'function') {
+            window.closeMobileSheet();
+          } else {
+            var summaryFallback = self._getStickySummary();
+            if (summaryFallback) {
+              summaryFallback.classList.remove('sheet-open');
+              summaryFallback.style.removeProperty('--summary-footer-gradient-height');
+            }
+            var overlayFb = document.getElementById('bottom-sheet-overlay');
+            if (overlayFb) overlayFb.classList.remove('active');
+          }
+          var formClear = document.getElementById('MFZ-NewCostCalForm');
+          var rootClear = self._getWizardRoot();
+          if (rootClear) rootClear.classList.remove('mobile-payment-detail-from-payment');
+          if (formClear) {
+            var ccClear = formClear.closest('.cc-form');
+            if (ccClear) ccClear.classList.remove('mobile-payment-detail-from-payment');
+          }
+
+          var panel = document.getElementById('mobile-payment-step');
+          if (!panel) return;
+
+          var totalEl = document.getElementById('total-cost-display');
+          var licenseSubtotal = parseAedDisplayText(totalEl ? totalEl.textContent : '0');
+          var innovationFee = MOBILE_PAYMENT_INNOVATION_FEE_AED;
+          var knowledgeFee = MOBILE_PAYMENT_KNOWLEDGE_FEE_AED;
+          var paymentGrandTotal = licenseSubtotal + innovationFee + knowledgeFee;
+
+          var licenseLine = document.getElementById('mobile-payment-license-fee');
+          if (licenseLine) licenseLine.textContent = formatAedPaymentAmount(licenseSubtotal);
+
+          var innEl = document.getElementById('mobile-payment-innovation-fee');
+          if (innEl) innEl.textContent = formatAedPaymentAmount(innovationFee);
+
+          var knEl = document.getElementById('mobile-payment-knowledge-fee');
+          if (knEl) knEl.textContent = formatAedPaymentAmount(knowledgeFee);
+
+          var payGrand = document.getElementById('mobile-payment-grand-total');
+          var grandStr = formatAedPaymentAmount(paymentGrandTotal);
+          if (payGrand) payGrand.textContent = grandStr;
+
+          var payableAmountEl = document.getElementById('mobile-payment-payable-amount');
+          if (payableAmountEl) payableAmountEl.textContent = grandStr;
+
+          var orderEl = document.getElementById('mobile-payment-order-id');
+          if (orderEl) orderEl.textContent = String(Date.now()) + String(Math.floor(Math.random() * 900) + 100);
+
+          panel.classList.add('is-active');
+          panel.removeAttribute('hidden');
+          panel.setAttribute('aria-hidden', 'false');
+
+          var form = document.getElementById('MFZ-NewCostCalForm');
+          var root = self._getWizardRoot();
+          if (root) root.classList.add('mobile-payment-step-active');
+          if (form) {
+            var cc = form.closest('.cc-form');
+            if (cc && cc !== root) cc.classList.add('mobile-payment-step-active');
+          }
+
+          document.body.style.overflow = 'hidden';
+        };
+
+        MobileStepManager.prototype._closePaymentStep = function () {
+          if (
+            typeof window.isMobileSheetOpen === 'function' &&
+            typeof window.closeMobileSheet === 'function' &&
+            window.isMobileSheetOpen()
+          ) {
+            window.closeMobileSheet();
+          }
+          var panel = document.getElementById('mobile-payment-step');
+          if (panel) {
+            panel.classList.remove('is-active');
+            panel.setAttribute('hidden', '');
+            panel.setAttribute('aria-hidden', 'true');
+          }
+          var form = document.getElementById('MFZ-NewCostCalForm');
+          var root = this._getWizardRoot();
+          if (root) {
+            root.classList.remove('mobile-payment-step-active');
+            root.classList.remove('mobile-payment-detail-from-payment');
+          }
+          if (form) {
+            var cc = form.closest('.cc-form');
+            if (cc && cc !== root) cc.classList.remove('mobile-payment-step-active');
+            if (cc) cc.classList.remove('mobile-payment-detail-from-payment');
+          }
+          document.body.style.overflow = '';
+          if (this.isActive) {
+            this._updateNextBtn(this._getVisibleModals().length);
+          }
+        };
+      
+        MobileStepManager.prototype._activate = function () {
+          this.isActive = true;
+          var form = document.getElementById('MFZ-NewCostCalForm');
+          var root = this._getWizardRoot();
+          if (root) root.classList.add('mobile-steps-active');
+          if (form) {
+            form.classList.add('mobile-steps-active');
+            var cc = form.closest('.cc-form');
+            if (cc && cc !== root) cc.classList.add('mobile-steps-active');
+          }
+
+          var summary = this._getStickySummary();
+          if (summary) {
+            summary.classList.remove('sheet-open');
+            summary.style.removeProperty('--summary-footer-gradient-height');
+            var btn = summary.querySelector('.get-call-btn');
+            if (btn && !this._savedGetCallBtnHTML) {
+              this._savedGetCallBtnHTML = btn.innerHTML;
+            }
+          }
+          if (this._footerGradientRO) {
+            this._footerGradientRO.disconnect();
+          }
+          var overlay = document.getElementById('bottom-sheet-overlay');
+          if (overlay) overlay.classList.remove('active');
+          document.body.style.overflow = '';
+        };
+      
+        MobileStepManager.prototype._deactivate = function () {
+          this.isActive = false;
+          this.currentStep = 0;
+          this._closePaymentStep();
+          var form = document.getElementById('MFZ-NewCostCalForm');
+          var root = this._getWizardRoot();
+          if (root) root.classList.remove('mobile-steps-active');
+          if (form) {
+            form.classList.remove('mobile-steps-active');
+            var cc = form.closest('.cc-form');
+            if (cc && cc !== root) cc.classList.remove('mobile-steps-active');
+          }
+
+          document.querySelectorAll('#MFZ-NewCostCalForm .form-modal[data-step]').forEach(function (m) {
+            m.style.removeProperty('--mobile-step-header-offset');
+          });
+
+          var summary = this._getStickySummary();
+          if (summary) {
+            summary.classList.remove('sheet-open');
+            summary.style.removeProperty('--summary-footer-gradient-height');
+            var btn = summary.querySelector('.get-call-btn');
+            if (btn && this._savedGetCallBtnHTML) {
+              btn.innerHTML = this._savedGetCallBtnHTML;
+              btn.classList.remove('mobile-wizard-cta');
+            }
+          }
+          if (this._footerGradientRO) {
+            this._footerGradientRO.disconnect();
+          }
+          var overlay = document.getElementById('bottom-sheet-overlay');
+          if (overlay) overlay.classList.remove('active');
+          document.body.style.overflow = '';
+
+          document.querySelectorAll('.form-modal[data-step]').forEach(function (m) {
+            m.classList.remove('step-active', 'step-prev', 'step-before', 'step-after');
+          });
+        };
+      
+        /**
+         * n is a 1-based index into the currently visible modals array.
+         * Hidden form-modals (display:none inner section) are excluded automatically.
+         */
+        MobileStepManager.prototype.goToStep = function (n) {
+          var visibleModals = this._getVisibleModals();
+          var total = visibleModals.length;
+          this.currentStep = n;
+      
+          // Reset all form-modals first
+          document.querySelectorAll('.form-modal[data-step]').forEach(function (m) {
+            m.classList.remove('step-active', 'step-prev', 'step-before', 'step-after');
+          });
+      
+          // Apply position classes only to visible modals
+          // Each section has its own signature color for ALL its progress segments
+          var stepColors = ['#5ED1AD', '#46C2E8', '#75D7CF', '#FBA129'];
+          // Use current step's color for all filled segments
+          var activeColor = stepColors[n - 1] || '#EB5F40';
+      
+          // Build progress segments HTML once (reused for each panel)
+          var segmentsHtml = '';
+          for (var i = 1; i <= total; i++) {
+            var bg = i <= n ? activeColor : '#EDEDED';
+            segmentsHtml += '<div class="step-progress-segment" style="background:' + bg + '"></div>';
+          }
+      
+          visibleModals.forEach(function (modal, idx) {
+            var pos = idx + 1; // 1-based
+            if (pos === n) {
+              modal.classList.add('step-active');
+              // Update counter text
+              var cur = modal.querySelector('.step-current');
+              var tot = modal.querySelector('.step-total');
+              if (cur) cur.textContent = n;
+              if (tot) tot.textContent = total;
+              // Render progress segments
+              var progress = modal.querySelector('.mobile-step-progress');
+              if (progress) progress.innerHTML = segmentsHtml;
+            } else if (pos < n) {
+              modal.classList.add('step-before');
+            } else {
+              modal.classList.add('step-after');
+            }
+          });
+      
+          // Scroll the form area near the top
+          var container = document.querySelector('.form-sections-container');
+          if (container) {
+            var top = container.getBoundingClientRect().top + window.pageYOffset - 60;
+            window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+          }
+
+          var selfGo = this;
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              selfGo._syncMobileStepHeaderOffset();
+            });
+          });
+      
+          this._updateNextBtn(total);
+        };
+
+        /**
+         * Jump wizard to the step that contains sectionId (e.g. visa-options-section → visible step index).
+         * Closes expanded summary sheet and mobile payment panel if open.
+         */
+        MobileStepManager.prototype.goToSectionId = function (sectionId) {
+          var section = document.getElementById(sectionId);
+          if (!section) return false;
+          var modal = section.closest('.form-modal[data-step]');
+          if (!modal) return false;
+
+          var visible = this._getVisibleModals();
+          var idx = -1;
+          for (var i = 0; i < visible.length; i++) {
+            if (visible[i] === modal) {
+              idx = i;
+              break;
+            }
+          }
+          if (idx === -1) return false;
+
+          if (typeof window.closeMobileSheet === 'function') {
+            window.closeMobileSheet();
+          }
+
+          var payPanel = document.getElementById('mobile-payment-step');
+          if (payPanel && payPanel.classList.contains('is-active')) {
+            this._closePaymentStep();
+          }
+
+          this.goToStep(idx + 1);
+          return true;
+        };
+      
+        MobileStepManager.prototype.nextStep = function () {
+          var total = this._getVisibleModals().length;
+          if (this.currentStep < total) {
+            this.goToStep(this.currentStep + 1);
+          }
+          /* Last-step checkout is handled in capture handler → _openPaymentStep (not a wizard step). */
+        };
+      
+        MobileStepManager.prototype.prevStep = function () {
+          if (this.currentStep > 1) {
+            this.goToStep(this.currentStep - 1);
+          } else {
+            this._deactivate();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        };
+      
+        MobileStepManager.prototype._showCheckout = function () {
+          this._deactivate();
+          var summary = this._getStickySummary();
+          if (summary) {
+            summary.style.display = 'block';
+            setTimeout(function () {
+              var top = summary.getBoundingClientRect().top + window.pageYOffset - 20;
+              window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+            }, 80);
+          }
+        };
+      
+        MobileStepManager.prototype._updateNextBtn = function (total) {
+          var summary = this._getStickySummary();
+          var btn = summary && summary.querySelector('.get-call-btn');
+          if (!btn) return;
+          var isLast = this.currentStep >= total;
+          var collapsedLabel = isLast ? 'Check Out' : ('Next Step (' + this.currentStep + '/' + total + ')');
+          var sheetOpen = summary.classList.contains('sheet-open');
+          var arrowSvg =
+            '<svg class="get-call-btn-icon-wizard" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+              '<path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>' +
+            '</svg>';
+          var cardSvg =
+            '<svg class="get-call-btn-icon-sheet" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+              '<path d="M2 8.50391H22" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>' +
+              '<path d="M6 16.5039H8" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>' +
+              '<path d="M10.5 16.5039H14.5" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>' +
+              '<path d="M6.44 3.50391H17.55C21.11 3.50391 22 4.38391 22 7.89391V16.1039C22 19.6139 21.11 20.4939 17.56 20.4939H6.44C2.89 20.5039 2 19.6239 2 16.1139V7.89391C2 4.38391 2.89 3.50391 6.44 3.50391Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</svg>';
+          /* Expanded sheet: icon left + "Pay For License" (design). Collapsed bar: label + arrow right. */
+          if (sheetOpen) {
+            btn.innerHTML = cardSvg + '<span class="get-call-btn-label">Pay For License</span>';
+          } else {
+            btn.innerHTML = '<span class="get-call-btn-label">' + collapsedLabel + '</span>' + arrowSvg;
+          }
+          btn.classList.add('mobile-wizard-cta');
+        };
+      
+        /* ── Bootstrap ── */
+        function boot() {
+          setTimeout(function () {
+            window._mobileStepMgr = new MobileStepManager();
+          }, 150);
+        }
+      
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', boot);
+        } else {
+          boot();
+        }
+
+        window.closeMobilePaymentStep = function () {
+          if (window._mobileStepMgr) window._mobileStepMgr._closePaymentStep();
+        };
+      })();

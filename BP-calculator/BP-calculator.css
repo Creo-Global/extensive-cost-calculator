@@ -1,4 +1,6 @@
-
+* {
+    box-sizing: border-box;
+}
 /* css Strat from here */
 
 .iti {
@@ -27,6 +29,8 @@ padding: 0; */
 
 .sticky-summary-container {
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     padding: 24px;
     border-radius: 20px;
     background: #F9FAFB;
@@ -275,7 +279,7 @@ background-color: #f9fafb;
 }
 
 .learn-more-btn:hover {
-    color: #308CC7;
+    color: #0171E3;
 }
 h3+.learn-more-btn{
 color: #000;
@@ -310,7 +314,7 @@ color: #000;
 }
 
 .select-btn.selected {
-  background: #000;
+  background: rgba(1, 113, 227, 1);
   color: white;
   -webkit-text-fill-color: white;
   border: none;
@@ -376,10 +380,10 @@ color: #000;
 }
 
 
-.pill-option:hover {color: #308CC7;}
+.pill-option:hover {color: #0171E3;}
 
 .pill-option.selected {
-    background: #000;
+    background: rgba(1, 113, 227, 1);
     color: white;
     -webkit-text-fill-color: white;
     border: none;
@@ -536,8 +540,8 @@ font-family: "Plus Jakarta Sans";
 
 .visa-toggle-label {
     position: absolute;
-    left: 0;
-    top: -10px;
+    left: 2px;
+    top: -7px;
     font-size: 13px;
     font-weight: 600;
     color: #000;
@@ -600,7 +604,7 @@ font-family: "Plus Jakarta Sans";
     isolation: isolate;
 }
 
-.visa-toggle-switch input:checked + .visa-toggle-slider {background: linear-gradient(90deg, #000 -25.41%, #2E2E2E 30.48%, #666 99.59%);}
+.visa-toggle-switch input:checked + .visa-toggle-slider {background: #0171E3;}
 
 .visa-toggle-switch input:checked + .visa-toggle-slider:before {
     transform: translateX(20px);
@@ -760,13 +764,13 @@ align-items: center;
 
 .summary-total .summary-label {
     font-weight: 700;
-    color: #308CC7;
+    color: #0171E3;
 }
 
 .summary-price {
     font-size: 14px;
     font-weight: 700;
-    color: #308CC7;
+    color: #0171E3;
 }
 
 .bsa-code-container input {
@@ -813,7 +817,7 @@ align-items: center;
     font-weight: 500;
 }
 
-.grand-total-amount {font-size: 18px;font-weight: 700;color: #308CC7;}
+.grand-total-amount {font-size: 18px;font-weight: 700;color: #0171E3;}
 
 .get-call-btn {
     width: 100%;
@@ -822,22 +826,22 @@ align-items: center;
     justify-content: center;
     gap: 8px;
     border-radius: 40px;
-    background: transparent;
-    color: #000;
-    border: 1px solid #000;
+    background: #0171E3;
+    color: #fff;
+    border: 1px solid #0171E3;
     padding: 16px 24px !important;
     font-size: 16px;
     font-weight: 600;
     font-family: "Plus Jakarta Sans";
     cursor: pointer;
     transition: all 0.3s;
-    background-color: #fff;
+    background-color: #0171E3;
 }
 
 .get-call-btn:hover {
-    background: #000;
+    background: #3498FF;
     color: #fff;
-    border-color: #000;
+    border-color: #3498FF;
 }
 
 .get-call-btn svg {
@@ -857,18 +861,18 @@ align-items: center;
 }
 
 .submit-button {
-    background:#fff;
-    color: #000;
-    border: 1px solid #000;
+    background:#0171E3;
+    color: #fff;
+    border: 1px solid #0171E3;
     border-radius: 40px;
-    padding: 16px 24px !important;
-    font-size: 16px;
+    padding: 12px 20px !important;
+    font-size: 14px;
     font-weight: 600;
     font-family: "Plus Jakarta Sans";
     cursor: pointer;
     transition: all 0.3s ease;
     min-width: 180px;
-    line-height: 24px;
+    line-height: 1.2;
     width: fit-content;
     display: flex;
     align-items: center;
@@ -877,8 +881,9 @@ align-items: center;
 }
 
 .submit-button:hover {
-    background: #000;
+    background: #3498FF;
     color: white;
+    border-color: #3498FF;
 }
 
 .submit-button:disabled {
@@ -987,7 +992,7 @@ justify-content: center;
 }
 
 .search-results-dropdown .modal-activity-checkbox.checked {
-    background: linear-gradient(102deg, #EB5F40 0%, #B5348B 100%);
+    background: #0171E3;    
     border: none;
 }
 
@@ -1047,8 +1052,33 @@ justify-content: center;
 
 
 @media (max-width: 768px) {
+    /* Stack calculator columns and stop sticky summary clipping past the viewport */
+    .cc-form .b2c-costcalculator,
+    .b2c-costcalculator {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .cc-form .b2c-costcalculator-left,
+    .b2c-costcalculator-left,
+    .cc-form .b2c-costcalculator--right,
+    .b2c-costcalculator--right {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .cc-form {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
     .sticky-summary-container {
         max-width: 100%;
+        min-width: 0;
         position: static;
         max-height: none;
         padding: 32px 16px 16px 16px !important;
@@ -1269,6 +1299,27 @@ font-size: 18px;
     line-height: 1.2;
 }
 
+.addon-category-header h3 .addon-title-m {
+    font-style: italic;
+    font-weight: inherit;
+}
+
+.addon-category-header h3.addon-category-title--mcore {
+    color: #E1584C;
+}
+
+.addon-category-header h3.addon-category-title--mresidency {
+    color: #8866A2;
+}
+
+.addon-category-header h3.addon-category-title--massist {
+    color: #0E8AD9;
+}
+
+.addon-category-header h3.addon-category-title--maccounting {
+    color: #46B349;
+}
+
 .addon-category-description {
     color: #1C1C1C;
     font-size: 14px;
@@ -1305,12 +1356,12 @@ font-size: 18px;
 
 .service-pill:hover {
     color: #ffffff;
-    background: #000;
+    background: #3498FF;
     box-shadow: none;
 }
 
 .service-pill.selected {
-    background: #000;
+    background: rgba(1, 113, 227, 1);
     color: white !important;
     box-shadow: none;
 }
@@ -1515,7 +1566,7 @@ backdrop-filter: blur(24px);
 /* Selected visa card styles */
 .visa-card.selected {
     background: #fff;
-    box-shadow: none;
+    /* box-shadow: none; */
 }
 
 /* Change Status Section - using visa card styling */
@@ -1589,9 +1640,24 @@ backdrop-filter: blur(24px);
 
 /* Visa footer with controls */
 .visa-footer {
+    position: relative;
     display: flex;
         justify-content: flex-end;
         align-items: center;
+}
+
+/* Investor visa: hidden checkbox kept for config / toggleVisaCard — not visible or focusable */
+.investor-visa-toggle-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    border: 0;
+    white-space: nowrap;
 }
 
 .visa-selected-controls {
@@ -1631,6 +1697,7 @@ backdrop-filter: blur(24px);
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    border: none;
 }
 
 .quantity-btn:hover:not(:disabled) {
@@ -1906,12 +1973,12 @@ backdrop-filter: blur(24px);
 
 .activity-modal-content {
     border-radius: 16px;
-    width: 90%;
-    max-width: 500px;
+    width: 100%;
+    max-width: 100%;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
-    margin: 20px;
+    margin: 0;
     position: relative;
     background: rgb(255 255 255);
     backdrop-filter: blur(22px) saturate(180%);
@@ -1940,20 +2007,6 @@ backdrop-filter: blur(24px);
     margin: 0;
         border-radius: 20px 20px 0 0;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-    }
-    
-    .activity-modal-header {
-        padding-top: 12px !important;
-    }
-    
-    .activity-modal-header::before {
-        content: '';
-        width: 40px;
-        height: 4px;
-        background: #D1D5DB;
-        border-radius: 2px;
-        display: block;
-        margin: 0 auto 12px;
     }
     
     .close-btn {
@@ -2146,8 +2199,8 @@ backdrop-filter: blur(24px);
 .modal-search-icon {
     position: absolute;
     left: 36px;
-    top: 61%;
-    transform: translateY(-100%);
+    top: 50%;
+    transform: translateY(-90%);
     color: #a0aec0;
     pointer-events: none;
 }
@@ -2197,7 +2250,7 @@ backdrop-filter: blur(24px);
 }
 
 .modal-activity-checkbox.checked {
-    background: #000;
+    background: #0171E3;
     border:none;
 }
 
@@ -2415,7 +2468,7 @@ backdrop-filter: blur(24px);
 }
 
 .addon-service-toggle-label.selected {
-    color: #000;
+    color: #0171E3;
     font-weight: 600;
 }
 
@@ -2435,7 +2488,7 @@ backdrop-filter: blur(24px);
 }
 
 .addon-service-toggle.checked {
-    background: #000;
+    background: #0171E3;
     box-shadow: none;
 }
 
@@ -2445,7 +2498,7 @@ backdrop-filter: blur(24px);
     left: 3px;
     width: 18px;
     height: 18px;
-    background: linear-gradient(0deg, rgba(53, 98, 141, 0.20) 0%, rgba(53, 98, 141, 0.20) 100%), linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(252, 255, 253, 0.20) 93.45%);
+    background: linear-gradient(0deg, rgba(53, 98, 141, 0.20) 0%, rgba(53, 98, 141, 0.20) 100%), linear-gradient(180deg, #0171e366 0%, rgba(252, 255, 253, 0.20) 93.45%);
     border-radius: 50%;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -2453,12 +2506,12 @@ backdrop-filter: blur(24px);
 
 .addon-service-toggle.checked .addon-service-toggle-slider {
     transform: translateX(18px);
+    box-shadow: none;
+    isolation: isolate;
     background: rgb(255 255 255 / 7%);
     backdrop-filter: blur(22px) saturate(180%);
     -webkit-backdrop-filter: blur(22px) saturate(180%);
     border: 1px solid rgb(255 255 255 / 45%);
-    box-shadow: inset 3px 3px 10px #00000070, inset -3px -3px 10px 1px rgb(155 156 163 / 98%);
-    isolation: isolate;
 }
 
 .addon-service-description {
@@ -2510,6 +2563,19 @@ backdrop-filter: blur(24px);
     overflow: scroll;
     height: 400px;
     padding-right: 20px;
+}
+
+/* Keep breakdown sections hidden when markup/JS sets inline display:none */
+#detailed-summary > .summary-section[style*="display: none"],
+#detailed-summary > .summary-section[style*="display:none"],
+#addons-summary-section[style*="display: none"],
+#addons-summary-section[style*="display:none"] {
+    display: none !important;
+}
+
+#addons-summary-container .summary-section[style*="display: none"],
+#addons-summary-container .summary-section[style*="display:none"] {
+    display: none !important;
 }
 /*width*/
 .detailed-summary::-webkit-scrollbar {
@@ -2603,6 +2669,9 @@ backdrop-filter: blur(24px);
         background: #F9FAFB;
         border-radius: 20px;
         overflow-y: auto;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     .activity-cards-container {
         max-width: 93vw;
@@ -2863,23 +2932,75 @@ backdrop-filter: blur(24px);
     outline-offset: 1px;
 }
 
+.consent-text-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+/* Two lines only: line-clamp + max-height so <br> inside doesn’t show a third row in WebKit */
+.consent-text-wrap:not(.consent-text-wrap--expanded) .consent-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    max-height: calc(1.6em * 2);
+}
+
+.consent-text-wrap--expanded .consent-text {
+    display: block;
+    max-height: none;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+}
+
+.consent-read-toggle {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    color: #0171E3;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+.consent-read-toggle:hover {
+    color: #0171E3;
+}
+
+.consent-read-toggle:focus-visible {
+    outline: 2px solid #0171E3;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
 .consent-text {
     font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 12px;
     font-weight: 400;
     line-height: 1.6;
     color: #4B5563;
-    flex: 1;
+    width: 100%;
 }
 
 .consent-text a {
-    color: #EB5F40;
+    color: #0171E3;
     text-decoration: underline;
     font-weight: 500;
 }
 
 .consent-text a:hover {
-    color: #B5348B;
+    color: #0171E3;
 }
 
 .consent-text strong {
@@ -2897,6 +3018,14 @@ backdrop-filter: blur(24px);
     .consent-text {
         font-size: 11px;
         line-height: 1.5;
+    }
+
+    .consent-text-wrap:not(.consent-text-wrap--expanded) .consent-text {
+        max-height: calc(1.5em * 2);
+    }
+
+    .consent-read-toggle {
+        font-size: 11px;
     }
 }
 
@@ -3396,7 +3525,7 @@ margin-bottom: 16px;
 .share-icon {
     width: 20px;
     height: 20px;
-    color: #308CC7;
+    color: #0171E3;
     transition: transform 0.2s ease;
 }
 
@@ -3432,18 +3561,36 @@ margin-bottom: 16px;
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
     .grand-total {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
         gap: 12px;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .grand-total-left {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .grand-total .share-btn {
+        flex-shrink: 0;
     }
     
     .share-btn {
         justify-content: center;
     }
+
+    .get-call-btn {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
 }
 
 .visa-toggle-switch input:checked + .visa-toggle-slider:before {
-    background: #000;
+    background: transparent;
     box-shadow: inset 3px 3px 10px #ccdbe800, inset -3px -3px 10px 1px rgb(255 255 255 / 51%);
 }
 
@@ -3452,7 +3599,7 @@ margin-bottom: 16px;
 }
 
 #summary-package-type.summary-value {
-    color: #308CC7;
+    color: #0171E3;
     font-weight: 700;
 }
 
@@ -3598,8 +3745,8 @@ p#addons-modal-subtitle {
   }
 }
 
-
 /* Grand total sticky for Mobile  */
+
 
 .quantity-btn {
   position: relative;
@@ -3607,10 +3754,7 @@ p#addons-modal-subtitle {
 
 
 
-
-
-
-/* For CTA color update to blue  added in - 12-03-2026*/
+/* for new color */
 
 .modal-footer{
     .modal-continue-btn,
@@ -3623,81 +3767,1143 @@ p#addons-modal-subtitle {
         }
     }
 }
-.sec-cc-v2 .cc-form{
-    .select-btn.selected,
-    .pill-option.selected{
-        background-color: rgba(1, 113, 227, 1);
-
-    }
-    .modal-search-icon{
-        top: 50%;
-        transform: translateY(-90%);
-    }
-    .visa-toggle-switch input:checked + .visa-toggle-slider {
-        background: #0171E3;
-    }
-    .visa-toggle-switch input:checked + .visa-toggle-slider:before {
-        background: transparent;
-    }
-    .visa-toggle-label{
-        left: 2px;
-        top: -7px;
-    }
-    .service-pill.selected{
-        background-color: rgba(1, 113, 227, 1);
-        color: #fff;
-    }
-    .service-pill:hover {
-        color: #ffffff;
-        background: #3498FF;
-    }
-    .addon-service-toggle-label.selected{
-        color: #0171E3;
-    }
-    .addon-service-toggle.checked{
-        background-color: #0171E3;
-    }
-    .addon-service-toggle-slider{
-        background: linear-gradient(0deg, rgba(53, 98, 141, 0.20) 0%, rgba(53, 98, 141, 0.20) 100%), linear-gradient(180deg, #0171e366 0%, rgba(252, 255, 253, 0.20) 93.45%);
-    }
-    .addon-service-toggle.checked .addon-service-toggle-slider{
-        box-shadow: none;
-    }
-    #summary-package-type.summary-value,
-    .summary-total .summary-label,
-    .summary-price,
-    .grand-total-amount {
-        color: #0171E3;
-    }
-
-    .share-btn svg path{
-        stroke: #0171E3;
-    }
-    .summary-pricing-revealed .get-call-btn{
-        background-color: #0171E3;
-        border-color: #0171E3;
-        color: #fff;
-        &:hover{
-            background-color: #3498FF;
-            border-color: #3498FF;
-            color: #fff;
-        }
-    }
-    #addons-summary-section.expanded .summary-content {
-        display: flex;
+#MFZ-NewCostCalForm{
+    .grand-total-container{
+        margin: 0 !important;
     }
 }
-.activity-modal-content{
-    .addon-service-toggle-label.selected{
-        color: #0171E3;
+
+#Country-of-Residence {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 30px; /* Right padding for arrow */
+background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' width='512' height='512' x='0' y='0' viewBox='0 0 24 24' style='enable-background:new 0 0 512 512' xml:space='preserve' class=''%3e%3cg%3e%3cpath d='M12 16a1 1 0 0 1-.71-.29l-6-6a1 1 0 0 1 1.42-1.42l5.29 5.3 5.29-5.29a1 1 0 0 1 1.41 1.41l-6 6a1 1 0 0 1-.7.29z' data-name='16' fill='%23000000' opacity='1' data-original='%23000000'%3e%3c/path%3e%3c/g%3e%3c/svg%3e") !important;  background-repeat: no-repeat !important;
+  background-position: right 10px center !important; /* 👈 Arrow position */
+  background-size: 16px 16px !important;
+}
+
+
+
+/* For mobile design */
+@media (max-width: 640px) {
+
+    /* ── Container becomes the clipping viewport ── */
+    #MFZ-NewCostCalForm .form-sections-container {
+      position: relative;
+      overflow: hidden;
     }
-    .addon-service-toggle.checked{
-        background-color: #0171E3;
+  
+    /* ── Hide contact section once wizard starts ── */
+    .b2c-costcalculator.mobile-steps-active #MFZ-NewCostCalForm .contact-form-section,
+    .cc-form.mobile-steps-active #MFZ-NewCostCalForm .contact-form-section {
+      display: none !important;
     }
-    .addon-service-toggle-slider{
-        background: linear-gradient(0deg, rgba(53, 98, 141, 0.20) 0%, rgba(53, 98, 141, 0.20) 100%), linear-gradient(180deg, #0171e366 0%, rgba(252, 255, 253, 0.20) 93.45%);
+
+    /* ── Sticky summary = bottom bar + expandable sheet (same HTML) ── */
+    /* top: auto — global .sticky-summary-container { top: 110px } must not apply with fixed or the bar sits below the header */
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container,
+    .cc-form.mobile-steps-active .sticky-summary-container {
+      position: fixed !important;
+      top: auto !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      z-index: 10001 !important;
+      border-radius: 16px 16px 0 0 !important;
+      border-bottom-left-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      /* Flat sheet: no inset “glass” shadows (reads as extra white layer) */
+      box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.1) !important;
+      border: none !important;
+      background: #fff !important;
+      padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+      display: flex !important;
+      flex-wrap: wrap;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px 12px;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+      isolation: auto !important;
     }
-    .addon-service-toggle.checked .addon-service-toggle-slider{
+
+    /* Collapsed wizard bar only: hide decorative ::after */
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open)::after,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open)::after {
+      display: none !important;
+      content: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* Expanded sheet: restore gradient ::after (matches desktop summary-pricing-revealed) */
+    /* Height set by JS --summary-footer-gradient-height (footer block only, no % overlap) */
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open::after,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open::after {
+      display: block !important;
+      content: '' !important;
+      position: absolute !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      height: var(--summary-footer-gradient-height, 200px) !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      border-radius: 16px 16px 0 0 !important;
+      z-index: 0 !important;
+      background: linear-gradient(0deg, rgb(187 201 219) 0%, rgba(25, 116, 201, 0.20) 100%), linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(131, 132, 132, 0.20) 93.45%) !important;
+      pointer-events: none !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      transition: opacity 0.3s ease !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open > *,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open > * {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open),
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) {
+      max-height: 200px;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .summary-header,
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .simplified-summary,
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .detailed-summary,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .summary-header,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .simplified-summary,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .detailed-summary {
+      display: none !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .sheet-close-handle,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .sheet-close-handle {
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      flex: 0 0 100%;
+      padding: 10px 0 4px;
+      margin: 0;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .handle-bar,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .handle-bar {
+      width: 60px;
+      height: 5px;
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .grand-total-container,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .grand-total-container {
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0 !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .grand-total,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .grand-total {
+      padding: 0 !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) #share-btn,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) #share-btn {
+      display: none !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .get-call-btn,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .get-call-btn {
+      flex: 0 0 auto;
+      margin: 0 !important;
+      width: auto !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .grand-total-amount,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .grand-total-amount {
+      color: #000 !important;
+    }
+
+    /* Expanded estimate (screenshot 2) */
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open {
+      max-height: 85vh;
+      height: 85vh;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: 0;
+      overflow: hidden !important;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .sheet-close-handle,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .sheet-close-handle {
+      display: flex !important;
+      flex: 0 0 auto;
+      width: 100%;
+      padding: 10px 0 20px;
+      justify-content: center;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .handle-bar,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .handle-bar {
+      width: 130px;
+      height: 5px;
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .summary-header,
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .simplified-summary,
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .detailed-summary,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .summary-header,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .simplified-summary,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .detailed-summary {
+      display: block !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .detailed-summary,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .detailed-summary {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open #share-btn,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open #share-btn {
+      display: inline-flex !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .grand-total-container,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .grand-total-container {
+      flex: 0 0 auto;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn {
+      flex: 0 0 auto;
+      width: 100% !important;
+      margin-top: 8px !important;
+      justify-content: center !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn .get-call-btn-icon-sheet,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn .get-call-btn-icon-sheet {
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn:hover .get-call-btn-icon-sheet,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn:hover .get-call-btn-icon-sheet {
+      transform: none;
+    }
+
+    /* Overlay when sheet expanded */
+    .b2c-costcalculator.mobile-steps-active #bottom-sheet-overlay.active,
+    .cc-form.mobile-steps-active #bottom-sheet-overlay.active {
+      display: block !important;
+      z-index: 10000;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .get-call-btn.mobile-wizard-cta,
+    .cc-form.mobile-steps-active .get-call-btn.mobile-wizard-cta {
+      background: #0171e3 !important;
+      color: #fff !important;
+      border: none !important;
+      border-radius: 999px !important;
+      padding: 10px 16px !important;
+      font-weight: 600 !important;
+      font-size: 12px !important;
+      display: inline-flex !important;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Expanded sheet CTA: wins over .mobile-wizard-cta (Pay For License + card icon) */
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn.mobile-wizard-cta,
+    .cc-form.mobile-steps-active .sticky-summary-container.sheet-open .get-call-btn.mobile-wizard-cta {
+      font-size: 15px !important;
+      padding: 14px 22px !important;
+      justify-content: center !important;
+    }
+  
+    /* ── All form-modal panels: default off-screen right (hidden steps / pre-class) ── */
+    #MFZ-NewCostCalForm .form-modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #fff;
+      transform: translateX(100%);
+      transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 0s linear 0.42s;
+      will-change: transform;
+      visibility: hidden;
+      pointer-events: none;
+      padding: 0 16px;
+      z-index: 1;
+    }
+  
+    /* ── Active panel: slides in, participates in normal flow for height ── */
+    /* translateX(0) still creates a fixed-position containing block — fixed children stick to this panel, not the viewport. */
+    #MFZ-NewCostCalForm .form-modal.step-active {
+      position: relative;
+      transform: none;
+      visibility: visible;
+      pointer-events: auto;
+      z-index: 3;
+      will-change: auto;
+      transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 0s linear 0s;
+    }
+  
+    /* ── Steps before current: full off-screen left (back = slide in from left) ── */
+    #MFZ-NewCostCalForm .form-modal.step-before {
+      transform: translateX(-100%);
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 1;
+      transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 0s linear 0.42s;
+    }
+  
+    /* ── Steps after current: full off-screen right (next = slide in from right) ── */
+    #MFZ-NewCostCalForm .form-modal.step-after {
+      transform: translateX(100%);
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 1;
+      transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 0s linear 0.42s;
+    }
+  
+    /* ── Mobile step header injected into each panel ── */
+    /* Sticky is overridden for .step-active: parent .form-modal uses transform, which breaks viewport sticky. */
+    .mobile-step-header {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px 0px 20px;
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .b2c-costcalculator.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active .mobile-step-header,
+    .cc-form.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active .mobile-step-header,
+    #MFZ-NewCostCalForm.mobile-steps-active .form-modal.step-active .mobile-step-header {
+      position: fixed;
+      top: env(safe-area-inset-top, 0px);
+      left: 0;
+      right: 0;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
+      padding-left: 16px;
+      padding-right: 16px;
+      z-index: 10000;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    .b2c-costcalculator.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active,
+    .cc-form.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active,
+    #MFZ-NewCostCalForm.mobile-steps-active .form-modal.step-active {
+      padding-top: calc(env(safe-area-inset-top, 0px) + var(--mobile-step-header-offset, 118px));
+    }
+  
+    .mobile-step-header-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      width: 100%;
+      gap: 8px;
+    }
+
+    .mobile-step-header-left {
+      justify-self: start;
+    }
+
+    .mobile-step-header-right {
+      justify-self: end;
+    }
+  
+    .mobile-step-back-btn {
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: background 0.2s;
+      border-radius: 10px;
+    }
+
+    .mobile-step-back-btn:active {
+      background: rgba(0, 0, 0, 0.06);
+    }
+  
+    .mobile-step-counter {
+      font-size: 14px;
+      font-weight: 600;
+      color: #000;
+      text-align: center;
+      justify-self: center;
+      grid-column: 2;
+      white-space: nowrap;
+    }
+
+    .mobile-step-close-btn {
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      border-radius: 10px;
+      transition: background 0.2s;
+    }
+
+    .mobile-step-close-btn svg {
+      display: block;
+    }
+
+    .mobile-step-close-btn:active {
+      background: rgba(0, 0, 0, 0.06);
+    }
+  
+  
+    /* ── Segmented step progress bar ── */
+    .mobile-step-progress {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+  
+    .step-progress-segment {
+      flex: 1;
+      height: 5px;
+      border-radius: 100px;
+      background: #00000010;
+      transition: background 0.35s ease, opacity 0.35s ease;
+    }
+  
+  
+    /* ── Extra bottom padding so content clears the fixed summary bar ── */
+    .b2c-costcalculator.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active .form-section,
+    .cc-form.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active .form-section {
+      padding-bottom: 120px !important;
+      margin-bottom: 0 !important;
+    }
+
+    
+    [data-license="fawri"] .license-card-image ,
+    [data-license="regular"] .license-card-image {
+        aspect-ratio: 1/1;
+        max-width: 122px;
+        border-radius: 8px;
+    }
+    .license-cards-container{
+        gap: 0 !important;
+    }
+
+    .license-cards-container .license-card{
+        padding: 12px;
+        border-radius: 10px;
+        display: flex;
+        /* align-items: center; */
+        gap: 12px;
+    }
+    .section-header h2{
+        font-size: 20px;
+        font-weight: 600;
+    }
+    .free-groups,
+    .section-subtitle{
+        color: #A2A5B4;
+    }
+    .license-card-content{
+        padding: 0 !important;
+        gap: 8px !important;
+        .license-header{
+            h3{
+                font-size: 14px;
+                max-width: 130px;
+            }        
+            .license-duration{
+                font-size: 10px;
+                font-weight: 700;
+                color: #0171E3;
+                padding: 0;
+            }
+        }
+        .license-description{
+            margin-top: 0 !important;
+            margin-bottom: 6px !important;
+            font-size: 12px;
+            font-weight: 600;
+            color: #B2AEAE;
+        }
+        .license-footer{
+            .learn-more-btn{
+                padding: 0 !important;
+                font-size: 10px;
+                font-weight: 600;
+                color: #0171E3;
+                svg path{
+                    fill: #0171E3;
+                }
+            }
+            .select-btn{
+                line-height: 1.1;
+                font-size: 12px;
+                font-weight: 600;
+                padding: 7px !important;
+            }
+        }
+    }
+
+    .license-option-group{
+        padding: 6px 0 0 !important;
+        gap: 10px;
+        border-radius: 0;
+        background: unset;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: none;
         box-shadow: none;
+        overflow: unset;
     }
+    .quantity-btn {
+        background: rgba(0, 0, 0, 0.06);
+        border: none;
+    }
+    .summary-header.expanded {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+    }
+    .summary-section {
+        padding-bottom: 12px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .visa-cards-container{
+        gap: 15px;
+        .visa-card{
+            padding: 14px;
+            border-radius: 8px;
+            display: flex;
+            gap: 12px;
+            .visa-card-image{
+                aspect-ratio: 1/1;
+                border-radius: 6px;
+                overflow: hidden;
+                max-width: 120px;     
+                max-height: 120px;    
+                min-height: 120px;   
+                img{
+                    width: 100%;
+                    height: 100%;
+                    min-height: 120px;
+                    object-fit: cover;
+                }
+            }
+            .visa-card-content{
+                padding: 0 !important;
+                .visa-header{
+                    margin-bottom: 0;
+                    h3{
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: #000;
+                    }
+                    .learn-more-btn{
+                        padding: 0 !important;
+                        font-size: 10px;
+                        font-weight: 600;
+                        color: #0171E3;
+                        svg path{
+                            fill: #0171E3;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .visa-toggle-container{
+        gap: 6px;
+        padding: 8px !important;
+        .visa-toggle-switch{
+            width: 40px;
+            height: 26px;
+        }
+        .visa-toggle-slider:before{
+            height: 16px;
+            width: 16px;
+        }
+    }
+    .visa-toggle-switch input:checked + .visa-toggle-slider:before {
+        transform: translateX(13px);
+    }
+    .visa-footer{
+        .select-btn{
+            padding: 6px 8px !important;
+            width: 90px;
+        }
+    }
+    .quantity-value {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+    }
+    .quantity-btn{
+        width: 24px;
+        height: 24px;
+        font-size: 16px;
+    }
+    .status-label{
+        line-height: 1.2;
+    }
+    .addons-container{
+        padding: 0 !important;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: none;
+        overflow: unset;
+        gap: 26px !important;
+        .addon-category-card{
+            padding: 0 !important;
+            border-bottom: none;
+        }
+    }
+    .addon-services{
+        gap: 10px !important;
+        .service-pill{
+            font-size: 12px !important;
+            border: 1px solid #000;
+            box-shadow: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            color: #000;
+            &:hover{
+                background-color: #3498FF;
+                border-color: #3498FF;
+                color: #fff;
+            }
+            &.selected{
+                color: #fff;
+                background-color: #0171E3;
+                border-color: #0171E3;
+            }
+        }
+    }
+    .addon-category-header .learn-more-btn{
+        color: #0171E3;
+        svg path{
+            fill: #0171E3;
+        }   
+    }
+    .addon-category-description{
+        color: #B2AEAE;
+    }
+
+    /* ── Mobile payment step (separate from wizard steps) ── */
+    .mobile-payment-step {
+      display: none !important;
+      position: fixed;
+      inset: 0;
+      z-index: 10060;
+      flex-direction: column;
+      background: #f3f4f6;
+      overflow: hidden;
+    }
+
+    .mobile-payment-step.is-active {
+      display: flex !important;
+    }
+
+    .mobile-payment-header {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      padding-top: calc(12px + env(safe-area-inset-top, 0px));
+      background: #f3f4f6;
+    }
+
+    .mobile-payment-back-btn {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      border-radius: 10px;
+    }
+
+    .mobile-payment-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .mobile-payment-header-spacer {
+      width: 44px;
+      height: 44px;
+    }
+
+    .mobile-payment-body {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding: 0;
+    }
+
+    .mobile-payment-body-scroll {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 16px 16px;
+    }
+
+    .mobile-payment-footer {
+      flex: 0 0 auto;
+      padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+      background: #f3f4f6;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .mobile-payment-summary-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 22px;
+      margin-bottom: 26px;
+    }
+
+    .mobile-payment-fee-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .mobile-payment-fee-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      line-height: 2;
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .mobile-payment-fee-row + .mobile-payment-fee-row {
+      margin-top: 5px;
+    }
+
+    .mobile-payment-fee-label {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .mobile-payment-fee-value {
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    .mobile-payment-card-divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 15px 0;
+    }
+
+    .mobile-payment-grand-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .mobile-payment-gt-label {
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: #0E1012;
+    }
+
+    .mobile-payment-gt-amount {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
+      color: #0171e3;
+      line-height: 1.5;
+    }
+
+    .mobile-payment-order {
+      margin: 10px 0 0;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .mobile-payment-learn-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: none;
+      background: none;
+      color: #0171e3;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+
+    .mobile-payment-footnote {
+      margin: 12px 0 0;
+      font-size: 10px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.4;
+    }
+
+    .mobile-payment-between-sections {
+      height: 1px;
+      background: #DFDFDF;
+      margin: 15px 0;
+    }
+
+    .mobile-payment-section {
+      margin-bottom: 10px;
+    }
+
+    .mobile-payment-section-title {
+      margin: 0 0 15px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #000;
+      line-height: 1.5;
+      text-transform: capitalize;
+    }
+
+    .mobile-payment-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    }
+
+    .mobile-payment-row-tall {
+      align-items: flex-start;
+    }
+
+    .mobile-payment-row-icon {
+      flex-shrink: 0;
+    }
+
+    .mobile-payment-row-text {
+      flex: 1 1 auto;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: #000;
+      min-width: 0;
+    }
+
+    .mobile-payment-row-stack {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .mobile-payment-row-sub {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: #9ca3af;
+      line-height: 1.35;
+    }
+
+    .mobile-payment-tamara-logo {
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #111827;
+      padding: 6px 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .mobile-payment-add-btn {
+      flex-shrink: 0;
+      border: none;
+      background: none;
+      color: #0171e3;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px 4px;
+      font-family: inherit;
+    }
+
+    .mobile-payment-payable {
+      margin: 0 0 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #000;
+      line-height: 1.5;
+        span{
+            font-size: 10px;
+            font-weight: 400;
+            color: #000;
+            &#mobile-payment-payable-amount{
+                font-size: 14px;
+                font-weight: 700;
+                color: #000;
+                line-height: 1.5;
+            }
+        }
+    }
+
+    .mobile-payment-submit {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: none;
+      border-radius: 999px;
+      background: #0171e3;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 24px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .mobile-payment-icon{
+        aspect-ratio: 58 / 38;
+        max-width: 58px;
+        display: block;
+        img{
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+    }
+
+    /* Hide sticky bar on payment unless user opened estimate via Learn More (:not avoids blocking detail sheet) */
+    .b2c-costcalculator.mobile-payment-step-active:not(.mobile-payment-detail-from-payment) .sticky-summary-container,
+    .cc-form.mobile-payment-step-active:not(.mobile-payment-detail-from-payment) .sticky-summary-container {
+      display: none !important;
+    }
+
+    /* Payment → Learn More: expanded estimate sheet above payment (z-index above #mobile-payment-step) */
+    .b2c-costcalculator.mobile-payment-step-active.mobile-payment-detail-from-payment .sticky-summary-container,
+    .cc-form.mobile-payment-step-active.mobile-payment-detail-from-payment .sticky-summary-container {
+      display: flex !important;
+      flex-direction: column;
+      z-index: 10070 !important;
+    }
+
+    .b2c-costcalculator.mobile-payment-step-active.mobile-payment-detail-from-payment #bottom-sheet-overlay.active,
+    .cc-form.mobile-payment-step-active.mobile-payment-detail-from-payment #bottom-sheet-overlay.active {
+      z-index: 10065 !important;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .license-options-container{
+        gap: 10px !important;
+    }
+    .visa-footer{
+        .visa-selected-controls{
+            justify-content: flex-end;
+        }
+    }
+    #business-activities-section{
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: none;
+        box-shadow: none;
+        overflow: unset;
+        padding: 0 !important;
+    }
+    #MFZ-NewCostCalForm input.activity-search-input{
+        border-radius: 30px;
+        border: 1px solid #0171E3;
+        background-color: #fff;
+        font-size: 13px;
+        color: #000;
+        &::placeholder{
+            color: #7F98A8;
+        }
+    }
+    .activity-search-container{
+        position: relative;
+        &::after{
+            content: '';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 31px;
+            height: 31px;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg width='31' height='31' viewBox='0 0 31 31' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='15.5' cy='15.5' r='15.5' fill='%230171E3'/%3e%3cpath d='M10 15.5H22' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3cpath d='M16 21.5V9.5' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e ");
+            pointer-events: none;
+            background-size: 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+    }
+    .search-icon{
+        top: 50%;
+        svg path{
+            stroke: #7F98A8;
+        }
+    }
+    .consent-checkbox{
+        accent-color: #0171E3;
+    }
+    .modal-footer{
+        .modal-back-btn {
+            width: 42px;
+            height: 42px;
+        }
+    }
+    .addon-category-image-container{
+        padding: 0px 24px 20px;
+    }
+    .activity-modal-header .close-btn {
+        top: 0;
+        position: relative;
+        right: 20px;
+        margin: 10px 0 10px auto !important;
+        background: #fff !important;
+    }
+    .option-note{
+        margin: 0;
+    }
+    .activity-cards-wrapper{
+        padding: 0;
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: none;
+        box-shadow: none;
+        .activity-cards-container {
+            max-width: 100vw !important;
+        }
+        .scroll-indicator{
+            display: none !important;
+        }
+        .activity-cards-container{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow: unset;
+            .activity-card{
+                width: 100%;
+                padding: 12px;
+                gap: 12px;
+                border-radius: 9px;
+                flex-direction: row-reverse;
+                .activity-card-header{
+                    width: auto;
+                    gap: 10px;
+                }
+                .activity-card-body{
+                    flex: 1;  
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    .activity-icon{
+                        width: 32px;
+                    }
+                    .activity-card-content h3{
+                        margin-top: 0;
+                        font-weight: 600;
+                    }
+                    .select-activity-link{
+                        color: #0171E3;
+                        font-size: 12px;
+                        font-weight: 600;
+                        svg path{
+                            fill: #0171E3;
+                        }
+                    }
+                }
+            }
+            .activity-checkbox {
+                width: 22px;
+                height: 22px;
+            }
+        }
+    }
+    .summary-subtitle{
+        color: #B2AEAE;
+        margin: 8px 0;
+    }
+    .license-options-container{
+        .visa-footer {
+            .visa-selected-controls {
+                justify-content: space-between;
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+@media (min-width: 641px) {
+  .mobile-payment-step,
+  .mobile-payment-step.is-active {
+    display: none !important;
+  }
+
+  .b2c-costcalculator.mobile-payment-step-active .sticky-summary-container,
+  .cc-form.mobile-payment-step-active .sticky-summary-container {
+    display: block !important;
+  }
 }

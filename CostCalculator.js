@@ -5452,6 +5452,22 @@
             renderPaymentSummary(paymentIntegration.generateOrderId());
         }
         container.classList.add('payment-view-active');
+
+        var mobilePanel = document.getElementById('mobile-payment-step');
+        if (mobilePanel && window.innerWidth <= 640) {
+            mobilePanel.classList.add('is-active');
+            mobilePanel.removeAttribute('hidden');
+            mobilePanel.setAttribute('aria-hidden', 'false');
+            var root = document.querySelector('.b2c-costcalculator');
+            if (root) root.classList.add('mobile-payment-step-active');
+            var form = document.getElementById('MFZ-NewCostCalForm');
+            if (form) {
+                var cc = form.closest('.cc-form');
+                if (cc && cc !== root) cc.classList.add('mobile-payment-step-active');
+            }
+            document.body.style.overflow = 'hidden';
+        }
+
         updatePaymentButtonsAvailability();
 
         if (getTotalVisaCount() > 6) {
@@ -5470,6 +5486,26 @@
         var container = document.querySelector('.sticky-summary-container');
         if (container) container.classList.remove('payment-view-active');
         clearPaymentMessages();
+
+        var mobilePanel = document.getElementById('mobile-payment-step');
+        if (mobilePanel) {
+            mobilePanel.classList.remove('is-active');
+            mobilePanel.setAttribute('hidden', '');
+            mobilePanel.setAttribute('aria-hidden', 'true');
+        }
+        var root = document.querySelector('.b2c-costcalculator');
+        if (root) {
+            root.classList.remove('mobile-payment-step-active');
+            root.classList.remove('mobile-payment-detail-from-payment');
+        }
+        var form = document.getElementById('MFZ-NewCostCalForm');
+        if (form) {
+            var cc = form.closest('.cc-form');
+            if (cc) {
+                cc.classList.remove('mobile-payment-step-active');
+                cc.classList.remove('mobile-payment-detail-from-payment');
+            }
+        }
     }
 
     window.openSummaryPaymentView = openSummaryPaymentView;

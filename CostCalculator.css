@@ -826,7 +826,7 @@ align-items: center;
     justify-content: center;
     gap: 8px;
     border-radius: 40px;
-    background: transparent;
+    background: #fff;
     color: #0171E3;
     border: 1.5px solid #0171E3;
     padding: 16px 24px !important;
@@ -1973,7 +1973,7 @@ backdrop-filter: blur(24px);
 
 .activity-modal-content {
     border-radius: 16px;
-    width: 100%;
+    width: 600px;
     max-width: 100%;
     max-height: 85vh;
     display: flex;
@@ -2343,18 +2343,20 @@ backdrop-filter: blur(24px);
     }
 }
 .modal-back-btn {
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        background: rgb(255 255 255 / 7%);
-        backdrop-filter: blur(22px) saturate(180%);
-        -webkit-backdrop-filter: blur(22px) saturate(180%);
-        border: 1px solid rgb(255 255 255 / 45%);
-        box-shadow: inset 3px 3px 10px #ccdbe870, inset -3px -3px 10px 1px rgb(255 255 255), 11.845px 9.871px 30.993px 0 rgba(39, 67, 103, 0.13);
-        isolation: isolate;
-        border-radius: 50%;
-        padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    background: rgb(255 255 255 / 7%);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid rgb(255 255 255 / 45%);
+    box-shadow: inset 3px 3px 10px #ccdbe870, inset -3px -3px 10px 1px rgb(255 255 255), 11.845px 9.871px 30.993px 0 rgba(39, 67, 103, 0.13);
+    isolation: isolate;
+    border-radius: 50%;
+    padding: 0;
+    width: 46px;
+    height: 46px;
 }
 
 
@@ -3509,6 +3511,7 @@ select.calc-error {
 
 .success-image {
     flex-shrink: 0;
+    display: none;
 }
 
 .team-member-photo {
@@ -3751,8 +3754,9 @@ h3#addons-modal-title {
     margin: 0;
     line-height: 1.5;
 }
-body:has(.success-message-container.show) .sticky-summary-container.summary-pricing-revealed:after{
- height: 350px;   
+/* Height set by JS --summary-success-gradient-height (footer + success block, mirrors mobile sheet gradient) */
+body:has(.success-message-container.show) .sticky-summary-container.summary-pricing-revealed:after {
+    height: var(--summary-success-gradient-height, 350px);
 }
 
 .activity-card.selected .activity-checkbox .check-icon path {
@@ -3784,6 +3788,7 @@ p#addons-modal-subtitle {
 
 
 /* Activity Cards Styling */
+@media (min-width: 641px){
 .activity-cards-container > .activity-card{
   .activity-icon path{
     stroke: #000;
@@ -3852,7 +3857,7 @@ p#addons-modal-subtitle {
     background: linear-gradient(317deg, rgba(174, 46, 35, 0.10) 8.54%, rgba(177, 27, 57, 0.48) 54.32%), linear-gradient(130deg, rgba(0, 0, 0, 0.40) 19.34%, rgba(131, 132, 132, 0.08) 91.07%);
   }
 }
-
+}
 /* Grand total sticky for Mobile  */
 
 
@@ -3900,6 +3905,21 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
     #MFZ-NewCostCalForm .form-sections-container {
       position: relative;
       overflow: hidden;
+    }
+    .mfz-section.sec-cc.sec-cc-v2{
+        padding-top: 96px;
+        &>.mfz-container{
+            padding: 0;
+        }
+        .selected-activities-count{
+            display: none !important;
+        }
+        .activity-card.selected{
+            background: rgb(255 255 255 / 7%) !important;
+            box-shadow: inset 3px 3px 10px #ccdbe870, inset -3px -3px 10px 1px rgb(255 255 255), 11.845px 9.871px 30.993px 0 rgb(39 67 103 / 10%) !important;
+            border: 1px solid rgb(255 255 255 / 45%) !important;
+            
+        }
     }
   
     /* ── Hide contact section once wizard starts ── */
@@ -4225,7 +4245,8 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
     .b2c-costcalculator.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active,
     .cc-form.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active,
     #MFZ-NewCostCalForm.mobile-steps-active .form-modal.step-active {
-      padding-top: calc(env(safe-area-inset-top, 0px) + var(--mobile-step-header-offset, 118px));
+      /* padding-top: calc(env(safe-area-inset-top, 0px) + var(--mobile-step-header-offset, 118px)); */
+      padding-top: 30px;
     }
   
     .mobile-step-header-row {
@@ -4316,7 +4337,8 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
     /* ── Extra bottom padding so content clears the fixed summary bar ── */
     .b2c-costcalculator.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active .form-section,
     .cc-form.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active .form-section {
-      padding-bottom: 120px !important;
+      /* padding-bottom: 120px !important; */
+      padding-bottom: 30px !important;
       margin-bottom: 0 !important;
     }
 
@@ -4904,7 +4926,7 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
         }
     }
     .consent-checkbox{
-        accent-color: #0171E3;
+        accent-color: #0171E3 !important;
     }
     .modal-footer{
         .modal-back-btn {
@@ -5056,7 +5078,7 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
 }
 
 .pay-for-license-btn:hover svg {
-  transform: translateX(2px);
+  /* transform: translateX(2px); */
 }
 
 /* ── Summary Payment View ── */

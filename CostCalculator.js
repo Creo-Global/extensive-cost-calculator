@@ -41,6 +41,64 @@
     };
     let currentPaymentOrderId = '';
 
+    let _desktopSuccessGradientRaf = null;
+    let _desktopSuccessGradientRO = null;
+    let _desktopSuccessGradientWindowHandler = null;
+
+    function updateDesktopStickySuccessGradientHeight() {
+        var summary = document.querySelector('.sticky-summary-container.summary-pricing-revealed');
+        var successEl = document.getElementById('theFinalSuccessMessage');
+        if (!summary || !successEl || !successEl.classList.contains('show')) {
+            if (summary) summary.style.removeProperty('--summary-success-gradient-height');
+            return;
+        }
+        var grandWrap = summary.querySelector('.grand-total-container');
+        if (!grandWrap) {
+            summary.style.removeProperty('--summary-success-gradient-height');
+            return;
+        }
+        var sRect = summary.getBoundingClientRect();
+        var footerTop = grandWrap.getBoundingClientRect().top;
+        var h = sRect.bottom - footerTop + 20;
+        h = Math.max(Math.ceil(h), 200);
+        summary.style.setProperty('--summary-success-gradient-height', h + 'px');
+    }
+
+    function scheduleDesktopStickySuccessGradientUpdate() {
+        if (_desktopSuccessGradientRaf) cancelAnimationFrame(_desktopSuccessGradientRaf);
+        _desktopSuccessGradientRaf = requestAnimationFrame(function () {
+            _desktopSuccessGradientRaf = requestAnimationFrame(updateDesktopStickySuccessGradientHeight);
+        });
+    }
+
+    function attachDesktopSuccessGradientResizeTracking() {
+        if (typeof ResizeObserver !== 'undefined') {
+            if (!_desktopSuccessGradientRO) {
+                _desktopSuccessGradientRO = new ResizeObserver(function () {
+                    var el = document.getElementById('theFinalSuccessMessage');
+                    if (el && el.classList.contains('show')) scheduleDesktopStickySuccessGradientUpdate();
+                });
+            } else {
+                _desktopSuccessGradientRO.disconnect();
+            }
+            var summary = document.querySelector('.sticky-summary-container.summary-pricing-revealed');
+            var succ = document.getElementById('theFinalSuccessMessage');
+            var grand = summary && summary.querySelector('.grand-total-container');
+            if (summary) _desktopSuccessGradientRO.observe(summary);
+            if (grand) _desktopSuccessGradientRO.observe(grand);
+            if (succ) _desktopSuccessGradientRO.observe(succ);
+        }
+        if (!_desktopSuccessGradientWindowHandler) {
+            _desktopSuccessGradientWindowHandler = function () {
+                var el = document.getElementById('theFinalSuccessMessage');
+                if (el && el.classList.contains('show')) scheduleDesktopStickySuccessGradientUpdate();
+            };
+            window.addEventListener('resize', _desktopSuccessGradientWindowHandler);
+        }
+    }
+
+    window.updateDesktopStickySuccessGradient = scheduleDesktopStickySuccessGradientUpdate;
+
     function isProductionEnvironment() {
         const host = window.location.hostname;
         return host !== 'localhost' && host !== '127.0.0.1' && !host.endsWith('.local');
@@ -246,6 +304,9 @@
             // Trigger animation after a brief delay
             setTimeout(() => {
                 successMessage.classList.add('show');
+                scheduleDesktopStickySuccessGradientUpdate();
+                attachDesktopSuccessGradientResizeTracking();
+                setTimeout(scheduleDesktopStickySuccessGradientUpdate, 650);
             }, 100);
         }
         
@@ -9562,3 +9623,33 @@
           if (window._mobileStepMgr) window._mobileStepMgr._closePaymentStep();
         };
       })();
+
+
+// For svg image to svg code convertor
+function convertImgToSvg() {
+    let convertImages = (query, callback) => {
+      let images = document.querySelectorAll('img.svg');
+      images.forEach((image) => {
+        fetch(image.src)
+          .then((res) => res.text())
+          .then((data) => {
+            let parser = new DOMParser();
+            let svg = parser
+              .parseFromString(data, 'image/svg+xml')
+              .querySelector('svg');
+            svg.setAttribute(
+              'viewBox',
+              '0 0 ' +
+                svg.getAttribute('width') +
+                ' ' +
+                svg.getAttribute('height')
+            );
+            if (image.id) svg.id = image.id;
+            if (image.className) svg.classList = image.classList;
+            image.parentNode.replaceChild(svg, image);
+          })
+          .then(callback);
+      });
+    };
+    convertImages('img');
+  }

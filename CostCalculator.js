@@ -5415,6 +5415,7 @@
     function initializePayForLicense() {
         var payBtn = document.getElementById('pay-for-license-btn');
         var backBtn = document.getElementById('summary-payment-back-btn');
+        var backBtnTop = document.getElementById('summary-payment-back-btn-top');
         var summarySubmitBtn = document.getElementById('summary-payment-submit-btn');
         var mobileSubmitBtn = document.getElementById('mobile-payment-submit-btn');
 
@@ -5426,12 +5427,12 @@
             });
         }
 
-        if (backBtn) {
-            backBtn.addEventListener('click', function (e) {
+        [backBtn, backBtnTop].filter(Boolean).forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 closeSummaryPaymentView();
             });
-        }
+        });
 
         [summarySubmitBtn, mobileSubmitBtn].filter(Boolean).forEach(function (button) {
             if (button.dataset.initialized === 'true') return;

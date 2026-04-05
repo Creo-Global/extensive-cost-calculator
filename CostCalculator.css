@@ -3920,11 +3920,11 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
             
         }
     }
-    .mobile-steps-active{
+    /* .mobile-steps-active{
         margin: 0 -16px;
         width: auto;
         max-width: max-content;
-    }
+    } */
   
     /* ── Hide contact section once wizard starts ── */
     .b2c-costcalculator.mobile-steps-active #MFZ-NewCostCalForm .contact-form-section,
@@ -5094,11 +5094,34 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   display: block;
 }
 
+/* Payment header at top (outside summary-payment-view) – hidden by default */
+#summary-payment-header-top {
+  display: none;
+}
+
+.sticky-summary-container.payment-view-active #summary-payment-header-top {
+  display: flex;
+}
+
 .sticky-summary-container.payment-view-active .summary-header,
 .sticky-summary-container.payment-view-active .simplified-summary,
-.sticky-summary-container.payment-view-active .detailed-summary,
-.sticky-summary-container.payment-view-active .grand-total-container,
 .sticky-summary-container.payment-view-active .summary-cta-group {
+  display: none !important;
+}
+
+/* Hide edit buttons in estimate sections during payment view */
+.sticky-summary-container.payment-view-active .detailed-summary .edit-btn {
+  display: none !important;
+}
+
+/* Hide the old payment header inside summary-payment-view (moved to top) */
+.sticky-summary-container.payment-view-active .summary-payment-view .summary-payment-header {
+  display: none !important;
+}
+
+/* Hide the simplified fee list in the payment card (full breakdown is shown above) */
+.sticky-summary-container.payment-view-active .summary-payment-fee-list,
+.sticky-summary-container.payment-view-active .summary-payment-divider {
   display: none !important;
 }
 
@@ -5409,11 +5432,7 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   }
 
   .sticky-summary-container.sheet-open.payment-view-active .summary-payment-view {
-    display: flex !important;
-    flex-direction: column;
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    display: block !important;
+    flex: none;
   }
 }

@@ -5435,4 +5435,14 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
     display: block !important;
     flex: none;
   }
+
+  .sticky-summary-container.payment-view-active .detailed-summary,
+  .sticky-summary-container.payment-view-active .grand-total-container {
+    display: none !important;
+  }
+
+  .sticky-summary-container.payment-view-active .summary-payment-fee-list,
+  .sticky-summary-container.payment-view-active .summary-payment-divider {
+    display: block !important;
+  }
 }

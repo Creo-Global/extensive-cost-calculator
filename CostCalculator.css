@@ -2926,7 +2926,7 @@ backdrop-filter: blur(24px);
     margin: 2px 0 0 0 !important;
     padding: 0 !important;
     cursor: pointer;
-    accent-color: #000;
+    accent-color: #0171E3 !important;
 }
 
 .consent-checkbox.error {
@@ -3907,10 +3907,9 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
       overflow: hidden;
     }
     .mfz-section.sec-cc.sec-cc-v2{
-        padding-top: 96px;
-        &>.mfz-container{
-            padding: 0;
-        }
+        padding-top: 96px;    
+        position: relative;
+        z-index: 999;    
         .selected-activities-count{
             display: none !important;
         }
@@ -3920,6 +3919,11 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
             border: 1px solid rgb(255 255 255 / 45%) !important;
             
         }
+    }
+    .mobile-steps-active{
+        margin: 0 -16px;
+        width: auto;
+        max-width: max-content;
     }
   
     /* ── Hide contact section once wizard starts ── */
@@ -5102,7 +5106,8 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   overflow: visible !important;
 }
 
-.sticky-summary-container.payment-view-active::after {
+ 
+.b2c-costcalculator.mobile-steps-active .b2c-costcalculator--right .sticky-summary-container.payment-view-active::after {
   display: none !important;
 }
 

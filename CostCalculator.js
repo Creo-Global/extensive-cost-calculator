@@ -8457,29 +8457,11 @@
 
 
 
-    // Mobile Auto-Scroll Functionality
-    // Shared-link gating flags
+    // Mobile shared-link scroll guard
     var isSharedLinkSession = false;
     var mobileUserHasInteracted = false;
     var originalWindowScrollTo = null;
     var originalElementScrollIntoView = null;
-    
-    function canAutoScroll() {
-        return !isSharedLinkSession || mobileUserHasInteracted;
-    }
-
-    /** Skip guided scroll when the user is interacting with real form fields (not card chrome). */
-    function shouldSuppressMobileAutoScrollFromTarget(target) {
-        if (!target || typeof target.closest !== 'function') return false;
-        if (target.closest('textarea, select')) return true;
-        if (target.closest('.visa-toggle-switch')) return true;
-        if (target.closest('label')) return true;
-        var inp = target.closest('input');
-        if (!inp) return false;
-        var type = (inp.type || '').toLowerCase();
-        if (type === 'hidden' || type === 'button' || type === 'submit' || type === 'reset' || type === 'image') return false;
-        return true;
-    }
     
     function initializeMobileAutoScroll() {
         // Only run on mobile devices
@@ -8496,7 +8478,7 @@
             
             const params = new URLSearchParams(window.location.search);
             isSharedLinkSession = !!(params.get('share') || params.get('DynamicConfig') || params.get('Config'));
-            mobileUserHasInteracted = false; // Always require interaction first
+            mobileUserHasInteracted = !isSharedLinkSession;
             
             if (isSharedLinkSession) {
                 // Capture original programmatic scroll functions and gate them
@@ -8534,300 +8516,6 @@
         } catch (err) { 
             logNonProdError('initializeMobileAutoScroll setup failed', err);
         }
-        
-        // Function to scroll to next card by ID
-        const scrollToNextCard = (currentElement, cardSelector) => {
-            if (!canAutoScroll()) return;
-            const allCards = Array.from(document.querySelectorAll(cardSelector));
-            const currentIndex = allCards.indexOf(currentElement);
-            
-            if (currentIndex >= 0 && currentIndex < allCards.length - 1) {
-                const nextCard = allCards[currentIndex + 1];
-                if (nextCard) {
-                    setTimeout(() => {
-                        const headerOffset = 180;
-                        const elementPosition = nextCard.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        });
-                    }, 300);
-                }
-            }
-        };
-        
-        // Company Setup Section - License Cards
-        const licenseCards = document.querySelectorAll('.license-card');
-        licenseCards.forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (shouldSuppressMobileAutoScrollFromTarget(e.target)) return;
-                scrollToNextCard(card, '.license-card');
-            });
-        });
-        
-        // License Select Buttons
-        const selectButtons = document.querySelectorAll('.select-btn');
-        selectButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                if (!canAutoScroll()) return;
-                // Scroll to duration options after selecting a license
-                const durationOptions = document.getElementById('duration-options');
-                if (durationOptions) {
-                    setTimeout(() => {
-                        const headerOffset = 80;
-                        const elementPosition = durationOptions.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        });
-                    }, 300);
-                }
-            });
-        });
-        
-        // Track user interactions with duration and shareholders
-        let durationInteracted = false;
-        let shareholdersInteracted = false;
-        
-        // Function to check if both sections have been interacted with
-        const checkBothSectionsInteracted = () => {
-            if (!canAutoScroll()) return;
-            if (durationInteracted && shareholdersInteracted) {
-                const businessActivitiesSection = document.getElementById('business-activities-section');
-                if (businessActivitiesSection && !businessActivitiesSection.classList.contains('locked')) {
-                    setTimeout(() => {
-                        const headerOffset = 80;
-                        const elementPosition = businessActivitiesSection.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        });
-                    }, 300);
-                }
-            }
-        };
-        
-        // Duration Buttons - mark as interacted and check if ready to scroll
-        const durationButtons = document.querySelectorAll('#duration-options .pill-option');
-        durationButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                durationInteracted = true;
-                // Don't immediately scroll, just scroll to shareholders section
-                if (!canAutoScroll()) return;
-                const shareholdersSection = document.getElementById('shareholders-selected-controls');
-                if (shareholdersSection && !shareholdersInteracted) {
-                    setTimeout(() => {
-                        const headerOffset = 80;
-                        const elementPosition = shareholdersSection.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        });
-                    }, 300);
-                } else {
-                    // If shareholders already interacted, check if ready for business activities
-                    checkBothSectionsInteracted();
-                }
-            });
-        });
-        
-        // Shareholders Buttons - mark as interacted and check if ready to scroll
-        // Use event delegation since these controls might be dynamically shown/hidden
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('#shareholders-selected-controls .quantity-btn')) {
-                shareholdersInteracted = true;
-                // Check if both sections have been interacted with
-                checkBothSectionsInteracted();
-            }
-        });
-        
-        // Also track shareholder selection button clicks
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('.select-btn[data-visa="shareholders"]')) {
-                shareholdersInteracted = true;
-                checkBothSectionsInteracted();
-            }
-        });
-        
-        // Business Activities Section - scroll to visa section after activity selection
-        // Note: Activity cards are dynamically generated, so we need to use event delegation
-        const businessActivitiesSection = document.getElementById('business-activities-section');
-        if (businessActivitiesSection) {
-            businessActivitiesSection.addEventListener('click', (e) => {
-                // Check if clicked element is an activity card
-                const activityCard = e.target.closest('.activity-card');
-                if (activityCard) {
-                    // Check if any activities are selected after a short delay (to allow selection to complete)
-                    setTimeout(() => {
-                        if (!canAutoScroll()) return;
-                        if (window.selectedActivities && window.selectedActivities.length > 0) {
-                            const visaOptionsSection = document.getElementById('visa-options-section');
-                            if (visaOptionsSection && !visaOptionsSection.classList.contains('locked')) {
-                                setTimeout(() => {
-                                    const headerOffset = 80;
-                                    const elementPosition = visaOptionsSection.getBoundingClientRect().top;
-                                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                                    window.scrollTo({
-                                        top: offsetPosition,
-                                        behavior: 'smooth'
-                                    });
-                                }, 300);
-                            }
-                        }
-                    }, 100);
-                }
-            });
-        }
-        
-        // Activity modal close - scroll to visa section after modal interaction
-        const activityModal = document.getElementById('activity-search-modal');
-        if (activityModal) {
-            const modalCloseHandler = () => {
-                // Check if any activities are selected after modal closes
-                setTimeout(() => {
-                    if (!canAutoScroll()) return;
-                    if (window.selectedActivities && window.selectedActivities.length > 0) {
-                        const visaOptionsSection = document.getElementById('visa-options-section');
-                        if (visaOptionsSection && !visaOptionsSection.classList.contains('locked')) {
-                            setTimeout(() => {
-                                const headerOffset = 80;
-                                const elementPosition = visaOptionsSection.getBoundingClientRect().top;
-                                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                                window.scrollTo({
-                                    top: offsetPosition,
-                                    behavior: 'smooth'
-                                });
-                            }, 300);
-                        }
-                    }
-                }, 200);
-            };
-            
-            // Add event listeners for modal close
-            const closeButton = activityModal.querySelector('.close-btn, .close');
-            const doneButton = activityModal.querySelector('#activity-done-btn');
-            if (closeButton) closeButton.addEventListener('click', modalCloseHandler);
-            if (doneButton) doneButton.addEventListener('click', modalCloseHandler);
-        }
-        
-        // Visa Options Section - scroll to next visa card or change status section
-        const visaCards = document.querySelectorAll('.visa-card:not(.change-status-card)');
-        visaCards.forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (shouldSuppressMobileAutoScrollFromTarget(e.target)) return;
-                if (!canAutoScroll()) return;
-                const allVisaCards = Array.from(document.querySelectorAll('.visa-card:not(.change-status-card)'));
-                const currentIndex = allVisaCards.indexOf(card);
-                
-                // If this is the last visa card, scroll to change status section
-                if (currentIndex === allVisaCards.length - 1) {
-                    const changeStatusSection = document.getElementById('change-status-section');
-                    if (changeStatusSection && !changeStatusSection.classList.contains('locked')) {
-                        setTimeout(() => {
-                            const headerOffset = 80;
-                            const elementPosition = changeStatusSection.getBoundingClientRect().top;
-                            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                            window.scrollTo({
-                                top: offsetPosition,
-                                behavior: 'smooth'
-                            });
-                        }, 300);
-                    }
-                } else {
-                    // Not the last card, scroll to next visa card
-                    scrollToNextCard(card, '.visa-card:not(.change-status-card)');
-                }
-            });
-        });
-        
-        // Visa Toggle Switches
-        const visaToggles = document.querySelectorAll('.visa-toggle-switch input');
-        visaToggles.forEach(toggle => {
-            toggle.addEventListener('click', () => {
-                if (!canAutoScroll()) return;
-                const visaCard = toggle.closest('.visa-card');
-                if (visaCard) {
-                    const allVisaCards = Array.from(document.querySelectorAll('.visa-card:not(.change-status-card)'));
-                    const currentIndex = allVisaCards.indexOf(visaCard);
-                    
-                    // If this is the last visa card, scroll to change status section
-                    if (currentIndex === allVisaCards.length - 1) {
-                        const changeStatusSection = document.getElementById('change-status-section');
-                        if (changeStatusSection && !changeStatusSection.classList.contains('locked')) {
-                            setTimeout(() => {
-                                const headerOffset = 80;
-                                const elementPosition = changeStatusSection.getBoundingClientRect().top;
-                                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                                window.scrollTo({
-                                    top: offsetPosition,
-                                    behavior: 'smooth'
-                            });
-                            }, 300);
-                        }
-                    } else {
-                        // Not the last card, scroll to next visa card
-                        scrollToNextCard(visaCard, '.visa-card:not(.change-status-card)');
-                    }
-                }
-            });
-        });
-        
-        // Change Status Section only — do not bind all .quantity-btn (visa/shareholder +/- would scroll here too)
-        const changeStatusSection = document.getElementById('change-status-section');
-        if (changeStatusSection) {
-            changeStatusSection.querySelectorAll('.quantity-btn').forEach(button => {
-                button.addEventListener('click', () => {
-                    if (!canAutoScroll()) return;
-                    const addonsSection = document.getElementById('addons-section');
-                    if (addonsSection && !addonsSection.classList.contains('locked')) {
-                        setTimeout(() => {
-                            const headerOffset = 80;
-                            const elementPosition = addonsSection.getBoundingClientRect().top;
-                            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                            window.scrollTo({
-                                top: offsetPosition,
-                                behavior: 'smooth'
-                            });
-                        }, 300);
-                    }
-                });
-            });
-        }
-        
-        // Add-ons Section - scroll to next addon category
-        const addonCategories = document.querySelectorAll('.addon-category-card');
-        addonCategories.forEach(category => {
-            category.addEventListener('click', (e) => {
-                if (shouldSuppressMobileAutoScrollFromTarget(e.target)) return;
-                if (!canAutoScroll()) return;
-                scrollToNextCard(category, '.addon-category-card');
-            });
-        });
-        
-        // Service selection within addons
-        const serviceCheckboxes = document.querySelectorAll('.addons-container input[type="checkbox"]');
-        serviceCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                if (!canAutoScroll()) return;
-                const categoryCard = checkbox.closest('.addon-category-card');
-                if (categoryCard) {
-                    scrollToNextCard(categoryCard, '.addon-category-card');
-                }
-            });
-        });
     }
 
     // Helper function to trigger form validation after programmatic field filling
@@ -9213,7 +8901,6 @@
                 e.preventDefault();
                 e.stopPropagation();
                 self._deactivate();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
                 try {
                   document.dispatchEvent(new CustomEvent('costCalculatorMobileWizardClose', { bubbles: true }));
                 } catch (err) { /* ignore */ }
@@ -9611,13 +9298,6 @@
             }
           });
       
-          // Scroll the form area near the top
-          var container = document.querySelector('.form-sections-container');
-          if (container) {
-            var top = container.getBoundingClientRect().top + window.pageYOffset - 60;
-            window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-          }
-
           var selfGo = this;
           requestAnimationFrame(function () {
             requestAnimationFrame(function () {
@@ -9674,7 +9354,6 @@
             this.goToStep(this.currentStep - 1);
           } else {
             this._deactivate();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         };
       
@@ -9683,10 +9362,6 @@
           var summary = this._getStickySummary();
           if (summary) {
             summary.style.display = 'block';
-            setTimeout(function () {
-              var top = summary.getBoundingClientRect().top + window.pageYOffset - 20;
-              window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-            }, 80);
           }
         };
       

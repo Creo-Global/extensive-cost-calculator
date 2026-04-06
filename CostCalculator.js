@@ -353,7 +353,7 @@
 
     // Function to detect user's location and update phone country
     function detectUserLocation() {
-        return fetch('https://api.meydanfz.ae/ip')
+        return fetch('https://api.creoglobal.co/ip')
             .then(response => {
                 if (!response || !response.ok) {
                     throw new Error('Location request failed');

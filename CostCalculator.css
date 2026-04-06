@@ -1278,7 +1278,7 @@ font-size: 18px;
     padding: 16px 16px 24px 16px !important;
     display: flex;
     flex-direction: column;
-    gap: p;
+    gap: 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 .addon-category-card:last-of-type {
@@ -4576,10 +4576,6 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
         border: none;
         overflow: unset;
         gap: 26px !important;
-        .addon-category-card{
-            padding: 0 !important;
-            border-bottom: none;
-        }
     }
     .addon-services{
         gap: 10px !important;

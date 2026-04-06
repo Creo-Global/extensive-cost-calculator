@@ -152,6 +152,8 @@ align-items: center;
 @media (max-width: 768px) {
     .license-cards-container {
         margin-bottom: 0px;
+        display: flex;
+        flex-direction: column-reverse;    
     }
 }
 

@@ -4298,6 +4298,10 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
       /* padding-top: calc(env(safe-area-inset-top, 0px) + var(--mobile-step-header-offset, 118px)); */
       padding-top: 30px;
     }
+
+    #MFZ-NewCostCalForm .change-status-section--mobile-merged {
+      margin-top: 24px;
+    }
   
     .mobile-step-header-row {
       display: grid;

@@ -45,6 +45,8 @@
     let _desktopSuccessGradientRaf = null;
     let _desktopSuccessGradientRO = null;
     let _desktopSuccessGradientWindowHandler = null;
+    let _mobileMergedChangeStatusOriginalModal = null;
+    let _mobileChangeStatusLayoutResizeBound = false;
 
     function updateDesktopStickySuccessGradientHeight() {
         var summary = document.querySelector('.sticky-summary-container.summary-pricing-revealed');
@@ -158,6 +160,14 @@
         if (hasInitializedCalculator) return;
         try {
             moveActivityModalsToBody();
+            syncMobileChangeStatusStepLayout();
+
+            if (!_mobileChangeStatusLayoutResizeBound) {
+                _mobileChangeStatusLayoutResizeBound = true;
+                window.addEventListener('resize', function () {
+                    syncMobileChangeStatusStepLayout();
+                });
+            }
 
             // Initialize user location detection
             if (typeof detectUserLocation === 'function') {
@@ -536,6 +546,42 @@
 
         countryField.dataset.resolvedCountryValue = resolvedValue;
         return resolvedValue;
+    }
+
+    function syncMobileChangeStatusStepLayout() {
+        const visaModal = document.querySelector('.form-modal[data-step="3"]');
+        const changeStatusSection = document.getElementById('change-status-section');
+        if (!visaModal || !changeStatusSection) return;
+
+        if (!_mobileMergedChangeStatusOriginalModal) {
+            const originalModal = changeStatusSection.closest('.form-modal[data-step]');
+            if (originalModal) {
+                _mobileMergedChangeStatusOriginalModal = originalModal;
+            }
+        }
+
+        const originalModal = _mobileMergedChangeStatusOriginalModal;
+        if (!originalModal) return;
+
+        const shouldMergeOnMobile = window.innerWidth <= 640;
+        const isCurrentlyMerged = changeStatusSection.parentElement === visaModal;
+
+        if (shouldMergeOnMobile) {
+            if (!isCurrentlyMerged) {
+                visaModal.appendChild(changeStatusSection);
+            }
+            changeStatusSection.classList.add('change-status-section--mobile-merged');
+            originalModal.dataset.mobileStepMerged = 'true';
+            originalModal.setAttribute('aria-hidden', 'true');
+            return;
+        }
+
+        if (isCurrentlyMerged) {
+            originalModal.appendChild(changeStatusSection);
+        }
+        changeStatusSection.classList.remove('change-status-section--mobile-merged');
+        originalModal.removeAttribute('data-mobile-step-merged');
+        originalModal.removeAttribute('aria-hidden');
     }
 
     function getContactProgressIndicator() {
@@ -9130,8 +9176,10 @@
          * is not hidden: inline display:none, hidden attribute, or computed display none.
          */
         MobileStepManager.prototype._getVisibleModals = function () {
+          syncMobileChangeStatusStepLayout();
           var result = [];
           document.querySelectorAll('.form-modal[data-step]').forEach(function (modal) {
+            if (modal.dataset.mobileStepMerged === 'true') return;
             var inner = modal.querySelector('.form-section');
             if (isWizardStepContentHidden(modal)) return;
             if (inner && isWizardStepContentHidden(inner)) return;
@@ -9148,6 +9196,7 @@
           }
       
           window.addEventListener('resize', function () {
+            syncMobileChangeStatusStepLayout();
             if (self._isMobile() && !self._domReady) {
               self._setupDOM();
             }
@@ -9183,6 +9232,7 @@
         MobileStepManager.prototype._setupDOM = function () {
           if (this._domReady) return;
           this._domReady = true;
+          syncMobileChangeStatusStepLayout();
           this._injectStepHeaders();
           this._bindStickySummaryBar();
           this._bindPaymentStep();

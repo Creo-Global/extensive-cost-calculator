@@ -549,9 +549,9 @@
     }
 
     function syncMobileChangeStatusStepLayout() {
-        const visaModal = document.querySelector('.form-modal[data-step="3"]');
+        const visaSection = document.getElementById('visa-options-section');
         const changeStatusSection = document.getElementById('change-status-section');
-        if (!visaModal || !changeStatusSection) return;
+        if (!visaSection || !changeStatusSection) return;
 
         if (!_mobileMergedChangeStatusOriginalModal) {
             const originalModal = changeStatusSection.closest('.form-modal[data-step]');
@@ -564,11 +564,16 @@
         if (!originalModal) return;
 
         const shouldMergeOnMobile = window.innerWidth <= 640;
-        const isCurrentlyMerged = changeStatusSection.parentElement === visaModal;
+        const isCurrentlyMerged = changeStatusSection.parentElement === visaSection;
 
         if (shouldMergeOnMobile) {
             if (!isCurrentlyMerged) {
-                visaModal.appendChild(changeStatusSection);
+                const mergeAnchor = visaSection.querySelector('#employee-visa-count');
+                if (mergeAnchor) {
+                    visaSection.insertBefore(changeStatusSection, mergeAnchor);
+                } else {
+                    visaSection.appendChild(changeStatusSection);
+                }
             }
             changeStatusSection.classList.add('change-status-section--mobile-merged');
             originalModal.dataset.mobileStepMerged = 'true';

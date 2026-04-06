@@ -386,8 +386,40 @@
         return !normalized || normalized === 'select country' || normalized === 'current country of residence';
     }
 
-    function getCountryFieldValue(field) {
-        const countryField = field || document.getElementById('Country-of-Residence');
+    function getCountryFieldCandidates(field) {
+        const seen = new Set();
+        const candidates = [];
+
+        const addCandidate = (element) => {
+            if (!element || seen.has(element)) return;
+            seen.add(element);
+            candidates.push(element);
+        };
+
+        addCandidate(field);
+
+        [
+            '#Country-of-Residence',
+            '[id="Country-of-Residence"]',
+            'select[name="Country-of-Residence"]',
+            'input[name="Country-of-Residence"]',
+            '[data-name="Country of Residence"]'
+        ].forEach((selector) => {
+            document.querySelectorAll(selector).forEach(addCandidate);
+        });
+
+        const countryLabels = Array.from(document.querySelectorAll('label[for="Country-of-Residence"]'));
+        countryLabels.forEach((label) => {
+            const group = label.closest('.form-group') || label.parentElement;
+            if (!group || !group.querySelectorAll) return;
+
+            group.querySelectorAll('select, input, [role="combobox"], [contenteditable="true"]').forEach(addCandidate);
+        });
+
+        return candidates;
+    }
+
+    function extractCountryValueFromField(countryField) {
         if (!countryField) return '';
 
         const directValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
@@ -452,6 +484,18 @@
         return '';
     }
 
+    function getCountryFieldValue(field) {
+        const candidates = getCountryFieldCandidates(field);
+        for (const candidate of candidates) {
+            const resolvedValue = extractCountryValueFromField(candidate);
+            if (!isCountryPlaceholderValue(resolvedValue)) {
+                return resolvedValue;
+            }
+        }
+
+        return '';
+    }
+
     function syncCountryFieldValue(field) {
         const countryField = field || document.getElementById('Country-of-Residence');
         if (!countryField) return '';
@@ -469,14 +513,25 @@
         }
 
         const options = Array.from(countryField.options || []);
-        const matchingOption = options.find((option) => {
+        const matchingOptionIndex = options.findIndex((option) => {
             const optionValue = String(option.value || '').trim();
             const optionText = String(option.textContent || '').trim();
             return optionValue === resolvedValue || optionText === resolvedValue;
         });
+        const matchingOption = matchingOptionIndex >= 0 ? options[matchingOptionIndex] : null;
 
         if (matchingOption) {
-            countryField.value = String(matchingOption.value || matchingOption.textContent || '').trim();
+            const nativeValue = String(matchingOption.value || matchingOption.textContent || '').trim();
+            options.forEach((option) => {
+                option.selected = false;
+                option.classList.remove('selected', 'current');
+            });
+            matchingOption.selected = true;
+            matchingOption.classList.add('selected', 'current');
+            countryField.selectedIndex = matchingOptionIndex;
+            countryField.value = nativeValue;
+            countryField.dataset.resolvedCountryValue = nativeValue;
+            return nativeValue;
         }
 
         countryField.dataset.resolvedCountryValue = resolvedValue;

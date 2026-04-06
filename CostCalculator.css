@@ -5168,11 +5168,6 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   display: none !important;
 }
 
-/* Hide the old payment header inside summary-payment-view (moved to top) */
-.sticky-summary-container.payment-view-active .summary-payment-view .summary-payment-header {
-  display: none !important;
-}
-
 /* Hide the simplified fee list in the payment card (full breakdown is shown above) */
 .sticky-summary-container.payment-view-active .summary-payment-fee-list,
 .sticky-summary-container.payment-view-active .summary-payment-divider {

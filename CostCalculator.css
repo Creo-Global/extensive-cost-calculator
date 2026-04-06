@@ -1931,6 +1931,7 @@ backdrop-filter: blur(24px);
     width: 36px;
     height: auto;
     margin-bottom: 0;
+    filter: invert(1);
 }
 
 .activity-card h3 {

@@ -8970,35 +8970,63 @@
         observer.observe(calculatorSection);
     }
 
+    function updateChatButtonZIndex(summaryVisible) {
+        var chatRoot = document.getElementById('cl-root');
+        if (!chatRoot) return;
+        if (window.innerWidth > 640) {
+            chatRoot.style.removeProperty('z-index');
+            return;
+        }
+        chatRoot.style.zIndex = summaryVisible ? '0' : '999';
+    }
+
     function initializeMobileSummaryVisibility() {
         var MOBILE_BP = 640;
         var ccSection = document.querySelector('.mfz-section.sec-cc.sec-cc-v2');
         if (!ccSection) return;
 
-        var observer = new IntersectionObserver(function (entries) {
-            if (window.innerWidth > MOBILE_BP) return;
+        function isSectionInViewport() {
+            var rect = ccSection.getBoundingClientRect();
+            return rect.top < window.innerHeight && rect.bottom > 0;
+        }
+
+        function applySummaryState(visible) {
             var summary = document.querySelector('.sticky-summary-container');
             if (!summary) return;
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    summary.classList.remove('cc-section-out-of-view');
-                } else {
-                    if (summary.classList.contains('sheet-open') && typeof window.closeMobileSheet === 'function') {
-                        window.closeMobileSheet();
-                    }
-                    summary.classList.add('cc-section-out-of-view');
+            if (visible) {
+                summary.classList.remove('cc-section-out-of-view');
+                updateChatButtonZIndex(true);
+            } else {
+                if (summary.classList.contains('sheet-open') && typeof window.closeMobileSheet === 'function') {
+                    window.closeMobileSheet();
                 }
+                summary.classList.add('cc-section-out-of-view');
+                updateChatButtonZIndex(false);
+            }
+        }
+
+        var observer = new IntersectionObserver(function (entries) {
+            if (window.innerWidth > MOBILE_BP) return;
+            entries.forEach(function (entry) {
+                applySummaryState(entry.isIntersecting);
             });
         }, { threshold: 0 });
 
         observer.observe(ccSection);
 
+        var resizeTimer;
         window.addEventListener('resize', function () {
-            var summary = document.querySelector('.sticky-summary-container');
-            if (!summary) return;
-            if (window.innerWidth > MOBILE_BP) {
-                summary.classList.remove('cc-section-out-of-view');
-            }
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                var summary = document.querySelector('.sticky-summary-container');
+                if (!summary) return;
+                if (window.innerWidth > MOBILE_BP) {
+                    summary.classList.remove('cc-section-out-of-view');
+                    updateChatButtonZIndex(false);
+                } else {
+                    applySummaryState(isSectionInViewport());
+                }
+            }, 100);
         });
     }
 
@@ -9473,6 +9501,8 @@
             var cc = form.closest('.cc-form');
             if (cc && cc !== root) cc.classList.add('mobile-steps-active');
           }
+          var mfzContainer = document.querySelector('.mfz-section.sec-cc.sec-cc-v2 > .mfz-container');
+          if (mfzContainer) mfzContainer.classList.add('mobile-steps-active');
 
           var summary = this._getStickySummary();
           if (summary) {
@@ -9503,6 +9533,8 @@
             var cc = form.closest('.cc-form');
             if (cc && cc !== root) cc.classList.remove('mobile-steps-active');
           }
+          var mfzContainer = document.querySelector('.mfz-section.sec-cc.sec-cc-v2 > .mfz-container');
+          if (mfzContainer) mfzContainer.classList.remove('mobile-steps-active');
 
           document.querySelectorAll('#MFZ-NewCostCalForm .form-modal[data-step]').forEach(function (m) {
             m.style.removeProperty('--mobile-step-header-offset');

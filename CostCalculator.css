@@ -3920,6 +3920,10 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
             
         }
     }
+    .mfz-section.sec-cc.sec-cc-v2 > .mfz-container.mobile-steps-active {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
     /* .mobile-steps-active{
         margin: 0 -16px;
         width: auto;

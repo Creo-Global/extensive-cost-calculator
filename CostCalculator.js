@@ -175,6 +175,9 @@
                 initializeStickyButtonsControl();
             }
             
+            if (typeof initializeMobileSummaryVisibility === 'function') {
+                initializeMobileSummaryVisibility();
+            }
 
             // Initialize sharing functionality
             initializeUnifiedSharing();
@@ -8965,6 +8968,38 @@
         });
 
         observer.observe(calculatorSection);
+    }
+
+    function initializeMobileSummaryVisibility() {
+        var MOBILE_BP = 640;
+        var ccSection = document.querySelector('.mfz-section.sec-cc.sec-cc-v2');
+        if (!ccSection) return;
+
+        var observer = new IntersectionObserver(function (entries) {
+            if (window.innerWidth > MOBILE_BP) return;
+            var summary = document.querySelector('.sticky-summary-container');
+            if (!summary) return;
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    summary.classList.remove('cc-section-out-of-view');
+                } else {
+                    if (summary.classList.contains('sheet-open') && typeof window.closeMobileSheet === 'function') {
+                        window.closeMobileSheet();
+                    }
+                    summary.classList.add('cc-section-out-of-view');
+                }
+            });
+        }, { threshold: 0 });
+
+        observer.observe(ccSection);
+
+        window.addEventListener('resize', function () {
+            var summary = document.querySelector('.sticky-summary-container');
+            if (!summary) return;
+            if (window.innerWidth > MOBILE_BP) {
+                summary.classList.remove('cc-section-out-of-view');
+            }
+        });
     }
 
     // Make core functions globally available

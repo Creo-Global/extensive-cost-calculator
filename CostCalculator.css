@@ -3909,7 +3909,7 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
     .mfz-section.sec-cc.sec-cc-v2{
         padding-top: 96px;    
         position: relative;
-        z-index: 999;    
+        z-index: 9;    
         .selected-activities-count{
             display: none !important;
         }
@@ -3930,6 +3930,18 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
     .b2c-costcalculator.mobile-steps-active #MFZ-NewCostCalForm .contact-form-section,
     .cc-form.mobile-steps-active #MFZ-NewCostCalForm .contact-form-section {
       display: none !important;
+    }
+
+    /* Hide the bottom sticky summary when the CC section scrolls out of view */
+    .sticky-summary-container.cc-section-out-of-view {
+      transform: translateY(100%) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
+      transition: transform 0.35s ease, opacity 0.25s ease, visibility 0s 0.35s !important;
+    }
+    .sticky-summary-container:not(.cc-section-out-of-view) {
+      transition: transform 0.35s ease, opacity 0.25s ease !important;
     }
 
     /* ── Sticky summary = bottom bar + expandable sheet (same HTML) ── */

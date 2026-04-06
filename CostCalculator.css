@@ -5151,6 +5151,12 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   display: flex;
 }
 
+@media (min-width: 641px) {
+  .sticky-summary-container.payment-view-active .grand-total-container {
+    display: none !important;
+  }
+}
+
 .sticky-summary-container.payment-view-active .summary-header,
 .sticky-summary-container.payment-view-active .simplified-summary,
 .sticky-summary-container.payment-view-active .summary-cta-group {
@@ -5175,6 +5181,13 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
 
 .sticky-summary-container.payment-view-active {
   overflow: visible !important;
+}
+
+.sticky-summary-container.payment-view-active::after {
+  display: none !important;
+  content: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
  
@@ -5296,6 +5309,7 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
 
 .summary-payment-section {
   margin-bottom: 16px;
+  display: none;
 }
 
 .summary-payment-section-title {

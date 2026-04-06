@@ -2838,6 +2838,7 @@ backdrop-filter: blur(24px);
 
 /* Progress indicator enhancement */
 .contact-form-progress {
+    display: none;
     margin-top: 16px;
     padding: 12px;
     background: #F3F4F6;
@@ -2846,9 +2847,18 @@ backdrop-filter: blur(24px);
     transition: all 0.3s ease;
 }
 
+.contact-form-progress.is-visible {
+    display: block;
+}
+
 .contact-form-progress.completed {
     background: #ECFDF5;
     border-left-color: #75B477;
+}
+
+.contact-form-progress.error {
+    background: #FEF2F2;
+    border-left-color: #EB5F40;
 }
 
 .contact-form-progress p {
@@ -2865,6 +2875,10 @@ backdrop-filter: blur(24px);
     color: #75B477;
 }
 
+.contact-form-progress.error p {
+    color: #B42318;
+}
+
 .contact-form-progress .progress-icon {
     width: 16px;
     height: 16px;
@@ -2876,8 +2890,19 @@ backdrop-filter: blur(24px);
     transition: all 0.3s ease;
 }
 
+.contact-form-progress .progress-icon svg {
+    display: block;
+}
+
 .contact-form-progress.completed .progress-icon {
     background: #75B477;
+}
+
+.contact-form-progress.error .progress-icon {
+    background: #EB5F40;
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 700;
 }
 /* Input field error state */
 .contact-form-section input.error {

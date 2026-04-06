@@ -40,6 +40,7 @@
         checkedAt: 0
     };
     let currentPaymentOrderId = '';
+    let hasContactValidationFeedback = false;
 
     let _desktopSuccessGradientRaf = null;
     let _desktopSuccessGradientRO = null;
@@ -478,6 +479,120 @@
         return resolvedValue;
     }
 
+    function getContactProgressIndicator() {
+        return document.getElementById('contact-progress');
+    }
+
+    function formatHumanList(items) {
+        if (!items || items.length === 0) return '';
+        if (items.length === 1) return items[0];
+        if (items.length === 2) return `${items[0]} and ${items[1]}`;
+        return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+    }
+
+    function getMissingRequiredContactItems() {
+        const missingFields = [];
+
+        if (!document.getElementById('full-name')?.value?.trim()) {
+            missingFields.push('your full name');
+        }
+
+        if (!document.getElementById('phone')?.value?.trim()) {
+            missingFields.push('your phone number');
+        }
+
+        if (!document.getElementById('email')?.value?.trim()) {
+            missingFields.push('your email address');
+        }
+
+        if (!getCountryFieldValue()) {
+            missingFields.push('your current country of residence');
+        }
+
+        const consentMissing = document.getElementById('consent-checkbox')?.checked !== true;
+
+        return {
+            missingFields,
+            consentMissing
+        };
+    }
+
+    function buildContactProgressErrorMessage() {
+        const { missingFields, consentMissing } = getMissingRequiredContactItems();
+        if (!missingFields.length && !consentMissing) {
+            return '';
+        }
+
+        if (!missingFields.length && consentMissing) {
+            return 'Please agree to the terms and privacy policy to calculate your business setup cost.';
+        }
+
+        if (missingFields.length && !consentMissing) {
+            return `Please complete ${formatHumanList(missingFields)} to calculate your business setup cost.`;
+        }
+
+        return `Please complete ${formatHumanList(missingFields)} and agree to the terms and privacy policy to calculate your business setup cost.`;
+    }
+
+    function setContactProgressState(state, message) {
+        const progressIndicator = getContactProgressIndicator();
+        if (!progressIndicator) return;
+
+        const progressText = progressIndicator.querySelector('p');
+        if (!progressText) return;
+
+        progressIndicator.classList.remove('is-visible', 'completed', 'error');
+
+        if (state === 'hidden') {
+            progressIndicator.setAttribute('hidden', '');
+            progressIndicator.setAttribute('aria-hidden', 'true');
+            return;
+        }
+
+        progressIndicator.removeAttribute('hidden');
+        progressIndicator.setAttribute('aria-hidden', 'false');
+        progressIndicator.classList.add('is-visible');
+
+        if (state === 'completed') {
+            progressIndicator.classList.add('completed');
+            progressText.innerHTML = `
+                <span class="progress-icon" id="progress-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20,6 9,17 4,12"/>
+                    </svg>
+                </span>
+                ${message}
+            `;
+            return;
+        }
+
+        progressIndicator.classList.add('error');
+        progressText.innerHTML = `
+            <span class="progress-icon" id="progress-icon">!</span>
+            ${message}
+        `;
+    }
+
+    function updateContactProgressFeedback() {
+        if (isContactFormCompleted) {
+            setContactProgressState('completed', "You're all set. Let's explore your business setup options.");
+            return;
+        }
+
+        if (!hasContactValidationFeedback) {
+            setContactProgressState('hidden');
+            return;
+        }
+
+        const errorMessage = buildContactProgressErrorMessage();
+        if (!errorMessage) {
+            setContactProgressState('hidden');
+            return;
+        }
+
+        setContactProgressState('error', errorMessage);
+    }
+
     // CENTRALIZED VALIDATION SYSTEM
     class FormValidator {
         constructor() {
@@ -624,6 +739,7 @@
             const resetPhoneValidationState = () => {
                 this.clearCachedPhoneValidation();
                 this.clearFieldError('phone');
+                updateContactProgressFeedback();
             };
 
             // Use MFZPhone if available (already loaded on Webflow site)
@@ -652,6 +768,7 @@
             phoneField.addEventListener('input', () => {
                 this.clearCachedPhoneValidation();
                 this.clearFieldError('phone');
+                updateContactProgressFeedback();
             });
 
             phoneField.addEventListener('blur', () => {
@@ -668,6 +785,7 @@
 
                 nameField.addEventListener('input', () => {
                     this.clearFieldError('full-name');
+                    updateContactProgressFeedback();
                 });
 
                 nameField.addEventListener('blur', () => {
@@ -679,6 +797,7 @@
             if (emailField) {
                 emailField.addEventListener('input', () => {
                     this.clearFieldError('email');
+                    updateContactProgressFeedback();
                 });
 
                 emailField.addEventListener('blur', () => {
@@ -693,6 +812,7 @@
                     if (countryValue) {
                         this.clearFieldError('Country-of-Residence');
                     }
+                    updateContactProgressFeedback();
                     if (typeof updateSectionLockState === 'function') {
                         updateSectionLockState();
                     }
@@ -730,6 +850,7 @@
                     this.clearFieldError('consent-checkbox');
                     // Remove error class from checkbox
                     consentCheckbox.classList.remove('error');
+                    updateContactProgressFeedback();
                     // Trigger section lock state update
                     if (typeof updateSectionLockState === 'function') {
                         updateSectionLockState();
@@ -1078,6 +1199,9 @@
                 }
             });
 
+            hasContactValidationFeedback = !isValid;
+            updateContactProgressFeedback();
+
             return isValid;
         }
         
@@ -1183,22 +1307,8 @@
                             contactSection.classList.add('validated', 'completed');
                         }
                         
-                        // Update progress indicator
-                        const progressIndicator = document.getElementById('contact-progress');
-                        if (progressIndicator) {
-                            progressIndicator.classList.add('completed');
-                            const progressText = progressIndicator.querySelector('p');
-                            if (progressText) {
-                                progressText.innerHTML = `
-                                    <span class="progress-icon" id="progress-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="20,6 9,17 4,12"/>
-                                        </svg>
-                                    </span>
-                                    You're all set. Let's explore your business setup options.
-                                `;
-                            }
-                        }
+                        hasContactValidationFeedback = false;
+                        updateContactProgressFeedback();
                         
                         // Reveal pricing
                         if (!pricingRevealed) {
@@ -5822,11 +5932,11 @@
         try {
             const isValid = validateContactForm();
             const contactSection = document.querySelector('.contact-form-section');
-            const progressIndicator = document.getElementById('contact-progress');
             
             if (isValid && !isContactFormCompleted) {
                 // Form is now valid - reveal sections with elegant animation
                 isContactFormCompleted = true;
+                hasContactValidationFeedback = false;
                 
                 // Add validation glow to contact form
                 if (contactSection) {
@@ -5871,21 +5981,7 @@
                     contactSection.classList.add('completed');
                 }
                 
-                // Update progress indicator
-                if (progressIndicator) {
-                    progressIndicator.classList.add('completed');
-                    const progressText = progressIndicator.querySelector('p');
-                    if (progressText) {
-                        progressText.innerHTML = `
-                            <span class="progress-icon" id="progress-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20,6 9,17 4,12"/>
-                                </svg>
-                            </span>
-                            You're all set. Let's explore your business setup options.
-                        `;
-                    }
-                }
+                updateContactProgressFeedback();
                 
             } else if (!isValid && isContactFormCompleted) {
                 // Form was valid but now invalid - only hide if user actually changed a field to invalid
@@ -5905,6 +6001,7 @@
                 }
                 
                 isContactFormCompleted = false;
+                hasContactValidationFeedback = true;
                 
                 // Remove validation glow
                 if (contactSection) {
@@ -5918,17 +6015,7 @@
                     contactSection.classList.remove('completed');
                 }
                 
-                // Update progress indicator
-                if (progressIndicator) {
-                    progressIndicator.classList.remove('completed');
-                    const progressText = progressIndicator.querySelector('p');
-                    if (progressText) {
-                        progressText.innerHTML = `
-                            <span class="progress-icon" id="progress-icon"></span>
-                            This is a required section to calculate your business setup cost.
-                        `;
-                    }
-                }
+                updateContactProgressFeedback();
             }
         } catch (err) {
      logNonProdError('updateSectionLockState suppressed error', err);

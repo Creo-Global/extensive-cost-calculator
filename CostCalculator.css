@@ -5155,6 +5155,10 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   .sticky-summary-container.payment-view-active .grand-total-container {
     display: none !important;
   }
+
+  .sticky-summary-container.payment-view-active .detailed-summary {
+    display: none !important;
+  }
 }
 
 .sticky-summary-container.payment-view-active .summary-header,

@@ -395,7 +395,11 @@
             return directValue;
         }
 
-        const selectedOption = countryField.selectedOptions && countryField.selectedOptions[0];
+        const selectedOption =
+            (countryField.selectedOptions && countryField.selectedOptions[0]) ||
+            (Number.isInteger(countryField.selectedIndex) && countryField.selectedIndex >= 0
+                ? countryField.options?.[countryField.selectedIndex]
+                : null);
         const selectedOptionValue = selectedOption && typeof selectedOption.value === 'string'
             ? selectedOption.value.trim()
             : '';
@@ -820,6 +824,15 @@
 
                 countryField.addEventListener('input', handleCountryValueUpdate);
                 countryField.addEventListener('change', handleCountryValueUpdate);
+                countryField.addEventListener('click', () => {
+                    setTimeout(handleCountryValueUpdate, 0);
+                });
+                countryField.addEventListener('keyup', () => {
+                    setTimeout(handleCountryValueUpdate, 0);
+                });
+                countryField.addEventListener('focusout', () => {
+                    setTimeout(handleCountryValueUpdate, 0);
+                });
 
                 countryField.addEventListener('blur', () => {
                     setTimeout(() => {
@@ -833,6 +846,28 @@
                         handleCountryValueUpdate();
                         this.validateField('Country-of-Residence');
                     });
+                }
+
+                if (typeof MutationObserver !== 'undefined' && !countryField._countrySyncObserver) {
+                    const observer = new MutationObserver(() => {
+                        handleCountryValueUpdate();
+                    });
+
+                    observer.observe(countryField, {
+                        attributes: true,
+                        attributeFilter: ['value', 'data-value', 'data-current-value', 'data-selected-value'],
+                        childList: true,
+                        subtree: true
+                    });
+
+                    Array.from(countryField.options || []).forEach((option) => {
+                        observer.observe(option, {
+                            attributes: true,
+                            attributeFilter: ['selected', 'value']
+                        });
+                    });
+
+                    countryField._countrySyncObserver = observer;
                 }
             }
 
@@ -1257,6 +1292,10 @@
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
+
+            if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                document.activeElement.blur();
+            }
 
             const submitBtn = e.target;
             const originalText = submitBtn.innerHTML;

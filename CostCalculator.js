@@ -353,7 +353,7 @@
 
     // Function to detect user's location and update phone country
     function detectUserLocation() {
-        return fetch('https://ipapi.co/json/')
+        return fetch('https://api.meydanfz.ae/ip')
             .then(response => {
                 if (!response || !response.ok) {
                     throw new Error('Location request failed');
@@ -361,10 +361,10 @@
                 return response.json();
             })
             .then(data => {
-                if (data && !data.error) {
+                if (data && data.success) {
                     userLocationInfo = {
                         country: data.country_code ? data.country_code.toLowerCase() : 'ae',
-                        country_name: data.country_name || 'United Arab Emirates',
+                        country_name: data.country || data.country_name || 'United Arab Emirates',
                         ip: data.ip || null,
                         city: data.city || null,
                         region: data.region || null,

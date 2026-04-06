@@ -3948,6 +3948,11 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
       transition: transform 0.35s ease, opacity 0.25s ease !important;
     }
 
+    /* Push chat widget behind the sticky summary when it's visible */
+    body.cc-summary-visible #cl-root {
+      z-index: 0 !important;
+    }
+
     /* ── Sticky summary = bottom bar + expandable sheet (same HTML) ── */
     /* top: auto — global .sticky-summary-container { top: 110px } must not apply with fixed or the bar sits below the header */
     .b2c-costcalculator.mobile-steps-active .sticky-summary-container,

@@ -8971,13 +8971,15 @@
     }
 
     function updateChatButtonZIndex(summaryVisible) {
-        var chatRoot = document.getElementById('cl-root');
-        if (!chatRoot) return;
         if (window.innerWidth > 640) {
-            chatRoot.style.removeProperty('z-index');
+            document.body.classList.remove('cc-summary-visible');
             return;
         }
-        chatRoot.style.zIndex = summaryVisible ? '0' : '999';
+        if (summaryVisible) {
+            document.body.classList.add('cc-summary-visible');
+        } else {
+            document.body.classList.remove('cc-summary-visible');
+        }
     }
 
     function initializeMobileSummaryVisibility() {

@@ -380,6 +380,104 @@
             });
     }
 
+    function isCountryPlaceholderValue(value) {
+        const normalized = String(value || '').trim().toLowerCase();
+        return !normalized || normalized === 'select country' || normalized === 'current country of residence';
+    }
+
+    function getCountryFieldValue(field) {
+        const countryField = field || document.getElementById('Country-of-Residence');
+        if (!countryField) return '';
+
+        const directValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
+        if (!isCountryPlaceholderValue(directValue)) {
+            return directValue;
+        }
+
+        const selectedOption = countryField.selectedOptions && countryField.selectedOptions[0];
+        const selectedOptionValue = selectedOption && typeof selectedOption.value === 'string'
+            ? selectedOption.value.trim()
+            : '';
+        if (!isCountryPlaceholderValue(selectedOptionValue)) {
+            return selectedOptionValue;
+        }
+
+        const selectedOptionText = selectedOption && typeof selectedOption.textContent === 'string'
+            ? selectedOption.textContent.trim()
+            : '';
+        if (!isCountryPlaceholderValue(selectedOptionText)) {
+            return selectedOptionText;
+        }
+
+        const wrapper = countryField.closest('.form-group') || countryField.parentElement || document;
+        const customValueSelectors = [
+            '.select2-selection__rendered',
+            '.nice-select .current',
+            '.nice-select .selected',
+            '.ms-input-wrap .current'
+        ];
+
+        for (const selector of customValueSelectors) {
+            const valueNode = wrapper && wrapper.querySelector ? wrapper.querySelector(selector) : null;
+            const textValue = valueNode && typeof valueNode.textContent === 'string'
+                ? valueNode.textContent.trim()
+                : '';
+            if (!isCountryPlaceholderValue(textValue)) {
+                return textValue;
+            }
+        }
+
+        const datasetCandidates = [
+            countryField.dataset?.resolvedCountryValue,
+            countryField.dataset?.selectedValue,
+            countryField.dataset?.currentValue,
+            countryField.dataset?.value,
+            countryField.getAttribute('data-selected-value'),
+            countryField.getAttribute('data-current-value'),
+            countryField.getAttribute('data-value')
+        ];
+
+        for (const candidate of datasetCandidates) {
+            const resolvedValue = String(candidate || '').trim();
+            if (!isCountryPlaceholderValue(resolvedValue)) {
+                return resolvedValue;
+            }
+        }
+
+        return '';
+    }
+
+    function syncCountryFieldValue(field) {
+        const countryField = field || document.getElementById('Country-of-Residence');
+        if (!countryField) return '';
+
+        const resolvedValue = getCountryFieldValue(countryField);
+        if (!resolvedValue) {
+            delete countryField.dataset.resolvedCountryValue;
+            return '';
+        }
+
+        const currentValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
+        if (!isCountryPlaceholderValue(currentValue)) {
+            countryField.dataset.resolvedCountryValue = currentValue;
+            return currentValue;
+        }
+
+        const options = Array.from(countryField.options || []);
+        const matchingOption = options.find((option) => {
+            const optionValue = String(option.value || '').trim();
+            const optionText = String(option.textContent || '').trim();
+            return optionValue === resolvedValue || optionText === resolvedValue;
+        });
+
+        if (matchingOption) {
+            countryField.value = String(matchingOption.value || matchingOption.textContent || '').trim();
+        }
+
+        countryField.dataset.resolvedCountryValue = resolvedValue;
+        return resolvedValue;
+    }
+
     // CENTRALIZED VALIDATION SYSTEM
     class FormValidator {
         constructor() {
@@ -590,13 +688,32 @@
 
             const countryField = document.getElementById('Country-of-Residence');
             if (countryField) {
-                countryField.addEventListener('change', () => {
-                    this.clearFieldError('Country-of-Residence');
-                });
+                const handleCountryValueUpdate = () => {
+                    const countryValue = syncCountryFieldValue(countryField);
+                    if (countryValue) {
+                        this.clearFieldError('Country-of-Residence');
+                    }
+                    if (typeof updateSectionLockState === 'function') {
+                        updateSectionLockState();
+                    }
+                };
+
+                countryField.addEventListener('input', handleCountryValueUpdate);
+                countryField.addEventListener('change', handleCountryValueUpdate);
 
                 countryField.addEventListener('blur', () => {
-                    this.validateField('Country-of-Residence');
+                    setTimeout(() => {
+                        handleCountryValueUpdate();
+                        this.validateField('Country-of-Residence');
+                    }, 0);
                 });
+
+                if (window.jQuery) {
+                    window.jQuery(countryField).on('select2:select select2:close', () => {
+                        handleCountryValueUpdate();
+                        this.validateField('Country-of-Residence');
+                    });
+                }
             }
 
             const submitBtn = document.getElementById('submitBtn');
@@ -676,7 +793,9 @@
                 return this.validateConsent(field);
             }
             
-            const value = field.value.trim();
+            const value = fieldType === 'country'
+                ? syncCountryFieldValue(field)
+                : field.value.trim();
             const rules = this.validationRules[fieldType];
 
             this.clearFieldError(fieldId);
@@ -967,7 +1086,7 @@
             const fullName = document.getElementById('full-name')?.value?.trim();
             const email = document.getElementById('email')?.value?.trim();
             const phoneField = document.getElementById('phone');
-            const country = document.getElementById('Country-of-Residence')?.value?.trim();
+            const country = getCountryFieldValue();
             const consentCheckbox = document.getElementById('consent-checkbox');
             
             // Name validation
@@ -4045,7 +4164,7 @@
             fullName: document.getElementById('full-name')?.value?.trim() || '',
             email: document.getElementById('email')?.value?.trim() || '',
             phone: getFormattedPhoneValue(),
-            country: document.getElementById('Country-of-Residence')?.value?.trim() || '',
+            country: getCountryFieldValue(),
             consentChecked: document.getElementById('consent-checkbox')?.checked === true,
             phoneValidationStatus: phoneState.phoneValidationStatus,
             phoneValidationMessage: phoneState.phoneValidationMessage,
@@ -5182,7 +5301,7 @@
             }
         }
         const email = document.getElementById("email").value;
-        const countryOfResidence = document.getElementById("Country-of-Residence").value;
+        const countryOfResidence = getCountryFieldValue();
         const bsaCode = document.getElementById("bsa-code")?.value || "";
         const licenseType = document.getElementById("license-type")?.value || "fawri";
         
@@ -5555,7 +5674,7 @@
             const fullName = document.getElementById('full-name')?.value?.trim();
             const email = document.getElementById('email')?.value?.trim();
             const phoneField = document.getElementById('phone');
-            const country = document.getElementById('Country-of-Residence')?.value?.trim();
+            const country = getCountryFieldValue();
             const consentCheckbox = document.getElementById('consent-checkbox');
             
             // Strict validation - ALL fields must be valid

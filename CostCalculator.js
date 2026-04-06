@@ -811,6 +811,30 @@
 
             const countryField = document.getElementById('Country-of-Residence');
             if (countryField) {
+                const syncCountryFromOptionTarget = (target) => {
+                    if (!target) return;
+
+                    const optionText = String(target.textContent || '').trim();
+                    if (!optionText) return;
+
+                    const matchingOption = Array.from(countryField.options || []).find((option) => {
+                        const optionValue = String(option.value || '').trim();
+                        const optionLabel = String(option.textContent || '').trim();
+                        return optionValue === optionText || optionLabel === optionText;
+                    });
+
+                    if (!matchingOption) return;
+
+                    const resolvedValue = String(matchingOption.value || matchingOption.textContent || '').trim();
+                    if (isCountryPlaceholderValue(resolvedValue)) return;
+
+                    countryField.value = resolvedValue;
+                    countryField.dataset.resolvedCountryValue = resolvedValue;
+
+                    handleCountryValueUpdate();
+                    this.validateField('Country-of-Residence');
+                };
+
                 const handleCountryValueUpdate = () => {
                     const countryValue = syncCountryFieldValue(countryField);
                     if (countryValue) {
@@ -846,6 +870,26 @@
                         handleCountryValueUpdate();
                         this.validateField('Country-of-Residence');
                     });
+                }
+
+                if (!countryField._countryOptionClickSyncBound) {
+                    const optionClickHandler = (event) => {
+                        const optionTarget = event.target && event.target.closest
+                            ? event.target.closest('.select2-results__option, .nice-select .option, [role="option"], [data-selected="true"], [aria-selected="true"]')
+                            : null;
+                        if (!optionTarget) return;
+
+                        setTimeout(() => {
+                            syncCountryFromOptionTarget(optionTarget);
+                        }, 0);
+                    };
+
+                    document.addEventListener('click', optionClickHandler, true);
+                    document.addEventListener('keyup', (event) => {
+                        if (event.key !== 'Enter' && event.key !== ' ') return;
+                        optionClickHandler(event);
+                    }, true);
+                    countryField._countryOptionClickSyncBound = true;
                 }
 
                 if (typeof MutationObserver !== 'undefined' && !countryField._countrySyncObserver) {

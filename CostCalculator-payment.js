@@ -42,6 +42,26 @@
       return String(value).trim();
     }
 
+    function hasOwnValue(target, key) {
+      return (
+        target &&
+        Object.prototype.hasOwnProperty.call(target, key) &&
+        target[key] !== undefined &&
+        target[key] !== null
+      );
+    }
+
+    function pickFirstDefinedValue(source, aliases, fallbackValue) {
+      var aliasList = Array.isArray(aliases) ? aliases : [aliases];
+      for (var i = 0; i < aliasList.length; i += 1) {
+        var key = aliasList[i];
+        if (hasOwnValue(source, key)) {
+          return source[key];
+        }
+      }
+      return fallbackValue;
+    }
+
     function splitFullName(fullName) {
       var normalized = normalizeString(fullName);
       if (!normalized) {
@@ -349,16 +369,303 @@
     function buildPaymentSessionData(input) {
       var nextInput = input || {};
       return {
-        name: normalizeString(nextInput.name),
+        fullName: normalizeString(nextInput.fullName || nextInput.name),
         email: normalizeString(nextInput.email),
         phone: normalizeString(nextInput.phone),
         country: normalizeString(nextInput.country),
-        order_id: normalizeString(nextInput.orderId),
-        payment_amount: Number(nextInput.paymentAmount || 0),
-        payment_type: normalizeString(nextInput.paymentType || PAYMENT_CONFIG.paymentType),
-        tracking_id: normalizeString(nextInput.trackingId),
+        orderId: normalizeString(nextInput.orderId),
+        paymentAmount: Number(nextInput.paymentAmount || 0),
+        paymentType: normalizeString(nextInput.paymentType || PAYMENT_CONFIG.paymentType),
+        trackingId: normalizeString(nextInput.trackingId),
         timestamp: normalizeString(nextInput.timestamp || new Date().toISOString()),
       };
+    }
+
+    function createUnifiedSubmissionPayload(input) {
+      var source = input || {};
+      var unifiedPayload = {
+        actionType: normalizeString(pickFirstDefinedValue(source, ['actionType', 'action_type'], '')),
+        leadStatus: normalizeString(
+          pickFirstDefinedValue(source, ['leadStatus', 'lead_status'], 'complete'),
+        ),
+        incompleteReason: normalizeString(
+          pickFirstDefinedValue(source, ['incompleteReason', 'incomplete_reason', 'reason'], ''),
+        ),
+        formStatus: normalizeString(
+          pickFirstDefinedValue(source, ['formStatus', 'form_status'], ''),
+        ),
+        formId: normalizeString(pickFirstDefinedValue(source, ['formId', 'form_id'], '')),
+        formName: normalizeString(pickFirstDefinedValue(source, ['formName', 'form_name'], '')),
+        fullName: normalizeString(
+          pickFirstDefinedValue(source, ['fullName', 'full_name', 'name'], ''),
+        ),
+        email: normalizeString(pickFirstDefinedValue(source, 'email', '')),
+        phone: normalizeString(pickFirstDefinedValue(source, 'phone', '')),
+        countryOfResidence: normalizeString(
+          pickFirstDefinedValue(source, ['countryOfResidence', 'country_of_residence', 'country'], ''),
+        ),
+        consent: normalizeString(pickFirstDefinedValue(source, 'consent', '')),
+        bsaCode: normalizeString(pickFirstDefinedValue(source, ['bsaCode', 'bsa_code'], '')),
+        officeSpace: normalizeString(
+          pickFirstDefinedValue(source, ['officeSpace', 'office_space'], PAYMENT_CONFIG.defaultOfficeSpace),
+        ),
+        licenseType: normalizeString(
+          pickFirstDefinedValue(source, ['licenseType', 'license_type'], ''),
+        ),
+        licenseDuration: pickFirstDefinedValue(
+          source,
+          ['licenseDuration', 'license_duration'],
+          '',
+        ),
+        shareholdersCount: pickFirstDefinedValue(
+          source,
+          ['shareholdersCount', 'shareholders_count', 'shareholdersRange', 'shareholders_range', 'shareholders'],
+          '',
+        ),
+        selectedActivities: normalizeString(
+          pickFirstDefinedValue(source, ['selectedActivities', 'selected_activities', 'businessActivities', 'business_activities'], ''),
+        ),
+        selectedActivitiesCount: pickFirstDefinedValue(
+          source,
+          ['selectedActivitiesCount', 'selected_activities_count'],
+          0,
+        ),
+        selectedActivitiesDetails: normalizeString(
+          pickFirstDefinedValue(source, ['selectedActivitiesDetails', 'selected_activities_details'], ''),
+        ),
+        investorVisas: pickFirstDefinedValue(
+          source,
+          ['investorVisas', 'investor_visas', 'investorVisa', 'investor_visa'],
+          0,
+        ),
+        employeeVisas: pickFirstDefinedValue(
+          source,
+          ['employeeVisas', 'employee_visas', 'employeeVisa', 'employee_visa'],
+          0,
+        ),
+        dependencyVisas: pickFirstDefinedValue(
+          source,
+          ['dependencyVisas', 'dependency_visas', 'dependencyVisa', 'dependency_visa'],
+          0,
+        ),
+        totalVisas: pickFirstDefinedValue(source, ['totalVisas', 'total_visas'], ''),
+        investorVisaNeeded: normalizeString(
+          pickFirstDefinedValue(source, ['investorVisaNeeded', 'investor_visa_needed'], ''),
+        ),
+        employeeVisaNeeded: normalizeString(
+          pickFirstDefinedValue(source, ['employeeVisaNeeded', 'employee_visa_needed'], ''),
+        ),
+        businessBankAccount: normalizeString(
+          pickFirstDefinedValue(source, ['businessBankAccount', 'business_bank_account'], ''),
+        ),
+        vipMedicalEid: normalizeString(
+          pickFirstDefinedValue(source, ['vipMedicalEid', 'vip_medical_eid'], ''),
+        ),
+        selectedAddons: normalizeString(
+          pickFirstDefinedValue(source, ['selectedAddons', 'selected_addons', 'addons'], ''),
+        ),
+        selectedAddonsCount: pickFirstDefinedValue(
+          source,
+          ['selectedAddonsCount', 'selected_addons_count'],
+          0,
+        ),
+        selectedAddonsDetails: normalizeString(
+          pickFirstDefinedValue(source, ['selectedAddonsDetails', 'selected_addons_details'], ''),
+        ),
+        applicantsInsideUae: pickFirstDefinedValue(
+          source,
+          ['applicantsInsideUae', 'applicants_inside_uae', 'changeStatusInsideUAE', 'change_status_inside_uae'],
+          0,
+        ),
+        applicantsOutsideUae: pickFirstDefinedValue(
+          source,
+          ['applicantsOutsideUae', 'applicants_outside_uae', 'changeStatusOutsideUAE', 'change_status_outside_uae'],
+          0,
+        ),
+        totalCost: pickFirstDefinedValue(source, ['totalCost', 'total_cost'], 0),
+        licenseCost: pickFirstDefinedValue(source, ['licenseCost', 'license_cost'], 0),
+        visaCost: pickFirstDefinedValue(source, ['visaCost', 'visa_cost'], 0),
+        addonsCost: pickFirstDefinedValue(source, ['addonsCost', 'addons_cost'], 0),
+        businessActivitiesCost: pickFirstDefinedValue(
+          source,
+          ['businessActivitiesCost', 'business_activities_cost'],
+          0,
+        ),
+        changeStatusCost: pickFirstDefinedValue(
+          source,
+          ['changeStatusCost', 'change_status_cost'],
+          0,
+        ),
+        knowledgeFee: pickFirstDefinedValue(source, ['knowledgeFee', 'knowledge_fee'], 0),
+        officeCost: pickFirstDefinedValue(source, ['officeCost', 'office_cost'], 0),
+        costBreakdown: normalizeString(
+          pickFirstDefinedValue(source, ['costBreakdown', 'cost_breakdown'], ''),
+        ),
+        licenseBaseCostPerYear: pickFirstDefinedValue(
+          source,
+          ['licenseBaseCostPerYear', 'license_base_cost_per_year'],
+          0,
+        ),
+        licenseDurationYears: pickFirstDefinedValue(
+          source,
+          ['licenseDurationYears', 'license_duration_years'],
+          0,
+        ),
+        licenseDiscountPercentage: pickFirstDefinedValue(
+          source,
+          ['licenseDiscountPercentage', 'license_discount_percentage'],
+          0,
+        ),
+        additionalShareholdersCount: pickFirstDefinedValue(
+          source,
+          ['additionalShareholdersCount', 'additional_shareholders_count'],
+          0,
+        ),
+        additionalShareholdersCost: pickFirstDefinedValue(
+          source,
+          ['additionalShareholdersCost', 'additional_shareholders_cost'],
+          0,
+        ),
+        shareableLink: normalizeString(
+          pickFirstDefinedValue(source, ['shareableLink', 'shareable_link'], ''),
+        ),
+        configurationId: normalizeString(
+          pickFirstDefinedValue(source, ['configurationId', 'configuration_id'], ''),
+        ),
+        lastViewedTimestamp: normalizeString(
+          pickFirstDefinedValue(source, ['lastViewedTimestamp', 'last_viewed_timestamp'], ''),
+        ),
+        clientName: normalizeString(pickFirstDefinedValue(source, ['clientName', 'client_name'], '')),
+        clientEmail: normalizeString(pickFirstDefinedValue(source, ['clientEmail', 'client_email'], '')),
+        clientPhone: normalizeString(pickFirstDefinedValue(source, ['clientPhone', 'client_phone'], '')),
+        clientId: normalizeString(pickFirstDefinedValue(source, ['clientId', 'client_id'], '')),
+        salespersonName: normalizeString(
+          pickFirstDefinedValue(source, ['salespersonName', 'salesperson_name'], ''),
+        ),
+        salespersonEmail: normalizeString(
+          pickFirstDefinedValue(source, ['salespersonEmail', 'salesperson_email'], ''),
+        ),
+        salespersonPhone: normalizeString(
+          pickFirstDefinedValue(source, ['salespersonPhone', 'salesperson_phone'], ''),
+        ),
+        orderId: normalizeString(pickFirstDefinedValue(source, ['orderId', 'order_id'], '')),
+        trackingId: normalizeString(pickFirstDefinedValue(source, ['trackingId', 'tracking_id'], '')),
+        paymentInitiated: normalizeString(
+          pickFirstDefinedValue(source, ['paymentInitiated', 'payment_initiated'], ''),
+        ),
+        paymentType: normalizeString(
+          pickFirstDefinedValue(source, ['paymentType', 'payment_type'], ''),
+        ),
+        paymentAmount: pickFirstDefinedValue(source, ['paymentAmount', 'payment_amount'], ''),
+        paymentStatus: normalizeString(
+          pickFirstDefinedValue(source, ['paymentStatus', 'payment_status'], ''),
+        ),
+        paymentMode: normalizeString(
+          pickFirstDefinedValue(source, ['paymentMode', 'payment_mode'], ''),
+        ),
+        transDate: normalizeString(pickFirstDefinedValue(source, ['transDate', 'trans_date'], '')),
+        bankRefNo: normalizeString(pickFirstDefinedValue(source, ['bankRefNo', 'bank_ref_no'], '')),
+        failureMessage: normalizeString(
+          pickFirstDefinedValue(source, ['failureMessage', 'failure_message'], ''),
+        ),
+        statusMessage: normalizeString(
+          pickFirstDefinedValue(source, ['statusMessage', 'status_message'], ''),
+        ),
+        cardName: normalizeString(pickFirstDefinedValue(source, ['cardName', 'card_name'], '')),
+        currency: normalizeString(
+          pickFirstDefinedValue(source, 'currency', PAYMENT_CONFIG.currency),
+        ),
+        responseCode: normalizeString(
+          pickFirstDefinedValue(source, ['responseCode', 'response_code'], ''),
+        ),
+        billingName: normalizeString(
+          pickFirstDefinedValue(source, ['billingName', 'billing_name'], ''),
+        ),
+        billingEmail: normalizeString(
+          pickFirstDefinedValue(source, ['billingEmail', 'billing_email'], ''),
+        ),
+        billingTel: normalizeString(
+          pickFirstDefinedValue(source, ['billingTel', 'billing_tel'], ''),
+        ),
+        scheduledDate: normalizeString(
+          pickFirstDefinedValue(source, ['scheduledDate', 'scheduled_date'], ''),
+        ),
+        scheduledTime: normalizeString(
+          pickFirstDefinedValue(source, ['scheduledTime', 'scheduled_time'], ''),
+        ),
+        scheduledDateTimeIso: normalizeString(
+          pickFirstDefinedValue(source, ['scheduledDateTimeIso', 'scheduledDateTimeISO', 'scheduled_date_time_iso'], ''),
+        ),
+        scheduledTimezone: normalizeString(
+          pickFirstDefinedValue(source, ['scheduledTimezone', 'timezone'], ''),
+        ),
+        utmSource: normalizeString(pickFirstDefinedValue(source, ['utmSource', 'utm_source'], '')),
+        utmMedium: normalizeString(pickFirstDefinedValue(source, ['utmMedium', 'utm_medium'], '')),
+        utmCampaign: normalizeString(
+          pickFirstDefinedValue(source, ['utmCampaign', 'utm_campaign'], ''),
+        ),
+        utmTerm: normalizeString(pickFirstDefinedValue(source, ['utmTerm', 'utm_term'], '')),
+        utmContent: normalizeString(
+          pickFirstDefinedValue(source, ['utmContent', 'utm_content'], ''),
+        ),
+        pageUrl: normalizeString(
+          pickFirstDefinedValue(source, ['pageUrl', 'page_url', 'currentUrl', 'current_url'], ''),
+        ),
+        pageReferrer: normalizeString(
+          pickFirstDefinedValue(source, ['pageReferrer', 'page_referrer'], ''),
+        ),
+        browserInfo: normalizeString(
+          pickFirstDefinedValue(source, ['browserInfo', 'browser_info'], ''),
+        ),
+        screenResolution: normalizeString(
+          pickFirstDefinedValue(source, ['screenResolution', 'screen_resolution'], ''),
+        ),
+        userIp: normalizeString(pickFirstDefinedValue(source, ['userIp', 'user_ip'], '')),
+        userCountry: normalizeString(
+          pickFirstDefinedValue(source, ['userCountry', 'user_country'], ''),
+        ),
+        userCountryName: normalizeString(
+          pickFirstDefinedValue(source, ['userCountryName', 'user_country_name'], ''),
+        ),
+        userCity: normalizeString(pickFirstDefinedValue(source, ['userCity', 'user_city'], '')),
+        userRegion: normalizeString(pickFirstDefinedValue(source, ['userRegion', 'user_region'], '')),
+        userTimezone: normalizeString(
+          pickFirstDefinedValue(source, ['userTimezone', 'user_timezone'], ''),
+        ),
+        sectionsInteracted: normalizeString(
+          pickFirstDefinedValue(source, ['sectionsInteracted', 'sections_interacted'], ''),
+        ),
+        submissionTimestamp: normalizeString(
+          pickFirstDefinedValue(
+            source,
+            ['submissionTimestamp', 'submission_timestamp', 'submissionTime', 'submission_time'],
+            new Date().toISOString(),
+          ),
+        ),
+        invoiceCurrency: normalizeString(
+          pickFirstDefinedValue(source, ['invoiceCurrency', 'invoice_currency'], PAYMENT_CONFIG.currency),
+        ),
+        invoiceCurrencySymbol: normalizeString(
+          pickFirstDefinedValue(source, ['invoiceCurrencySymbol', 'invoice_currency_symbol'], ''),
+        ),
+        calculationVersion: normalizeString(
+          pickFirstDefinedValue(source, ['calculationVersion', 'calculation_version'], ''),
+        ),
+      };
+
+      if (!unifiedPayload.orderId) {
+        unifiedPayload.orderId = generateOrderId();
+      }
+
+      if (!unifiedPayload.trackingId) {
+        unifiedPayload.trackingId = '';
+      }
+
+      if (!unifiedPayload.countryOfResidence && unifiedPayload.userCountryName) {
+        unifiedPayload.countryOfResidence = unifiedPayload.userCountryName;
+      }
+
+      return unifiedPayload;
     }
 
     function buildPaymentLifecyclePayload(input) {
@@ -368,86 +675,76 @@
       var payment = nextInput.payment || {};
       var metadata = nextInput.metadata || {};
       var form = nextInput.form || {};
-      var name = normalizeString(contact.name);
-      var splitName = splitFullName(name);
       var actionType = normalizeString(nextInput.actionType);
 
-      var payload = {
-        name: name,
-        First_Name: splitName.firstName,
-        Last_Name: splitName.lastName,
-        email: normalizeString(contact.email),
-        phone: normalizeString(contact.phone),
-        country: normalizeString(contact.country),
-        consent: normalizeString(contact.consent),
-        officeSpace: normalizeString(calculator.officeSpace || PAYMENT_CONFIG.defaultOfficeSpace),
-        shareholders: normalizeString(calculator.shareholders),
-        selectedActivities: normalizeString(calculator.selectedActivities),
-        investorVisa: calculator.investorVisa !== undefined ? calculator.investorVisa : '',
-        employeeVisa: calculator.employeeVisa !== undefined ? calculator.employeeVisa : '',
-        businessBankAccount: normalizeString(calculator.businessBankAccount),
-        vipMedicalEid: normalizeString(calculator.vipMedicalEid),
-        totalCost: calculator.totalCost !== undefined ? calculator.totalCost : '',
-        licenseCost: calculator.licenseCost !== undefined ? calculator.licenseCost : '',
-        businessActivitiesCost:
-          calculator.businessActivitiesCost !== undefined ? calculator.businessActivitiesCost : '',
+      return createUnifiedSubmissionPayload({
         actionType: formatActionType(actionType),
-        lead_status: normalizeString(nextInput.leadStatus || 'complete'),
-        incomplete_reason: normalizeString(nextInput.reason),
-        form_id: normalizeString(form.formId),
-        form_name: normalizeString(form.formName),
-        order_id: normalizeString(payment.orderId),
-        license_duration: normalizeString(calculator.licenseDuration),
-        visa_cost: calculator.visaCost !== undefined ? calculator.visaCost : '',
-        knowledge_fee: calculator.knowledgeFee !== undefined ? calculator.knowledgeFee : '',
-        investor_visa_needed: normalizeString(calculator.investorVisaNeeded),
-        employee_visa_needed: normalizeString(calculator.employeeVisaNeeded),
-        change_status_inside_uae:
-          calculator.changeStatusInsideUAE !== undefined ? calculator.changeStatusInsideUAE : '',
-        change_status_outside_uae:
-          calculator.changeStatusOutsideUAE !== undefined ? calculator.changeStatusOutsideUAE : '',
-        change_status_cost:
-          calculator.changeStatusCost !== undefined ? calculator.changeStatusCost : '',
-        addons: normalizeString(calculator.addons),
-        addons_cost: calculator.addonsCost !== undefined ? calculator.addonsCost : '',
-        powered_by: normalizeString(nextInput.poweredBy || 'Webflow'),
-        payment_initiated: normalizeString(payment.paymentInitiated),
-        form_status: normalizeString(payment.formStatus),
-        payment_type: normalizeString(payment.paymentType),
-        payment_amount: payment.paymentAmount !== undefined ? payment.paymentAmount : '',
-        scheduledDate: normalizeString(nextInput.scheduledDate),
-        scheduledTime: normalizeString(nextInput.scheduledTime),
-        scheduledDateTimeISO: normalizeString(nextInput.scheduledDateTimeISO),
-        timezone: normalizeString(nextInput.timezone),
-        utm_source: normalizeString(metadata.utm_source),
-        utm_medium: normalizeString(metadata.utm_medium),
-        utm_campaign: normalizeString(metadata.utm_campaign),
-        utm_term: normalizeString(metadata.utm_term),
-        utm_content: normalizeString(metadata.utm_content),
-        page_url: normalizeString(metadata.page_url),
-        page_referrer: normalizeString(metadata.page_referrer),
-        browser_info: normalizeString(metadata.browser_info),
-        screen_resolution: normalizeString(metadata.screen_resolution),
-        submission_time: normalizeString(metadata.submission_time),
-      };
-
-      if (actionType !== 'payment_initiated') {
-        payload.tracking_id = normalizeString(payment.trackingId);
-        payload.payment_status = normalizeString(payment.paymentStatus);
-        payload.payment_mode = normalizeString(payment.paymentMode);
-        payload.trans_date = normalizeString(payment.transDate);
-        payload.bank_ref_no = normalizeString(payment.bankRefNo);
-        payload.failure_message = normalizeString(payment.failureMessage);
-        payload.status_message = normalizeString(payment.statusMessage);
-        payload.card_name = normalizeString(payment.cardName);
-        payload.currency = normalizeString(payment.currency || PAYMENT_CONFIG.currency);
-        payload.response_code = normalizeString(payment.responseCode);
-        payload.billing_name = normalizeString(payment.billingName);
-        payload.billing_email = normalizeString(payment.billingEmail);
-        payload.billing_tel = normalizeString(payment.billingTel);
-      }
-
-      return payload;
+        leadStatus: nextInput.leadStatus || 'complete',
+        incompleteReason: nextInput.reason,
+        formId: form.formId,
+        formName: form.formName,
+        fullName: contact.fullName || contact.name,
+        email: contact.email,
+        phone: contact.phone,
+        countryOfResidence: contact.country,
+        consent: contact.consent,
+        officeSpace: calculator.officeSpace || PAYMENT_CONFIG.defaultOfficeSpace,
+        licenseType: calculator.licenseType,
+        shareholdersCount: calculator.shareholders,
+        selectedActivities: calculator.selectedActivities,
+        investorVisas: calculator.investorVisa,
+        employeeVisas: calculator.employeeVisa,
+        businessBankAccount: calculator.businessBankAccount,
+        vipMedicalEid: calculator.vipMedicalEid,
+        totalCost: calculator.totalCost,
+        licenseCost: calculator.licenseCost,
+        businessActivitiesCost: calculator.businessActivitiesCost,
+        licenseDuration: calculator.licenseDuration,
+        visaCost: calculator.visaCost,
+        knowledgeFee: calculator.knowledgeFee,
+        investorVisaNeeded: calculator.investorVisaNeeded,
+        employeeVisaNeeded: calculator.employeeVisaNeeded,
+        applicantsInsideUae: calculator.changeStatusInsideUAE,
+        applicantsOutsideUae: calculator.changeStatusOutsideUAE,
+        changeStatusCost: calculator.changeStatusCost,
+        selectedAddons: calculator.addons,
+        addonsCost: calculator.addonsCost,
+        orderId: payment.orderId,
+        trackingId: payment.trackingId,
+        paymentInitiated: payment.paymentInitiated,
+        formStatus: payment.formStatus,
+        paymentType: payment.paymentType,
+        paymentAmount: payment.paymentAmount,
+        paymentStatus: actionType !== 'payment_initiated' ? payment.paymentStatus : '',
+        paymentMode: actionType !== 'payment_initiated' ? payment.paymentMode : '',
+        transDate: actionType !== 'payment_initiated' ? payment.transDate : '',
+        bankRefNo: actionType !== 'payment_initiated' ? payment.bankRefNo : '',
+        failureMessage: actionType !== 'payment_initiated' ? payment.failureMessage : '',
+        statusMessage: actionType !== 'payment_initiated' ? payment.statusMessage : '',
+        cardName: actionType !== 'payment_initiated' ? payment.cardName : '',
+        currency:
+          actionType !== 'payment_initiated'
+            ? payment.currency || PAYMENT_CONFIG.currency
+            : PAYMENT_CONFIG.currency,
+        responseCode: actionType !== 'payment_initiated' ? payment.responseCode : '',
+        billingName: actionType !== 'payment_initiated' ? payment.billingName : '',
+        billingEmail: actionType !== 'payment_initiated' ? payment.billingEmail : '',
+        billingTel: actionType !== 'payment_initiated' ? payment.billingTel : '',
+        scheduledDate: nextInput.scheduledDate,
+        scheduledTime: nextInput.scheduledTime,
+        scheduledDateTimeIso: nextInput.scheduledDateTimeISO,
+        scheduledTimezone: nextInput.timezone,
+        utmSource: metadata.utm_source,
+        utmMedium: metadata.utm_medium,
+        utmCampaign: metadata.utm_campaign,
+        utmTerm: metadata.utm_term,
+        utmContent: metadata.utm_content,
+        pageUrl: metadata.page_url,
+        pageReferrer: metadata.page_referrer,
+        browserInfo: metadata.browser_info,
+        screenResolution: metadata.screen_resolution,
+        submissionTimestamp: metadata.submission_time,
+      });
     }
 
     function parsePaymentCallbackParams(input, options) {
@@ -506,10 +803,10 @@
           : actionType === 'payment_cancelled'
             ? 'payment_cancelled'
             : 'payment_failed';
-      var orderId = normalizeString(searchParams.get('order_id')) || 'N/A';
+      var orderId = normalizeString(searchParams.get('order_id'));
       var amount = normalizeString(searchParams.get('amount')) || '0';
-      var trackingId = normalizeString(searchParams.get('tracking_id')) || 'N/A';
-      var paymentMode = normalizeString(searchParams.get('payment_mode')) || 'N/A';
+      var trackingId = normalizeString(searchParams.get('tracking_id'));
+      var paymentMode = normalizeString(searchParams.get('payment_mode'));
       var transDate =
         normalizeString(searchParams.get('trans_date')) ||
         normalizeString(nextOptions.nowString) ||
@@ -557,6 +854,7 @@
       generateOrderId: generateOrderId,
       buildSecurePaymentRequest: buildSecurePaymentRequest,
       buildPaymentSessionData: buildPaymentSessionData,
+      createUnifiedSubmissionPayload: createUnifiedSubmissionPayload,
       buildPaymentLifecyclePayload: buildPaymentLifecyclePayload,
       parsePaymentCallbackParams: parsePaymentCallbackParams,
     };

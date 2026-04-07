@@ -42,6 +42,46 @@
     let currentPaymentOrderId = '';
     let hasContactValidationFeedback = false;
 
+    function generateFallbackOrderId() {
+        return `${Date.now()}${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
+    }
+
+    function ensureSubmissionOrderId(preferredOrderId = '') {
+        const normalizedPreferredOrderId = String(preferredOrderId || '').trim();
+
+        if (normalizedPreferredOrderId) {
+            currentPaymentOrderId = normalizedPreferredOrderId;
+            return currentPaymentOrderId;
+        }
+
+        if (currentPaymentOrderId) {
+            return currentPaymentOrderId;
+        }
+
+        currentPaymentOrderId = paymentIntegration && typeof paymentIntegration.generateOrderId === 'function'
+            ? paymentIntegration.generateOrderId()
+            : generateFallbackOrderId();
+
+        return currentPaymentOrderId;
+    }
+
+    function normalizeSubmissionPayload(payload) {
+        const rawPayload = payload && typeof payload === 'object' ? payload : {};
+        const normalizer = paymentIntegration && typeof paymentIntegration.createUnifiedSubmissionPayload === 'function'
+            ? paymentIntegration.createUnifiedSubmissionPayload
+            : null;
+        const normalizedPayload = normalizer
+            ? normalizer(rawPayload)
+            : { ...rawPayload };
+
+        normalizedPayload.orderId = ensureSubmissionOrderId(
+            normalizedPayload.orderId || rawPayload.orderId || rawPayload.order_id,
+        );
+        normalizedPayload.trackingId = normalizedPayload.trackingId || '';
+
+        return normalizedPayload;
+    }
+
     let _desktopSuccessGradientRaf = null;
     let _desktopSuccessGradientRO = null;
     let _desktopSuccessGradientWindowHandler = null;
@@ -4258,15 +4298,16 @@
 
     function submitToWebhook(formData) {
         const webhookURL = 'https://flow.zoho.com/758936401/flow/webhook/incoming?zapikey=1001.9b6be080c9fa69677e2afb5090aeb9ef.16d36d524fa9d89adb3df08c5a8dc7d1&isdebug=false';
+        const normalizedPayload = normalizeSubmissionPayload(formData);
         
         return new Promise((resolve, reject) => {
             try {
                 // Try iframe form submission first
-                submitViaIframe(webhookURL, formData)
+                submitViaIframe(webhookURL, normalizedPayload)
                     .then(resolve)
                     .catch((iframeError) => {
                         // Fallback to URL params method
-                        submitViaURLParams(webhookURL, formData)
+                        submitViaURLParams(webhookURL, normalizedPayload)
                             .then(resolve)
                             .catch(reject);
                     });
@@ -4298,7 +4339,7 @@
                     const input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = key;
-                    input.value = formData[key] || '';
+                    input.value = formData[key] ?? '';
                     form.appendChild(input);
                 });
                 
@@ -4347,7 +4388,7 @@
                 // Convert formData to URL parameters
                 const params = new URLSearchParams();
                 Object.keys(formData).forEach(key => {
-                    params.append(key, formData[key] || '');
+                    params.append(key, formData[key] ?? '');
                 });
                 
                 // Create full URL with parameters
@@ -4405,16 +4446,7 @@
             page_referrer: document.referrer || '',
             browser_info: `${navigator.platform || ''} - ${navigator.language || ''}`.trim(),
             screen_resolution: `${window.screen?.width || 0}x${window.screen?.height || 0}`,
-            submission_time: new Date().toLocaleString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                timeZoneName: 'short',
-            }),
+            submission_time: new Date().toISOString(),
         };
     }
 
@@ -4605,7 +4637,7 @@
         }
 
         const summary = getCurrentSetupFeeSummary();
-        currentPaymentOrderId = orderId || currentPaymentOrderId || paymentIntegration.generateOrderId();
+        currentPaymentOrderId = ensureSubmissionOrderId(orderId);
 
         const fields = {
             'summary-payment-license-fee': formatAedAmount(summary.licenseFee),
@@ -4775,7 +4807,7 @@
         const contactState = getContactFormState();
         try {
             const sessionData = paymentIntegration.buildPaymentSessionData({
-                name: contactState.fullName,
+                fullName: contactState.fullName,
                 email: contactState.email,
                 phone: contactState.phone,
                 country: contactState.country,
@@ -4848,7 +4880,7 @@
         return paymentIntegration.buildPaymentLifecyclePayload({
             actionType: 'payment_initiated',
             contact: {
-                name: contactState.fullName,
+                fullName: contactState.fullName,
                 email: contactState.email,
                 phone: contactState.phone,
                 country: contactState.country,
@@ -4856,6 +4888,7 @@
             },
             calculator: {
                 officeSpace: paymentIntegration.PAYMENT_CONFIG.defaultOfficeSpace,
+                licenseType: document.getElementById('license-type')?.value || 'fawri',
                 shareholders: snapshot.shareholdersCount,
                 selectedActivities: getSelectedActivitiesText(),
                 investorVisa: 0,
@@ -4885,10 +4918,9 @@
             },
             form: {
                 formId: document.getElementById('multiStepForm')?.id || 'multiStepForm',
-                formName: 'BP Calculator',
+                formName: 'Cost Calcualtor',
             },
             metadata: collectSubmissionMetadata(),
-            poweredBy: 'Webflow',
         });
     }
 
@@ -4896,7 +4928,7 @@
         return paymentIntegration.buildPaymentLifecyclePayload({
             actionType: parsedResult.actionType,
             contact: {
-                name: restoredSession?.name || parsedResult.billingName,
+                fullName: restoredSession?.fullName || parsedResult.billingName,
                 email: restoredSession?.email || parsedResult.billingEmail,
                 phone: restoredSession?.phone || parsedResult.billingTel,
                 country: restoredSession?.country || '',
@@ -4906,7 +4938,7 @@
                 orderId: parsedResult.orderId,
                 trackingId: parsedResult.trackingId,
                 paymentStatus: parsedResult.status,
-                paymentAmount: restoredSession?.payment_amount || parsedResult.amount,
+                paymentAmount: restoredSession?.paymentAmount || parsedResult.amount,
                 paymentMode: parsedResult.paymentMode,
                 transDate: parsedResult.transDate,
                 bankRefNo: parsedResult.bankRefNo,
@@ -4918,15 +4950,14 @@
                 billingName: parsedResult.billingName,
                 billingEmail: parsedResult.billingEmail,
                 billingTel: parsedResult.billingTel,
-                paymentType: restoredSession?.payment_type || paymentIntegration.PAYMENT_CONFIG.paymentType,
+                paymentType: restoredSession?.paymentType || paymentIntegration.PAYMENT_CONFIG.paymentType,
                 formStatus: parsedResult.formStatus,
             },
             form: {
                 formId: document.getElementById('multiStepForm')?.id || 'multiStepForm',
-                formName: 'BP Calculator',
+                formName: 'Cost Calcualtor',
             },
             metadata: collectSubmissionMetadata(),
-            poweredBy: 'Webflow',
         });
     }
 
@@ -5101,9 +5132,9 @@
             return;
         }
 
-        const paymentSummary = renderPaymentSummary(paymentIntegration.generateOrderId());
+        const paymentSummary = renderPaymentSummary(ensureSubmissionOrderId());
         const currentSetupFeeSummary = paymentSummary || getCurrentSetupFeeSummary();
-        const orderId = paymentSummary?.orderId || paymentIntegration.generateOrderId();
+        const orderId = paymentSummary?.orderId || ensureSubmissionOrderId();
         const amount = currentSetupFeeSummary?.amount || currentSetupFeeSummary?.total || paymentIntegration.PAYMENT_CONFIG.setupFeeAmount;
         const contactState = getContactFormState();
 
@@ -5174,13 +5205,13 @@
         showPaymentStatusModal({
             status: parsedResult.status,
             orderId: parsedResult.orderId,
-            amount: restoredSession?.payment_amount || parsedResult.amount,
+            amount: restoredSession?.paymentAmount || parsedResult.amount,
             trackingId: parsedResult.trackingId,
             paymentMode: parsedResult.paymentMode,
             transDate: parsedResult.transDate,
         });
 
-        clearPaymentSession(parsedResult.orderId, restoredSession?.order_id);
+        clearPaymentSession(parsedResult.orderId, restoredSession?.orderId);
         currentPaymentOrderId = '';
         const cleanUrl = window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
@@ -5443,37 +5474,40 @@
         try {
             // Ensure dataLayer exists
             window.dataLayer = window.dataLayer || [];
+            const normalizedFormData = normalizeSubmissionPayload(formData);
             
             // Create the event object
             const eventData = {
                 event: eventName,
                 form_data: {
-                    form_status: formData.form_status || 'complete',
-                    full_name: formData.fullName || '',
-                    phone: formData.phone || '',
-                    email: formData.email || '',
-                    license_type: formData.license_type || '',
-                    license_duration: formData.license_duration || '',
-                    business_activities: formData.business_activities || '',
-                    shareholders_range: formData.shareholders_range || '0',
-                    investor_visas: formData.investor_visas || '0',
-                    employee_visas: formData.employee_visas || '0',
-                    dependency_visas: formData.dependency_visas || '0',
-                    selected_addons: formData.selected_addons || '',
-                    applicants_inside_uae: formData.applicants_inside_uae || '0',
-                    applicants_outside_uae: formData.applicants_outside_uae || '0',
-                    total_cost: formData.total_cost || 0,
-                    license_cost: formData.license_cost || 0,
-                    visa_cost: formData.visa_cost || 0,
-                    user_country: formData.user_country || '',
-                    user_country_name: formData.user_country_name || '',
-                    user_city: formData.user_city || '',
-                    current_url: formData.current_url || window.location.href,
+                    form_status: normalizedFormData.formStatus || 'complete',
+                    full_name: normalizedFormData.fullName || '',
+                    order_id: normalizedFormData.orderId || '',
+                    tracking_id: normalizedFormData.trackingId || '',
+                    phone: normalizedFormData.phone || '',
+                    email: normalizedFormData.email || '',
+                    license_type: normalizedFormData.licenseType || '',
+                    license_duration: normalizedFormData.licenseDuration || '',
+                    business_activities: normalizedFormData.selectedActivities || '',
+                    shareholders_range: normalizedFormData.shareholdersCount ?? '0',
+                    investor_visas: normalizedFormData.investorVisas ?? '0',
+                    employee_visas: normalizedFormData.employeeVisas ?? '0',
+                    dependency_visas: normalizedFormData.dependencyVisas ?? '0',
+                    selected_addons: normalizedFormData.selectedAddons || '',
+                    applicants_inside_uae: normalizedFormData.applicantsInsideUae ?? '0',
+                    applicants_outside_uae: normalizedFormData.applicantsOutsideUae ?? '0',
+                    total_cost: normalizedFormData.totalCost ?? 0,
+                    license_cost: normalizedFormData.licenseCost ?? 0,
+                    visa_cost: normalizedFormData.visaCost ?? 0,
+                    user_country: normalizedFormData.userCountry || '',
+                    user_country_name: normalizedFormData.userCountryName || '',
+                    user_city: normalizedFormData.userCity || '',
+                    current_url: normalizedFormData.pageUrl || window.location.href,
                     // Additional fields specific to BP-calculator
-                    cost_breakdown: formData.cost_breakdown || '',
-                    configuration_id: formData.configuration_id || '',
-                    client_name: formData.client_name || '',
-                    salesperson_name: formData.salesperson_name || ''
+                    cost_breakdown: normalizedFormData.costBreakdown || '',
+                    configuration_id: normalizedFormData.configurationId || '',
+                    client_name: normalizedFormData.clientName || '',
+                    salesperson_name: normalizedFormData.salespersonName || ''
                 },
                 // Add timestamp
                 timestamp: new Date().toISOString(),
@@ -5491,6 +5525,189 @@
     }
 
     let isQuoteSubmissionInProgress = false;
+
+    function buildQuoteSubmissionPayload({ shareableLink = '', configurationId = '', lastViewedTimestamp = '' } = {}) {
+        const snapshot = getFormSnapshot();
+        const metadata = collectSubmissionMetadata();
+        const contactState = getContactFormState();
+        const licenseType = document.getElementById('license-type')?.value || 'fawri';
+        const licenseDuration = document.getElementById('license-duration')?.value || '';
+        const selectedAddons = snapshot.selectedAddons || [];
+        const businessActivities = window.selectedActivities || [];
+        const businessActivitiesText = businessActivities
+            .map(activity => activity['Activity Name'] || activity.Name || activity.Description || '')
+            .filter(Boolean)
+            .join(', ');
+        const totalVisas = snapshot.investorVisas + snapshot.employeeVisas + snapshot.dependencyVisas;
+        const licenseDurationYears = parseInt(licenseDuration || 1, 10);
+        const shareholdersCount = snapshot.shareholdersCount;
+        const additionalShareholdersCount = Math.max(0, shareholdersCount - 6);
+        const licenseBaseCostPerYear = licenseType === 'fawri' ? 15000 : 12500;
+        const invoiceCurrency = 'AED';
+        const orderId = ensureSubmissionOrderId();
+
+        return normalizeSubmissionPayload({
+            actionType: 'quote_request',
+            leadStatus: 'complete',
+            formStatus: 'complete',
+            formId: document.getElementById('multiStepForm')?.id || 'multiStepForm',
+            formName: 'Cost Calcualtor',
+            orderId,
+            trackingId: '',
+            fullName: contactState.fullName,
+            email: contactState.email,
+            phone: contactState.phone,
+            countryOfResidence: contactState.country,
+            consent: contactState.consentChecked ? 'Yes' : 'No',
+            bsaCode: document.getElementById('bsa-code')?.value || '',
+            licenseType,
+            licenseDuration,
+            shareholdersCount,
+            selectedActivities: businessActivitiesText,
+            selectedActivitiesCount: businessActivities.length,
+            selectedActivitiesDetails: JSON.stringify(businessActivities),
+            investorVisas: snapshot.investorVisas,
+            employeeVisas: snapshot.employeeVisas,
+            dependencyVisas: snapshot.dependencyVisas,
+            totalVisas,
+            selectedAddons: selectedAddons.join(','),
+            selectedAddonsCount: selectedAddons.length,
+            selectedAddonsDetails: JSON.stringify(selectedAddons),
+            applicantsInsideUae: snapshot.applicantsInsideUAE,
+            applicantsOutsideUae: snapshot.applicantsOutsideUAE,
+            totalCost: calculateTotalCost(),
+            licenseCost: LicenseCost || 0,
+            visaCost: VisaCost || 0,
+            addonsCost: window.AddonsComponent || 0,
+            businessActivitiesCost: window.BusinessActivitiesCost || 0,
+            changeStatusCost: window.ChangeStatusCost || 0,
+            officeCost: 0,
+            licenseBaseCostPerYear,
+            licenseDurationYears,
+            licenseDiscountPercentage: licenseDurationYears > 1 ? 15 : 0,
+            additionalShareholdersCount,
+            additionalShareholdersCost: additionalShareholdersCount * 2000 * licenseDurationYears,
+            costBreakdown: JSON.stringify({
+                license: {
+                    type: licenseType,
+                    duration: licenseDuration,
+                    base_cost_per_year: licenseType === 'fawri' ? 14625 : 12125,
+                    shared_desk_fee: 375,
+                    cost_per_unit: licenseType === 'fawri' ? 14625 : 12125,
+                    duration_years: licenseDurationYears,
+                    base_cost_total: (licenseType === 'fawri' ? 14625 : 12125) * licenseDurationYears,
+                    shareholders_count: shareholdersCount,
+                    additional_shareholders: additionalShareholdersCount,
+                    additional_shareholders_cost: additionalShareholdersCount * 2000 * licenseDurationYears,
+                    cost_per_additional_shareholder: 2000,
+                    subtotal_before_discount: ((licenseType === 'fawri' ? 14625 : 12125) * licenseDurationYears) +
+                        (375 * licenseDurationYears) +
+                        (additionalShareholdersCount * 2000 * licenseDurationYears),
+                    discount_percentage: licenseDurationYears > 1 ? 15 : 0,
+                    discount_amount: licenseDurationYears > 1
+                        ? ((licenseType === 'fawri' ? 14625 : 12125) * licenseDurationYears) * 0.15
+                        : 0,
+                    final_cost: LicenseCost || 0
+                },
+                visas: {
+                    investor: {
+                        count: snapshot.investorVisas,
+                        cost_per_unit: 5850,
+                        total_cost: snapshot.investorVisas * 5850
+                    },
+                    employee: {
+                        count: snapshot.employeeVisas,
+                        cost_per_unit: 5350,
+                        total_cost: snapshot.employeeVisas * 5350
+                    },
+                    dependency: {
+                        count: snapshot.dependencyVisas,
+                        cost_per_unit: 6000,
+                        total_cost: snapshot.dependencyVisas * 6000
+                    },
+                    immigration_card_fee: 2000,
+                    total_visa_cost: VisaCost || 0
+                },
+                addons: {
+                    selected_services: selectedAddons,
+                    cost: window.AddonsComponent || 0,
+                    details: selectedAddons.map(addon => {
+                        const addonCosts = {
+                            'bank-account': 1500,
+                            'business-card': 240,
+                            'company-stamp': 200,
+                            'ecommerce-starter': 1000,
+                            'medical-emirates-id': 2250,
+                            'medical-insurance': 1080,
+                            'melite': 6000,
+                            'meeting-rooms': 150,
+                            'po-box': 1700,
+                            'mail-management': 750,
+                            'document-translation': 250,
+                            'virtual-assistant': 12000,
+                            'corporate-tax': 1200,
+                            'vat-registration': 1500,
+                            'liquidation-report': 1000,
+                            'financial-audit-report': 250,
+                            'valuation-report': 10000,
+                            'bookkeeping': 1000
+                        };
+
+                        let cost = addonCosts[addon] || 0;
+                        if (addon === 'medical-emirates-id') {
+                            cost = cost * (snapshot.investorVisas + snapshot.employeeVisas);
+                        }
+
+                        return {
+                            service: addon,
+                            cost,
+                        };
+                    })
+                },
+                business_activities: {
+                    selected_activities: businessActivities,
+                    activity_count: businessActivities.length,
+                    cost: window.BusinessActivitiesCost || 0
+                },
+                change_status: {
+                    inside_uae: snapshot.applicantsInsideUAE,
+                    outside_uae: snapshot.applicantsOutsideUAE,
+                    cost_per_inside_applicant: 1500,
+                    total_cost: window.ChangeStatusCost || 0
+                }
+            }),
+            sectionsInteracted: JSON.stringify(sectionInteractions),
+            pageUrl: metadata.page_url,
+            pageReferrer: metadata.page_referrer,
+            browserInfo: metadata.browser_info,
+            screenResolution: metadata.screen_resolution,
+            utmSource: metadata.utm_source,
+            utmMedium: metadata.utm_medium,
+            utmCampaign: metadata.utm_campaign,
+            utmTerm: metadata.utm_term,
+            utmContent: metadata.utm_content,
+            shareableLink,
+            configurationId,
+            lastViewedTimestamp,
+            userIp: userLocationInfo.ip,
+            userCountry: userLocationInfo.country,
+            userCountryName: userLocationInfo.country_name,
+            userCity: userLocationInfo.city,
+            userRegion: userLocationInfo.region,
+            userTimezone: userLocationInfo.timezone,
+            clientName: window.currentClientData?.name || '',
+            clientEmail: window.currentClientData?.email || '',
+            clientPhone: window.currentClientData?.phone || '',
+            clientId: window.currentClientData?.clientId || '',
+            salespersonName: window.currentSalesData?.name || '',
+            salespersonEmail: window.currentSalesData?.email || '',
+            salespersonPhone: window.currentSalesData?.phone || '',
+            submissionTimestamp: new Date().toISOString(),
+            invoiceCurrency,
+            invoiceCurrencySymbol: 'د.إ',
+            calculationVersion: '1.0'
+        });
+    }
 
     // Get a Call buttons - handles form submission
     function initializeGetCallButtons() {
@@ -5589,212 +5806,12 @@
             logNonProdError('Failed while preparing share metadata', error);
         }
 
-        const fullName = document.getElementById("full-name").value;
-        const phoneField = document.getElementById("phone");
-        let phone = phoneField?.value || '';
-        // Get E.164 formatted phone from MFZPhone if available
-        if (window.MFZPhone && formValidator && formValidator.useMFZPhone && phoneField) {
-            const formattedPhone = window.MFZPhone.getFormattedNumber(phoneField);
-            if (formattedPhone) {
-                phone = formattedPhone;
-            }
-        }
-        const email = document.getElementById("email").value;
-        const countryOfResidence = getCountryFieldValue();
-        const bsaCode = document.getElementById("bsa-code")?.value || "";
-        const licenseType = document.getElementById("license-type")?.value || "fawri";
-        
-        const shareholdersCount = parseInt(document.getElementById("shareholders-range").value) || 0;
-        // Prepare complete form data for webhook
-        const selectedAddons = [];
-        document.querySelectorAll('.service-checkbox:checked').forEach(checkbox => selectedAddons.push(checkbox.value));
-
-        // Format business activities properly from the selectedActivities array
-        const businessActivitiesText = window.selectedActivities && window.selectedActivities.length > 0 
-            ? window.selectedActivities.map(activity => activity["Activity Name"] || activity.Name || activity.Description || '').filter(name => name).join(', ')
-            : '';
-
-        const completeFormData = {
-            // Basic contact information
-            fullName: fullName,
-            phone: phone,
-            email: email,
-            bsa_code: bsaCode,
-            country_of_residence: countryOfResidence,
-            
-            // License information
-            license_type: licenseType,
-            license_duration: document.getElementById("license-duration")?.value || '',
-            
-            // Business activities
-            business_activities: businessActivitiesText,
-            selected_activities_count: window.selectedActivities ? window.selectedActivities.length : 0,
-            selected_activities_details: window.selectedActivities ? JSON.stringify(window.selectedActivities) : '',
-            
-            // Shareholders
-            shareholders_range: document.getElementById("shareholders-range").value,
-            
-            // Visa information
-            investor_visas: document.getElementById("investor-visa-count")?.value || '0',
-            employee_visas: document.getElementById("employee-visa-count")?.value || '0',
-            dependency_visas: document.getElementById("dependency-visas")?.value || '0',
-            total_visas: (parseInt(document.getElementById("investor-visa-count")?.value || 0) + 
-                         parseInt(document.getElementById("employee-visa-count")?.value || 0) + 
-                         parseInt(document.getElementById("dependency-visas")?.value || 0)).toString(),
-            
-            // Add-ons and services
-            selected_addons: selectedAddons.join(','),
-            selected_addons_count: selectedAddons.length,
-            selected_addons_details: JSON.stringify(selectedAddons),
-            
-            // Change status information
-            applicants_inside_uae: document.getElementById("applicants-inside-uae")?.value || '0',
-            applicants_outside_uae: document.getElementById("applicants-outside-uae")?.value || '0',
-            
-            // Cost breakdown for proforma invoice
-            total_cost: calculateTotalCost(),
-            license_cost: LicenseCost || 0,
-            visa_cost: VisaCost || 0,
-            addons_cost: window.AddonsComponent || 0,
-            business_activities_cost: window.BusinessActivitiesCost || 0,
-            change_status_cost: window.ChangeStatusCost || 0,
-            office_cost: 0, // Always 0 as per current implementation
-            
-            // License pricing details
-            license_base_cost_per_year: licenseType === "fawri" ? 15000 : 12500,
-            license_duration_years: parseInt(document.getElementById("license-duration")?.value || 1),
-            license_discount_percentage: parseInt(document.getElementById("license-duration")?.value || 1) > 1 ? 15 : 0,
-            additional_shareholders_count: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6),
-            additional_shareholders_cost: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000 * parseInt(document.getElementById("license-duration")?.value || 1),
-            
-            // Detailed cost breakdown for invoice
-            cost_breakdown: JSON.stringify({
-                license: {
-                    type: licenseType,
-                    duration: document.getElementById("license-duration")?.value || '',
-                    base_cost_per_year: licenseType === "fawri" ? 14625 : 12125, // Base cost without shared desk fee
-                    shared_desk_fee: 375, // Shared desk fee separated
-                    cost_per_unit: licenseType === "fawri" ? 14625 : 12125, // Base cost without shared desk fee
-                    duration_years: parseInt(document.getElementById("license-duration")?.value || 1),
-                    base_cost_total: (licenseType === "fawri" ? 14625 : 12125) * parseInt(document.getElementById("license-duration")?.value || 1), // Base cost without shared desk fee
-                    shareholders_count: parseInt(document.getElementById("shareholders-range")?.value || 1),
-                    additional_shareholders: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6),
-                    additional_shareholders_cost: Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000 * parseInt(document.getElementById("license-duration")?.value || 1),
-                    cost_per_additional_shareholder: 2000,
-                    subtotal_before_discount: ((licenseType === "fawri" ? 14625 : 12125) * parseInt(document.getElementById("license-duration")?.value || 1)) + // Base cost
-                        (375 * parseInt(document.getElementById("license-duration")?.value || 1)) + // Shared desk fee
-                        (Math.max(0, parseInt(document.getElementById("shareholders-range")?.value || 1) - 6) * 2000 * parseInt(document.getElementById("license-duration")?.value || 1)), // Additional shareholders cost
-                    discount_percentage: parseInt(document.getElementById("license-duration")?.value || 1) > 1 ? 15 : 0,
-                    discount_amount: parseInt(document.getElementById("license-duration")?.value || 1) > 1 ? ((licenseType === "fawri" ? 14625 : 12125) * parseInt(document.getElementById("license-duration")?.value || 1)) * 0.15 : 0, // Discount ONLY applies to base license cost (excluding shared desk fee)
-                    final_cost: LicenseCost || 0
-                },
-                visas: {
-                    investor: {
-                        count: parseInt(document.getElementById("investor-visa-count")?.value || 0),
-                        cost_per_unit: 5850,
-                        total_cost: parseInt(document.getElementById("investor-visa-count")?.value || 0) * 5850
-                    },
-                    employee: {
-                        count: parseInt(document.getElementById("employee-visa-count")?.value || 0),
-                        cost_per_unit: 5350,
-                        total_cost: parseInt(document.getElementById("employee-visa-count")?.value || 0) * 5350
-                    },
-                    dependency: {
-                        count: parseInt(document.getElementById("dependency-visas")?.value || 0),
-                        cost_per_unit: 6000,
-                        total_cost: parseInt(document.getElementById("dependency-visas")?.value || 0) * 6000
-                    },
-                    immigration_card_fee: 2000,
-                    total_visa_cost: VisaCost || 0
-                },
-                addons: {
-                    selected_services: selectedAddons,
-                    cost: window.AddonsComponent || 0,
-                    details: selectedAddons.map(addon => {
-                        const addonCosts = {
-                            "bank-account": 1500,
-                            "business-card": 240,
-                            "company-stamp": 200,
-                            "ecommerce-starter": 1000,
-                            "medical-emirates-id": 2250,
-                            "medical-insurance": 1080,
-                            "melite": 6000,
-                            "meeting-rooms": 150,
-                            "po-box": 1700,
-                            "mail-management": 750,
-                            "document-translation": 250,
-                            "virtual-assistant": 12000,
-                            "corporate-tax": 1200,
-                            "vat-registration": 1500,
-                            "liquidation-report": 1000,
-                            "financial-audit-report": 250,
-                            "valuation-report": 10000,
-                            "bookkeeping": 1000
-                        };
-                        
-                        let cost = addonCosts[addon] || 0;
-                        
-                        // Medical & Emirates ID applies only to investor and employee visas (no fee for dependents)
-                        if (addon === 'medical-emirates-id') {
-                            const investorVisas = parseInt(document.getElementById("investor-visa-count")?.value || 0);
-                            const employeeVisas = parseInt(document.getElementById("employee-visa-count")?.value || 0);
-                            const eligibleVisas = investorVisas + employeeVisas;
-                            cost = cost * eligibleVisas;
-                        }
-                        
-                        return {
-                            service: addon,
-                            cost: cost
-                        };
-                    })
-                },
-                business_activities: {
-                    selected_activities: window.selectedActivities || [],
-                    activity_count: window.selectedActivities ? window.selectedActivities.length : 0,
-                    cost: window.BusinessActivitiesCost || 0
-                },
-                change_status: {
-                    inside_uae: parseInt(document.getElementById("applicants-inside-uae")?.value || 0),
-                    outside_uae: parseInt(document.getElementById("applicants-outside-uae")?.value || 0),
-                    cost_per_inside_applicant: 1500,
-                    total_cost: window.ChangeStatusCost || 0
-                }
-            }),
-            
-            // Form interaction data
-            sections_interacted: JSON.stringify(sectionInteractions),
-            
-            // Current URL and user information
-            current_url: window.location.href,
-            user_ip: userLocationInfo.ip,
-            user_country: userLocationInfo.country,
-            user_country_name: userLocationInfo.country_name,
-            user_city: userLocationInfo.city,
-            user_region: userLocationInfo.region,
-            user_timezone: userLocationInfo.timezone,
-            
-            // Shareable link and tracking information
-            shareable_link: shareableLink,
-            configuration_id: uniqueConfigId,
-            last_viewed_timestamp: lastViewedTimestamp,
-            
-            // Client and sales data
-            client_name: window.currentClientData?.name || '',
-            client_email: window.currentClientData?.email || '',
-            client_phone: window.currentClientData?.phone || '',
-            client_id: window.currentClientData?.clientId || '',
-            salesperson_name: window.currentSalesData?.name || '',
-            salesperson_email: window.currentSalesData?.email || '',
-            salesperson_phone: window.currentSalesData?.phone || '',
-            
-            // Timestamp
-            submission_timestamp: new Date().toISOString(),
-            
-            // Additional metadata for invoice generation
-            invoice_currency: 'AED',
-            invoice_currency_symbol: 'د.إ',
-            calculation_version: '1.0'
-        };
+        const completeFormData = buildQuoteSubmissionPayload({
+            shareableLink,
+            configurationId: uniqueConfigId,
+            lastViewedTimestamp,
+        });
+        const fullName = completeFormData.fullName || '';
 
         // Submit to webhook
         submitToWebhook(completeFormData)

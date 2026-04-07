@@ -4799,22 +4799,14 @@
         return paymentHealthRequestPromise;
     }
 
-    function storePaymentSession(orderId, paymentAmount) {
-        if (!paymentIntegration || typeof paymentIntegration.buildPaymentSessionData !== 'function') {
+    function storePaymentSession(payload) {
+        if (!payload || typeof payload !== 'object') {
             return;
         }
 
-        const contactState = getContactFormState();
         try {
-            const sessionData = paymentIntegration.buildPaymentSessionData({
-                fullName: contactState.fullName,
-                email: contactState.email,
-                phone: contactState.phone,
-                country: contactState.country,
-                orderId,
-                paymentAmount,
-                paymentType: paymentIntegration.PAYMENT_CONFIG.paymentType,
-            });
+            const sessionData = normalizeSubmissionPayload(payload);
+            const orderId = sessionData.orderId;
             sessionStorage.setItem(`payment_session_${orderId}`, JSON.stringify(sessionData));
             sessionStorage.setItem('latest_payment_order_id', orderId);
         } catch (error) {
@@ -4872,92 +4864,59 @@
     }
 
     function buildPaymentInitiatedPayload(orderId, paymentAmount) {
-        const contactState = getContactFormState();
-        const snapshot = getFormSnapshot();
-        const licenseDuration = document.getElementById('license-duration')?.value || '1';
-        const paymentSummary = getCurrentSetupFeeSummary();
-
-        return paymentIntegration.buildPaymentLifecyclePayload({
+        return buildQuoteSubmissionPayload({
             actionType: 'payment_initiated',
-            contact: {
-                fullName: contactState.fullName,
-                email: contactState.email,
-                phone: contactState.phone,
-                country: contactState.country,
-                consent: contactState.consentChecked ? 'Yes' : 'No',
-            },
-            calculator: {
-                officeSpace: paymentIntegration.PAYMENT_CONFIG.defaultOfficeSpace,
-                licenseType: document.getElementById('license-type')?.value || 'fawri',
-                shareholders: snapshot.shareholdersCount,
-                selectedActivities: getSelectedActivitiesText(),
-                investorVisa: 0,
-                employeeVisa: 0,
-                businessBankAccount: 'No',
-                vipMedicalEid: 'No',
-                totalCost: paymentAmount,
-                licenseCost: paymentSummary.licenseFee,
-                businessActivitiesCost: 0,
-                licenseDuration: licenseDuration,
-                visaCost: 0,
-                knowledgeFee: paymentSummary.knowledgeFee + paymentSummary.innovationFee,
-                investorVisaNeeded: 'No',
-                employeeVisaNeeded: 'No',
-                addons: getSelectedAddonsText(),
-                addonsCost: window.AddonsComponent || 0,
-                changeStatusInsideUAE: document.getElementById('applicants-inside-uae')?.value || '',
-                changeStatusOutsideUAE: document.getElementById('applicants-outside-uae')?.value || '',
-                changeStatusCost: window.ChangeStatusCost || 0,
-            },
-            payment: {
-                orderId,
-                paymentInitiated: 'yes',
-                formStatus: 'payment',
-                paymentType: paymentIntegration.PAYMENT_CONFIG.paymentType,
-                paymentAmount,
-            },
-            form: {
-                formId: document.getElementById('multiStepForm')?.id || 'multiStepForm',
-                formName: 'Cost Calcualtor',
-            },
-            metadata: collectSubmissionMetadata(),
+            formStatus: 'payment',
+            orderId,
+            trackingId: '',
+            paymentInitiated: 'yes',
+            paymentType: paymentIntegration?.PAYMENT_CONFIG?.paymentType || 'setup_fee',
+            paymentAmount,
         });
     }
 
     function buildPaymentResultPayload(parsedResult, restoredSession) {
-        return paymentIntegration.buildPaymentLifecyclePayload({
-            actionType: parsedResult.actionType,
-            contact: {
-                fullName: restoredSession?.fullName || parsedResult.billingName,
-                email: restoredSession?.email || parsedResult.billingEmail,
-                phone: restoredSession?.phone || parsedResult.billingTel,
-                country: restoredSession?.country || '',
-                consent: '',
-            },
-            payment: {
-                orderId: parsedResult.orderId,
-                trackingId: parsedResult.trackingId,
-                paymentStatus: parsedResult.status,
-                paymentAmount: restoredSession?.paymentAmount || parsedResult.amount,
-                paymentMode: parsedResult.paymentMode,
-                transDate: parsedResult.transDate,
-                bankRefNo: parsedResult.bankRefNo,
-                failureMessage: parsedResult.failureMessage,
-                statusMessage: parsedResult.statusMessage,
-                cardName: parsedResult.cardName,
-                currency: parsedResult.currency,
-                responseCode: parsedResult.responseCode,
-                billingName: parsedResult.billingName,
-                billingEmail: parsedResult.billingEmail,
-                billingTel: parsedResult.billingTel,
-                paymentType: restoredSession?.paymentType || paymentIntegration.PAYMENT_CONFIG.paymentType,
-                formStatus: parsedResult.formStatus,
-            },
-            form: {
-                formId: document.getElementById('multiStepForm')?.id || 'multiStepForm',
-                formName: 'Cost Calcualtor',
-            },
-            metadata: collectSubmissionMetadata(),
+        const metadata = collectSubmissionMetadata();
+        const formattedActionType = paymentIntegration && typeof paymentIntegration.formatActionType === 'function'
+            ? paymentIntegration.formatActionType(parsedResult.actionType)
+            : parsedResult.actionType;
+
+        return normalizeSubmissionPayload({
+            ...(restoredSession || {}),
+            actionType: formattedActionType,
+            formStatus: parsedResult.formStatus,
+            formId: restoredSession?.formId || document.getElementById('multiStepForm')?.id || 'multiStepForm',
+            formName: restoredSession?.formName || 'Cost Calcualtor',
+            fullName: restoredSession?.fullName || parsedResult.billingName || '',
+            email: restoredSession?.email || parsedResult.billingEmail || '',
+            phone: restoredSession?.phone || parsedResult.billingTel || '',
+            countryOfResidence: restoredSession?.countryOfResidence || restoredSession?.country || '',
+            orderId: parsedResult.orderId || restoredSession?.orderId || '',
+            trackingId: parsedResult.trackingId || '',
+            paymentStatus: parsedResult.status,
+            paymentAmount: restoredSession?.paymentAmount || parsedResult.amount,
+            paymentMode: parsedResult.paymentMode,
+            transDate: parsedResult.transDate,
+            bankRefNo: parsedResult.bankRefNo,
+            failureMessage: parsedResult.failureMessage,
+            statusMessage: parsedResult.statusMessage,
+            cardName: parsedResult.cardName,
+            currency: parsedResult.currency || restoredSession?.currency || 'AED',
+            responseCode: parsedResult.responseCode,
+            billingName: parsedResult.billingName,
+            billingEmail: parsedResult.billingEmail,
+            billingTel: parsedResult.billingTel,
+            paymentType: restoredSession?.paymentType || paymentIntegration?.PAYMENT_CONFIG?.paymentType || 'setup_fee',
+            pageUrl: metadata.page_url,
+            pageReferrer: metadata.page_referrer,
+            browserInfo: metadata.browser_info,
+            screenResolution: metadata.screen_resolution,
+            utmSource: restoredSession?.utmSource || metadata.utm_source,
+            utmMedium: restoredSession?.utmMedium || metadata.utm_medium,
+            utmCampaign: restoredSession?.utmCampaign || metadata.utm_campaign,
+            utmTerm: restoredSession?.utmTerm || metadata.utm_term,
+            utmContent: restoredSession?.utmContent || metadata.utm_content,
+            submissionTimestamp: metadata.submission_time,
         });
     }
 
@@ -5163,9 +5122,8 @@
             return;
         }
 
-        storePaymentSession(orderId, amount);
-
         const initiatedPayload = buildPaymentInitiatedPayload(orderId, amount);
+        storePaymentSession(initiatedPayload);
         submitLifecyclePayload(initiatedPayload).catch((error) => {
             logNonProdError('Payment initiated webhook submission failed', error);
         });
@@ -5526,7 +5484,36 @@
 
     let isQuoteSubmissionInProgress = false;
 
-    function buildQuoteSubmissionPayload({ shareableLink = '', configurationId = '', lastViewedTimestamp = '' } = {}) {
+    function buildQuoteSubmissionPayload({
+        shareableLink = '',
+        configurationId = '',
+        lastViewedTimestamp = '',
+        actionType = 'quote_request',
+        leadStatus = 'complete',
+        formStatus = 'complete',
+        orderId = '',
+        trackingId = '',
+        paymentInitiated = '',
+        paymentType = '',
+        paymentAmount = '',
+        paymentStatus = '',
+        paymentMode = '',
+        transDate = '',
+        bankRefNo = '',
+        failureMessage = '',
+        statusMessage = '',
+        cardName = '',
+        currency = 'AED',
+        responseCode = '',
+        billingName = '',
+        billingEmail = '',
+        billingTel = '',
+        scheduledDate = '',
+        scheduledTime = '',
+        scheduledDateTimeIso = '',
+        scheduledTimezone = '',
+        submissionTimestamp = new Date().toISOString(),
+    } = {}) {
         const snapshot = getFormSnapshot();
         const metadata = collectSubmissionMetadata();
         const contactState = getContactFormState();
@@ -5544,16 +5531,19 @@
         const additionalShareholdersCount = Math.max(0, shareholdersCount - 6);
         const licenseBaseCostPerYear = licenseType === 'fawri' ? 15000 : 12500;
         const invoiceCurrency = 'AED';
-        const orderId = ensureSubmissionOrderId();
+        const effectiveOrderId = ensureSubmissionOrderId(orderId);
+        const formattedActionType = paymentIntegration && typeof paymentIntegration.formatActionType === 'function'
+            ? paymentIntegration.formatActionType(actionType)
+            : actionType;
 
         return normalizeSubmissionPayload({
-            actionType: 'quote_request',
-            leadStatus: 'complete',
-            formStatus: 'complete',
+            actionType: formattedActionType,
+            leadStatus,
+            formStatus,
             formId: document.getElementById('multiStepForm')?.id || 'multiStepForm',
             formName: 'Cost Calcualtor',
-            orderId,
-            trackingId: '',
+            orderId: effectiveOrderId,
+            trackingId,
             fullName: contactState.fullName,
             email: contactState.email,
             phone: contactState.phone,
@@ -5702,7 +5692,26 @@
             salespersonName: window.currentSalesData?.name || '',
             salespersonEmail: window.currentSalesData?.email || '',
             salespersonPhone: window.currentSalesData?.phone || '',
-            submissionTimestamp: new Date().toISOString(),
+            paymentInitiated,
+            paymentType,
+            paymentAmount,
+            paymentStatus,
+            paymentMode,
+            transDate,
+            bankRefNo,
+            failureMessage,
+            statusMessage,
+            cardName,
+            currency,
+            responseCode,
+            billingName,
+            billingEmail,
+            billingTel,
+            scheduledDate,
+            scheduledTime,
+            scheduledDateTimeIso,
+            scheduledTimezone,
+            submissionTimestamp,
             invoiceCurrency,
             invoiceCurrencySymbol: 'د.إ',
             calculationVersion: '1.0'

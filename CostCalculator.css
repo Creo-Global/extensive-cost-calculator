@@ -4327,7 +4327,7 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
     .b2c-costcalculator.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active,
     .cc-form.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active,
     #MFZ-NewCostCalForm.mobile-steps-active .form-modal.step-active {
-      padding-top: calc(env(safe-area-inset-top, 0px) + var(--mobile-step-header-offset, 118px));
+      padding-top: 120px
     }
 
     #MFZ-NewCostCalForm .change-status-section--mobile-merged {
@@ -4424,7 +4424,7 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
     /* ── Extra bottom padding so content clears the fixed summary bar ── */
     .b2c-costcalculator.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active .form-section,
     .cc-form.mobile-steps-active #MFZ-NewCostCalForm .form-modal.step-active .form-section {
-      padding-bottom: 60px !important;
+      padding-bottom: 120px !important;
       margin-bottom: 0 !important;
     }
 

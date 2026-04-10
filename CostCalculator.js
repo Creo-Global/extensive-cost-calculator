@@ -9607,6 +9607,8 @@
       
         MobileStepManager.prototype._activate = function () {
           this.isActive = true;
+          this._savedScrollY = window.scrollY;
+
           var form = document.getElementById('MFZ-NewCostCalForm');
           var root = this._getWizardRoot();
           if (root) root.classList.add('mobile-steps-active');
@@ -9632,7 +9634,8 @@
           }
           var overlay = document.getElementById('bottom-sheet-overlay');
           if (overlay) overlay.classList.remove('active');
-          document.body.style.overflow = '';
+
+          document.documentElement.classList.add('cc-mobile-fullscreen');
         };
       
         MobileStepManager.prototype._deactivate = function () {
@@ -9670,7 +9673,13 @@
           }
           var overlay = document.getElementById('bottom-sheet-overlay');
           if (overlay) overlay.classList.remove('active');
-          document.body.style.overflow = '';
+
+          document.documentElement.classList.remove('cc-mobile-fullscreen');
+
+          if (typeof this._savedScrollY === 'number') {
+            window.scrollTo(0, this._savedScrollY);
+            this._savedScrollY = undefined;
+          }
 
           document.querySelectorAll('.form-modal[data-step]').forEach(function (m) {
             m.classList.remove('step-active', 'step-prev', 'step-before', 'step-after');

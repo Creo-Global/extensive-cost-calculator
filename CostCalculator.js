@@ -8147,9 +8147,9 @@
         
         // Scroll event listener for addon viewport detection is set up at script load
         
-        // Ensure Fawri license is selected by default for calculations
+        // Ensure Regular license is selected by default for calculations
         // But don't mark the section as interacted yet
-        const licenseType = 'fawri';
+        const licenseType = 'regular';
         document.querySelectorAll('.license-card').forEach(card => {
             const isSelected = card.getAttribute('data-license') === licenseType;
             card.classList.toggle('selected', isSelected);

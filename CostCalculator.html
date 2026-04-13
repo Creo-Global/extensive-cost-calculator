@@ -169,7 +169,7 @@
                 </div>
 
                 <div class="license-cards-container">
-                  <div class="license-card selected" data-license="fawri">
+                  <div class="license-card" data-license="fawri">
                     <div class="license-card-image">
                       <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff3ea2f58e971216773187_b2c-fawri.webp" alt="Fawri License" />
                     </div>
@@ -188,14 +188,13 @@
                             <path d="M10.7456 5.96508L6.80807 9.90258C6.68478 10.0259 6.51757 10.0951 6.34323 10.0951C6.16884 10.0951 6.00163 10.0259 5.87838 9.90258C5.75509 9.77929 5.68579 9.61208 5.68579 9.43773C5.68579 9.26339 5.75509 9.09618 5.87838 8.97289L8.69531 6.15701H0.65625C0.482204 6.15701 0.31528 6.08788 0.192211 5.96481C0.0691426 5.84174 0 5.6748 0 5.50076C0 5.32672 0.0691426 5.15981 0.192211 5.03675C0.31528 4.91368 0.482204 4.84451 0.65625 4.84451H8.69531L5.87943 2.02702C5.75619 1.90373 5.68689 1.73652 5.68689 1.56217C5.68689 1.38782 5.75619 1.22061 5.87943 1.09733C6.00272 0.974046 6.16993 0.904785 6.34427 0.904785C6.51866 0.904785 6.68587 0.974046 6.80912 1.09733L10.7466 5.03482C10.8078 5.09589 10.8563 5.16843 10.8894 5.24828C10.9225 5.32812 10.9395 5.41374 10.9394 5.50019C10.9393 5.5866 10.9221 5.67217 10.8889 5.75197C10.8556 5.83173 10.8069 5.90418 10.7456 5.96508Z" fill="#7F98A8" />
                           </svg>
                         </button>
-                        <button type="button" class="select-btn selected" data-license="fawri">
-                          <span class="check-icon"><img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/689453765dc003d002d51677_check.svg" alt="Check" /></span>
-                          Selected
+                        <button type="button" class="select-btn" data-license="fawri">
+                          Select
                         </button>
                       </div>
                     </div>
                   </div>
-                  <div class="license-card" data-license="regular">
+                  <div class="license-card selected" data-license="regular">
                     <div class="license-card-image">
                       <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff3ea2f58e9712167731a2_b2c-regular.webp" alt="Regular Business License" />
                     </div>
@@ -214,7 +213,10 @@
                             <path d="M10.7456 5.96508L6.80807 9.90258C6.68478 10.0259 6.51757 10.0951 6.34323 10.0951C6.16884 10.0951 6.00163 10.0259 5.87838 9.90258C5.75509 9.77929 5.68579 9.61208 5.68579 9.43773C5.68579 9.26339 5.75509 9.09618 5.87838 8.97289L8.69531 6.15701H0.65625C0.482204 6.15701 0.31528 6.08788 0.192211 5.96481C0.0691426 5.84174 0 5.6748 0 5.50076C0 5.32672 0.0691426 5.15981 0.192211 5.03675C0.31528 4.91368 0.482204 4.84451 0.65625 4.84451H8.69531L5.87943 2.02702C5.75619 1.90373 5.68689 1.73652 5.68689 1.56217C5.68689 1.38782 5.75619 1.22061 5.87943 1.09733C6.00272 0.974046 6.16993 0.904785 6.34427 0.904785C6.51866 0.904785 6.68587 0.974046 6.80912 1.09733L10.7466 5.03482C10.8078 5.09589 10.8563 5.16843 10.8894 5.24828C10.9225 5.32812 10.9395 5.41374 10.9394 5.50019C10.9393 5.5866 10.9221 5.67217 10.8889 5.75197C10.8556 5.83173 10.8069 5.90418 10.7456 5.96508Z" fill="#7F98A8" />
                           </svg>
                         </button>
-                        <button type="button" class="select-btn" data-license="regular">Select</button>
+                        <button type="button" class="select-btn selected" data-license="regular">
+                          <span class="check-icon"><img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/689453765dc003d002d51677_check.svg" alt="Check" /></span>
+                          Selected
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -250,7 +252,7 @@
                   </div>
                 </div>
                 <!-- Hidden inputs for form validation -->
-                <input type="hidden" id="license-type" name="license-type" value="fawri" required />
+                <input type="hidden" id="license-type" name="license-type" value="regular" required />
                 <input type="hidden" id="license-duration" name="license-duration" value="1" required />
                 <input type="hidden" id="shareholders-range" name="shareholders-range" value="1" required />
               </div>
@@ -635,7 +637,7 @@
                 <div class="summary-content">
                     <div class="summary-row">
                         <span class="summary-label">License Type</span>
-                        <span class="summary-value" id="summary-package-type">Fawri License</span>
+                        <span class="summary-value" id="summary-package-type">Regular</span>
                     </div>
                     <div class="summary-row">
                         <span class="summary-label">License Duration</span>

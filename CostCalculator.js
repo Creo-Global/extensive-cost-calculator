@@ -3700,7 +3700,7 @@
         const investorVisaCount = toMinInteger(document.getElementById("investor-visa-count")?.value, 0, 0);
 
         return {
-            licenseType: document.getElementById("license-type")?.value || "fawri",
+            licenseType: document.getElementById("license-type")?.value || "regular",
             licenseDuration: toMinInteger(document.getElementById("license-duration")?.value, 1, 1),
             shareholdersCount: toMinInteger(document.getElementById("shareholders-range")?.value, 1, 1),
             investorVisas: investorVisaCount,
@@ -4675,7 +4675,7 @@
     }
 
     function getSelectedLicenseTypeForPayment() {
-        return document.getElementById('license-type')?.value || 'fawri';
+        return document.getElementById('license-type')?.value || 'regular';
     }
 
     function getCurrentSetupFeeSummary() {
@@ -5587,7 +5587,7 @@
         const snapshot = getFormSnapshot();
         const metadata = collectSubmissionMetadata();
         const contactState = getContactFormState();
-        const licenseType = document.getElementById('license-type')?.value || 'fawri';
+        const licenseType = document.getElementById('license-type')?.value || 'regular';
         const licenseDuration = document.getElementById('license-duration')?.value || '';
         const selectedAddons = snapshot.selectedAddons || [];
         const businessActivities = window.selectedActivities || [];
@@ -6612,7 +6612,7 @@
 
         // License Configuration
         const licenseData = {
-            licenseType: document.getElementById("license-type")?.value || "fawri",
+            licenseType: document.getElementById("license-type")?.value || "regular",
             licenseDuration: parseInt(document.getElementById("license-duration")?.value) || 1,
             shareholdersCount: parseInt(document.getElementById("shareholders-range")?.value) || 1
         };

@@ -1961,73 +1961,191 @@
         return Boolean(supabaseClient && typeof supabaseClient.from === 'function');
     }
 
-    function generateSmartSearchVariants(searchTerm) {
-        const term = searchTerm.trim();
-        if (!term) return [];
+    function sanitizeFilterValue(val) {
+        return val.replace(/[,.()"'\\%_]/g, '');
+    }
 
-        const variants = new Set();
-        variants.add(term);
+    function parseSearchWords(searchTerm) {
+        return searchTerm.trim().split(/[\s,;]+/).filter(function(w) { return w.length > 0; });
+    }
 
-        const lower = term.toLowerCase();
-        variants.add(lower);
+    function generateWordVariants(word) {
+        const lower = word.toLowerCase().trim();
+        if (!lower) return [];
+        var variants = new Set([lower]);
+        var stripped = lower.replace(/[^a-z0-9]/g, '');
+        if (stripped && stripped !== lower) variants.add(stripped);
 
-        const noSpaces = lower.replace(/[\s\-_]+/g, '');
-        variants.add(noSpaces);
+        var camelSplit = word.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+        if (camelSplit !== lower && camelSplit.includes(' ')) {
+            variants.add(camelSplit);
+            variants.add(camelSplit.replace(/\s+/g, '-'));
+            variants.add(camelSplit.replace(/\s+/g, ''));
+        }
 
-        const camelSplit = term.replace(/([a-z])([A-Z])/g, '$1 $2');
-        variants.add(camelSplit.toLowerCase());
+        if (lower.endsWith('ies') && lower.length > 4) {
+            variants.add(lower.slice(0, -3) + 'y');
+        } else if (lower.endsWith('ves') && lower.length > 4) {
+            variants.add(lower.slice(0, -3) + 'f');
+            variants.add(lower.slice(0, -3) + 'fe');
+        } else if (lower.endsWith('es') && lower.length > 4 && /(?:s|x|z|ch|sh)es$/.test(lower)) {
+            variants.add(lower.slice(0, -2));
+        } else if (lower.endsWith('s') && !lower.endsWith('ss') && lower.length > 3) {
+            variants.add(lower.slice(0, -1));
+        }
 
-        const hyphenated = camelSplit.replace(/\s+/g, '-').toLowerCase();
-        variants.add(hyphenated);
-
-        const withSpaces = lower.replace(/[\-_]+/g, ' ');
-        variants.add(withSpaces);
-
-        const withHyphens = lower.replace(/[\s_]+/g, '-');
-        variants.add(withHyphens);
-
-        const noPunctuation = lower.replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
-        variants.add(noPunctuation);
-
-        if (/^[a-z]+$/i.test(term) && term.length > 4) {
-            const words = term.replace(/([a-z])([A-Z])/g, '$1 $2').split(' ');
-            if (words.length >= 2) {
-                variants.add(words.join('-').toLowerCase());
-                variants.add(words.join(' ').toLowerCase());
+        if (!lower.endsWith('s')) {
+            variants.add(lower + 's');
+            if (lower.endsWith('y') && lower.length > 2 && !/[aeiou]y$/.test(lower)) {
+                variants.add(lower.slice(0, -1) + 'ies');
             }
+        }
 
-            const prefixes = [
-                'e', 'pre', 'post', 'non', 're', 'co', 'sub', 'multi', 'anti', 'auto',
-                'semi', 'over', 'under', 'out', 'inter', 'intra', 'cross', 'micro', 'macro'
-            ];
-            const lowerTerm = term.toLowerCase();
-            for (const prefix of prefixes) {
-                if (lowerTerm.startsWith(prefix) && lowerTerm.length > prefix.length + 2) {
-                    const rest = lowerTerm.slice(prefix.length);
-                    variants.add(prefix + '-' + rest);
-                    variants.add(prefix + ' ' + rest);
+        if (lower.endsWith('ing') && lower.length > 5) {
+            var base = lower.slice(0, -3);
+            variants.add(base);
+            variants.add(base + 'e');
+            if (base.length > 2 && base[base.length - 1] === base[base.length - 2]) variants.add(base.slice(0, -1));
+        }
+        if (lower.endsWith('ed') && lower.length > 4) {
+            var base = lower.slice(0, -2);
+            variants.add(base);
+            variants.add(base + 'e');
+            if (base.length > 2 && base[base.length - 1] === base[base.length - 2]) variants.add(base.slice(0, -1));
+        }
+        if (lower.endsWith('er') && lower.length > 4 && !lower.endsWith('eer')) {
+            var base = lower.slice(0, -2);
+            variants.add(base);
+            variants.add(base + 'e');
+        }
+        if (lower.endsWith('ment') && lower.length > 6) variants.add(lower.slice(0, -4));
+        if (lower.endsWith('tion') && lower.length > 6) {
+            variants.add(lower.slice(0, -4));
+            variants.add(lower.slice(0, -4) + 'te');
+        }
+        if (lower.endsWith('sion') && lower.length > 6) {
+            variants.add(lower.slice(0, -4));
+            variants.add(lower.slice(0, -4) + 'de');
+        }
+        if (lower.endsWith('ly') && lower.length > 4) variants.add(lower.slice(0, -2));
+
+        if (!lower.endsWith('ing') && lower.length > 3) {
+            variants.add(lower.endsWith('e') && !lower.endsWith('ee') ? lower.slice(0, -1) + 'ing' : lower + 'ing');
+        }
+
+        if (lower.includes('-')) {
+            variants.add(lower.replace(/-/g, ' '));
+            variants.add(lower.replace(/-/g, ''));
+        }
+
+        var prefixes = ['e','pre','post','non','re','co','sub','multi','anti','auto','semi','over','under','out','inter','intra','cross','micro','macro'];
+        if (/^[a-z]+$/.test(lower) && lower.length > 4) {
+            for (var i = 0; i < prefixes.length; i++) {
+                var p = prefixes[i];
+                if (lower.startsWith(p) && lower.length > p.length + 2) {
+                    variants.add(p + '-' + lower.slice(p.length));
                 }
             }
         }
 
         variants.delete('');
-        return [...variants];
+        return Array.from(variants).filter(function(v) { return v.length > 0; });
     }
 
-    function buildSmartSearchFilter(searchTerm) {
-        const variants = generateSmartSearchVariants(searchTerm);
-        if (variants.length === 0) return `"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`;
+    function buildBroadSearchFilter(searchWords) {
+        var filterWords = searchWords.filter(function(w) {
+            return w.replace(/[^a-z0-9]/gi, '').length >= 3;
+        });
+        filterWords.sort(function(a, b) { return b.length - a.length; });
+        filterWords = filterWords.slice(0, 3);
+        if (filterWords.length === 0) filterWords = searchWords.slice(0, 2);
 
-        const conditions = [];
-        const seen = new Set();
-        for (const v of variants) {
-            const key = v.toLowerCase();
-            if (seen.has(key)) continue;
-            seen.add(key);
-            conditions.push(`"Activity Name".ilike.%${v}%`);
-            conditions.push(`Code.ilike.%${v}%`);
+        var allVariants = new Set();
+        for (var i = 0; i < filterWords.length; i++) {
+            var wordVars = generateWordVariants(filterWords[i]);
+            for (var j = 0; j < wordVars.length; j++) {
+                var safe = sanitizeFilterValue(wordVars[j]);
+                if (safe.length >= 2) allVariants.add(safe);
+            }
         }
+
+        var conditions = [];
+        allVariants.forEach(function(v) {
+            conditions.push('"Activity Name".ilike.%' + v + '%');
+            conditions.push('Code.ilike.%' + v + '%');
+        });
         return conditions.join(',');
+    }
+
+    function tokenizeForMatch(text) {
+        return text.toLowerCase().replace(/[-_/\\,.;:()&'"#+]+/g, ' ').split(/\s+/).filter(function(w) { return w.length > 0; });
+    }
+
+    function scoreActivity(activity, searchWords, variantsCache) {
+        var name = activity['Activity Name'] || '';
+        var code = (activity.Code || '').toLowerCase();
+        var nameTokens = tokenizeForMatch(name);
+        var nameJoined = nameTokens.join(' ');
+        var nameStripped = nameTokens.join('');
+        var totalScore = 0;
+
+        for (var wi = 0; wi < searchWords.length; wi++) {
+            var variants = variantsCache[searchWords[wi]];
+            var bestScore = 0;
+
+            for (var vi = 0; vi < variants.length; vi++) {
+                var v = variants[vi];
+                var vc = v.replace(/[^a-z0-9]/g, '');
+                var ti, t;
+
+                for (ti = 0; ti < nameTokens.length; ti++) {
+                    t = nameTokens[ti];
+                    if (t === v || t === vc) { bestScore = 100; break; }
+                }
+                if (bestScore >= 100) break;
+
+                for (ti = 0; ti < nameTokens.length; ti++) {
+                    t = nameTokens[ti];
+                    if (v.length >= 3 && (t.startsWith(v) || (vc && t.startsWith(vc)))) { bestScore = Math.max(bestScore, 80); break; }
+                    if (t.length >= 3 && (v.startsWith(t) || (vc && vc.startsWith(t)))) { bestScore = Math.max(bestScore, 60); break; }
+                }
+                if (bestScore >= 80) continue;
+
+                if (nameJoined.includes(v) || (vc && nameStripped.includes(vc))) {
+                    bestScore = Math.max(bestScore, 40);
+                } else if (code.includes(v) || (vc && code.includes(vc))) {
+                    bestScore = Math.max(bestScore, 30);
+                }
+            }
+
+            if (bestScore === 0) return -1;
+            totalScore += bestScore;
+        }
+
+        return totalScore;
+    }
+
+    function smartFilterAndRank(results, searchTerm, maxResults) {
+        var searchWords = parseSearchWords(searchTerm);
+        if (searchWords.length === 0 || !Array.isArray(results)) return results || [];
+
+        var variantsCache = {};
+        for (var i = 0; i < searchWords.length; i++) {
+            variantsCache[searchWords[i]] = generateWordVariants(searchWords[i]);
+        }
+
+        var scored = [];
+        for (var r = 0; r < results.length; r++) {
+            var score = scoreActivity(results[r], searchWords, variantsCache);
+            if (score > 0) scored.push({ activity: results[r], score: score });
+        }
+
+        scored.sort(function(a, b) { return b.score - a.score; });
+        var out = [];
+        for (var s = 0; s < Math.min(scored.length, maxResults); s++) {
+            out.push(scored[s].activity);
+        }
+        return out;
     }
 
     let modalSearchRequestId = 0;
@@ -2377,18 +2495,21 @@
         modalList.innerHTML = '<div class="loading-results">Searching...</div>';
         
         try {
-            const smartFilter = buildSmartSearchFilter(searchTerm);
+            const searchWords = parseSearchWords(searchTerm);
+            const broadFilter = buildBroadSearchFilter(searchWords);
+            const fetchLimit = searchWords.length > 1 ? 200 : 100;
             const { data, error } = await supabaseClient
                 .from('Activity List')
                 .select('Code, "Activity Name", Category, Group, "When", DNFBP')
-                .or(smartFilter)
-                .limit(50);
+                .or(broadFilter)
+                .limit(fetchLimit);
 
             if (error) throw error;
             if (requestId !== modalSearchRequestId) return;
 
-            if (data && data.length > 0) {
-                displaySearchResultsInModal(data);
+            const ranked = smartFilterAndRank(data || [], searchTerm, 50);
+            if (ranked.length > 0) {
+                displaySearchResultsInModal(ranked);
         } else {
                 modalList.innerHTML = '<div class="no-results">No activities found matching your search.</div>';
             }
@@ -8202,18 +8323,21 @@
                 searchResultsDropdown.innerHTML = '<div class="loading-results">Searching...</div>';
                 searchResultsDropdown.style.display = 'block';
             
-            const smartFilter = buildSmartSearchFilter(searchTerm);
+            const searchWords = parseSearchWords(searchTerm);
+            const broadFilter = buildBroadSearchFilter(searchWords);
+            const fetchLimit = searchWords.length > 1 ? 200 : 100;
             const query = searchTerm === "*" ? 
                 supabaseClient.from('Activity List').select('Code, "Activity Name", Category, Group').limit(40) : 
                 supabaseClient.from('Activity List').select('Code, "Activity Name", Category, Group')
-                    .or(smartFilter)
-                    .limit(100);
+                    .or(broadFilter)
+                    .limit(fetchLimit);
             
                 const { data, error } = await query;
                 if (error) throw error;
                 if (requestId !== activitySearchRequestId) return;
             
-                displaySearchResults(Array.isArray(data) ? data : []);
+                const ranked = searchTerm === "*" ? (Array.isArray(data) ? data : []) : smartFilterAndRank(data || [], searchTerm, 100);
+                displaySearchResults(ranked);
             } catch (err) {
                 if (requestId !== activitySearchRequestId) return;
                 logNonProdError('searchActivities failed', err);

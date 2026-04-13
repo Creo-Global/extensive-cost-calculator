@@ -1961,6 +1961,75 @@
         return Boolean(supabaseClient && typeof supabaseClient.from === 'function');
     }
 
+    function generateSmartSearchVariants(searchTerm) {
+        const term = searchTerm.trim();
+        if (!term) return [];
+
+        const variants = new Set();
+        variants.add(term);
+
+        const lower = term.toLowerCase();
+        variants.add(lower);
+
+        const noSpaces = lower.replace(/[\s\-_]+/g, '');
+        variants.add(noSpaces);
+
+        const camelSplit = term.replace(/([a-z])([A-Z])/g, '$1 $2');
+        variants.add(camelSplit.toLowerCase());
+
+        const hyphenated = camelSplit.replace(/\s+/g, '-').toLowerCase();
+        variants.add(hyphenated);
+
+        const withSpaces = lower.replace(/[\-_]+/g, ' ');
+        variants.add(withSpaces);
+
+        const withHyphens = lower.replace(/[\s_]+/g, '-');
+        variants.add(withHyphens);
+
+        const noPunctuation = lower.replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        variants.add(noPunctuation);
+
+        if (/^[a-z]+$/i.test(term) && term.length > 4) {
+            const words = term.replace(/([a-z])([A-Z])/g, '$1 $2').split(' ');
+            if (words.length >= 2) {
+                variants.add(words.join('-').toLowerCase());
+                variants.add(words.join(' ').toLowerCase());
+            }
+
+            const prefixes = [
+                'e', 'pre', 'post', 'non', 're', 'co', 'sub', 'multi', 'anti', 'auto',
+                'semi', 'over', 'under', 'out', 'inter', 'intra', 'cross', 'micro', 'macro'
+            ];
+            const lowerTerm = term.toLowerCase();
+            for (const prefix of prefixes) {
+                if (lowerTerm.startsWith(prefix) && lowerTerm.length > prefix.length + 2) {
+                    const rest = lowerTerm.slice(prefix.length);
+                    variants.add(prefix + '-' + rest);
+                    variants.add(prefix + ' ' + rest);
+                }
+            }
+        }
+
+        variants.delete('');
+        return [...variants];
+    }
+
+    function buildSmartSearchFilter(searchTerm) {
+        const variants = generateSmartSearchVariants(searchTerm);
+        if (variants.length === 0) return `"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`;
+
+        const conditions = [];
+        const seen = new Set();
+        for (const v of variants) {
+            const key = v.toLowerCase();
+            if (seen.has(key)) continue;
+            seen.add(key);
+            conditions.push(`"Activity Name".ilike.%${v}%`);
+            conditions.push(`Code.ilike.%${v}%`);
+        }
+        return conditions.join(',');
+    }
+
     let modalSearchRequestId = 0;
     let modalCategoryRequestId = 0;
     let activitySearchRequestId = 0;
@@ -2308,10 +2377,11 @@
         modalList.innerHTML = '<div class="loading-results">Searching...</div>';
         
         try {
+            const smartFilter = buildSmartSearchFilter(searchTerm);
             const { data, error } = await supabaseClient
                 .from('Activity List')
                 .select('Code, "Activity Name", Category, Group, "When", DNFBP')
-                .or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`)
+                .or(smartFilter)
                 .limit(50);
 
             if (error) throw error;
@@ -8132,10 +8202,11 @@
                 searchResultsDropdown.innerHTML = '<div class="loading-results">Searching...</div>';
                 searchResultsDropdown.style.display = 'block';
             
+            const smartFilter = buildSmartSearchFilter(searchTerm);
             const query = searchTerm === "*" ? 
                 supabaseClient.from('Activity List').select('Code, "Activity Name", Category, Group').limit(40) : 
                 supabaseClient.from('Activity List').select('Code, "Activity Name", Category, Group')
-                    .or(`"Activity Name".ilike.%${searchTerm}%,Code.ilike.%${searchTerm}%`)
+                    .or(smartFilter)
                     .limit(100);
             
                 const { data, error } = await query;

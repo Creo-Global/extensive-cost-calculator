@@ -996,13 +996,18 @@
 
                     try {
                         const rawVal = typeof countryField.value === 'string' ? countryField.value.trim() : '';
+
+                        // Also check the dataset attribute directly — the ms-input-wrap custom
+                        // select writes data-resolved-country-value without updating .value
                         const datasetVal = countryField.dataset.resolvedCountryValue || '';
                         const effectiveVal = (!rawVal || isCountryPlaceholderValue(rawVal))
                             ? datasetVal
                             : rawVal;
 
                         if (!effectiveVal || isCountryPlaceholderValue(effectiveVal)) {
-                            delete countryField.dataset.resolvedCountryValue;
+                            if (countryField.dataset.resolvedCountryValue !== undefined) {
+                                delete countryField.dataset.resolvedCountryValue;
+                            }
                             this.clearFieldError('Country-of-Residence');
                             updateContactProgressFeedback();
                             if (typeof updateSectionLockState === 'function') {
@@ -1011,7 +1016,11 @@
                             return;
                         }
 
-                        countryField.dataset.resolvedCountryValue = effectiveVal;
+                        // Only write to the dataset if the value actually changed —
+                        // setting the same value still triggers MutationObserver
+                        if (countryField.dataset.resolvedCountryValue !== effectiveVal) {
+                            countryField.dataset.resolvedCountryValue = effectiveVal;
+                        }
                         this.clearFieldError('Country-of-Residence');
                         updateContactProgressFeedback();
                         if (typeof updateSectionLockState === 'function') {

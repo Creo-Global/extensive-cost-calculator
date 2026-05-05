@@ -540,18 +540,19 @@
         const countryField = field || document.getElementById('Country-of-Residence');
         if (!countryField) return '';
 
-        // 1. Trust the native select value first
+        // 1. Check which option carries class="selected current" — this is what
+        //    the ms-input-wrap widget marks when a country is actively chosen.
+        const options = Array.from(countryField.options || []);
+        const markedOption = options.find(opt => opt.classList.contains('selected') && opt.classList.contains('current'));
+        const markedValue = markedOption ? String(markedOption.value || '').trim() : '';
+        if (markedValue && !isCountryPlaceholderValue(markedValue)) {
+            return markedValue;
+        }
+
+        // 2. Fallback to native select value (for non-widget usage / programmatic fills)
         const rawValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
         if (rawValue && !isCountryPlaceholderValue(rawValue)) {
             return rawValue;
-        }
-
-        // 2. Fallback to data-resolved-country-value — but ONLY this attribute,
-        //    because handleCountryValueUpdate is the single source of truth for it
-        //    and it explicitly deletes it on deselect.
-        const resolvedValue = countryField.dataset?.resolvedCountryValue || '';
-        if (resolvedValue && !isCountryPlaceholderValue(resolvedValue)) {
-            return resolvedValue;
         }
 
         return '';
@@ -1000,13 +1001,17 @@
 
                     try {
                         const rawVal = typeof countryField.value === 'string' ? countryField.value.trim() : '';
-                        const selectedIndex = typeof countryField.selectedIndex === 'number' ? countryField.selectedIndex : -1;
-                        const selectedOption = selectedIndex >= 0 ? countryField.options?.[selectedIndex] : null;
-                        const isPlaceholderSelected = selectedOption && (selectedOption.value === '' || isCountryPlaceholderValue(selectedOption.value));
-
-                        // If the placeholder option is explicitly selected (selectedIndex points to it),
-                        // the user has deselected the country — clear everything regardless of dataset.
-                        if (isPlaceholderSelected) {
+                        
+                        // The ms-input-wrap widget marks the chosen option with class="selected current".
+                        // Use this as the source of truth for which option (if any) is actually selected.
+                        const options = Array.from(countryField.options || []);
+                        const markedOption = options.find(opt => opt.classList.contains('selected') && opt.classList.contains('current'));
+                        const markedValue = markedOption ? String(markedOption.value || '').trim() : '';
+                        const hasRealSelection = markedValue && !isCountryPlaceholderValue(markedValue);
+                        
+                        // If no option carries the selected/current class, OR the marked option is the placeholder,
+                        // the user has deselected — clear everything regardless of stale dataset.
+                        if (!hasRealSelection) {
                             if (countryField.dataset.resolvedCountryValue !== undefined) {
                                 delete countryField.dataset.resolvedCountryValue;
                             }
@@ -1017,27 +1022,10 @@
                             }
                             return;
                         }
-
-                        // Otherwise, fall back to dataset if .value is empty —
-                        // ms-input-wrap custom select writes data-resolved-country-value without updating .value
-                        const datasetVal = countryField.dataset.resolvedCountryValue || '';
-                        const effectiveVal = (!rawVal || isCountryPlaceholderValue(rawVal))
-                            ? datasetVal
-                            : rawVal;
-
-                        if (!effectiveVal || isCountryPlaceholderValue(effectiveVal)) {
-                            if (countryField.dataset.resolvedCountryValue !== undefined) {
-                                delete countryField.dataset.resolvedCountryValue;
-                            }
-                            this.clearFieldError('Country-of-Residence');
-                            updateContactProgressFeedback();
-                            if (typeof updateSectionLockState === 'function') {
-                                updateSectionLockState();
-                            }
-                            return;
-                        }
-
-                        // Only write to the dataset if the value actually changed
+                        
+                        // A real option is marked selected — use its value
+                        const effectiveVal = markedValue;
+                        
                         if (countryField.dataset.resolvedCountryValue !== effectiveVal) {
                             countryField.dataset.resolvedCountryValue = effectiveVal;
                         }

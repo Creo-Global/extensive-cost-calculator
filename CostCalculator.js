@@ -433,7 +433,9 @@
 
     function isCountryPlaceholderValue(value) {
         const normalized = String(value || '').trim().toLowerCase();
-        return !normalized || normalized === 'select country' || normalized === 'current country of residence';
+        return !normalized || normalized === 'select country' 
+        || normalized === 'current country of residence'
+        || normalized === 'current country of residence*';
     }
 
     function getCountryFieldCandidates(field) {
@@ -473,7 +475,7 @@
         if (!countryField) return '';
 
         const directValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
-        if (!isCountryPlaceholderValue(directValue)) {
+        if (directValue && !isCountryPlaceholderValue(directValue)) {
             return directValue;
         }
 
@@ -655,7 +657,8 @@
             missingFields.push('your email address');
         }
 
-        if (!getCountryFieldValue()) {
+        const _countryVal = getCountryFieldValue();
+        if (!_countryVal || isCountryPlaceholderValue(_countryVal)) {
             missingFields.push('your current country of residence');
         }
 
@@ -1450,7 +1453,7 @@
             
             // Consent validation
             const isConsentValid = consentCheckbox?.checked === true;
-            const isCountryValid = Boolean(country);
+            const isCountryValid = Boolean(country) && !isCountryPlaceholderValue(country);
             
             // Phone validation using MFZPhone if available
             const phoneMeta = this.getPhoneValidationMeta(phoneField);

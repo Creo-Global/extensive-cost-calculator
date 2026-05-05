@@ -516,6 +516,11 @@
             }
         }
 
+        const liveValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
+        if (!liveValue || isCountryPlaceholderValue(liveValue)) {
+            return '';
+        }
+
         const datasetCandidates = [
             countryField.dataset?.resolvedCountryValue,
             countryField.dataset?.selectedValue,
@@ -551,6 +556,12 @@
     function syncCountryFieldValue(field) {
         const countryField = field || document.getElementById('Country-of-Residence');
         if (!countryField) return '';
+
+        const rawSelectValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
+        if (!rawSelectValue || isCountryPlaceholderValue(rawSelectValue)) {
+            delete countryField.dataset.resolvedCountryValue;
+            return '';
+        }
 
         const resolvedValue = getCountryFieldValue(countryField);
         if (!resolvedValue) {
@@ -985,6 +996,11 @@
                 };
 
                 const handleCountryValueUpdate = () => {
+                    const rawVal = typeof countryField.value === 'string' ? countryField.value.trim() : '';
+                    if (!rawVal || isCountryPlaceholderValue(rawVal)) {
+                        delete countryField.dataset.resolvedCountryValue;
+                    }
+                    
                     const countryValue = syncCountryFieldValue(countryField);
                     if (countryValue) {
                         this.clearFieldError('Country-of-Residence');

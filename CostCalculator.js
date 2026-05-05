@@ -557,18 +557,6 @@
         const countryField = field || document.getElementById('Country-of-Residence');
         if (!countryField) return '';
 
-        const rawSelectValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
-        if (!rawSelectValue || isCountryPlaceholderValue(rawSelectValue)) {
-            delete countryField.dataset.resolvedCountryValue;
-            return '';
-        }
-
-        const resolvedValue = getCountryFieldValue(countryField);
-        if (!resolvedValue) {
-            delete countryField.dataset.resolvedCountryValue;
-            return '';
-        }
-
         const currentValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
         if (!isCountryPlaceholderValue(currentValue)) {
             countryField.dataset.resolvedCountryValue = currentValue;
@@ -1001,7 +989,7 @@
                         delete countryField.dataset.resolvedCountryValue;
                     }
                     
-                    const countryValue = syncCountryFieldValue(countryField);
+                    const countryValue = countryField.dataset.resolvedCountryValue || syncCountryFieldValue(countryField);
                     if (countryValue) {
                         this.clearFieldError('Country-of-Residence');
                     }
@@ -1301,7 +1289,7 @@
         }
 
         validateCountry(field, value) {
-            if (!value) {
+            if (!field.dataset.resolvedCountryValue ) {
                 this.showFieldError(field.id, 'country', 'required');
                 return false;
             }
@@ -1469,7 +1457,7 @@
             
             // Consent validation
             const isConsentValid = consentCheckbox?.checked === true;
-            const isCountryValid = Boolean(country) && !isCountryPlaceholderValue(country);
+            const isCountryValid = Boolean(document.getElementById('Country-of-Residence')?.dataset.resolvedCountryValue);
             
             // Phone validation using MFZPhone if available
             const phoneMeta = this.getPhoneValidationMeta(phoneField);

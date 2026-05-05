@@ -563,6 +563,8 @@
             return currentValue;
         }
 
+        const resolvedValue = countryField.dataset.resolvedCountryValue || '';
+
         const options = Array.from(countryField.options || []);
         const matchingOptionIndex = options.findIndex((option) => {
             const optionValue = String(option.value || '').trim();

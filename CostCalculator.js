@@ -537,12 +537,21 @@
     }
 
     function getCountryFieldValue(field) {
-        const candidates = getCountryFieldCandidates(field);
-        for (const candidate of candidates) {
-            const resolvedValue = extractCountryValueFromField(candidate);
-            if (!isCountryPlaceholderValue(resolvedValue)) {
-                return resolvedValue;
-            }
+        const countryField = field || document.getElementById('Country-of-Residence');
+        if (!countryField) return '';
+
+        // 1. Trust the native select value first
+        const rawValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
+        if (rawValue && !isCountryPlaceholderValue(rawValue)) {
+            return rawValue;
+        }
+
+        // 2. Fallback to data-resolved-country-value — but ONLY this attribute,
+        //    because handleCountryValueUpdate is the single source of truth for it
+        //    and it explicitly deletes it on deselect.
+        const resolvedValue = countryField.dataset?.resolvedCountryValue || '';
+        if (resolvedValue && !isCountryPlaceholderValue(resolvedValue)) {
+            return resolvedValue;
         }
 
         return '';

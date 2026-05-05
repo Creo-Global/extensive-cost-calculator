@@ -989,24 +989,36 @@
                     this.validateField('Country-of-Residence');
                 };
 
+                let _countryUpdateInProgress = false;
                 const handleCountryValueUpdate = () => {
-                    const rawVal = typeof countryField.value === 'string' ? countryField.value.trim() : '';
-                    
-                    if (!rawVal || isCountryPlaceholderValue(rawVal)) {
-                        delete countryField.dataset.resolvedCountryValue;
+                    if (_countryUpdateInProgress) return;
+                    _countryUpdateInProgress = true;
+
+                    try {
+                        const rawVal = typeof countryField.value === 'string' ? countryField.value.trim() : '';
+                        const datasetVal = countryField.dataset.resolvedCountryValue || '';
+                        const effectiveVal = (!rawVal || isCountryPlaceholderValue(rawVal))
+                            ? datasetVal
+                            : rawVal;
+
+                        if (!effectiveVal || isCountryPlaceholderValue(effectiveVal)) {
+                            delete countryField.dataset.resolvedCountryValue;
+                            this.clearFieldError('Country-of-Residence');
+                            updateContactProgressFeedback();
+                            if (typeof updateSectionLockState === 'function') {
+                                updateSectionLockState();
+                            }
+                            return;
+                        }
+
+                        countryField.dataset.resolvedCountryValue = effectiveVal;
                         this.clearFieldError('Country-of-Residence');
                         updateContactProgressFeedback();
                         if (typeof updateSectionLockState === 'function') {
                             updateSectionLockState();
                         }
-                        return; 
-                    }
-
-                    countryField.dataset.resolvedCountryValue = rawVal;
-                    this.clearFieldError('Country-of-Residence');
-                    updateContactProgressFeedback();
-                    if (typeof updateSectionLockState === 'function') {
-                        updateSectionLockState();
+                    } finally {
+                        _countryUpdateInProgress = false;
                     }
                 };
 
@@ -1063,7 +1075,7 @@
 
                     observer.observe(countryField, {
                         attributes: true,
-                        attributeFilter: ['value', 'data-value', 'data-current-value', 'data-selected-value'],
+                        attributeFilter: ['value', 'data-value', 'data-current-value', 'data-selected-value', 'data-resolved-country-value'],
                         childList: true,
                         subtree: true
                     });
@@ -1071,7 +1083,7 @@
                     Array.from(countryField.options || []).forEach((option) => {
                         observer.observe(option, {
                             attributes: true,
-                            attributeFilter: ['selected', 'value']
+                            attributeFilter: ['selected', 'value', 'class']
                         });
                     });
 

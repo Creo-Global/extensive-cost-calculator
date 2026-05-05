@@ -587,7 +587,11 @@
             return nativeValue;
         }
 
-        countryField.dataset.resolvedCountryValue = resolvedValue;
+        if (resolvedValue) {
+            countryField.dataset.resolvedCountryValue = resolvedValue;
+        } else {
+            delete countryField.dataset.resolvedCountryValue;
+        }
         return resolvedValue;
     }
 
@@ -987,14 +991,19 @@
 
                 const handleCountryValueUpdate = () => {
                     const rawVal = typeof countryField.value === 'string' ? countryField.value.trim() : '';
+                    
                     if (!rawVal || isCountryPlaceholderValue(rawVal)) {
                         delete countryField.dataset.resolvedCountryValue;
-                    }
-                    
-                    const countryValue = countryField.dataset.resolvedCountryValue || syncCountryFieldValue(countryField);
-                    if (countryValue) {
                         this.clearFieldError('Country-of-Residence');
+                        updateContactProgressFeedback();
+                        if (typeof updateSectionLockState === 'function') {
+                            updateSectionLockState();
+                        }
+                        return; 
                     }
+
+                    countryField.dataset.resolvedCountryValue = rawVal;
+                    this.clearFieldError('Country-of-Residence');
                     updateContactProgressFeedback();
                     if (typeof updateSectionLockState === 'function') {
                         updateSectionLockState();
@@ -1082,14 +1091,24 @@
             if (consentCheckbox) {
                 consentCheckbox.addEventListener('change', () => {
                     this.clearFieldError('consent-checkbox');
-                    // Remove error class from checkbox
                     consentCheckbox.classList.remove('error');
                     updateContactProgressFeedback();
-                    // Trigger section lock state update
+
+                    // Only trigger section lock update if country is already filled
+                    // This prevents consent alone from unlocking the form
+                    const countryField = document.getElementById('Country-of-Residence');
+                    const resolvedCountry = countryField?.dataset.resolvedCountryValue || '';
+                    const rawCountry = typeof countryField?.value === 'string' ? countryField.value.trim() : '';
+                    const countryFilled = Boolean(
+                        (!isCountryPlaceholderValue(resolvedCountry) && resolvedCountry) ||
+                        (!isCountryPlaceholderValue(rawCountry) && rawCountry)
+                    );
+
                     if (typeof updateSectionLockState === 'function') {
                         updateSectionLockState();
                     }
                 });
+
             }
 
             const consentWrap = document.getElementById('consent-text-wrap');
@@ -1291,11 +1310,20 @@
         }
 
         validateCountry(field, value) {
-            if (!field.dataset.resolvedCountryValue ) {
+            const resolvedValue = field.dataset.resolvedCountryValue || '';
+            const rawValue = typeof field.value === 'string' ? field.value.trim() : '';
+            
+            const effectiveValue = (!isCountryPlaceholderValue(resolvedValue) && resolvedValue)
+                ? resolvedValue
+                : (!isCountryPlaceholderValue(rawValue) ? rawValue : '');
+
+            if (!effectiveValue) {
                 this.showFieldError(field.id, 'country', 'required');
                 return false;
             }
 
+            // Ensure dataset is always in sync with the confirmed value
+            field.dataset.resolvedCountryValue = effectiveValue;
             return true;
         }
 
@@ -1459,7 +1487,13 @@
             
             // Consent validation
             const isConsentValid = consentCheckbox?.checked === true;
-            const isCountryValid = Boolean(document.getElementById('Country-of-Residence')?.dataset.resolvedCountryValue);
+            const countryField = document.getElementById('Country-of-Residence');
+            const rawCountryVal = countryField ? (typeof countryField.value === 'string' ? countryField.value.trim() : '') : '';
+            const resolvedCountryVal = countryField?.dataset.resolvedCountryValue || '';
+            const isCountryValid = Boolean(
+                (!isCountryPlaceholderValue(resolvedCountryVal) && resolvedCountryVal) ||
+                (!isCountryPlaceholderValue(rawCountryVal) && rawCountryVal)
+            );
             
             // Phone validation using MFZPhone if available
             const phoneMeta = this.getPhoneValidationMeta(phoneField);
@@ -6190,25 +6224,28 @@
     function validateContactForm() {
         try {
             // Use FormValidator if available for consistent validation
-            if (window.formValidator && typeof window.formValidator.validateContactForm === 'function') {
-                // Don't show errors during passive validation checks
-                const result = window.formValidator.validateContactFormSilent();
-                return result;
+            if (window.formValidator && typeof window.formValidator.validateContactFormSilent === 'function') {
+                return window.formValidator.validateContactFormSilent();
             }
             
             const fullName = document.getElementById('full-name')?.value?.trim();
             const email = document.getElementById('email')?.value?.trim();
             const phoneField = document.getElementById('phone');
-            const country = getCountryFieldValue();
             const consentCheckbox = document.getElementById('consent-checkbox');
             
             // Strict validation - ALL fields must be valid
             const isNameValid = fullName && fullName.length >= 2 && NAME_VALIDATION_REGEX.test(fullName);
             const isEmailValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-            
-            // Consent validation
             const isConsentValid = consentCheckbox?.checked === true;
-            const isCountryValid = Boolean(country);
+            
+            // Country: check both resolved dataset value and raw select value
+            const countryField = document.getElementById('Country-of-Residence');
+            const resolvedCountry = countryField?.dataset.resolvedCountryValue || '';
+            const rawCountry = typeof countryField?.value === 'string' ? countryField.value.trim() : '';
+            const isCountryValid = Boolean(
+                (!isCountryPlaceholderValue(resolvedCountry) && resolvedCountry) ||
+                (!isCountryPlaceholderValue(rawCountry) && rawCountry)
+            );
             
             // Phone validation using MFZPhone if available
             let isPhoneValid = false;

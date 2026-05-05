@@ -1104,7 +1104,7 @@
 
                     observer.observe(countryField, {
                         attributes: true,
-                        attributeFilter: ['value', 'data-value', 'data-current-value', 'data-selected-value'],
+                        attributeFilter: ['value', 'data-value', 'data-current-value', 'data-selected-value', 'data-resolved-country-value'],
                         childList: true,
                         subtree: true
                     });
@@ -1112,7 +1112,7 @@
                     Array.from(countryField.options || []).forEach((option) => {
                         observer.observe(option, {
                             attributes: true,
-                            attributeFilter: ['selected', 'value']
+                            attributeFilter: ['selected', 'value', 'class'],
                         });
                     });
 

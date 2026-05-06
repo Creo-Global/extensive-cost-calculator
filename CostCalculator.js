@@ -462,6 +462,54 @@
             || /^current country of residence\*?$/.test(normalized);
     }
 
+    /**
+     * Resolves the calculator's Country-of-Residence <select>.
+     *
+     * The host page (Webflow) sometimes renders MORE THAN ONE element with
+     * id="Country-of-Residence" — typically a hidden popup contact form ships
+     * with the same id as the calculator's own select. document.getElementById
+     * only returns the first one in document order (usually the popup), which
+     * means our validation reads an empty popup select while the user is
+     * actually interacting with the calculator's select. That manifests as
+     * "Current country of residence is required" even after a country has
+     * been picked.
+     *
+     * We pick the calculator's select by anchoring on #calc-error-message
+     * (which only exists in the calculator markup). If we can't find that
+     * anchor we fall back to the last matching select on the page, then to
+     * the legacy getElementById behaviour.
+     */
+    function getCalculatorCountrySelect() {
+        const errorAnchor = document.getElementById('calc-error-message');
+        if (errorAnchor) {
+            const formGroup = errorAnchor.closest('.form-group') || errorAnchor.parentElement;
+            if (formGroup) {
+                const scoped = formGroup.querySelector(
+                    'select#Country-of-Residence, select[name="Country-of-Residence"]'
+                );
+                if (scoped) return scoped;
+            }
+        }
+
+        const matches = document.querySelectorAll(
+            'select#Country-of-Residence, select[name="Country-of-Residence"]'
+        );
+        if (matches.length === 1) return matches[0];
+        if (matches.length > 1) {
+            // Prefer one that lives in the calculator container (next to calc-error-message).
+            for (let i = 0; i < matches.length; i += 1) {
+                const candidate = matches[i];
+                const fg = candidate.closest('.form-group') || candidate.parentElement;
+                if (fg && fg.querySelector('#calc-error-message')) return candidate;
+            }
+            // Otherwise the calculator is usually injected later in the DOM —
+            // pick the last occurrence rather than the first.
+            return matches[matches.length - 1];
+        }
+
+        return document.getElementById('Country-of-Residence');
+    }
+
     /** Minimal list if CostCalculator-countries-data.js fails to load (same host/path as CostCalculator.js). */
     const MFZ_CALC_FALLBACK_COUNTRIES = [
         { code: 'AE', name: 'United Arab Emirates' },
@@ -522,12 +570,15 @@
             }
         };
 
+        // NOTE: This handler used to re-dispatch a 'change' event on the same
+        // select, which caused infinite recursion (handler → dispatch →
+        // handler → dispatch → stack overflow) every time the user picked a
+        // country. The native event already bubbles to every other listener
+        // on its own, so just react to the change here without re-firing it.
         select.addEventListener('change', () => {
             syncCountryCodeHiddenFieldFromSelect(select);
             markSelectedOption();
             select.dataset.resolvedCountryValue = select.value;
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-            select.dispatchEvent(new Event('input', { bubbles: true }));
         });
         markSelectedOption();
         if (select.value) {
@@ -537,7 +588,7 @@
     }
 
     function tryBootstrapCountryResidence() {
-        const select = document.getElementById('Country-of-Residence');
+        const select = getCalculatorCountrySelect();
         if (!select) return;
 
         const codedOptions = select.querySelectorAll('option[data-code]');
@@ -819,7 +870,7 @@
     }
 
     function getCountryFieldValue(field) {
-        const countryField = field || document.getElementById('Country-of-Residence');
+        const countryField = field || getCalculatorCountrySelect();
         if (!countryField) return '';
 
         applyVisibleCountrySelectionToNative(countryField);
@@ -858,7 +909,7 @@
     }
 
     function syncCountryFieldValue(field) {
-        const countryField = field || document.getElementById('Country-of-Residence');
+        const countryField = field || getCalculatorCountrySelect();
         if (!countryField) return '';
 
         const resolvedValue = getCountryFieldValue(countryField);
@@ -1267,7 +1318,7 @@
                 });
             }
 
-            const countryField = document.getElementById('Country-of-Residence');
+            const countryField = getCalculatorCountrySelect();
             if (countryField) {
                 const syncCountryFromOptionTarget = (target) => {
                     if (!target) return;
@@ -1477,7 +1528,12 @@
         }
 
         validateField(fieldId) {
-            const field = document.getElementById(fieldId);
+            // The Country-of-Residence id is duplicated on the host page (popup
+            // form + calculator share the same id). Resolve via helper so we
+            // always validate the calculator's select, not the popup's.
+            const field = fieldId === 'Country-of-Residence'
+                ? getCalculatorCountrySelect()
+                : document.getElementById(fieldId);
             if (!field) return true;
 
             const fieldType = this.getFieldType(fieldId);
@@ -1865,7 +1921,7 @@
                     }
                 }
 
-                applyVisibleCountrySelectionToNative(document.getElementById('Country-of-Residence'));
+                applyVisibleCountrySelectionToNative(getCalculatorCountrySelect());
 
                 const isValid = this.validateContactForm();
                 

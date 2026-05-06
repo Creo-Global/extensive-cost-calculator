@@ -547,9 +547,13 @@
         if (!window.jQuery || typeof window.jQuery.fn.niceSelect !== 'function') return;
         try {
             const $el = window.jQuery(select);
-            if ($el.next('.nice-select').length) {
-                $el.niceSelect('destroy');
-            }
+            // Only refresh if niceSelect is already wrapping this select.
+            // Initialising it here would force the wrapper onto pages that
+            // load niceSelect's JS but not its CSS — the widget then renders
+            // as a flat inline list of every option (e.g. on
+            // meydanfz.ae/cost-calculator).
+            if (!$el.next('.nice-select').length) return;
+            $el.niceSelect('destroy');
             $el.niceSelect();
         } catch (e) {
             logNonProdError('niceSelect refresh failed', e);

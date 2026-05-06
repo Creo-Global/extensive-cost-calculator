@@ -43,6 +43,26 @@
     let currentPaymentOrderId = '';
     let hasContactValidationFeedback = false;
 
+    (function initMfzCalcBundleBase() {
+        try {
+            const nodes = document.getElementsByTagName('script');
+            for (let i = nodes.length - 1; i >= 0; i -= 1) {
+                const src = nodes[i].src || '';
+                if (/CostCalculator\.js(\?|$)/i.test(src)) {
+                    window.__mfzCalcBundleBase = src.replace(/CostCalculator\.js(\?.*)?$/i, '');
+                    return;
+                }
+            }
+        } catch (e) {
+            /* ignore */
+        }
+        window.__mfzCalcBundleBase = window.__mfzCalcBundleBase || '';
+    }());
+
+    let __mfzCalcCountryDataRequested = false;
+    let __mfzCalcCountryDataLoadFailed = false;
+    let __mfzCalcCountryDataTimeoutId = null;
+
     function generateFallbackOrderId() {
         return `${Date.now()}${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
     }
@@ -434,9 +454,181 @@
 
     function isCountryPlaceholderValue(value) {
         const normalized = String(value || '').trim().toLowerCase();
-        return !normalized || normalized === 'select country' 
-        || normalized === 'current country of residence'
-        || normalized === 'current country of residence*';
+        return !normalized
+            || normalized === 'select country'
+            || normalized === 'current country of residence'
+            || normalized === 'current country of residence*'
+            || normalized === 'current country of residence\*'
+            || /^current country of residence\*?$/.test(normalized);
+    }
+
+    /** Minimal list if CostCalculator-countries-data.js fails to load (same host/path as CostCalculator.js). */
+    const MFZ_CALC_FALLBACK_COUNTRIES = [
+        { code: 'AE', name: 'United Arab Emirates' },
+        { code: 'SA', name: 'Saudi Arabia' },
+        { code: 'GB', name: 'United Kingdom' },
+        { code: 'US', name: 'United States' },
+        { code: 'IN', name: 'India' },
+        { code: 'PK', name: 'Pakistan' },
+        { code: 'EG', name: 'Egypt' },
+        { code: 'JO', name: 'Jordan' },
+        { code: 'LB', name: 'Lebanon' },
+        { code: 'PH', name: 'Philippines' },
+        { code: 'FR', name: 'France' },
+        { code: 'DE', name: 'Germany' },
+        { code: 'CA', name: 'Canada' },
+        { code: 'AU', name: 'Australia' },
+        { code: 'CN', name: 'China' },
+        { code: 'RU', name: 'Russia' },
+        { code: 'ZA', name: 'South Africa' },
+        { code: 'NG', name: 'Nigeria' },
+        { code: 'KE', name: 'Kenya' },
+        { code: 'TR', name: 'Turkey' },
+    ];
+
+    function syncCountryCodeHiddenFieldFromSelect(select) {
+        const form = select && select.closest ? select.closest('form') : null;
+        if (!form) return;
+        const codeInput = form.querySelector('[name="Country_of_Residence_Code"], [name="Country-of-Residence-Code"]');
+        if (!codeInput) return;
+        const opt = select.options[select.selectedIndex];
+        codeInput.value = opt && opt.dataset && opt.dataset.code ? opt.dataset.code : '';
+    }
+
+    function refreshNiceSelectAfterCountryOptionsChange(select) {
+        if (!window.jQuery || typeof window.jQuery.fn.niceSelect !== 'function') return;
+        try {
+            const $el = window.jQuery(select);
+            if ($el.next('.nice-select').length) {
+                $el.niceSelect('destroy');
+            }
+            $el.niceSelect();
+        } catch (e) {
+            logNonProdError('niceSelect refresh failed', e);
+        }
+    }
+
+    function wireCountryResidenceCalculatorSync(select) {
+        if (!select || select.getAttribute('data-mfz-calc-bootstrap-wired') === 'true') return;
+        select.setAttribute('data-mfz-calc-bootstrap-wired', 'true');
+
+        const markSelectedOption = () => {
+            Array.from(select.options || []).forEach((opt) => {
+                opt.classList.remove('selected', 'current');
+            });
+            const chosen = select.options[select.selectedIndex];
+            if (chosen && chosen.value) {
+                chosen.classList.add('selected', 'current');
+            }
+        };
+
+        select.addEventListener('change', () => {
+            syncCountryCodeHiddenFieldFromSelect(select);
+            markSelectedOption();
+            select.dataset.resolvedCountryValue = select.value;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            select.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        markSelectedOption();
+        if (select.value) {
+            select.dataset.resolvedCountryValue = select.value;
+        }
+        syncCountryCodeHiddenFieldFromSelect(select);
+    }
+
+    function tryBootstrapCountryResidence() {
+        const select = document.getElementById('Country-of-Residence');
+        if (!select) return;
+
+        const codedOptions = select.querySelectorAll('option[data-code]');
+        if (codedOptions.length >= 40) {
+            if (select.getAttribute('data-mfz-calc-bootstrap-wired') !== 'true') {
+                wireCountryResidenceCalculatorSync(select);
+                refreshNiceSelectAfterCountryOptionsChange(select);
+            }
+            return;
+        }
+
+        let list = window.__MFZ_CALC_EMBEDDED_COUNTRIES;
+        const hasFullList = Array.isArray(list) && list.length > 30;
+        if (!hasFullList) {
+            const waitingOnScript = __mfzCalcCountryDataRequested && !__mfzCalcCountryDataLoadFailed
+                && typeof window.__mfzCalcBundleBase === 'string' && window.__mfzCalcBundleBase;
+            if (waitingOnScript) {
+                return;
+            }
+            list = MFZ_CALC_FALLBACK_COUNTRIES;
+        }
+
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
+
+        const pinned = list.filter((c) => c.code === 'AE');
+        const rest = list.filter((c) => c.code !== 'AE');
+        const frag = document.createDocumentFragment();
+        pinned.concat(rest).forEach((c) => {
+            const opt = document.createElement('option');
+            opt.value = c.name;
+            opt.dataset.code = c.code;
+            opt.textContent = c.name;
+            frag.appendChild(opt);
+        });
+        select.appendChild(frag);
+
+        select.setAttribute('data-mfz-country-initialized', 'true');
+        select.setAttribute('data-calculator-country-bootstrap', 'done');
+
+        wireCountryResidenceCalculatorSync(select);
+        refreshNiceSelectAfterCountryOptionsChange(select);
+
+        if (typeof updateSectionLockState === 'function') {
+            updateSectionLockState();
+        }
+    }
+
+    function scheduleCountryResidenceBootstrap() {
+        if (window.__MFZ_CALC_EMBEDDED_COUNTRIES && window.__MFZ_CALC_EMBEDDED_COUNTRIES.length) {
+            tryBootstrapCountryResidence();
+            return;
+        }
+
+        const base = typeof window.__mfzCalcBundleBase === 'string' ? window.__mfzCalcBundleBase : '';
+        if (!base) {
+            __mfzCalcCountryDataLoadFailed = true;
+            tryBootstrapCountryResidence();
+            return;
+        }
+
+        if (!__mfzCalcCountryDataRequested) {
+            __mfzCalcCountryDataRequested = true;
+            const sc = document.createElement('script');
+            sc.async = true;
+            sc.src = `${base}CostCalculator-countries-data.js`;
+            sc.onload = () => {
+                tryBootstrapCountryResidence();
+            };
+            sc.onerror = () => {
+                __mfzCalcCountryDataLoadFailed = true;
+                tryBootstrapCountryResidence();
+            };
+            const parent = document.head || document.documentElement;
+            parent.appendChild(sc);
+
+            if (!__mfzCalcCountryDataTimeoutId) {
+                __mfzCalcCountryDataTimeoutId = setTimeout(() => {
+                    if (!window.__MFZ_CALC_EMBEDDED_COUNTRIES || !window.__MFZ_CALC_EMBEDDED_COUNTRIES.length) {
+                        __mfzCalcCountryDataLoadFailed = true;
+                        tryBootstrapCountryResidence();
+                    }
+                }, 3000);
+            }
+            return;
+        }
+
+        if (__mfzCalcCountryDataLoadFailed) {
+            tryBootstrapCountryResidence();
+        }
     }
 
     function getCountryFieldCandidates(field) {
@@ -554,6 +746,12 @@
         const rawValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
         if (rawValue && !isCountryPlaceholderValue(rawValue)) {
             return rawValue;
+        }
+
+        // 3. Select2 / nice-select / ms-input-wrap: native .value often lags the visible UI
+        const extracted = extractCountryValueFromField(countryField);
+        if (extracted && !isCountryPlaceholderValue(extracted)) {
+            return extracted;
         }
 
         return '';
@@ -1799,7 +1997,11 @@
             
             // Initialize section locking
             initializeSectionLocking();
-            
+
+            scheduleCountryResidenceBootstrap();
+            setTimeout(scheduleCountryResidenceBootstrap, 120);
+            setTimeout(scheduleCountryResidenceBootstrap, 700);
+
             // Initialize Get a Call buttons
             initializeGetCallButtons();
             

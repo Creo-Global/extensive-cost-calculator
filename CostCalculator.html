@@ -48,7 +48,8 @@
             <p class="mobile-payment-footnote">*Remaining charges will be billed on a pay-as-you-go basis.</p>
           </div>
 
-          <!-- <section class="mobile-payment-section">
+          <!-- Card payment section (hidden for now)
+          <section class="mobile-payment-section">
             <h2 class="mobile-payment-section-title">Payment Method</h2>
             <div class="mobile-payment-row">
               <span class="mobile-payment-icon" aria-hidden="true">
@@ -60,19 +61,23 @@
           </section>
 
           <div class="mobile-payment-between-sections" role="presentation"></div>
+          -->
+
+          <div class="mobile-payment-between-sections" role="presentation"></div>
 
           <section class="mobile-payment-section">
             <h2 class="mobile-payment-section-title">Buy Now, Pay Later</h2>
-            <div class="mobile-payment-row mobile-payment-row-tall">
+            <button type="button" class="mobile-payment-row mobile-payment-row-tall payment-tamara-option" id="mobile-payment-tamara-btn" data-payment-channel="tamara" aria-label="Pay with Tamara">
               <span class="mobile-payment-icon" aria-hidden="true">
-                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/69d089dae5ddef82e22ecc1a_pay-later.webp" alt="Fawri License" />
+                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/69d089dae5ddef82e22ecc1a_pay-later.webp" alt="" />
               </span>
               <div class="mobile-payment-row-stack">
                 <span class="mobile-payment-row-text">Pay with Tamara</span>
-                <span class="mobile-payment-row-sub">If its your first order with Tabby, they may verify your ID</span>
+                <span class="mobile-payment-row-sub">If it's your first order with Tamara, they may verify your ID.</span>
+                <span class="mobile-payment-row-sub">An additional AED 313 applies when paying with Tamara.</span>
               </div>
-            </div>
-          </section>-->
+            </button>
+          </section>
         </div> 
 
         <div class="mobile-payment-footer">
@@ -848,15 +853,16 @@
 
           <div class="summary-payment-section">
             <h4 class="summary-payment-section-title">Buy Now, Pay Later</h4>
-            <div class="summary-payment-method-row summary-payment-method-row-tall">
+            <button type="button" class="summary-payment-method-row summary-payment-method-row-tall payment-tamara-option" id="summary-payment-tamara-btn" data-payment-channel="tamara" aria-label="Pay with Tamara">
               <span class="summary-payment-method-icon">
-                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/69d089dae5ddef82e22ecc1a_pay-later.webp" alt="Pay Later" />
+                <img src="https://cdn.prod.website-files.com/6746fa16829349829922b7c4/69d089dae5ddef82e22ecc1a_pay-later.webp" alt="" />
               </span>
               <div class="summary-payment-method-stack">
                 <span class="summary-payment-method-text">Pay with Tamara</span>
-                <span class="summary-payment-method-sub">If its your first order with Tabby, they may verify your ID</span>
+                <span class="summary-payment-method-sub">If it's your first order with Tamara, they may verify your ID.</span>
+                <span class="summary-payment-method-sub">An additional AED 313 applies when paying with Tamara.</span>
               </div>
-            </div>
+            </button>
           </div>
 
           <div class="summary-payment-footer">

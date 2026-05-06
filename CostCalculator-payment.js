@@ -344,7 +344,7 @@
         '?return_url=' +
         encodeURIComponent(currentUrl);
 
-      return {
+      var secureRequest = {
         order_id: normalizeString(nextInput.orderId),
         amount: Number(nextInput.amount || 0),
         currency: PAYMENT_CONFIG.currency,
@@ -364,6 +364,13 @@
         merchant_param4: normalizeString(nextInput.businessActivitiesText).substring(0, 500),
         merchant_param5: normalizeString(nextInput.totalVisasText),
       };
+
+      var channelValue = normalizeString(nextInput.channel);
+      if (channelValue) {
+        secureRequest.channel = channelValue;
+      }
+
+      return secureRequest;
     }
 
     function buildPaymentSessionData(input) {
@@ -651,6 +658,7 @@
         calculationVersion: normalizeString(
           pickFirstDefinedValue(source, ['calculationVersion', 'calculation_version'], ''),
         ),
+        channel: normalizeString(pickFirstDefinedValue(source, 'channel', '')),
       };
 
       if (!unifiedPayload.orderId) {

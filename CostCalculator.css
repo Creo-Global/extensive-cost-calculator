@@ -5338,7 +5338,7 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
 
 .summary-payment-section {
   margin-bottom: 16px;
-  display: none;
+  display: block;
 }
 
 .summary-payment-section-title {
@@ -5395,6 +5395,35 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   font-size: 11px;
   color: #9ca3af;
   font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+button.summary-payment-method-row.payment-tamara-option {
+  width: 100%;
+  font: inherit;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  cursor: pointer;
+  text-align: left;
+}
+
+button.mobile-payment-row.payment-tamara-option {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #f9fafb;
+  font: inherit;
+  cursor: pointer;
+}
+
+button.mobile-payment-row.payment-tamara-option:focus-visible {
+  outline: 2px solid #0171e3;
+  outline-offset: 2px;
+}
+
+button.summary-payment-method-row.payment-tamara-option:focus-visible {
+  outline: 2px solid #0171e3;
+  outline-offset: 2px;
 }
 
 .summary-payment-add-btn {

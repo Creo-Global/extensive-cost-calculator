@@ -31,6 +31,7 @@
 
     let hasInitializedCalculator = false;
     const paymentIntegration = window.BPCalculatorPayment || null;
+    const TAMARA_PAYMENT_SURCHARGE_AED = 313;
     let isPaymentSubmissionInProgress = false;
     let paymentHealthRequestPromise = null;
     let paymentHealthState = {
@@ -5101,7 +5102,7 @@
         return Promise.resolve(submitFn(payload));
     }
 
-    function buildPaymentInitiatedPayload(orderId, paymentAmount) {
+    function buildPaymentInitiatedPayload(orderId, paymentAmount, channel = '') {
         return buildQuoteSubmissionPayload({
             actionType: 'payment_initiated',
             formStatus: 'payment',
@@ -5110,6 +5111,7 @@
             paymentInitiated: 'yes',
             paymentType: paymentIntegration?.PAYMENT_CONFIG?.paymentType || 'setup_fee',
             paymentAmount,
+            channel,
         });
     }
 
@@ -5231,25 +5233,30 @@
         });
     }
 
-    async function initiateSecurePayment(orderId, amount) {
+    async function initiateSecurePayment(orderId, amount, options = {}) {
         const config = getPaymentConfig();
         if (!config || !paymentIntegration || typeof paymentIntegration.buildSecurePaymentRequest !== 'function') {
             return { success: false };
         }
 
+        const securePayload = {
+            orderId,
+            amount,
+            fullName: document.getElementById('full-name')?.value?.trim() || '',
+            email: document.getElementById('email')?.value?.trim() || '',
+            phone: getFormattedPhoneValue(),
+            selectedLicense: 'Setup Fee Only (License + Co-working + Knowledge Fee)',
+            businessActivitiesText: getSelectedActivitiesText() || 'N/A',
+            totalVisasText: `Investor: 0, Employee: 0 (Total: 0)`,
+            visaAmount: 0,
+            currentUrl: window.location.href,
+        };
+        if (options.channel) {
+            securePayload.channel = options.channel;
+        }
+
         try {
-            const requestData = paymentIntegration.buildSecurePaymentRequest({
-                orderId,
-                amount,
-                fullName: document.getElementById('full-name')?.value?.trim() || '',
-                email: document.getElementById('email')?.value?.trim() || '',
-                phone: getFormattedPhoneValue(),
-                selectedLicense: 'Setup Fee Only (License + Co-working + Knowledge Fee)',
-                businessActivitiesText: getSelectedActivitiesText() || 'N/A',
-                totalVisasText: `Investor: 0, Employee: 0 (Total: 0)`,
-                visaAmount: 0,
-                currentUrl: window.location.href,
-            });
+            const requestData = paymentIntegration.buildSecurePaymentRequest(securePayload);
 
             const response = await fetchWithTimeout(config.initiateUrl, {
                 method: 'POST',
@@ -5302,6 +5309,14 @@
         if (event?.preventDefault) {
             event.preventDefault();
         }
+        const paymentChannel =
+            (event?.currentTarget && event.currentTarget.getAttribute('data-payment-channel')) || '';
+        await runSetupFeePaymentFlow({ channel: paymentChannel });
+    }
+
+    async function runSetupFeePaymentFlow({ channel: rawChannel = '' } = {}) {
+        const channelKey = String(rawChannel || '').trim().toLowerCase();
+        const paymentChannel = channelKey === 'tamara' ? 'tamara' : '';
 
         if (!paymentIntegration || typeof paymentIntegration.evaluatePaymentStepGuard !== 'function') {
             showPaymentMessage('Payment is temporarily unavailable. Please try again later.');
@@ -5332,16 +5347,34 @@
         const paymentSummary = renderPaymentSummary(ensureSubmissionOrderId());
         const currentSetupFeeSummary = paymentSummary || getCurrentSetupFeeSummary();
         const orderId = paymentSummary?.orderId || ensureSubmissionOrderId();
-        const amount = currentSetupFeeSummary?.amount || currentSetupFeeSummary?.total || paymentIntegration.PAYMENT_CONFIG.setupFeeAmount;
+        const baseAmount = currentSetupFeeSummary?.amount
+            || currentSetupFeeSummary?.total
+            || paymentIntegration.PAYMENT_CONFIG.setupFeeAmount;
+        const tamaraSurcharge = paymentChannel === 'tamara' ? TAMARA_PAYMENT_SURCHARGE_AED : 0;
+        const amount = baseAmount + tamaraSurcharge;
         const contactState = getContactFormState();
 
-        const confirmMessage =
-            `You are about to pay the setup fee only: AED ${amount.toLocaleString()}.\n\n` +
-            `Order ID: ${orderId}\n` +
-            `Name: ${contactState.fullName}\n` +
-            `Email: ${contactState.email}\n` +
-            `Includes: License, CoWorking, Knowledge Fee\n\n` +
-            `Do you want to continue?`;
+        let confirmMessage;
+        if (paymentChannel === 'tamara') {
+            confirmMessage =
+                `You are about to pay the setup fee via Tamara.\n\n` +
+                `Setup fee: AED ${baseAmount.toLocaleString()}\n` +
+                `Tamara additional charge: AED ${tamaraSurcharge.toLocaleString()}\n` +
+                `Total payable: AED ${amount.toLocaleString()}\n\n` +
+                `Order ID: ${orderId}\n` +
+                `Name: ${contactState.fullName}\n` +
+                `Email: ${contactState.email}\n` +
+                `Includes: License, Co-working, Knowledge Fee\n\n` +
+                `Do you want to continue?`;
+        } else {
+            confirmMessage =
+                `You are about to pay the setup fee only: AED ${baseAmount.toLocaleString()}.\n\n` +
+                `Order ID: ${orderId}\n` +
+                `Name: ${contactState.fullName}\n` +
+                `Email: ${contactState.email}\n` +
+                `Includes: License, CoWorking, Knowledge Fee\n\n` +
+                `Do you want to continue?`;
+        }
 
         if (!window.confirm(confirmMessage)) {
             return;
@@ -5360,13 +5393,14 @@
             return;
         }
 
-        const initiatedPayload = buildPaymentInitiatedPayload(orderId, amount);
+        const initiatedPayload = buildPaymentInitiatedPayload(orderId, amount, paymentChannel);
         storePaymentSession(initiatedPayload);
         submitLifecyclePayload(initiatedPayload).catch((error) => {
             logNonProdError('Payment initiated webhook submission failed', error);
         });
 
-        const paymentResult = await initiateSecurePayment(orderId, amount);
+        const secureOptions = paymentChannel === 'tamara' ? { channel: 'tamara' } : {};
+        const paymentResult = await initiateSecurePayment(orderId, amount, secureOptions);
         if (!paymentResult.success) {
             isPaymentSubmissionInProgress = false;
             setPaymentButtonsLoading(false);
@@ -5751,6 +5785,7 @@
         scheduledDateTimeIso = '',
         scheduledTimezone = '',
         submissionTimestamp = new Date().toISOString(),
+        channel = '',
     } = {}) {
         const snapshot = getFormSnapshot();
         const metadata = collectSubmissionMetadata();
@@ -5952,7 +5987,8 @@
             submissionTimestamp,
             invoiceCurrency,
             invoiceCurrencySymbol: 'د.إ',
-            calculationVersion: '1.0'
+            calculationVersion: '1.0',
+            channel,
         });
     }
 
@@ -6122,6 +6158,14 @@
         [summarySubmitBtn, mobileSubmitBtn].filter(Boolean).forEach(function (button) {
             if (button.dataset.initialized === 'true') return;
             button.dataset.initialized = 'true';
+            button.addEventListener('click', handleSetupFeePayment);
+        });
+
+        var summaryTamaraBtn = document.getElementById('summary-payment-tamara-btn');
+        var mobileTamaraBtn = document.getElementById('mobile-payment-tamara-btn');
+        [summaryTamaraBtn, mobileTamaraBtn].filter(Boolean).forEach(function (button) {
+            if (button.dataset.tamaraInit === 'true') return;
+            button.dataset.tamaraInit = 'true';
             button.addEventListener('click', handleSetupFeePayment);
         });
     }

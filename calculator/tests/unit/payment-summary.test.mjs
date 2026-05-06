@@ -28,4 +28,33 @@ describe('payment setup fee summary', () => {
       total: 15020,
     });
   });
+
+  it('includes channel on secure payment request when provided', () => {
+    const req = paymentIntegration.buildSecurePaymentRequest({
+      orderId: '20260101120000123456',
+      amount: 12833,
+      fullName: 'Test User',
+      email: 'test@example.com',
+      phone: '501234567',
+      channel: 'tamara',
+      businessActivitiesText: 'Activity',
+      totalVisasText: 'Investor: 0, Employee: 0 (Total: 0)',
+      currentUrl: 'https://example.com/page',
+    });
+    expect(req.channel).toBe('tamara');
+  });
+
+  it('omits channel on secure payment request when not provided', () => {
+    const req = paymentIntegration.buildSecurePaymentRequest({
+      orderId: '20260101120000123456',
+      amount: 12520,
+      fullName: 'Test User',
+      email: 'test@example.com',
+      phone: '501234567',
+      businessActivitiesText: 'Activity',
+      totalVisasText: 'Investor: 0, Employee: 0 (Total: 0)',
+      currentUrl: 'https://example.com/page',
+    });
+    expect(req.channel).toBeUndefined();
+  });
 });

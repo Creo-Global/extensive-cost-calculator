@@ -739,9 +739,90 @@
         return '';
     }
 
+    /**
+     * Reads visible label from nice-select / Select2 (native value often stays on placeholder).
+     */
+    function getVisibleCountryLabelFromWidgets(countryField) {
+        if (!countryField) return '';
+        const roots = [
+            countryField.closest('.ms-input-wrap'),
+            countryField.closest('.w-select'),
+            countryField.parentElement,
+            countryField.closest('.form-group'),
+        ].filter(Boolean);
+
+        const readFromRoot = (root) => {
+            if (!root || !root.querySelector) return '';
+            const niceCurrent = root.querySelector('.nice-select .current');
+            if (niceCurrent && niceCurrent.textContent) {
+                return niceCurrent.textContent.replace(/\s+/g, ' ').trim();
+            }
+            const s2 = root.querySelector('.select2-selection__rendered');
+            if (s2 && s2.textContent) {
+                return s2.textContent.replace(/\s+/g, ' ').trim();
+            }
+            return '';
+        };
+
+        for (let i = 0; i < roots.length; i += 1) {
+            const t = readFromRoot(roots[i]);
+            if (t) return t;
+        }
+
+        const nextSib = countryField.nextElementSibling;
+        if (nextSib && nextSib.classList) {
+            if (nextSib.classList.contains('nice-select')) {
+                const cur = nextSib.querySelector('.current');
+                if (cur && cur.textContent) return cur.textContent.replace(/\s+/g, ' ').trim();
+            }
+            if (nextSib.classList.contains('select2') || nextSib.classList.contains('select2-container')) {
+                const r = nextSib.querySelector('.select2-selection__rendered');
+                if (r && r.textContent) return r.textContent.replace(/\s+/g, ' ').trim();
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Maps visible country text to a real <option> and updates the native select (nice-select / Select2 gap).
+     */
+    function applyVisibleCountrySelectionToNative(countryField) {
+        if (!countryField || countryField.tagName !== 'SELECT') return;
+
+        const label = getVisibleCountryLabelFromWidgets(countryField);
+        if (!label || isCountryPlaceholderValue(label)) return;
+
+        const options = Array.from(countryField.options || []);
+        const match = options.find((opt) => {
+            const v = String(opt.value || '').trim();
+            const t = String(opt.textContent || '').trim();
+            if (isCountryPlaceholderValue(v) && isCountryPlaceholderValue(t)) return false;
+            return v === label || t === label;
+        });
+        if (!match) return;
+
+        const want = String(match.value || match.textContent || '').trim();
+        const idx = options.indexOf(match);
+        const currentVal = String(countryField.value || '').trim();
+        if (currentVal === want && countryField.selectedIndex === idx) {
+            return;
+        }
+
+        options.forEach((opt, i) => {
+            opt.selected = i === idx;
+            opt.classList.toggle('selected', i === idx);
+            opt.classList.toggle('current', i === idx);
+        });
+        countryField.selectedIndex = idx;
+        countryField.value = want;
+        countryField.dataset.resolvedCountryValue = want;
+    }
+
     function getCountryFieldValue(field) {
         const countryField = field || document.getElementById('Country-of-Residence');
         if (!countryField) return '';
+
+        applyVisibleCountrySelectionToNative(countryField);
 
         const rawValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
         if (rawValue && !isCountryPlaceholderValue(rawValue)) {
@@ -1783,7 +1864,9 @@
                         return;
                     }
                 }
-                
+
+                applyVisibleCountrySelectionToNative(document.getElementById('Country-of-Residence'));
+
                 const isValid = this.validateContactForm();
                 
                 if (isValid) {

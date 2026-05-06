@@ -692,6 +692,16 @@
         }
 
         const wrapper = countryField.closest('.form-group') || countryField.parentElement || document;
+
+        const nextSib = countryField.nextElementSibling;
+        if (nextSib && nextSib.classList && nextSib.classList.contains('nice-select')) {
+            const cur = nextSib.querySelector('.current');
+            const siblingNiceText = cur && typeof cur.textContent === 'string' ? cur.textContent.trim() : '';
+            if (!isCountryPlaceholderValue(siblingNiceText)) {
+                return siblingNiceText;
+            }
+        }
+
         const customValueSelectors = [
             '.select2-selection__rendered',
             '.nice-select .current',
@@ -733,25 +743,34 @@
         const countryField = field || document.getElementById('Country-of-Residence');
         if (!countryField) return '';
 
-        // 1. Check which option carries class="selected current" — this is what
-        //    the ms-input-wrap widget marks when a country is actively chosen.
-        const options = Array.from(countryField.options || []);
-        const markedOption = options.find(opt => opt.classList.contains('selected') && opt.classList.contains('current'));
-        const markedValue = markedOption ? String(markedOption.value || '').trim() : '';
-        if (markedValue && !isCountryPlaceholderValue(markedValue)) {
-            return markedValue;
-        }
-
-        // 2. Fallback to native select value (for non-widget usage / programmatic fills)
         const rawValue = typeof countryField.value === 'string' ? countryField.value.trim() : '';
         if (rawValue && !isCountryPlaceholderValue(rawValue)) {
             return rawValue;
         }
 
-        // 3. Select2 / nice-select / ms-input-wrap: native .value often lags the visible UI
+        const selIdx = countryField.selectedIndex;
+        if (Number.isInteger(selIdx) && selIdx >= 0 && countryField.options && countryField.options[selIdx]) {
+            const opt = countryField.options[selIdx];
+            const optionVal = String(opt.value || '').trim();
+            if (optionVal && !isCountryPlaceholderValue(optionVal)) {
+                return optionVal;
+            }
+            const optionText = String(opt.textContent || '').trim();
+            if (optionText && !isCountryPlaceholderValue(optionText)) {
+                return optionText;
+            }
+        }
+
         const extracted = extractCountryValueFromField(countryField);
         if (extracted && !isCountryPlaceholderValue(extracted)) {
             return extracted;
+        }
+
+        const options = Array.from(countryField.options || []);
+        const markedOption = options.find((opt) => opt.classList.contains('selected') && opt.classList.contains('current'));
+        const markedValue = markedOption ? String(markedOption.value || '').trim() : '';
+        if (markedValue && !isCountryPlaceholderValue(markedValue)) {
+            return markedValue;
         }
 
         return '';
@@ -1199,17 +1218,11 @@
                     _countryUpdateInProgress = true;
 
                     try {
-                        const rawVal = typeof countryField.value === 'string' ? countryField.value.trim() : '';
-                        
-                        // The ms-input-wrap widget marks the chosen option with class="selected current".
-                        // Use this as the source of truth for which option (if any) is actually selected.
-                        const options = Array.from(countryField.options || []);
-                        const markedOption = options.find(opt => opt.classList.contains('selected') && opt.classList.contains('current'));
-                        const markedValue = markedOption ? String(markedOption.value || '').trim() : '';
-                        const hasRealSelection = markedValue && !isCountryPlaceholderValue(markedValue);
-                        
-                        // If no option carries the selected/current class, OR the marked option is the placeholder,
-                        // the user has deselected — clear everything regardless of stale dataset.
+                        const effectiveVal = getCountryFieldValue(countryField);
+                        const hasRealSelection = Boolean(
+                            effectiveVal && !isCountryPlaceholderValue(effectiveVal),
+                        );
+
                         if (!hasRealSelection) {
                             if (countryField.dataset.resolvedCountryValue !== undefined) {
                                 delete countryField.dataset.resolvedCountryValue;
@@ -1221,10 +1234,7 @@
                             }
                             return;
                         }
-                        
-                        // A real option is marked selected — use its value
-                        const effectiveVal = markedValue;
-                        
+
                         if (countryField.dataset.resolvedCountryValue !== effectiveVal) {
                             countryField.dataset.resolvedCountryValue = effectiveVal;
                         }
@@ -1261,6 +1271,17 @@
                     window.jQuery(countryField).on('select2:select select2:close', () => {
                         handleCountryValueUpdate();
                         this.validateField('Country-of-Residence');
+                    });
+                }
+
+                const countryFormGroup = countryField.closest('.form-group');
+                if (countryFormGroup && window.jQuery && !countryField._niceSelectWrapClick) {
+                    countryField._niceSelectWrapClick = true;
+                    window.jQuery(countryFormGroup).on('click', '.nice-select .option', () => {
+                        window.setTimeout(() => {
+                            handleCountryValueUpdate();
+                            this.validateField('Country-of-Residence');
+                        }, 0);
                     });
                 }
 

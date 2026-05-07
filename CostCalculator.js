@@ -526,7 +526,7 @@
             syncCountryCodeHiddenFieldFromSelect(select);
             markSelectedOption();
             select.dataset.resolvedCountryValue = select.value;
-            select.dispatchEvent(new Event('change', { bubbles: true }));
+            // Do not dispatch a synthetic "change" here — it re-enters this listener and overflows the stack.
             select.dispatchEvent(new Event('input', { bubbles: true }));
         });
         markSelectedOption();
@@ -536,8 +536,32 @@
         syncCountryCodeHiddenFieldFromSelect(select);
     }
 
+    /**
+     * DOM on some pages (e.g. Webflow) contains multiple nodes with id Country-of-Residence.
+     * getElementById returns the first; the calculator field is the one paired with #calc-error-message
+     * or, when duplicated, typically the last matching element.
+     */
+    function getCalculatorCountrySelect() {
+        const errEl = document.getElementById('calc-error-message');
+        if (errEl) {
+            const group = errEl.closest('.form-group');
+            if (group) {
+                const scoped = group.querySelector('[id="Country-of-Residence"], select[name="Country-of-Residence"]');
+                if (scoped) return scoped;
+            }
+        }
+        const dupes = document.querySelectorAll('[id="Country-of-Residence"]');
+        if (dupes.length > 1) {
+            return dupes[dupes.length - 1];
+        }
+        if (dupes.length === 1) {
+            return dupes[0];
+        }
+        return document.querySelector('select[name="Country-of-Residence"]');
+    }
+
     function tryBootstrapCountryResidence() {
-        const select = document.getElementById('Country-of-Residence');
+        const select = getCalculatorCountrySelect();
         if (!select) return;
 
         const codedOptions = select.querySelectorAll('option[data-code]');
@@ -819,7 +843,7 @@
     }
 
     function getCountryFieldValue(field) {
-        const countryField = field || document.getElementById('Country-of-Residence');
+        const countryField = field || getCalculatorCountrySelect();
         if (!countryField) return '';
 
         applyVisibleCountrySelectionToNative(countryField);
@@ -858,7 +882,7 @@
     }
 
     function syncCountryFieldValue(field) {
-        const countryField = field || document.getElementById('Country-of-Residence');
+        const countryField = field || getCalculatorCountrySelect();
         if (!countryField) return '';
 
         const resolvedValue = getCountryFieldValue(countryField);
@@ -1267,7 +1291,7 @@
                 });
             }
 
-            const countryField = document.getElementById('Country-of-Residence');
+            const countryField = getCalculatorCountrySelect();
             if (countryField) {
                 const syncCountryFromOptionTarget = (target) => {
                     if (!target) return;
@@ -1477,7 +1501,9 @@
         }
 
         validateField(fieldId) {
-            const field = document.getElementById(fieldId);
+            const field = fieldId === 'Country-of-Residence'
+                ? getCalculatorCountrySelect()
+                : document.getElementById(fieldId);
             if (!field) return true;
 
             const fieldType = this.getFieldType(fieldId);
@@ -1683,7 +1709,9 @@
         }
 
         displayError(fieldId, message) {
-            const field = document.getElementById(fieldId);
+            const field = fieldId === 'Country-of-Residence'
+                ? getCalculatorCountrySelect()
+                : document.getElementById(fieldId);
             const errorId = this.getErrorElementId(fieldId);
             const errorElement = document.getElementById(errorId);
 
@@ -1726,7 +1754,9 @@
         }
 
         clearFieldError(fieldId) {
-            const field = document.getElementById(fieldId);
+            const field = fieldId === 'Country-of-Residence'
+                ? getCalculatorCountrySelect()
+                : document.getElementById(fieldId);
             const errorId = this.getErrorElementId(fieldId);
             const errorElement = document.getElementById(errorId);
 
@@ -1865,7 +1895,7 @@
                     }
                 }
 
-                applyVisibleCountrySelectionToNative(document.getElementById('Country-of-Residence'));
+                applyVisibleCountrySelectionToNative(getCalculatorCountrySelect());
 
                 const isValid = this.validateContactForm();
                 

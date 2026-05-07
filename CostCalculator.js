@@ -506,6 +506,45 @@
         }
     }
 
+    function ensureSelect2ForWebflowCountrySelect(select) {
+        if (!select || select.tagName !== 'SELECT') return;
+        if (!select.classList.contains('w-select')) return;
+        if (!window.jQuery || typeof window.jQuery.fn.select2 !== 'function') return;
+
+        const $el = window.jQuery(select);
+        if ($el.data('select2')) {
+            try {
+                $el.trigger('change');
+            } catch (err) {
+                logNonProdError('Select2 change trigger', err);
+            }
+            return;
+        }
+
+        if (typeof window.jQuery.fn.niceSelect === 'function' && $el.next('.nice-select').length) {
+            try {
+                $el.niceSelect('destroy');
+            } catch (err) {
+                logNonProdError('niceSelect destroy before Select2 ensure', err);
+            }
+        }
+
+        const $wrap = $el.closest('.ms-input-wrap');
+        const $dropdownParent = $wrap.length
+            ? $wrap
+            : $el.closest('.form-group, #MFZ-NewCostCalForm');
+        try {
+            $el.select2({
+                width: '100%',
+                dropdownParent: $dropdownParent.length ? $dropdownParent : window.jQuery(document.body),
+                minimumResultsForSearch: 15,
+            });
+            $el.trigger('change');
+        } catch (err) {
+            logNonProdError('ensureSelect2ForWebflowCountrySelect', err);
+        }
+    }
+
     /**
      * Webflow uses Select2 on `.w-select`. jquery-nice-select must not run on the same control — it
      * breaks the widget and leaves all <option> rows visible as plain text. For Webflow selects we
@@ -518,8 +557,6 @@
 
         const isWebflowSelect =
             typeof select.classList !== 'undefined' && select.classList.contains('w-select');
-        const hasSelect2 =
-            typeof window.jQuery.fn.select2 === 'function' && Boolean($el.data('select2'));
         const hasNicePlugin = typeof window.jQuery.fn.niceSelect === 'function';
 
         try {
@@ -531,21 +568,7 @@
                         logNonProdError('niceSelect destroy before Select2', e);
                     }
                 }
-                const notify = () => {
-                    if ($el.data('select2')) {
-                        $el.trigger('change');
-                        return true;
-                    }
-                    return false;
-                };
-                if (notify()) return;
-                let attempts = 0;
-                const timer = setInterval(() => {
-                    attempts += 1;
-                    if (notify() || attempts >= 25) {
-                        clearInterval(timer);
-                    }
-                }, 80);
+                ensureSelect2ForWebflowCountrySelect(select);
                 return;
             }
 
@@ -717,6 +740,19 @@
         if (__mfzCalcCountryDataLoadFailed) {
             tryBootstrapCountryResidence();
         }
+    }
+
+    /** Retries: Webflow may init Select2 late; we must attach before native <select> paints all options. */
+    function scheduleWebflowCountrySelect2Ensure() {
+        const run = () => {
+            try {
+                const el = getCalculatorCountrySelect();
+                if (el) ensureSelect2ForWebflowCountrySelect(el);
+            } catch (err) {
+                logNonProdError('scheduleWebflowCountrySelect2Ensure', err);
+            }
+        };
+        [0, 300, 900, 1800].forEach((ms) => setTimeout(run, ms));
     }
 
     function getCountryFieldCandidates(field) {
@@ -2204,6 +2240,7 @@
             scheduleCountryResidenceBootstrap();
             setTimeout(scheduleCountryResidenceBootstrap, 120);
             setTimeout(scheduleCountryResidenceBootstrap, 700);
+            scheduleWebflowCountrySelect2Ensure();
 
             // Initialize Get a Call buttons
             initializeGetCallButtons();

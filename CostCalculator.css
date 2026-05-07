@@ -3929,6 +3929,27 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   overflow: hidden;
 }
 
+/*
+ * jquery-nice-select: when its CSS file is missing on Webflow, .list stays visible and spills options.
+ * Scope to calculator so we do not break other site dropdowns.
+ */
+#MFZ-NewCostCalForm .ms-input-wrap .nice-select:not(.open) .list {
+  display: none !important;
+}
+#MFZ-NewCostCalForm .ms-input-wrap .nice-select .list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 10055;
+  max-height: min(280px, 50vh);
+  overflow: auto;
+  box-sizing: border-box;
+}
+#MFZ-NewCostCalForm .ms-input-wrap .nice-select.open .list {
+  display: block !important;
+}
+
 
 /* For mobile design */
 @media (max-width: 640px) {

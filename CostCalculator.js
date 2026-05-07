@@ -495,10 +495,61 @@
         codeInput.value = opt && opt.dataset && opt.dataset.code ? opt.dataset.code : '';
     }
 
-    function refreshNiceSelectAfterCountryOptionsChange(select) {
-        if (!window.jQuery || typeof window.jQuery.fn.niceSelect !== 'function') return;
+    function normalizeCountrySelectElement(select) {
+        if (!select || select.tagName !== 'SELECT') return;
         try {
-            const $el = window.jQuery(select);
+            select.classList.remove('open');
+            select.removeAttribute('size');
+            select.multiple = false;
+        } catch (e) {
+            logNonProdError('normalizeCountrySelectElement', e);
+        }
+    }
+
+    /**
+     * Webflow uses Select2 on `.w-select`. jquery-nice-select must not run on the same control — it
+     * breaks the widget and leaves all <option> rows visible as plain text. For Webflow selects we
+     * only normalize + notify Select2 after options change.
+     */
+    function refreshNiceSelectAfterCountryOptionsChange(select) {
+        if (!select || !window.jQuery) return;
+        const $el = window.jQuery(select);
+        normalizeCountrySelectElement(select);
+
+        const isWebflowSelect =
+            typeof select.classList !== 'undefined' && select.classList.contains('w-select');
+        const hasSelect2 =
+            typeof window.jQuery.fn.select2 === 'function' && Boolean($el.data('select2'));
+        const hasNicePlugin = typeof window.jQuery.fn.niceSelect === 'function';
+
+        try {
+            if (isWebflowSelect && typeof window.jQuery.fn.select2 === 'function') {
+                if ($el.next('.nice-select').length && hasNicePlugin) {
+                    try {
+                        $el.niceSelect('destroy');
+                    } catch (e) {
+                        logNonProdError('niceSelect destroy before Select2', e);
+                    }
+                }
+                const notify = () => {
+                    if ($el.data('select2')) {
+                        $el.trigger('change');
+                        return true;
+                    }
+                    return false;
+                };
+                if (notify()) return;
+                let attempts = 0;
+                const timer = setInterval(() => {
+                    attempts += 1;
+                    if (notify() || attempts >= 25) {
+                        clearInterval(timer);
+                    }
+                }, 80);
+                return;
+            }
+
+            if (!hasNicePlugin) return;
             if ($el.next('.nice-select').length) {
                 $el.niceSelect('destroy');
             }
@@ -574,6 +625,8 @@
     function tryBootstrapCountryResidence() {
         const select = getCalculatorCountrySelect();
         if (!select) return;
+
+        normalizeCountrySelectElement(select);
 
         const codedOptions = select.querySelectorAll('option[data-code]');
         if (codedOptions.length >= 40) {

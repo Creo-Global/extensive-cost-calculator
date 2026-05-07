@@ -3924,6 +3924,10 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   background-size: 16px 16px !important;
 }
 
+/* Keep native country <select> a single closed control (Webflow .open / plugin conflicts can list all options on the page) */
+#MFZ-NewCostCalForm select#Country-of-Residence:not([multiple]) {
+  overflow: hidden;
+}
 
 
 /* For mobile design */

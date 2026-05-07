@@ -452,14 +452,22 @@
             });
     }
 
+    /**
+     * First &lt;option&gt; label when no country is chosen (empty value).
+     * Must stay in sync with markup and with isCountryPlaceholderValue().
+     */
+    const MFZ_COUNTRY_PLACEHOLDER_OPTION_TEXT = 'Current Country of Residence *';
+
     function isCountryPlaceholderValue(value) {
         const normalized = String(value || '').trim().toLowerCase();
-        return !normalized
-            || normalized === 'select country'
-            || normalized === 'current country of residence'
-            || normalized === 'current country of residence*'
-            || normalized === 'current country of residence\*'
-            || /^current country of residence\*?$/.test(normalized);
+        if (!normalized) return true;
+        if (normalized === 'select country') return true;
+        if (normalized === MFZ_COUNTRY_PLACEHOLDER_OPTION_TEXT.trim().toLowerCase()) return true;
+        /* Embeds use label-style copy with optional asterisk / spacing */
+        if (normalized === 'current country of residence*') return true;
+        if (/^current country of residence\s*\*?\s*$/.test(normalized)) return true;
+        if (/^current country of residence/.test(normalized) && normalized.includes('*')) return true;
+        return false;
     }
 
     /** Minimal list if CostCalculator-countries-data.js fails to load (same host/path as CostCalculator.js). */
@@ -623,6 +631,24 @@
         if (!select) return;
 
         normalizeCountrySelectElement(select);
+
+        const ensureFirstCountryOptionLabel = () => {
+            if (!select.options.length) {
+                const o = document.createElement('option');
+                o.value = '';
+                o.textContent = MFZ_COUNTRY_PLACEHOLDER_OPTION_TEXT;
+                select.appendChild(o);
+                return;
+            }
+            const first = select.options[0];
+            const v = String(first.value || '').trim();
+            const t = String(first.textContent || '').trim();
+            const tLower = t.toLowerCase();
+            if (v === '' && (!t || tLower === 'select country')) {
+                first.textContent = MFZ_COUNTRY_PLACEHOLDER_OPTION_TEXT;
+            }
+        };
+        ensureFirstCountryOptionLabel();
 
         const codedOptions = select.querySelectorAll('option[data-code]');
         if (codedOptions.length >= 40) {
@@ -1578,9 +1604,13 @@
                 return this.validateConsent(field);
             }
             
-            const value = fieldType === 'country'
+            const valueRaw = fieldType === 'country'
                 ? syncCountryFieldValue(field)
                 : field.value.trim();
+            const value =
+                fieldType === 'country' && isCountryPlaceholderValue(valueRaw)
+                    ? ''
+                    : valueRaw;
             const rules = this.validationRules[fieldType];
 
             this.clearFieldError(fieldId);
@@ -1721,7 +1751,8 @@
         }
 
         validateCountry(field, value) {
-            if (!value) {
+            const trimmed = typeof value === 'string' ? value.trim() : '';
+            if (!trimmed || isCountryPlaceholderValue(trimmed)) {
                 this.showFieldError(field.id, 'country', 'required');
                 return false;
             }

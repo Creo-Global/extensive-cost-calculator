@@ -3932,6 +3932,10 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   box-sizing: border-box;
 }
 
+#MFZ-NewCostCalForm select#Country-of-Residence.mfz-country-native option[value=""] {
+  color: #6b7280;
+}
+
 /* If any orphan jquery-nice-select wrapper remains next to the field, hide spilled list */
 #MFZ-NewCostCalForm .ms-input-wrap .nice-select:not(.open) .list {
   display: none !important;

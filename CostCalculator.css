@@ -3924,30 +3924,17 @@ background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www
   background-size: 16px 16px !important;
 }
 
-/* Keep native country <select> a single closed control (Webflow .open / plugin conflicts can list all options on the page) */
-#MFZ-NewCostCalForm select#Country-of-Residence:not([multiple]) {
+/* Calculator country: plain native <select> — no Select2 / nice-select */
+#MFZ-NewCostCalForm select#Country-of-Residence.mfz-country-native:not([multiple]) {
   overflow: hidden;
-}
-
-/*
- * jquery-nice-select: when its CSS file is missing on Webflow, .list stays visible and spills options.
- * Scope to calculator so we do not break other site dropdowns.
- */
-#MFZ-NewCostCalForm .ms-input-wrap .nice-select:not(.open) .list {
-  display: none !important;
-}
-#MFZ-NewCostCalForm .ms-input-wrap .nice-select .list {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  z-index: 10055;
-  max-height: min(280px, 50vh);
-  overflow: auto;
+  width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
 }
-#MFZ-NewCostCalForm .ms-input-wrap .nice-select.open .list {
-  display: block !important;
+
+/* If any orphan jquery-nice-select wrapper remains next to the field, hide spilled list */
+#MFZ-NewCostCalForm .ms-input-wrap .nice-select:not(.open) .list {
+  display: none !important;
 }
 
 

@@ -526,8 +526,8 @@
             syncCountryCodeHiddenFieldFromSelect(select);
             markSelectedOption();
             select.dataset.resolvedCountryValue = select.value;
-            // Do not dispatch a synthetic "change" here — it re-enters this listener and overflows the stack.
-            select.dispatchEvent(new Event('input', { bubbles: true }));
+            // Do not dispatch synthetic "change" or "input" here — they re-enter listeners and can
+            // feedback with native <select> change/input and stall the page (especially on load).
         });
         markSelectedOption();
         if (select.value) {
@@ -542,6 +542,13 @@
      * or, when duplicated, typically the last matching element.
      */
     function getCalculatorCountrySelect() {
+        const calculatorRoot = document.getElementById('MFZ-NewCostCalForm');
+        if (calculatorRoot) {
+            const scoped = calculatorRoot.querySelector(
+                '[id="Country-of-Residence"], select[name="Country-of-Residence"]',
+            );
+            if (scoped) return scoped;
+        }
         const errEl = document.getElementById('calc-error-message');
         if (errEl) {
             const group = errEl.closest('.form-group');
@@ -556,6 +563,10 @@
         }
         if (dupes.length === 1) {
             return dupes[0];
+        }
+        if (calculatorRoot) {
+            const byName = calculatorRoot.querySelector('select[name="Country-of-Residence"]');
+            if (byName) return byName;
         }
         return document.querySelector('select[name="Country-of-Residence"]');
     }
@@ -1411,8 +1422,13 @@
                 }
 
                 if (typeof MutationObserver !== 'undefined' && !countryField._countrySyncObserver) {
+                    let countryMutationRaf = 0;
                     const observer = new MutationObserver(() => {
-                        handleCountryValueUpdate();
+                        if (countryMutationRaf) return;
+                        countryMutationRaf = requestAnimationFrame(() => {
+                            countryMutationRaf = 0;
+                            handleCountryValueUpdate();
+                        });
                     });
 
                     observer.observe(countryField, {
@@ -6585,7 +6601,9 @@
             // Add real-time validation listeners to contact form fields
             const contactFields = ['full-name', 'phone', 'email', 'Country-of-Residence'];
             contactFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
+                const field = fieldId === 'Country-of-Residence'
+                    ? getCalculatorCountrySelect()
+                    : document.getElementById(fieldId);
                 if (field) {
                     field.addEventListener('input', updateSectionLockState);
                     field.addEventListener('change', updateSectionLockState);

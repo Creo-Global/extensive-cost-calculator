@@ -378,7 +378,7 @@
     lastSnap = snapshot();
     setTimeout(function () { armed = true; }, 1500);
 
-    // 2) lead + identify
+    // 2) lead -> GTM dataLayer (single push)
     document.addEventListener('contactFormValid', function (e) {
       try { onContactValid(e && e.detail); } catch (err) {}
     });

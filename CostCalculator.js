@@ -4534,8 +4534,9 @@
             return;
         }
 
-        const paymentSummary = renderPaymentSummary(paymentIntegration.generateOrderId());
-        const orderId = paymentSummary?.orderId || paymentIntegration.generateOrderId();
+        // Generate orderId and amount once here to ensure consistency across the flow and avoid multiple generations if the user clicks the button multiple times quickly
+        const orderId = paymentIntegration.generateOrderId();
+        const paymentSummary = renderPaymentSummary(orderId);
         const amount = paymentSummary?.amount || paymentIntegration.PAYMENT_CONFIG.setupFeeAmount;
         const contactState = getContactFormState();
 

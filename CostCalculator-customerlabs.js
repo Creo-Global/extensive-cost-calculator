@@ -1,17 +1,22 @@
 /**
  * CostCalculator — CustomerLabs CDP event tracking
  * ------------------------------------------------------------------
- * Standalone, fully defensive OBSERVER module. It pushes calculator events to
- * the CustomerLabs CDP using the documented JavaScript API:
- *   https://www.customerlabs.com/docs/website-event-tracking/developer-documentation/javascript-api-documentation/
+ * Standalone, fully defensive OBSERVER module. It pushes calculator events to:
  *
- *   _cl.pageview(name, props)     — page/section views
- *   _cl.trackClick(name, props)   — click / configuration actions
- *   _cl.trackSubmit(name, props)  — form submissions
- *   _cl.identify(props)           — user PII (people)
+ *   • LEAD CAPTURE (first contact-details step) -> window.dataLayer (GTM).
+ *     Pushed exactly ONCE per unique contact as event "cost_calculator_lead"
+ *     so the CustomerLabs team can map it in GTM without double-counting leads.
+ *     (The site-wide Webflow form dataLayer listener does NOT fire for this
+ *     form, because the calculator intercepts the native submit and never
+ *     reaches Webflow's w-form-done state — so we push the lead explicitly.)
  *
- * Property shape (per the docs): every value is { t: 'string'|'number'|'Object',
- * v: value } wrapped under "customProperties" (and "user_traits" for identify).
+ *   • EVERYTHING ELSE -> CustomerLabs JS API (_cl.*), per the docs:
+ *       https://www.customerlabs.com/docs/website-event-tracking/developer-documentation/javascript-api-documentation/
+ *       _cl.pageview(name, props)    — page / section views
+ *       _cl.trackClick(name, props)  — configuration / payment / quote actions
+ *     For _cl.* calls each value is typed { t:'string'|'number', v: value }
+ *     wrapped under "customProperties". (The GTM dataLayer push uses plain
+ *     values, which is what GTM variables expect.)
  *
  * DESIGN — this NEVER changes form behaviour:
  *   • It only listens to events the calculator already emits and reads public
@@ -175,10 +180,16 @@
   }
 
   /* =====================================================================
-   * 2) Contact details submitted — identify (PII) + trackSubmit (lead)
+   * 2) LEAD — first contact-details step -> GTM dataLayer (ONE push)
+   *    The lead is captured here, on step 1, and pushed to window.dataLayer
+   *    exactly once per unique contact so the CustomerLabs team can map it in
+   *    GTM. We deliberately do NOT also send a CustomerLabs _cl identify/submit
+   *    for this step — that would count the same lead twice.
    *    Hooks the calculator's existing `contactFormValid` event.
    * ===================================================================== */
-  var lastIdentifiedEmail = '';
+  var LEAD_EVENT = 'cost_calculator_lead';
+  var leadPushedKey = '';
+
   function onContactValid(detail) {
     var name = ((detail && detail.name) || (document.getElementById('full-name') || {}).value || '').toString().trim();
     var email = ((detail && detail.email) || (document.getElementById('email') || {}).value || '').toString().trim();
@@ -186,41 +197,64 @@
     var country = countryValue();
 
     if (!email && !phone) return;
-    // de-dupe repeated identical submissions (Calculate can re-fire)
+    // de-dupe: one lead per unique contact (Calculate can re-fire on re-clicks)
     var key = (email || phone).toLowerCase();
-    if (key === lastIdentifiedEmail) return;
-    lastIdentifiedEmail = key;
+    if (key === leadPushedKey) return;
+    leadPushedKey = key;
 
     var parts = name ? name.split(/\s+/) : [];
     var first = parts.shift() || '';
     var last = parts.join(' ');
 
-    // identify — PII / people. Primary identifier is email (ib: true).
-    emit('identify', null, {
-      customProperties: {
-        user_traits: {
-          t: 'Object',
-          v: {
-            first_name: S(first),
-            last_name: S(last),
-            name: S(name),
-            email: S(email),
-            phone: S(phone),
-            country: S(country)
-          }
-        },
-        identify_by_email: { t: 'string', v: email, ib: true }
-      }
-    });
+    pushLeadToDataLayer({ name: name, first: first, last: last, email: email, phone: phone, country: country });
+  }
 
-    // lead event with the full configuration context
-    emit('trackSubmit', 'Contact Details Submitted', configProps({
-      first_name: S(first),
-      email: S(email),
-      phone: S(phone),
-      country: S(country),
-      form_submitted_from: S(window.location.href)
-    }));
+  // Single GTM dataLayer push with ALL contact + configuration data (plain
+  // values for GTM variable mapping — NOT the _cl typed { t, v } shape).
+  function pushLeadToDataLayer(contact) {
+    try {
+      window.dataLayer = window.dataLayer || [];
+      var c = cfg() || {};
+      var lic = c.license || {}, visa = c.visa || {}, act = c.activities || {}, cs = c.changeStatus || {};
+      var addons = c.addons || [];
+      var codes = activityCodes(c);
+      var totalVisas = (Number(visa.investorVisas) || 0) + (Number(visa.employeeVisas) || 0) + (Number(visa.dependencyVisas) || 0);
+      var consentEl = document.getElementById('consent-checkbox');
+
+      window.dataLayer.push({
+        event: LEAD_EVENT,
+        lead_step: 'contact_details',
+        form: {
+          formId: 'MFZ-NewCostCalForm',
+          formName: 'Cost Calculator',
+          formPage: 'cost-calculator'
+        },
+        fields: {
+          full_name: contact.name,
+          first_name: contact.first,
+          last_name: contact.last,
+          email: contact.email,
+          phone: contact.phone,
+          country: contact.country,
+          consent: !!(consentEl && consentEl.checked),
+          license_type: lic.licenseType || '',
+          license_duration_years: Number(lic.licenseDuration) || 0,
+          shareholders: Number(lic.shareholdersCount) || 0,
+          investor_visas: Number(visa.investorVisas) || 0,
+          employee_visas: Number(visa.employeeVisas) || 0,
+          dependency_visas: Number(visa.dependencyVisas) || 0,
+          total_visas: totalVisas,
+          business_activities: codes.join(', '),
+          business_activities_count: Number(act.selectedActivitiesCount) || 0,
+          addons: addons.join(', '),
+          addons_count: addons.length,
+          applicants_inside_uae: Number(cs.applicantsInsideUAE) || 0,
+          applicants_outside_uae: Number(cs.applicantsOutsideUAE) || 0,
+          total_cost_aed: grandTotal()
+        },
+        page: { url: location.href, path: location.pathname, title: document.title }
+      });
+    } catch (e) { /* never break the page */ }
   }
 
   /* =====================================================================

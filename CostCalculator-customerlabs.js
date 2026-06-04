@@ -1,38 +1,28 @@
 /**
  * CostCalculator — lead dataLayer push (GTM / CustomerLabs)
  * ------------------------------------------------------------------
- * Pushes ONE GTM dataLayer event — "form_submit_success" — with all contact +
- * configuration data the moment the user completes the first contact-details
- * step (Continue / Calculate pressed -> next step revealed). The CustomerLabs
- * team maps this event in GTM (CL - Lead / CL - Create User tags).
+ * Pushes ONE "cost_calculator_lead" GTM dataLayer event at the moment the
+ * calculator submits the lead to the Zoho Flow webhook — i.e. when the existing
+ * "form_submit_success" dataLayer event fires (CostCalculator.js pushes that
+ * right after submitToWebhook()). It is NOT fired on step 1.
  *
- * Event name + payload deliberately MATCH the existing form_submit_success that
- * CostCalculator.js already pushes on the final webhook submit, so the same GTM
- * variables/mapping work for both. The two are distinguished by form_data.form_status:
- *   • this step-1 lead .......... form_status: "lead"
- *   • existing final submit ..... form_status: "complete"
- * => to capture the lead on step 1 only, condition the CL trigger on
- *    form_data.form_status == "lead" (otherwise it fires on both points).
+ * The CustomerLabs team maps this single event in GTM (CL - Lead /
+ * CL - Create User tags) on Custom Event = cost_calculator_lead.
  *
- * Why a dedicated push: the calculator intercepts the native form submit (it
- * posts to a webhook, not a Webflow form), so the site-wide Webflow -> dataLayer
- * listener never fires for this form. This fills that gap with one clean event.
- *
- * Guarantees:
- *   • Fires exactly ONCE per unique contact (Calculate can re-fire) — no double
- *     leads from this script.
- *   • Purely additive / defensive: it only listens to the calculator's existing
- *     `contactFormValid` event and reads public state. It never patches, blocks,
- *     or alters any form behaviour, and every path is wrapped in try/catch.
+ * Defensive: it only wraps window.dataLayer.push to OBSERVE the existing
+ * form_submit_success event, then reads public state to build the lead. It never
+ * patches, blocks, or alters any form behaviour; the wrapper always calls the
+ * original push and returns its result, and every path is wrapped in try/catch.
+ * De-duped per submission (order_id) so the same lead is never counted twice.
  */
 (function () {
   'use strict';
 
-  var LEAD_EVENT = 'form_submit_success';
-  var LEAD_STATUS = 'lead';
-  var leadPushedKey = '';
+  var LEAD_EVENT = 'cost_calculator_lead';
+  var TRIGGER_EVENT = 'form_submit_success'; // webhook-submit signal from CostCalculator.js
+  var seen = {};
 
-  /* ---- state readers (all read-only, all guarded) ------------------- */
+  /* ---- state readers (read-only, guarded) --------------------------- */
   function cfg() {
     try {
       if (typeof window.collectFormConfiguration === 'function') {
@@ -42,29 +32,16 @@
     return null;
   }
 
-  function countrySelect() {
-    try {
-      var root = document.getElementById('MFZ-NewCostCalForm') || document;
-      return root.querySelector('[id="Country-of-Residence"], select[name="Country-of-Residence"]')
-          || document.querySelector('[id="Country-of-Residence"], select[name="Country-of-Residence"]');
-    } catch (e) { return null; }
-  }
-
   function countryName() {
     try {
-      var sel = countrySelect();
+      var root = document.getElementById('MFZ-NewCostCalForm') || document;
+      var sel = root.querySelector('[id="Country-of-Residence"], select[name="Country-of-Residence"]')
+             || document.querySelector('[id="Country-of-Residence"], select[name="Country-of-Residence"]');
       if (!sel) return '';
       var opt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
       var label = String(opt && opt.textContent ? opt.textContent : (sel.value || '')).trim();
       if (/select|choose|country of residence/i.test(label) && !sel.value) return '';
       return label;
-    } catch (e) { return ''; }
-  }
-
-  function countryCode() {
-    try {
-      var sel = countrySelect();
-      return sel && sel.value ? String(sel.value).toLowerCase() : '';
     } catch (e) { return ''; }
   }
 
@@ -86,90 +63,98 @@
     } catch (e) { return []; }
   }
 
-  function num(v) { var n = Number(v); return isFinite(n) ? n : ''; }
-  function urlParam(name) {
-    try { return new URLSearchParams(location.search).get(name) || ''; } catch (e) { return ''; }
-  }
-
   /* ---- the single GTM dataLayer push -------------------------------- */
-  // Mirrors the existing form_submit_success form_data shape (plain values for
-  // GTM variable mapping). Unavailable-at-step-1 fields are left empty.
-  function pushLeadToDataLayer(contact) {
+  function pushLead(contact) {
     try {
       window.dataLayer = window.dataLayer || [];
       var c = cfg() || {};
       var lic = c.license || {}, visa = c.visa || {}, act = c.activities || {}, cs = c.changeStatus || {};
       var addons = c.addons || [];
       var codes = activityCodes(c);
-      var configId = (typeof window.getCurrentConfigId === 'function' && window.getCurrentConfigId()) || '';
+      var totalVisas = (Number(visa.investorVisas) || 0) + (Number(visa.employeeVisas) || 0) + (Number(visa.dependencyVisas) || 0);
+      var name = String(contact.name || '').trim();
+      var parts = name ? name.split(/\s+/) : [];
+      var first = parts.shift() || '';
+      var last = parts.join(' ');
+      var consentEl = document.getElementById('consent-checkbox');
 
       window.dataLayer.push({
         event: LEAD_EVENT,
-        form_data: {
-          form_status: LEAD_STATUS,            // "lead" (final submit uses "complete")
-          full_name: contact.name,
-          first_name: contact.first,           // extra — handy for CustomerLabs identify
-          last_name: contact.last,             // extra
-          order_id: '',
-          tracking_id: '',
-          phone: contact.phone,
-          email: contact.email,
+        lead_step: 'contact_details',
+        form: { formId: 'MFZ-NewCostCalForm', formName: 'Cost Calculator', formPage: 'cost-calculator' },
+        fields: {
+          full_name: name,
+          first_name: first,
+          last_name: last,
+          email: contact.email || '',
+          phone: contact.phone || '',
+          country: contact.country || '',
+          consent: consentEl ? !!consentEl.checked : true,
           license_type: lic.licenseType || '',
-          license_duration: String(lic.licenseDuration || ''),
+          license_duration_years: Number(lic.licenseDuration) || 0,
+          shareholders: Number(lic.shareholdersCount) || 0,
+          investor_visas: Number(visa.investorVisas) || 0,
+          employee_visas: Number(visa.employeeVisas) || 0,
+          dependency_visas: Number(visa.dependencyVisas) || 0,
+          total_visas: totalVisas,
           business_activities: codes.join(', '),
-          shareholders_range: num(lic.shareholdersCount) || 0,
-          investor_visas: num(visa.investorVisas) || 0,
-          employee_visas: num(visa.employeeVisas) || 0,
-          dependency_visas: num(visa.dependencyVisas) || 0,
-          selected_addons: addons.join(', '),
-          applicants_inside_uae: num(cs.applicantsInsideUAE) || 0,
-          applicants_outside_uae: num(cs.applicantsOutsideUAE) || 0,
-          total_cost: grandTotal(),
-          license_cost: num(window.baseLicenseCostValue),
-          visa_cost: '',
-          user_country: countryCode(),
-          user_country_name: contact.country,
-          user_city: '',
-          current_url: location.href,
-          cost_breakdown: '',
-          configuration_id: configId,
-          client_name: urlParam('Client'),
-          salesperson_name: urlParam('SalesPerson'),
-          lead_step: 'contact_details'
+          business_activities_count: Number(act.selectedActivitiesCount) || 0,
+          addons: addons.join(', '),
+          addons_count: addons.length,
+          applicants_inside_uae: Number(cs.applicantsInsideUAE) || 0,
+          applicants_outside_uae: Number(cs.applicantsOutsideUAE) || 0,
+          total_cost_aed: grandTotal()
         },
-        timestamp: new Date().toISOString(),
-        page_title: document.title,
-        page_url: location.href
+        page: { url: location.href, path: location.pathname, title: document.title }
       });
     } catch (e) { /* never break the page */ }
   }
 
-  /* ---- trigger: contact step completed (Continue -> next step) ------- */
-  function onContactValid(detail) {
-    var name = ((detail && detail.name) || (document.getElementById('full-name') || {}).value || '').toString().trim();
-    var email = ((detail && detail.email) || (document.getElementById('email') || {}).value || '').toString().trim();
-    var phone = ((detail && detail.phone) || (document.getElementById('phone') || {}).value || '').toString().trim();
-    var country = countryName();
+  /* ---- trigger: the webhook-submit (form_submit_success) ------------- */
+  function onSubmitSuccess(obj) {
+    try {
+      var fd = (obj && obj.form_data) || {};
+      var key = fd.order_id || fd.email || 'lead';
+      if (seen[key]) return;          // de-dupe per submission
+      seen[key] = true;
 
-    if (!email && !phone) return;
-    // de-dupe: one lead per unique contact (Calculate can re-fire on re-clicks)
-    var key = (email || phone).toLowerCase();
-    if (key === leadPushedKey) return;
-    leadPushedKey = key;
+      // Prefer the submitted form_data for contact (exact), fall back to the DOM.
+      var name = String(fd.full_name || (document.getElementById('full-name') || {}).value || '').trim();
+      var email = fd.email || (document.getElementById('email') || {}).value || '';
+      var phone = fd.phone || (document.getElementById('phone') || {}).value || '';
+      var country = fd.user_country_name || fd.user_country || countryName();
 
-    var parts = name ? name.split(/\s+/) : [];
-    var first = parts.shift() || '';
-    var last = parts.join(' ');
-
-    pushLeadToDataLayer({ name: name, first: first, last: last, email: email, phone: phone, country: country });
+      pushLead({ name: name, email: email, phone: phone, country: country });
+    } catch (e) {}
   }
 
   function wire() {
-    // The calculator dispatches `contactFormValid` on `document` when the contact
-    // gate is passed (Continue/Calculate clicked, valid) and the next step opens.
-    document.addEventListener('contactFormValid', function (e) {
-      try { onContactValid(e && e.detail); } catch (err) {}
-    });
+    try {
+      window.dataLayer = window.dataLayer || [];
+      var dl = window.dataLayer;
+
+      // Safety: handle a form_submit_success already pushed before we wrapped.
+      try {
+        for (var i = 0; i < dl.length; i++) {
+          if (dl[i] && dl[i].event === TRIGGER_EVENT) onSubmitSuccess(dl[i]);
+        }
+      } catch (e) {}
+
+      // Observe future pushes (standard, non-destructive dataLayer hook).
+      var origPush = dl.push;
+      dl.push = function () {
+        var ret = origPush.apply(dl, arguments);
+        try {
+          var obj = arguments[0];
+          if (obj && obj.event === TRIGGER_EVENT) {
+            var captured = obj;
+            // defer so GTM processes form_submit_success first, and to avoid re-entrancy
+            setTimeout(function () { onSubmitSuccess(captured); }, 0);
+          }
+        } catch (e) {}
+        return ret;
+      };
+    } catch (e) {}
   }
 
   if (document.readyState === 'loading') {
@@ -179,5 +164,5 @@
   }
 
   // Optional manual hook / debug surface.
-  window.CLCalcLead = { push: pushLeadToDataLayer, event: LEAD_EVENT, status: LEAD_STATUS };
+  window.CLCalcLead = { event: LEAD_EVENT, push: pushLead };
 })();

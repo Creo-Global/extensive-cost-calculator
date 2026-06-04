@@ -1665,8 +1665,21 @@
                         this.lastValidatedPhoneKey = phoneValidationKey;
                     } else if (instance?.validationState) {
                         validationState = instance.validationState;
-                        if (validationState === 'validating' && phoneValidationKey && phoneValidationKey === this.lastValidatedPhoneKey) {
+
+                        // MFZPhone keeps the last successful E.164 in formattedNumber until the
+                        // number actually changes — a transient 'validating' re-check (e.g. the
+                        // synthetic blur fired on submit, or our debounced re-validation) does NOT
+                        // clear it. Treat an in-flight re-validation of the SAME, already-validated
+                        // number as still valid so a valid phone never reads back as "still
+                        // validating" and blocks submit.
+                        const validatedDigits = String(instance.formattedNumber || '').replace(/\D/g, '');
+                        const matchesValidatedNumber = digitsOnly.length > 0 && validatedDigits.endsWith(digitsOnly);
+
+                        if (validationState === 'validating' &&
+                            (matchesValidatedNumber ||
+                             (phoneValidationKey && phoneValidationKey === this.lastValidatedPhoneKey))) {
                             validationState = 'valid';
+                            this.lastValidatedPhoneKey = phoneValidationKey;
                         }
                         if (validationState === 'invalid' && phoneValidationKey === this.lastValidatedPhoneKey) {
                             this.clearCachedPhoneValidation();
@@ -9680,28 +9693,41 @@
             const fields = [nameField, emailField, phoneField].filter(field => field);
             
             fields.forEach(field => {
-                if (field && field.value.trim()) {
-                    // Create and dispatch input event
-                    const inputEvent = new Event('input', { 
-                        bubbles: true, 
-                        cancelable: true 
-                    });
-                    field.dispatchEvent(inputEvent);
-                    
-                    // Create and dispatch change event
-                    const changeEvent = new Event('change', { 
-                        bubbles: true, 
-                        cancelable: true 
-                    });
-                    field.dispatchEvent(changeEvent);
-                    
-                    // Trigger blur event for validation
-                    const blurEvent = new Event('blur', { 
-                        bubbles: true, 
-                        cancelable: true 
-                    });
-                    field.dispatchEvent(blurEvent);
+                if (!field || !field.value.trim()) return;
+
+                // The phone field is owned by MFZPhone, which validates asynchronously via its
+                // own input/blur listeners. Re-dispatching synthetic events on an already-valid
+                // phone throws it back into a transient 'validating' state (and clears our cached
+                // validation), which can make a valid number read as "still validating" and block
+                // submit. Leave it untouched when MFZPhone already considers it valid; an
+                // un-validated phone still gets the events below so it validates on submit.
+                if (field === phoneField &&
+                    window.MFZPhone &&
+                    typeof window.MFZPhone.isValid === 'function' &&
+                    window.MFZPhone.isValid(phoneField)) {
+                    return;
                 }
+
+                // Create and dispatch input event
+                const inputEvent = new Event('input', {
+                    bubbles: true,
+                    cancelable: true
+                });
+                field.dispatchEvent(inputEvent);
+
+                // Create and dispatch change event
+                const changeEvent = new Event('change', {
+                    bubbles: true,
+                    cancelable: true
+                });
+                field.dispatchEvent(changeEvent);
+
+                // Trigger blur event for validation
+                const blurEvent = new Event('blur', {
+                    bubbles: true,
+                    cancelable: true
+                });
+                field.dispatchEvent(blurEvent);
             });
             
             // Trigger phone validation specifically if FormValidator exists

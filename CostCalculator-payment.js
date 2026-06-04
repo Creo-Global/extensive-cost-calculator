@@ -351,7 +351,7 @@
         language: PAYMENT_CONFIG.language,
         billing_name: normalizeString(nextInput.fullName),
         billing_email: normalizeString(nextInput.email),
-        billing_tel: stripPhoneDigits(nextInput.phone),
+        billing_tel: normalizeString(nextInput.phone),
         billing_address: PAYMENT_CONFIG.billingAddress.address,
         billing_city: PAYMENT_CONFIG.billingAddress.city,
         billing_state: PAYMENT_CONFIG.billingAddress.state,

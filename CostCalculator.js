@@ -5701,7 +5701,12 @@
             }, config.timeouts.initiateMs);
 
             const result = await response.json();
-            if (!response.ok || !result.success || !result.data?.gatewayUrl || !result.data?.encRequest || !result.data?.accessCode) {
+            if (!response.ok) {
+                console.error('[Payment 400] response body:', JSON.stringify(result, null, 2));
+                logNonProdError('Payment initiation failed', result);
+                return { success: false };
+            }
+            if (!result.success || !result.data?.gatewayUrl || !result.data?.encRequest || !result.data?.accessCode) {
                 logNonProdError('Payment initiation failed', result);
                 return { success: false };
             }

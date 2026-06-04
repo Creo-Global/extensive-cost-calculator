@@ -1,103 +1,32 @@
 /**
- * CostCalculator — CustomerLabs CDP event tracking
+ * CostCalculator — lead dataLayer push (GTM / CustomerLabs)
  * ------------------------------------------------------------------
- * Standalone, fully defensive OBSERVER module. It pushes calculator events to:
+ * Pushes ONE GTM dataLayer event — "cost_calculator_lead" — with all contact +
+ * configuration data the moment the user completes the first contact-details
+ * step (Continue / Calculate pressed -> next step revealed). The CustomerLabs
+ * team maps this single event in GTM (CL - Lead / CL - Create User tags).
  *
- *   • LEAD CAPTURE (first contact-details step) -> window.dataLayer (GTM).
- *     Pushed exactly ONCE per unique contact as event "cost_calculator_lead"
- *     so the CustomerLabs team can map it in GTM without double-counting leads.
- *     (The site-wide Webflow form dataLayer listener does NOT fire for this
- *     form, because the calculator intercepts the native submit and never
- *     reaches Webflow's w-form-done state — so we push the lead explicitly.)
+ * Why a dedicated push: the calculator intercepts the native form submit (it
+ * posts to a webhook, not a Webflow form), so the site-wide Webflow -> dataLayer
+ * listener never fires for this form. This fills that gap with one clean event.
  *
- *   • EVERYTHING ELSE -> CustomerLabs JS API (_cl.*), per the docs:
- *       https://www.customerlabs.com/docs/website-event-tracking/developer-documentation/javascript-api-documentation/
- *       _cl.pageview(name, props)    — page / section views
- *       _cl.trackClick(name, props)  — configuration / payment / quote actions
- *     For _cl.* calls each value is typed { t:'string'|'number', v: value }
- *     wrapped under "customProperties". (The GTM dataLayer push uses plain
- *     values, which is what GTM variables expect.)
+ * Guarantees:
+ *   • Fires exactly ONCE per unique contact (Calculate can re-fire) — no double
+ *     leads.
+ *   • Purely additive / defensive: it only listens to the calculator's existing
+ *     `contactFormValid` event and reads public state. It never patches, blocks,
+ *     or alters any form behaviour, and every path is wrapped in try/catch.
  *
- * DESIGN — this NEVER changes form behaviour:
- *   • It only listens to events the calculator already emits and reads public
- *     state (window.collectFormConfiguration + the DOM). It does not wrap, patch
- *     or call any calculator function, and never calls preventDefault().
- *   • Every hook is wrapped in try/catch; a failure here can never block the form.
- *   • If the CustomerLabs SDK (window._cl) is not installed, every call is a
- *     silent no-op (events are queued briefly, then dropped).
- *
- * REQUIRES: the CustomerLabs base/install snippet on the page (defines window._cl
- * and window.CLabsgbVar). Load this file AFTER CostCalculator.js.
+ * To move the trigger to the final webhook submission instead of step 1, see the
+ * note on the `contactFormValid` listener at the bottom.
  */
 (function () {
   'use strict';
 
-  /* ---------------------------------------------------------------------
-   * Readiness gate + queue
-   * CustomerLabs sets ((window.CLabsgbVar||{}).generalProps||{}).uid once its
-   * SDK has initialised (this is the guard the official docs poll for). We
-   * queue events until then and flush, giving up quietly after a bounded wait.
-   * ------------------------------------------------------------------- */
-  var queue = [];
-  var POLL_MS = 1000;
-  var POLL_MAX = 90; // ~90s, then stop polling
+  var LEAD_EVENT = 'cost_calculator_lead';
+  var leadPushedKey = '';
 
-  function clReady() {
-    return !!(window._cl && (((window.CLabsgbVar || {}).generalProps || {}).uid));
-  }
-
-  function rawSend(method, name, props) {
-    try {
-      if (!window._cl || typeof window._cl[method] !== 'function') return;
-      if (name == null) {
-        window._cl[method](props);
-      } else {
-        window._cl[method](name, props);
-      }
-    } catch (e) { /* never break the page */ }
-  }
-
-  function flush() {
-    while (queue.length) {
-      var j = queue.shift();
-      rawSend(j.method, j.name, j.props);
-    }
-  }
-
-  function emit(method, name, props) {
-    try {
-      if (clReady()) { rawSend(method, name, props); return; }
-      queue.push({ method: method, name: name, props: props });
-    } catch (e) { /* swallow */ }
-  }
-
-  (function startPoll() {
-    var tries = 0;
-    var id = setInterval(function () {
-      tries++;
-      if (clReady()) { clearInterval(id); try { flush(); } catch (e) {} }
-      else if (tries >= POLL_MAX) { clearInterval(id); }
-    }, POLL_MS);
-  })();
-
-  /* ---------------------------------------------------------------------
-   * Property helpers — build the { t, v } typed values the API expects
-   * ------------------------------------------------------------------- */
-  function S(v) { return { t: 'string', v: v == null ? '' : String(v) }; }
-  function N(v) {
-    var n = Number(v);
-    return { t: 'number', v: String(isFinite(n) ? n : 0) };
-  }
-  function custom(obj) { return { customProperties: obj }; }
-  function assign(target, src) {
-    if (!src) return target;
-    for (var k in src) { if (Object.prototype.hasOwnProperty.call(src, k)) target[k] = src[k]; }
-    return target;
-  }
-
-  /* ---------------------------------------------------------------------
-   * State readers (all read-only, all guarded)
-   * ------------------------------------------------------------------- */
+  /* ---- state readers (all read-only, all guarded) ------------------- */
   function cfg() {
     try {
       if (typeof window.collectFormConfiguration === 'function') {
@@ -114,9 +43,7 @@
              || document.querySelector('[id="Country-of-Residence"], select[name="Country-of-Residence"]');
       if (!sel) return '';
       var opt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
-      var label = opt && opt.textContent ? opt.textContent : (sel.value || '');
-      label = String(label).trim();
-      // ignore placeholder-ish labels
+      var label = String(opt && opt.textContent ? opt.textContent : (sel.value || '')).trim();
       if (/select|choose|country of residence/i.test(label) && !sel.value) return '';
       return label;
     } catch (e) { return ''; }
@@ -140,77 +67,8 @@
     } catch (e) { return []; }
   }
 
-  // Rich customProperties bag describing the whole current configuration.
-  function configProps(extra) {
-    var c = cfg() || {};
-    var lic = c.license || {}, visa = c.visa || {}, act = c.activities || {}, cs = c.changeStatus || {};
-    var addons = c.addons || [];
-    var codes = activityCodes(c);
-    var totalVisas = (Number(visa.investorVisas) || 0) + (Number(visa.employeeVisas) || 0) + (Number(visa.dependencyVisas) || 0);
-
-    var props = {
-      page_url: S(window.location.href),
-      page_title: S(document.title),
-      license_type: S(lic.licenseType || ''),
-      license_duration_years: N(lic.licenseDuration || 0),
-      shareholders: N(lic.shareholdersCount || 0),
-      investor_visas: N(visa.investorVisas || 0),
-      employee_visas: N(visa.employeeVisas || 0),
-      dependency_visas: N(visa.dependencyVisas || 0),
-      total_visas: N(totalVisas),
-      business_activities_count: N(act.selectedActivitiesCount || 0),
-      business_activities: S(codes.join(', ')),
-      addons: S(addons.join(', ')),
-      addons_count: N(addons.length),
-      applicants_inside_uae: N(cs.applicantsInsideUAE || 0),
-      applicants_outside_uae: N(cs.applicantsOutsideUAE || 0),
-      total_cost_aed: N(grandTotal())
-    };
-    return custom(assign(props, extra));
-  }
-
-  /* =====================================================================
-   * 1) Pageview — calculator loaded
-   * ===================================================================== */
-  function trackPageview() {
-    emit('pageview', 'Cost Calculator Viewed', custom({
-      page_url: S(window.location.href),
-      page_title: S(document.title)
-    }));
-  }
-
-  /* =====================================================================
-   * 2) LEAD — first contact-details step -> GTM dataLayer (ONE push)
-   *    The lead is captured here, on step 1, and pushed to window.dataLayer
-   *    exactly once per unique contact so the CustomerLabs team can map it in
-   *    GTM. We deliberately do NOT also send a CustomerLabs _cl identify/submit
-   *    for this step — that would count the same lead twice.
-   *    Hooks the calculator's existing `contactFormValid` event.
-   * ===================================================================== */
-  var LEAD_EVENT = 'cost_calculator_lead';
-  var leadPushedKey = '';
-
-  function onContactValid(detail) {
-    var name = ((detail && detail.name) || (document.getElementById('full-name') || {}).value || '').toString().trim();
-    var email = ((detail && detail.email) || (document.getElementById('email') || {}).value || '').toString().trim();
-    var phone = ((detail && detail.phone) || (document.getElementById('phone') || {}).value || '').toString().trim();
-    var country = countryValue();
-
-    if (!email && !phone) return;
-    // de-dupe: one lead per unique contact (Calculate can re-fire on re-clicks)
-    var key = (email || phone).toLowerCase();
-    if (key === leadPushedKey) return;
-    leadPushedKey = key;
-
-    var parts = name ? name.split(/\s+/) : [];
-    var first = parts.shift() || '';
-    var last = parts.join(' ');
-
-    pushLeadToDataLayer({ name: name, first: first, last: last, email: email, phone: phone, country: country });
-  }
-
-  // Single GTM dataLayer push with ALL contact + configuration data (plain
-  // values for GTM variable mapping — NOT the _cl typed { t, v } shape).
+  /* ---- the single GTM dataLayer push -------------------------------- */
+  // Plain values (NOT a typed { t, v } shape) — this is what GTM variables read.
   function pushLeadToDataLayer(contact) {
     try {
       window.dataLayer = window.dataLayer || [];
@@ -257,177 +115,37 @@
     } catch (e) { /* never break the page */ }
   }
 
-  /* =====================================================================
-   * 3-9) Configuration changes — diff-based granular trackClick events.
-   *    Primary trigger: a passive MutationObserver on the total/summary
-   *    (every config change re-renders the total). Click + change listeners
-   *    are redundant safety nets. Nothing here touches form behaviour.
-   * ===================================================================== */
-  var lastSnap = null;
-  var armed = false; // suppress load-time / shared-URL-restore churn
+  /* ---- trigger: contact step completed (Continue -> next step) ------- */
+  function onContactValid(detail) {
+    var name = ((detail && detail.name) || (document.getElementById('full-name') || {}).value || '').toString().trim();
+    var email = ((detail && detail.email) || (document.getElementById('email') || {}).value || '').toString().trim();
+    var phone = ((detail && detail.phone) || (document.getElementById('phone') || {}).value || '').toString().trim();
+    var country = countryValue();
 
-  function snapshot() {
-    var c = cfg(); if (!c) return null;
-    var lic = c.license || {}, visa = c.visa || {}, act = c.activities || {}, cs = c.changeStatus || {};
-    return {
-      licenseType: lic.licenseType,
-      licenseDuration: lic.licenseDuration,
-      shareholders: lic.shareholdersCount,
-      investor: visa.investorVisas,
-      employee: visa.employeeVisas,
-      dependency: visa.dependencyVisas,
-      activities: activityCodes(c).join(','),
-      activitiesCount: Number(act.selectedActivitiesCount) || 0,
-      addons: (c.addons || []).slice().sort().join(','),
-      insideUae: cs.applicantsInsideUAE,
-      outsideUae: cs.applicantsOutsideUAE
-    };
-  }
+    if (!email && !phone) return;
+    // de-dupe: one lead per unique contact (Calculate can re-fire on re-clicks)
+    var key = (email || phone).toLowerCase();
+    if (key === leadPushedKey) return;
+    leadPushedKey = key;
 
-  function diffAndEmit() {
-    var cur = snapshot();
-    if (!cur) return;
-    if (!lastSnap || !armed) { lastSnap = cur; return; }
+    var parts = name ? name.split(/\s+/) : [];
+    var first = parts.shift() || '';
+    var last = parts.join(' ');
 
-    if (cur.licenseType !== lastSnap.licenseType) {
-      emit('trackClick', 'License Type Selected', configProps({ selected_value: S(cur.licenseType) }));
-    }
-    if (cur.licenseDuration !== lastSnap.licenseDuration) {
-      emit('trackClick', 'License Duration Selected', configProps({ selected_value: N(cur.licenseDuration) }));
-    }
-    if (cur.shareholders !== lastSnap.shareholders) {
-      emit('trackClick', 'Shareholders Updated', configProps({ selected_value: N(cur.shareholders) }));
-    }
-    if (cur.investor !== lastSnap.investor || cur.employee !== lastSnap.employee || cur.dependency !== lastSnap.dependency) {
-      emit('trackClick', 'Visa Selection Updated', configProps());
-    }
-    if (cur.activities !== lastSnap.activities) {
-      var added = cur.activitiesCount >= lastSnap.activitiesCount;
-      emit('trackClick', added ? 'Business Activity Added' : 'Business Activity Removed', configProps());
-    }
-    if (cur.addons !== lastSnap.addons) {
-      emit('trackClick', 'Add-on Updated', configProps());
-    }
-    if (cur.insideUae !== lastSnap.insideUae || cur.outsideUae !== lastSnap.outsideUae) {
-      emit('trackClick', 'Change Status Updated', configProps());
-    }
-    lastSnap = cur;
-  }
-
-  var diffTimer = null;
-  function scheduleDiff() {
-    if (diffTimer) clearTimeout(diffTimer);
-    diffTimer = setTimeout(function () { try { diffAndEmit(); } catch (e) {} }, 450);
-  }
-
-  /* =====================================================================
-   * 10) Checkout made — payment initiated (any channel)
-   * ===================================================================== */
-  var lastCheckoutAt = 0;
-  function onCheckout(channel) {
-    var now = (window.performance && performance.now) ? performance.now() : new Date().getTime();
-    if (now - lastCheckoutAt < 800) return; // de-dupe rapid double fires
-    lastCheckoutAt = now;
-    emit('trackClick', 'Checkout Made', configProps({
-      payment_channel: S(channel || 'card'),
-      amount_aed: N(grandTotal())
-    }));
-  }
-
-  /* =====================================================================
-   * 11) Quote requested — final submission success message shown
-   * ===================================================================== */
-  function watchSuccess() {
-    var el = document.getElementById('theFinalSuccessMessage');
-    if (!el || el.__clWatched) return;
-    el.__clWatched = true;
-    try {
-      var obs = new MutationObserver(function () {
-        if (el.classList.contains('show') && !el.__clFired) {
-          el.__clFired = true;
-          emit('trackClick', 'Quote Requested', configProps({ country: S(countryValue()) }));
-        }
-      });
-      obs.observe(el, { attributes: true, attributeFilter: ['class'] });
-    } catch (e) {}
-  }
-
-  /* ---------------------------------------------------------------------
-   * Wiring — all passive listeners/observers
-   * ------------------------------------------------------------------- */
-  function observeTotals() {
-    if (typeof MutationObserver === 'undefined') return;
-    ['total-cost-display', 'grand-total-clickable', 'mobile-payment-grand-total'].forEach(function (id) {
-      var el = document.getElementById(id);
-      if (!el || el.__clTotalObs) return;
-      el.__clTotalObs = true;
-      try {
-        new MutationObserver(scheduleDiff).observe(el, { childList: true, characterData: true, subtree: true });
-      } catch (e) {}
-    });
-    // activity tags container — catches activity add/remove that doesn't move the total
-    var tags = document.getElementById('activity-tags-container');
-    if (tags && !tags.__clTagObs) {
-      tags.__clTagObs = true;
-      try { new MutationObserver(scheduleDiff).observe(tags, { childList: true, subtree: true }); } catch (e) {}
-    }
+    pushLeadToDataLayer({ name: name, first: first, last: last, email: email, phone: phone, country: country });
   }
 
   function wire() {
-    // baseline config (defaults) so the first real change is captured
-    lastSnap = snapshot();
-    setTimeout(function () { armed = true; }, 1500);
-
-    // 2) lead -> GTM dataLayer (single push)
+    // The calculator dispatches `contactFormValid` on `document` when the contact
+    // gate is passed (Continue/Calculate clicked, valid) and the next step opens.
+    //
+    // To fire on the FINAL webhook submission instead of step 1, replace the
+    // listener below with one for the 'form_submit_success' dataLayer event, e.g.:
+    //   (window.dataLayer = window.dataLayer || []);  // observe existing pushes
+    // and call pushLeadToDataLayer there. (Step 1 is the earliest lead capture.)
     document.addEventListener('contactFormValid', function (e) {
       try { onContactValid(e && e.detail); } catch (err) {}
     });
-
-    // 3-9) config interactions (redundant with the total observer) + 10) payment
-    document.addEventListener('click', function (e) {
-      try {
-        var t = e.target;
-        if (!t || !t.closest) return;
-        if (t.closest('.select-btn, .visa-card, .quantity-btn, .activity-card, .service-checkbox, .addon-category-card, .duration-btn, .license-type-card, .package-card, .pill, .activity-tag')) {
-          scheduleDiff();
-        }
-        var pay = t.closest('#pay-for-license-btn, #mobile-payment-submit-btn, [data-payment-channel], .payment-tabby-option, .payment-tamara-option, #summary-payment-tabby-btn, #summary-payment-tamara-btn, #mobile-payment-tabby-btn, #mobile-payment-tamara-btn');
-        if (pay) {
-          var channel = pay.getAttribute('data-payment-channel') ||
-            (/tabby/i.test(pay.id || '') ? 'tabby' : /tamara/i.test(pay.id || '') ? 'tamara' : 'card');
-          onCheckout(channel);
-        }
-      } catch (err) {}
-    }, true);
-
-    // config inputs that DO emit native change/input (sliders / selects)
-    ['license-type', 'license-duration', 'shareholders-range', 'investor-visa-count',
-     'employee-visa-count', 'dependency-visas', 'applicants-inside-uae', 'applicants-outside-uae']
-      .forEach(function (id) {
-        var el = document.getElementById(id);
-        if (!el) return;
-        el.addEventListener('change', scheduleDiff);
-        el.addEventListener('input', scheduleDiff);
-      });
-
-    document.addEventListener('change', function (e) {
-      if (e.target && e.target.classList && e.target.classList.contains('service-checkbox')) scheduleDiff();
-    }, true);
-
-    observeTotals();
-    watchSuccess();
-
-    // Elements (success message, totals, tags) may be (re)rendered later — retry a few times.
-    var tries = 0;
-    var retry = setInterval(function () {
-      tries++;
-      observeTotals();
-      watchSuccess();
-      if (tries >= 20) clearInterval(retry);
-    }, 500);
-
-    // 1) pageview
-    trackPageview();
   }
 
   if (document.readyState === 'loading') {
@@ -436,11 +154,6 @@
     try { wire(); } catch (e) {}
   }
 
-  // Small debug surface (optional)
-  window.CLCalcTracker = {
-    isReady: clReady,
-    queued: function () { return queue.length; },
-    track: emit,
-    config: configProps
-  };
+  // Optional manual hook / debug surface.
+  window.CLCalcLead = { push: pushLeadToDataLayer, event: LEAD_EVENT };
 })();

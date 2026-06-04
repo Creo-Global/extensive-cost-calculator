@@ -5777,9 +5777,9 @@
             return;
         }
 
-        const orderId = paymentIntegration.generateOrderId();
-        const paymentSummary = renderPaymentSummary(orderId);
+        const paymentSummary = renderPaymentSummary(ensureSubmissionOrderId());
         const currentSetupFeeSummary = paymentSummary || getCurrentSetupFeeSummary();
+        const orderId = paymentSummary?.orderId || ensureSubmissionOrderId();
         const baseAmount = currentSetupFeeSummary?.amount
             || currentSetupFeeSummary?.total
             || paymentIntegration.PAYMENT_CONFIG.setupFeeAmount;

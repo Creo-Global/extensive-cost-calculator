@@ -10623,3 +10623,4 @@ function convertImgToSvg() {
     };
     convertImages('img');
   }
+  convertImgToSvg();

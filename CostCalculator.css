@@ -173,7 +173,7 @@ background-color: #f9fafb;
     }
 [data-license="fawri"] .license-card-image ,
 [data-license="regular"] .license-card-image {
-    aspect-ratio: 286/386;
+    aspect-ratio: 286/186;
 }
 
 .license-card-image img {
@@ -1198,6 +1198,9 @@ font-size: 18px;
     .visa-toggle-container {
         justify-content: center;
 }
+.b2c-costcalculator .sticky-summary-container:after {    
+      height: 270px;
+    }
 
 }
 
@@ -1931,7 +1934,7 @@ backdrop-filter: blur(24px);
     width: 36px;
     height: auto;
     margin-bottom: 0;
-    filter: invert(1);
+    /* filter: invert(1); */
 }
 
 .activity-card h3 {
@@ -2885,6 +2888,7 @@ backdrop-filter: blur(24px);
 .contact-form-progress .progress-icon {
     width: 16px;
     height: 16px;
+    min-width: 16px;
     border-radius: 50%;
     background: #E5E7EB;
     display: flex;
@@ -3076,7 +3080,7 @@ backdrop-filter: blur(24px);
 }
 
 #addons-summary-section.expanded .summary-content {
-    display: block;
+    display: flex;
     animation: slideDown 0.3s ease;
 }
 
@@ -3908,20 +3912,21 @@ p#addons-modal-subtitle {
         }
     }
 }
-#MFZ-NewCostCalForm{
+.modal-footer #MFZ-NewCostCalForm{
     .grand-total-container{
         margin: 0 !important;
     }
 }
 
-#Country-of-Residence {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding-right: 30px; /* Right padding for arrow */
-background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' width='512' height='512' x='0' y='0' viewBox='0 0 24 24' style='enable-background:new 0 0 512 512' xml:space='preserve' class=''%3e%3cg%3e%3cpath d='M12 16a1 1 0 0 1-.71-.29l-6-6a1 1 0 0 1 1.42-1.42l5.29 5.3 5.29-5.29a1 1 0 0 1 1.41 1.41l-6 6a1 1 0 0 1-.7.29z' data-name='16' fill='%23000000' opacity='1' data-original='%23000000'%3e%3c/path%3e%3c/g%3e%3c/svg%3e") !important;  background-repeat: no-repeat !important;
-  background-position: right 10px center !important; /* 👈 Arrow position */
-  background-size: 16px 16px !important;
+.modal-footer #Country-of-Residence {
+appearance: none;
+-webkit-appearance: none;
+-moz-appearance: none;
+padding-right: 30px; /* Right padding for arrow */
+background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' width='512' height='512' x='0' y='0' viewBox='0 0 24 24' style='enable-background:new 0 0 512 512' xml:space='preserve' class=''%3e%3cg%3e%3cpath d='M12 16a1 1 0 0 1-.71-.29l-6-6a1 1 0 0 1 1.42-1.42l5.29 5.3 5.29-5.29a1 1 0 0 1 1.41 1.41l-6 6a1 1 0 0 1-.7.29z' data-name='16' fill='%23000000' opacity='1' data-original='%23000000'%3e%3c/path%3e%3c/g%3e%3c/svg%3e") !important;
+background-repeat: no-repeat !important;
+background-position: right 10px center !important; /* 👈 Arrow position */
+background-size: 16px 16px !important;
 }
 
 /* Calculator country: plain native <select> — no Select2 / nice-select */

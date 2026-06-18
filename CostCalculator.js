@@ -10597,30 +10597,43 @@
 
 // For svg image to svg code convertor
 function convertImgToSvg() {
-    let convertImages = (query, callback) => {
-      let images = document.querySelectorAll('img.svg');
-      images.forEach((image) => {
-        fetch(image.src)
-          .then((res) => res.text())
-          .then((data) => {
-            let parser = new DOMParser();
-            let svg = parser
-              .parseFromString(data, 'image/svg+xml')
-              .querySelector('svg');
-            svg.setAttribute(
-              'viewBox',
-              '0 0 ' +
-                svg.getAttribute('width') +
-                ' ' +
-                svg.getAttribute('height')
-            );
-            if (image.id) svg.id = image.id;
-            if (image.className) svg.classList = image.classList;
-            image.parentNode.replaceChild(svg, image);
-          })
-          .then(callback);
+  document.querySelectorAll('img.svg').forEach((image) => {
+    fetch(image.src)
+      .then((res) => res.text())
+      .then((data) => {
+        const parser = new DOMParser();
+        const svg = parser
+          .parseFromString(data, 'image/svg+xml')
+          .querySelector('svg');
+
+        if (!svg) return;
+
+        if (!svg.getAttribute('viewBox')) {
+          const width = svg.getAttribute('width');
+          const height = svg.getAttribute('height');
+
+          if (width && height) {
+            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+          }
+        }
+
+        if (image.id) {
+          svg.id = image.id;
+        }
+
+        if (image.className) {
+          svg.setAttribute('class', image.className);
+        }
+
+        image.parentNode.replaceChild(svg, image);
+      })
+      .catch((err) => {
+        console.error('SVG conversion failed:', image.src, err);
       });
-    };
-    convertImages('img');
-  }
-  convertImgToSvg();
+  });
+}
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    convertImgToSvg();
+});

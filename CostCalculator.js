@@ -423,8 +423,31 @@
     }
 
     // Function to detect user's location and update phone country
+    const MFZ_IP_LOCATION_CACHE_KEY = 'mfz_ip_location_info';
+    const MFZ_IP_API_URL = 'https://apiphone.meydanfz.ae/ip';
+
     function detectUserLocation() {
-        return fetch('https://api.meydanfz.ae/ip')
+        try {
+            const cached = sessionStorage.getItem(MFZ_IP_LOCATION_CACHE_KEY);
+            if (cached) {
+                const data = JSON.parse(cached);
+                if (data && data.success) {
+                    userLocationInfo = {
+                        country: data.country_code ? data.country_code.toLowerCase() : 'ae',
+                        country_name: data.country || data.country_name || 'United Arab Emirates',
+                        ip: data.ip || null,
+                        city: data.city || null,
+                        region: data.region || null,
+                        timezone: data.timezone || null
+                    };
+                    return Promise.resolve(userLocationInfo.country);
+                }
+            }
+        } catch (error) {
+            logNonProdError('detectUserLocation cache read failed', error);
+        }
+
+        return fetch(MFZ_IP_API_URL)
             .then(response => {
                 if (!response || !response.ok) {
                     throw new Error('Location request failed');
@@ -433,6 +456,7 @@
             })
             .then(data => {
                 if (data && data.success) {
+                    sessionStorage.setItem(MFZ_IP_LOCATION_CACHE_KEY, JSON.stringify(data));
                     userLocationInfo = {
                         country: data.country_code ? data.country_code.toLowerCase() : 'ae',
                         country_name: data.country || data.country_name || 'United Arab Emirates',
@@ -1221,7 +1245,8 @@
                 phone: {
                     required: 'Phone number is required',
                     invalid: 'Please enter a valid phone number',
-                    validating: 'Please wait while we validate your phone number'
+                    validating: 'Please wait while we validate your phone number',
+                    rateLimited: 'Too many attempts, try again shortly'
                 },
                 country: {
                     required: 'Current country of residence is required'
@@ -1656,11 +1681,16 @@
             const phoneValidationKey = this.getPhoneValidationKey(field);
             let validationState = 'idle';
             let message = '';
+            let rateLimited = false;
 
             if (this.useMFZPhone && window.MFZPhone && field) {
                 try {
                     const instance = window.MFZPhone.getInstance(field);
-                    if (window.MFZPhone.isValid(field)) {
+                    if (instance?.rateLimited) {
+                        rateLimited = true;
+                        validationState = 'invalid';
+                        message = instance.validationMessage || this.errorMessages.phone.rateLimited;
+                    } else if (window.MFZPhone.isValid(field)) {
                         validationState = 'valid';
                         this.lastValidatedPhoneKey = phoneValidationKey;
                     } else if (instance?.validationState) {
@@ -1702,7 +1732,8 @@
             return {
                 digitsOnly,
                 validationState,
-                message
+                message,
+                rateLimited
             };
         }
         
@@ -1795,6 +1826,8 @@
                     countryVisible: false
                 });
                 errorMessage = validation.errors.phone || '';
+            } else if (phoneMeta.rateLimited) {
+                errorMessage = phoneMeta.message || this.errorMessages.phone.rateLimited;
             } else if (phoneMeta.digitsOnly.length < this.validationRules.phone.minDigits ||
                        phoneMeta.digitsOnly.length > this.validationRules.phone.maxDigits) {
                 errorMessage = this.errorMessages.phone.invalid;

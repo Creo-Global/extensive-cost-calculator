@@ -5295,6 +5295,18 @@ background-size: 16px 16px !important;
   margin-bottom: 24px;
 }
 
+.summary-currency-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.sticky-summary-container.payment-view-active .summary-currency-bar {
+  display: flex !important;
+}
+
 .payment-currency-panel {
   margin-bottom: 16px;
 }
@@ -5346,10 +5358,14 @@ background-size: 16px 16px !important;
 }
 
 @media (max-width: 640px) {
-  .grand-total .payment-currency-switcher {
+  .summary-currency-bar {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .summary-currency-bar .payment-currency-switcher {
     width: 100%;
     justify-content: center;
-    margin-top: 8px;
   }
 }
 

@@ -607,6 +607,14 @@
         <div class="sheet-close-handle">
             <div class="handle-bar"></div>
         </div>
+        <div class="summary-currency-bar" id="summary-currency-bar">
+          <div class="payment-currency-switcher" id="summary-currency-switcher" role="group" aria-label="Display currency">
+            <button type="button" class="payment-currency-btn is-active" data-currency="AED" aria-pressed="true">AED</button>
+            <button type="button" class="payment-currency-btn" data-currency="USD" aria-pressed="false">USD</button>
+            <button type="button" class="payment-currency-btn" data-currency="GBP" aria-pressed="false">GBP</button>
+          </div>
+          <p class="payment-currency-note" id="summary-currency-note" hidden></p>
+        </div>
         <div class="summary-header">
             <h3>Your Business Setup Estimate</h3>
             <p class="summary-subtitle">Here's your total cost, based on the options you selected.</p>
@@ -745,7 +753,7 @@
                 <div class="summary-content" id="change-status-summary">
                     <div class="summary-row">
                         <span class="summary-label">Applicants Outside the UAE <span id="summary-outside-count">(0)</span></span>
-                        <span class="summary-value">AED 0</span>
+                        <span class="summary-value" id="outside-status-cost">AED 0</span>
                     </div>
                     <div class="summary-row">
                         <span class="summary-label">Applicants Inside the UAE <span id="summary-inside-count">(0)</span></span>
@@ -789,11 +797,6 @@
                 <div class="grand-total-left">
                     <span class="grand-total-label">Grand Total</span>
                     <span class="grand-total-amount" id="total-cost-display">AED 0</span>
-                </div>
-                <div class="payment-currency-switcher" id="summary-currency-switcher" role="group" aria-label="Display currency">
-                  <button type="button" class="payment-currency-btn is-active" data-currency="AED" aria-pressed="true">AED</button>
-                  <button type="button" class="payment-currency-btn" data-currency="USD" aria-pressed="false">USD</button>
-                  <button type="button" class="payment-currency-btn" data-currency="GBP" aria-pressed="false">GBP</button>
                 </div>
                 <button type="button" id="share-btn" class="share-btn" onclick="handleShareClick()">
                     <svg width="21" height="25" viewBox="0 0 21 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -841,14 +844,6 @@
           </div>
 
           <div class="summary-payment-card">
-            <div class="payment-currency-panel">
-              <div class="payment-currency-switcher" id="summary-payment-currency-switcher" role="group" aria-label="Payment currency">
-                <button type="button" class="payment-currency-btn is-active" data-currency="AED" aria-pressed="true">AED</button>
-                <button type="button" class="payment-currency-btn" data-currency="USD" aria-pressed="false">USD</button>
-                <button type="button" class="payment-currency-btn" data-currency="GBP" aria-pressed="false">GBP</button>
-              </div>
-              <p class="payment-currency-note" id="summary-payment-currency-note" hidden></p>
-            </div>
             <ul class="summary-payment-fee-list" aria-label="Price breakdown">
               <li class="summary-payment-fee-row">
                 <span class="summary-payment-fee-label">License Fee</span>

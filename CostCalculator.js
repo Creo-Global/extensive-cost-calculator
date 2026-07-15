@@ -4551,6 +4551,7 @@
     function updateSummaryUI(costs, snapshot) {
         const { licenseCost, visaCost, bankAccountCost, officeCost, addonsCost, totalCost } = costs;
         const { licenseType, packageType, licenseDuration, officeType, investorVisas, employeeVisas, dependencyVisas, selectedAddons } = snapshot;
+        const formatSummaryAmount = (aedValue) => formatPaymentAmount(aedValue, getSelectedPaymentCurrency());
 
         // Update package type and license duration
         let packageText = licenseType === 'fawri' ? "Fawri" : "Regular";
@@ -4580,7 +4581,7 @@
             const additionalCount = shareholdersCount - 6;
             additionalShareholderRow.innerHTML = `
                 <span class="summary-label">Additional Shareholders (${additionalCount})</span>
-                <span class="summary-value">AED ${window.additionalShareholdersCost.toLocaleString()}</span>
+                <span class="summary-value">${formatSummaryAmount(window.additionalShareholdersCost)}</span>
             `;
         } else if (additionalShareholderRow) {
             // Remove the row if it exists but is no longer needed
@@ -4592,13 +4593,13 @@
         // Update license base cost
         const licenseCostElement = document.getElementById("license-base-cost");
         if (licenseCostElement) {
-            licenseCostElement.innerText = `AED ${window.baseLicenseCostValue.toLocaleString()}`;
+            licenseCostElement.innerText = formatSummaryAmount(window.baseLicenseCostValue);
         }
         
         // Update company setup header price
         const companySetupPrice = document.getElementById("company-setup-price");
         if (companySetupPrice) {
-            companySetupPrice.innerText = `AED ${licenseCost.toLocaleString()}`;
+            companySetupPrice.innerText = formatSummaryAmount(licenseCost);
         }
         
         // Show/hide Company Setup section based on cost
@@ -4667,12 +4668,12 @@
                     const groupIds = Object.keys(activityGroups);
                     const activitiesCostValue = calculateBusinessActivitiesCost(window.selectedActivities);
                     
-                    businessActivitiesCost.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
+                    businessActivitiesCost.innerText = formatSummaryAmount(activitiesCostValue);
                     
                     // Update the price in the business activities header
                     const businessActivitiesHeader = document.getElementById('business-activities-header-price');
                     if (businessActivitiesHeader) {
-                        businessActivitiesHeader.innerText = `AED ${activitiesCostValue.toLocaleString()}`;
+                        businessActivitiesHeader.innerText = formatSummaryAmount(activitiesCostValue);
                     }
                     
                     // Show/hide fee warning based on number of activity groups
@@ -4717,7 +4718,7 @@
                     investorRow.style.display = investorVisas > 0 ? 'flex' : 'none';
                     if (investorVisas > 0) {
                         document.getElementById("summary-investor-visa-display").innerText = `(${investorVisas})`;
-                        document.getElementById("investor-visa-cost").innerText = `AED ${investorVisaCost.toLocaleString()}`;
+                        document.getElementById("investor-visa-cost").innerText = formatSummaryAmount(investorVisaCost);
                     }
                 }
                 
@@ -4726,7 +4727,7 @@
                     employeeRow.style.display = employeeVisas > 0 ? 'flex' : 'none';
                     if (employeeVisas > 0) {
                         document.getElementById("summary-employee-visa-display").innerText = `(${employeeVisas})`;
-                        document.getElementById("employee-visa-cost").innerText = `AED ${employeeVisaCost.toLocaleString()}`;
+                        document.getElementById("employee-visa-cost").innerText = formatSummaryAmount(employeeVisaCost);
                     }
                 }
                 
@@ -4735,14 +4736,14 @@
                     dependencyRow.style.display = dependencyVisas > 0 ? 'flex' : 'none';
                     if (dependencyVisas > 0) {
                         document.getElementById("summary-dependency-visa-display").innerText = `(${dependencyVisas})`;
-                        document.getElementById("dependency-visa-cost").innerText = `AED ${dependencyVisaCost.toLocaleString()}`;
+                        document.getElementById("dependency-visa-cost").innerText = formatSummaryAmount(dependencyVisaCost);
                     }
                 }
                 
                 // Update the visa price in the summary header
                 const visaHeader = document.getElementById('visas-header-price');
                 if (visaHeader) {
-                    visaHeader.innerText = `AED ${totalVisaCost.toLocaleString()}`;
+                    visaHeader.innerText = formatSummaryAmount(totalVisaCost);
                 }
             } else {
                 // Hide visa section if no visas selected
@@ -4755,10 +4756,10 @@
         const immigrationCardRow = document.getElementById("immigration-card-row");
         if (immigrationCardElement && immigrationCardRow) {
             if (window.immigrationCardFee > 0) {
-                immigrationCardElement.innerText = `AED ${window.immigrationCardFee.toLocaleString()}`;
+                immigrationCardElement.innerText = formatSummaryAmount(window.immigrationCardFee);
                 immigrationCardRow.style.display = 'flex';
             } else {
-                immigrationCardElement.innerText = 'AED 0';
+                immigrationCardElement.innerText = formatSummaryAmount(0);
                 immigrationCardRow.style.display = 'none';
             }
         }
@@ -4776,12 +4777,16 @@
                 // Update summary counts
                 document.getElementById('summary-inside-count').innerText = `(${insideCount})`;
                 document.getElementById('summary-outside-count').innerText = `(${outsideCount})`;
-                document.getElementById('inside-status-cost').innerText = `AED ${changeStatusCost.toLocaleString()}`;
+                document.getElementById('inside-status-cost').innerText = formatSummaryAmount(changeStatusCost);
+                const outsideStatusCost = document.getElementById('outside-status-cost');
+                if (outsideStatusCost) {
+                    outsideStatusCost.innerText = formatSummaryAmount(0);
+                }
                 
                 // Update header price
                 const changeStatusHeaderPrice = document.getElementById('change-status-header-price');
                 if (changeStatusHeaderPrice) {
-                    changeStatusHeaderPrice.innerText = `AED ${changeStatusCost.toLocaleString()}`;
+                    changeStatusHeaderPrice.innerText = formatSummaryAmount(changeStatusCost);
                 }
             } else {
                 changeStatusSection.style.display = 'none';
@@ -4875,7 +4880,7 @@
                             displayCost = addon.cost * eligibleVisas;
                         }
                         
-                        value.innerText = `AED ${displayCost.toLocaleString()}`;
+                        value.innerText = formatSummaryAmount(displayCost);
                         
                         row.appendChild(label);
                         row.appendChild(value);
@@ -5302,7 +5307,7 @@
             }
         });
 
-        ['summary-payment-currency-note', 'mobile-payment-currency-note'].forEach((id) => {
+        ['summary-currency-note', 'mobile-payment-currency-note'].forEach((id) => {
             const note = document.getElementById(id);
             if (!note) return;
             const message = getPaymentCurrencyNote();
@@ -5339,12 +5344,13 @@
         paymentFxRatesPromise = paymentIntegration.fetchExchangeRates({
             timeoutMs: getPaymentConfig()?.timeouts?.healthMs || 5000,
         }).then((nextRatesState) => {
+            const previousCurrency = getSelectedPaymentCurrency();
             paymentFxRatesState = nextRatesState || paymentFxRatesState;
-            if (!isForeignCurrencyAvailable(getSelectedPaymentCurrency())) {
+            if (previousCurrency !== 'AED' && !isForeignCurrencyAvailable(previousCurrency)) {
                 selectedPaymentCurrency = 'AED';
             }
             syncPaymentCurrencyButtons();
-            updateGrandTotal(calculateTotalCost());
+            calculateCosts();
             const container = document.querySelector('.sticky-summary-container');
             if (container && container.classList.contains('payment-view-active')) {
                 renderPaymentSummary(currentPaymentOrderId || ensureSubmissionOrderId());
@@ -5352,13 +5358,17 @@
             return paymentFxRatesState;
         }).catch((error) => {
             logNonProdError('ensurePaymentExchangeRates failed', error);
+            const previousCurrency = getSelectedPaymentCurrency();
             paymentFxRatesState = {
                 ...(paymentIntegration.createEmptyRatesState ? paymentIntegration.createEmptyRatesState() : paymentFxRatesState),
                 error: 'Unable to load exchange rates. Payments are available in AED only.',
                 loading: false,
             };
-            selectedPaymentCurrency = 'AED';
+            if (previousCurrency !== 'AED' && !isForeignCurrencyAvailable(previousCurrency)) {
+                selectedPaymentCurrency = 'AED';
+            }
             syncPaymentCurrencyButtons();
+            calculateCosts();
             return paymentFxRatesState;
         }).finally(() => {
             paymentFxRatesState = {
@@ -5385,7 +5395,7 @@
             selectedPaymentCurrency = normalizedCurrency;
         }
         syncPaymentCurrencyButtons();
-        updateGrandTotal(calculateTotalCost());
+        calculateCosts();
         if (options.rerenderPayment !== false) {
             renderPaymentSummary(currentPaymentOrderId || ensureSubmissionOrderId());
         }
@@ -6905,10 +6915,15 @@
             return;
         }
         clearPaymentMessages();
+
+        var orderId = paymentIntegration && typeof paymentIntegration.generateOrderId === 'function'
+            ? paymentIntegration.generateOrderId()
+            : ensureSubmissionOrderId();
+        renderPaymentSummary(orderId);
+        syncPaymentCurrencyButtons();
+
         ensurePaymentExchangeRates().then(function () {
-            if (paymentIntegration && typeof paymentIntegration.generateOrderId === 'function') {
-                renderPaymentSummary(paymentIntegration.generateOrderId());
-            }
+            renderPaymentSummary(currentPaymentOrderId || orderId);
         });
         container.classList.add('payment-view-active');
 

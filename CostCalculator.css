@@ -804,13 +804,22 @@ align-items: center;
     border-radius: 12px;
     padding: 16px !important;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 12px;
     border-radius: 10px;
     background: #fff;
     -webkit-backdrop-filter: blur(24px);
     backdrop-filter: blur(24px);
+}
+
+.grand-total-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
 }
 
 .grand-total-label {
@@ -5284,6 +5293,64 @@ background-size: 16px 16px !important;
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 24px;
+}
+
+.payment-currency-panel {
+  margin-bottom: 16px;
+}
+
+.payment-currency-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #eef2f7;
+}
+
+.payment-currency-btn {
+  border: 0;
+  background: transparent;
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.payment-currency-btn.is-active {
+  background: #ffffff;
+  color: #0171E3;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+.payment-currency-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.payment-currency-note {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #6b7280;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.grand-total .payment-currency-switcher {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .grand-total .payment-currency-switcher {
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
+  }
 }
 
 .summary-payment-fee-list {

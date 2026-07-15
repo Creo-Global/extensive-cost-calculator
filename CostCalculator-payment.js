@@ -11,11 +11,21 @@
     var FORBIDDEN_NAME_CHARS_REGEX = /[0-9!@#$%^&*()_+=\[\]{};:"\\|,.<>?/~`]/;
     var EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
+    var SUPPORTED_CURRENCIES = {
+      AED: { code: 'AED', symbol: 'AED', locale: 'en-AE' },
+      USD: { code: 'USD', symbol: '$', locale: 'en-US' },
+      GBP: { code: 'GBP', symbol: '£', locale: 'en-GB' },
+    };
+
     var PAYMENT_CONFIG = {
       healthUrl: 'https://marketing.meydanfz.ae/api/payment/health',
       initiateUrl: 'https://marketing.meydanfz.ae/api/payment/initiate',
+      ratesUrl: 'https://marketing.meydanfz.ae/api/payment/rates',
+      fallbackRatesUrl: 'https://open.er-api.com/v6/latest/AED',
       callbackUrl: 'https://marketing.meydanfz.ae/api/payment/callback',
       currency: 'AED',
+      defaultRateBufferPct: 1.5,
+      ratesCacheMs: 5 * 60 * 1000,
       language: 'EN',
       setupFeeAmount: 12520,
       licenseAmount: 12500,
@@ -85,6 +95,202 @@
 
     function normalizeLicenseType(value) {
       return normalizeString(value).toLowerCase() === 'fawri' ? 'fawri' : 'regular';
+    }
+
+    function normalizeCurrencyCode(value) {
+      var code = normalizeString(value).toUpperCase();
+      return SUPPORTED_CURRENCIES[code] ? code : PAYMENT_CONFIG.currency;
+    }
+
+    function roundCurrencyAmount(value) {
+      return Math.round(Number(value || 0) * 100) / 100;
+    }
+
+    function applyRateBuffer(rate, bufferPct) {
+      var numericRate = Number(rate);
+      var numericBuffer = Number(bufferPct);
+      if (!Number.isFinite(numericRate) || numericRate <= 0) {
+        return 0;
+      }
+      if (!Number.isFinite(numericBuffer) || numericBuffer <= 0) {
+        return numericRate;
+      }
+      return numericRate * (1 - numericBuffer / 100);
+    }
+
+    function createEmptyRatesState() {
+      return {
+        base: PAYMENT_CONFIG.currency,
+        rates: { AED: 1 },
+        bufferPct: Number(PAYMENT_CONFIG.defaultRateBufferPct || 0),
+        fetchedAt: '',
+        expiresAt: 0,
+        source: '',
+        loading: false,
+        error: '',
+      };
+    }
+
+    function normalizeRatesPayload(payload, options) {
+      var nextOptions = options || {};
+      var source = payload || {};
+      var rates = { AED: 1 };
+      var rawRates = source.rates;
+
+      if (rawRates && typeof rawRates === 'object') {
+        Object.keys(rawRates).forEach(function (currencyCode) {
+          var normalizedCode = normalizeCurrencyCode(currencyCode);
+          var numericRate = Number(rawRates[currencyCode]);
+          if (normalizedCode !== PAYMENT_CONFIG.currency && Number.isFinite(numericRate) && numericRate > 0) {
+            rates[normalizedCode] = numericRate;
+          }
+        });
+      } else if (source.result === 'success' && source.rates && typeof source.rates === 'object') {
+        ['USD', 'GBP'].forEach(function (currencyCode) {
+          var providerRate = Number(source.rates[currencyCode]);
+          if (Number.isFinite(providerRate) && providerRate > 0) {
+            rates[currencyCode] = providerRate;
+          }
+        });
+      }
+
+      var fetchedAt =
+        normalizeString(source.fetchedAt) ||
+        normalizeString(source.time_last_update_utc) ||
+        normalizeString(nextOptions.fetchedAt) ||
+        new Date().toISOString();
+      var expiresAt = Number(source.expiresAt || 0);
+      if (!expiresAt) {
+        expiresAt = Date.now() + Number(PAYMENT_CONFIG.ratesCacheMs || 300000);
+      }
+
+      return {
+        base: normalizeString(source.base || source.base_code) || PAYMENT_CONFIG.currency,
+        rates: rates,
+        bufferPct: Number(
+          source.bufferPct !== undefined ? source.bufferPct : PAYMENT_CONFIG.defaultRateBufferPct,
+        ),
+        fetchedAt: fetchedAt,
+        expiresAt: expiresAt,
+        source: normalizeString(source.source || source.provider || nextOptions.source || ''),
+        loading: false,
+        error: '',
+      };
+    }
+
+    function convertFromAed(aedAmount, currencyCode, rateState) {
+      var currency = normalizeCurrencyCode(currencyCode);
+      var numericAmount = Number(aedAmount || 0);
+      if (!Number.isFinite(numericAmount)) {
+        return null;
+      }
+      if (currency === PAYMENT_CONFIG.currency) {
+        return roundCurrencyAmount(numericAmount);
+      }
+
+      var nextRateState = rateState || createEmptyRatesState();
+      var rawRate = Number(nextRateState.rates && nextRateState.rates[currency]);
+      if (!Number.isFinite(rawRate) || rawRate <= 0) {
+        return null;
+      }
+
+      var effectiveRate = applyRateBuffer(rawRate, nextRateState.bufferPct);
+      return roundCurrencyAmount(numericAmount * effectiveRate);
+    }
+
+    function formatCurrencyAmount(aedAmount, currencyCode, rateState) {
+      var currency = normalizeCurrencyCode(currencyCode);
+      var meta = SUPPORTED_CURRENCIES[currency] || SUPPORTED_CURRENCIES.AED;
+      var converted = convertFromAed(aedAmount, currency, rateState);
+      var displayAmount =
+        converted === null ? roundCurrencyAmount(aedAmount) : converted;
+      var displayCurrency = converted === null ? PAYMENT_CONFIG.currency : currency;
+      var displayMeta = SUPPORTED_CURRENCIES[displayCurrency] || meta;
+
+      return (
+        displayMeta.symbol +
+        ' ' +
+        displayAmount.toLocaleString(displayMeta.locale, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+      );
+    }
+
+    function isRatesStateFresh(rateState) {
+      return Boolean(rateState && rateState.expiresAt && Date.now() < Number(rateState.expiresAt));
+    }
+
+    function fetchExchangeRates(options) {
+      var nextOptions = options || {};
+      var fetchFn = typeof nextOptions.fetchFn === 'function' ? nextOptions.fetchFn : null;
+      if (!fetchFn && typeof fetch === 'function') {
+        fetchFn = fetch;
+      }
+
+      if (!fetchFn) {
+        return Promise.resolve(
+          Object.assign(createEmptyRatesState(), {
+            error: 'Exchange rates are unavailable in this environment.',
+          }),
+        );
+      }
+
+      var requestOptions = {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      };
+      var timeoutMs = Number(
+        nextOptions.timeoutMs || PAYMENT_CONFIG.timeouts.healthMs || 5000,
+      );
+
+      function fetchJson(url) {
+        var controller = typeof AbortController === 'function' ? new AbortController() : null;
+        var timeout = controller
+          ? setTimeout(function () {
+              controller.abort();
+            }, timeoutMs)
+          : null;
+
+        return fetchFn(url, controller ? Object.assign({}, requestOptions, { signal: controller.signal }) : requestOptions)
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error('Rates request failed with status ' + response.status);
+            }
+            return response.json();
+          })
+          .finally(function () {
+            if (timeout) {
+              clearTimeout(timeout);
+            }
+          });
+      }
+
+      return fetchJson(PAYMENT_CONFIG.ratesUrl)
+        .then(function (payload) {
+          var normalizedPayload = payload && payload.data ? payload.data : payload;
+          if (normalizedPayload && normalizedPayload.success === false) {
+            throw new Error('Rates endpoint returned an error.');
+          }
+          return normalizeRatesPayload(
+            normalizedPayload && normalizedPayload.rates ? normalizedPayload : normalizedPayload,
+            { source: 'backend' },
+          );
+        })
+        .catch(function () {
+          return fetchJson(PAYMENT_CONFIG.fallbackRatesUrl).then(function (payload) {
+            return normalizeRatesPayload(payload, { source: 'open.er-api.com' });
+          });
+        })
+        .catch(function (error) {
+          return Object.assign(createEmptyRatesState(), {
+            error:
+              (error && error.message) ||
+              'Unable to load exchange rates. Payments are available in AED only.',
+          });
+        });
     }
 
     function validateNameValue(value) {
@@ -343,11 +549,25 @@
         PAYMENT_CONFIG.callbackUrl +
         '?return_url=' +
         encodeURIComponent(currentUrl);
+      var currency = normalizeCurrencyCode(
+        pickFirstDefinedValue(nextInput, 'currency', PAYMENT_CONFIG.currency),
+      );
+      var amountAed = Number(
+        pickFirstDefinedValue(nextInput, ['amountAed', 'amount_aed'], nextInput.amount || 0),
+      );
+      var convertedAmount = convertFromAed(amountAed, currency, nextInput.rateState);
+      var paymentAmount =
+        currency === PAYMENT_CONFIG.currency
+          ? roundCurrencyAmount(amountAed)
+          : convertedAmount === null
+            ? roundCurrencyAmount(amountAed)
+            : convertedAmount;
 
       var secureRequest = {
         order_id: normalizeString(nextInput.orderId),
-        amount: Number(nextInput.amount || 0),
-        currency: PAYMENT_CONFIG.currency,
+        amount: paymentAmount,
+        amount_aed: roundCurrencyAmount(amountAed),
+        currency: currency,
         language: PAYMENT_CONFIG.language,
         billing_name: normalizeString(nextInput.fullName),
         billing_email: normalizeString(nextInput.email),
@@ -582,6 +802,11 @@
         currency: normalizeString(
           pickFirstDefinedValue(source, 'currency', PAYMENT_CONFIG.currency),
         ),
+        amountAed: pickFirstDefinedValue(source, ['amountAed', 'amount_aed'], ''),
+        exchangeRate: pickFirstDefinedValue(source, ['exchangeRate', 'exchange_rate'], ''),
+        rateFetchedAt: normalizeString(
+          pickFirstDefinedValue(source, ['rateFetchedAt', 'rate_fetched_at'], ''),
+        ),
         responseCode: normalizeString(
           pickFirstDefinedValue(source, ['responseCode', 'response_code'], ''),
         ),
@@ -730,10 +955,7 @@
         failureMessage: actionType !== 'payment_initiated' ? payment.failureMessage : '',
         statusMessage: actionType !== 'payment_initiated' ? payment.statusMessage : '',
         cardName: actionType !== 'payment_initiated' ? payment.cardName : '',
-        currency:
-          actionType !== 'payment_initiated'
-            ? payment.currency || PAYMENT_CONFIG.currency
-            : PAYMENT_CONFIG.currency,
+        currency: payment.currency || PAYMENT_CONFIG.currency,
         responseCode: actionType !== 'payment_initiated' ? payment.responseCode : '',
         billingName: actionType !== 'payment_initiated' ? payment.billingName : '',
         billingEmail: actionType !== 'payment_initiated' ? payment.billingEmail : '',
@@ -847,6 +1069,7 @@
 
     return {
       PAYMENT_CONFIG: PAYMENT_CONFIG,
+      SUPPORTED_CURRENCIES: SUPPORTED_CURRENCIES,
       stripPhoneDigits: stripPhoneDigits,
       splitFullName: splitFullName,
       validateNameValue: validateNameValue,
@@ -858,6 +1081,15 @@
       formatActionType: formatActionType,
       normalizePaymentStatus: normalizePaymentStatus,
       mapPaymentStatusToAction: mapPaymentStatusToAction,
+      normalizeCurrencyCode: normalizeCurrencyCode,
+      roundCurrencyAmount: roundCurrencyAmount,
+      applyRateBuffer: applyRateBuffer,
+      createEmptyRatesState: createEmptyRatesState,
+      normalizeRatesPayload: normalizeRatesPayload,
+      convertFromAed: convertFromAed,
+      formatCurrencyAmount: formatCurrencyAmount,
+      isRatesStateFresh: isRatesStateFresh,
+      fetchExchangeRates: fetchExchangeRates,
       createSetupFeeSummary: createSetupFeeSummary,
       generateOrderId: generateOrderId,
       buildSecurePaymentRequest: buildSecurePaymentRequest,

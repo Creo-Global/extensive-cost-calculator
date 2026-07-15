@@ -42,6 +42,20 @@
     };
     let currentPaymentOrderId = '';
     let hasContactValidationFeedback = false;
+    let selectedPaymentCurrency = 'AED';
+    let paymentFxRatesState = paymentIntegration && typeof paymentIntegration.createEmptyRatesState === 'function'
+        ? paymentIntegration.createEmptyRatesState()
+        : {
+            base: 'AED',
+            rates: { AED: 1 },
+            bufferPct: 1.5,
+            fetchedAt: '',
+            expiresAt: 0,
+            source: '',
+            loading: false,
+            error: '',
+        };
+    let paymentFxRatesPromise = null;
 
     (function initMfzCalcBundleBase() {
         try {
@@ -5222,6 +5236,176 @@
         };
     }
 
+    function getSelectedPaymentCurrency() {
+        if (!paymentIntegration || typeof paymentIntegration.normalizeCurrencyCode !== 'function') {
+            return selectedPaymentCurrency || 'AED';
+        }
+        return paymentIntegration.normalizeCurrencyCode(selectedPaymentCurrency);
+    }
+
+    function isForeignCurrencyAvailable(currencyCode) {
+        const targetCurrency = paymentIntegration && typeof paymentIntegration.normalizeCurrencyCode === 'function'
+            ? paymentIntegration.normalizeCurrencyCode(currencyCode || selectedPaymentCurrency)
+            : (currencyCode || selectedPaymentCurrency || 'AED');
+        if (targetCurrency === 'AED') {
+            return true;
+        }
+        const rate = Number(paymentFxRatesState?.rates?.[targetCurrency]);
+        return Number.isFinite(rate) && rate > 0 && !paymentFxRatesState?.error;
+    }
+
+    function formatPaymentAmount(aedValue, currencyCode = getSelectedPaymentCurrency()) {
+        if (paymentIntegration && typeof paymentIntegration.formatCurrencyAmount === 'function') {
+            return paymentIntegration.formatCurrencyAmount(aedValue, currencyCode, paymentFxRatesState);
+        }
+        return formatAedAmount(aedValue);
+    }
+
+    function convertPaymentAmount(aedValue, currencyCode = getSelectedPaymentCurrency()) {
+        if (paymentIntegration && typeof paymentIntegration.convertFromAed === 'function') {
+            return paymentIntegration.convertFromAed(aedValue, currencyCode, paymentFxRatesState);
+        }
+        return Number(aedValue || 0);
+    }
+
+    function getPaymentCurrencyNote() {
+        if (paymentFxRatesState.loading) {
+            return 'Updating exchange rates...';
+        }
+        if (paymentFxRatesState.error && getSelectedPaymentCurrency() !== 'AED') {
+            return paymentFxRatesState.error;
+        }
+        if (getSelectedPaymentCurrency() === 'AED') {
+            return '';
+        }
+        const fetchedAt = paymentFxRatesState.fetchedAt
+            ? new Date(paymentFxRatesState.fetchedAt).toLocaleString()
+            : '';
+        return fetchedAt
+            ? `Live exchange rate as of ${fetchedAt}. Final charge is confirmed at payment.`
+            : 'Live exchange rate applied. Final charge is confirmed at payment.';
+    }
+
+    function syncPaymentCurrencyButtons() {
+        const currency = getSelectedPaymentCurrency();
+        const foreignAvailable = isForeignCurrencyAvailable(currency);
+
+        document.querySelectorAll('.payment-currency-btn').forEach((button) => {
+            const buttonCurrency = button.getAttribute('data-currency');
+            const isActive = buttonCurrency === currency;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            if (buttonCurrency && buttonCurrency !== 'AED') {
+                button.disabled = !foreignAvailable;
+            } else {
+                button.disabled = false;
+            }
+        });
+
+        ['summary-payment-currency-note', 'mobile-payment-currency-note'].forEach((id) => {
+            const note = document.getElementById(id);
+            if (!note) return;
+            const message = getPaymentCurrencyNote();
+            note.textContent = message;
+            note.hidden = !message;
+        });
+    }
+
+    async function ensurePaymentExchangeRates({ force = false } = {}) {
+        if (!paymentIntegration || typeof paymentIntegration.fetchExchangeRates !== 'function') {
+            return paymentFxRatesState;
+        }
+
+        if (
+            !force &&
+            paymentIntegration.isRatesStateFresh &&
+            paymentIntegration.isRatesStateFresh(paymentFxRatesState)
+        ) {
+            syncPaymentCurrencyButtons();
+            return paymentFxRatesState;
+        }
+
+        if (!force && paymentFxRatesPromise) {
+            return paymentFxRatesPromise;
+        }
+
+        paymentFxRatesState = {
+            ...paymentFxRatesState,
+            loading: true,
+            error: '',
+        };
+        syncPaymentCurrencyButtons();
+
+        paymentFxRatesPromise = paymentIntegration.fetchExchangeRates({
+            timeoutMs: getPaymentConfig()?.timeouts?.healthMs || 5000,
+        }).then((nextRatesState) => {
+            paymentFxRatesState = nextRatesState || paymentFxRatesState;
+            if (!isForeignCurrencyAvailable(getSelectedPaymentCurrency())) {
+                selectedPaymentCurrency = 'AED';
+            }
+            syncPaymentCurrencyButtons();
+            updateGrandTotal(calculateTotalCost());
+            const container = document.querySelector('.sticky-summary-container');
+            if (container && container.classList.contains('payment-view-active')) {
+                renderPaymentSummary(currentPaymentOrderId || ensureSubmissionOrderId());
+            }
+            return paymentFxRatesState;
+        }).catch((error) => {
+            logNonProdError('ensurePaymentExchangeRates failed', error);
+            paymentFxRatesState = {
+                ...(paymentIntegration.createEmptyRatesState ? paymentIntegration.createEmptyRatesState() : paymentFxRatesState),
+                error: 'Unable to load exchange rates. Payments are available in AED only.',
+                loading: false,
+            };
+            selectedPaymentCurrency = 'AED';
+            syncPaymentCurrencyButtons();
+            return paymentFxRatesState;
+        }).finally(() => {
+            paymentFxRatesState = {
+                ...paymentFxRatesState,
+                loading: false,
+            };
+            paymentFxRatesPromise = null;
+            syncPaymentCurrencyButtons();
+        });
+
+        return paymentFxRatesPromise;
+    }
+
+    function setSelectedPaymentCurrency(nextCurrency, options = {}) {
+        const normalizedCurrency = paymentIntegration && typeof paymentIntegration.normalizeCurrencyCode === 'function'
+            ? paymentIntegration.normalizeCurrencyCode(nextCurrency)
+            : (nextCurrency || 'AED');
+        if (normalizedCurrency !== 'AED' && !isForeignCurrencyAvailable(normalizedCurrency)) {
+            if (!options.silent) {
+                showPaymentMessage('Exchange rates are unavailable right now. Showing AED instead.');
+            }
+            selectedPaymentCurrency = 'AED';
+        } else {
+            selectedPaymentCurrency = normalizedCurrency;
+        }
+        syncPaymentCurrencyButtons();
+        updateGrandTotal(calculateTotalCost());
+        if (options.rerenderPayment !== false) {
+            renderPaymentSummary(currentPaymentOrderId || ensureSubmissionOrderId());
+        }
+    }
+
+    function formatSettlementAmount(value, currencyCode = 'AED') {
+        const normalizedCurrency = paymentIntegration && typeof paymentIntegration.normalizeCurrencyCode === 'function'
+            ? paymentIntegration.normalizeCurrencyCode(currencyCode)
+            : (currencyCode || 'AED');
+        const meta = paymentIntegration?.SUPPORTED_CURRENCIES?.[normalizedCurrency];
+        const numericValue = Number(value || 0);
+        if (!meta) {
+            return formatAedAmount(numericValue);
+        }
+        return `${meta.symbol} ${numericValue.toLocaleString(meta.locale, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })}`;
+    }
+
     function formatAedAmount(value) {
         return `AED ${Number(value || 0).toLocaleString(undefined, {
             minimumFractionDigits: 2,
@@ -5358,17 +5542,17 @@
         currentPaymentOrderId = ensureSubmissionOrderId(orderId);
 
         const fields = {
-            'summary-payment-license-fee': formatAedAmount(summary.licenseFee),
-            'summary-payment-innovation-fee': formatAedAmount(summary.innovationFee),
-            'summary-payment-knowledge-fee': formatAedAmount(summary.knowledgeFee),
-            'summary-payment-grand-total': formatAedAmount(summary.total),
-            'summary-payment-payable-amount': formatAedAmount(summary.total),
+            'summary-payment-license-fee': formatPaymentAmount(summary.licenseFee),
+            'summary-payment-innovation-fee': formatPaymentAmount(summary.innovationFee),
+            'summary-payment-knowledge-fee': formatPaymentAmount(summary.knowledgeFee),
+            'summary-payment-grand-total': formatPaymentAmount(summary.total),
+            'summary-payment-payable-amount': formatPaymentAmount(summary.total),
             'summary-payment-order-id': currentPaymentOrderId,
-            'mobile-payment-license-fee': formatAedAmount(summary.licenseFee),
-            'mobile-payment-innovation-fee': formatAedAmount(summary.innovationFee),
-            'mobile-payment-knowledge-fee': formatAedAmount(summary.knowledgeFee),
-            'mobile-payment-grand-total': formatAedAmount(summary.total),
-            'mobile-payment-payable-amount': formatAedAmount(summary.total),
+            'mobile-payment-license-fee': formatPaymentAmount(summary.licenseFee),
+            'mobile-payment-innovation-fee': formatPaymentAmount(summary.innovationFee),
+            'mobile-payment-knowledge-fee': formatPaymentAmount(summary.knowledgeFee),
+            'mobile-payment-grand-total': formatPaymentAmount(summary.total),
+            'mobile-payment-payable-amount': formatPaymentAmount(summary.total),
             'mobile-payment-order-id': currentPaymentOrderId,
         };
 
@@ -5379,9 +5563,13 @@
             }
         });
 
+        syncPaymentCurrencyButtons();
+
         return {
             orderId: currentPaymentOrderId,
-            amount: summary.total,
+            amountAed: summary.total,
+            amount: convertPaymentAmount(summary.total) ?? summary.total,
+            currency: getSelectedPaymentCurrency(),
             licenseFee: summary.licenseFee,
             innovationFee: summary.innovationFee,
             knowledgeFee: summary.knowledgeFee,
@@ -5581,7 +5769,8 @@
         return Promise.resolve(submitFn(payload));
     }
 
-    function buildPaymentInitiatedPayload(orderId, paymentAmount, channel = '') {
+    function buildPaymentInitiatedPayload(orderId, paymentAmount, channel = '', paymentMeta = {}) {
+        const amountAed = Number(paymentMeta.amountAed ?? paymentAmount ?? 0);
         return buildQuoteSubmissionPayload({
             actionType: 'payment_initiated',
             formStatus: 'payment',
@@ -5590,6 +5779,10 @@
             paymentInitiated: 'yes',
             paymentType: paymentIntegration?.PAYMENT_CONFIG?.paymentType || 'setup_fee',
             paymentAmount,
+            currency: paymentMeta.currency || getSelectedPaymentCurrency(),
+            amountAed,
+            exchangeRate: paymentMeta.exchangeRate || '',
+            rateFetchedAt: paymentMeta.rateFetchedAt || paymentFxRatesState.fetchedAt || '',
             channel,
         });
     }
@@ -5668,7 +5861,10 @@
 
         const mappings = {
             'payment-status-order-id': data.orderId || 'N/A',
-            'payment-status-amount': formatAedAmount(data.amount || 0),
+            'payment-status-amount': formatSettlementAmount(
+                data.amount || 0,
+                data.currency || getSelectedPaymentCurrency(),
+            ),
             'payment-status-tracking-id': data.trackingId || 'N/A',
             'payment-status-mode': data.paymentMode || 'N/A',
             'payment-status-date': data.transDate || 'N/A',
@@ -5712,15 +5908,21 @@
         });
     }
 
-    async function initiateSecurePayment(orderId, amount, options = {}) {
+    async function initiateSecurePayment(orderId, amountAed, options = {}) {
         const config = getPaymentConfig();
         if (!config || !paymentIntegration || typeof paymentIntegration.buildSecurePaymentRequest !== 'function') {
             return { success: false };
         }
 
+        const paymentCurrency = options.channel === 'tamara'
+            ? 'AED'
+            : (options.currency || getSelectedPaymentCurrency());
+
         const securePayload = {
             orderId,
-            amount,
+            amountAed,
+            currency: paymentCurrency,
+            rateState: paymentFxRatesState,
             fullName: document.getElementById('full-name')?.value?.trim() || '',
             email: document.getElementById('email')?.value?.trim() || '',
             phone: getFormattedPhoneValue(),
@@ -5828,23 +6030,35 @@
             return;
         }
 
+        await ensurePaymentExchangeRates({
+            force: !(paymentIntegration?.isRatesStateFresh?.(paymentFxRatesState)),
+        });
+
         const paymentSummary = renderPaymentSummary(ensureSubmissionOrderId());
         const currentSetupFeeSummary = paymentSummary || getCurrentSetupFeeSummary();
         const orderId = paymentSummary?.orderId || ensureSubmissionOrderId();
-        const baseAmount = currentSetupFeeSummary?.amount
+        const baseAmountAed = Number(
+            paymentSummary?.amountAed
+            || currentSetupFeeSummary?.amountAed
+            || currentSetupFeeSummary?.amount
             || currentSetupFeeSummary?.total
-            || paymentIntegration.PAYMENT_CONFIG.setupFeeAmount;
+            || paymentIntegration.PAYMENT_CONFIG.setupFeeAmount,
+        );
+        const paymentCurrency = paymentChannel === 'tamara' ? 'AED' : getSelectedPaymentCurrency();
         const tamaraSurcharge = paymentChannel === 'tamara' ? TAMARA_PAYMENT_SURCHARGE_AED : 0;
-        const amount = baseAmount + tamaraSurcharge;
+        const totalAmountAed = baseAmountAed + tamaraSurcharge;
+        const payableAmount = paymentChannel === 'tamara'
+            ? totalAmountAed
+            : (convertPaymentAmount(totalAmountAed, paymentCurrency) ?? totalAmountAed);
         const contactState = getContactFormState();
 
         let confirmMessage;
         if (paymentChannel === 'tamara') {
             confirmMessage =
                 `You are about to pay the setup fee via Tamara.\n\n` +
-                `Setup fee: AED ${baseAmount.toLocaleString()}\n` +
-                `Tamara additional charge: AED ${tamaraSurcharge.toLocaleString()}\n` +
-                `Total payable: AED ${amount.toLocaleString()}\n\n` +
+                `Setup fee: ${formatPaymentAmount(baseAmountAed, 'AED')}\n` +
+                `Tamara additional charge: ${formatPaymentAmount(tamaraSurcharge, 'AED')}\n` +
+                `Total payable: ${formatPaymentAmount(totalAmountAed, 'AED')}\n\n` +
                 `Order ID: ${orderId}\n` +
                 `Name: ${contactState.fullName}\n` +
                 `Email: ${contactState.email}\n` +
@@ -5852,7 +6066,7 @@
                 `Do you want to continue?`;
         } else {
             confirmMessage =
-                `You are about to pay the setup fee only: AED ${baseAmount.toLocaleString()}.\n\n` +
+                `You are about to pay the setup fee only: ${formatPaymentAmount(totalAmountAed, paymentCurrency)}.\n\n` +
                 `Order ID: ${orderId}\n` +
                 `Name: ${contactState.fullName}\n` +
                 `Email: ${contactState.email}\n` +
@@ -5877,14 +6091,22 @@
             return;
         }
 
-        const initiatedPayload = buildPaymentInitiatedPayload(orderId, amount, paymentChannel);
+        const initiatedPayload = buildPaymentInitiatedPayload(orderId, payableAmount, paymentChannel, {
+            amountAed: totalAmountAed,
+            currency: paymentCurrency,
+            exchangeRate: paymentFxRatesState?.rates?.[paymentCurrency] || 1,
+            rateFetchedAt: paymentFxRatesState?.fetchedAt || '',
+        });
         storePaymentSession(initiatedPayload);
         submitLifecyclePayload(initiatedPayload).catch((error) => {
             logNonProdError('Payment initiated webhook submission failed', error);
         });
 
-        const secureOptions = paymentChannel === 'tamara' ? { channel: 'tamara' } : {};
-        const paymentResult = await initiateSecurePayment(orderId, amount, secureOptions);
+        const secureOptions = {
+            channel: paymentChannel === 'tamara' ? 'tamara' : '',
+            currency: paymentCurrency,
+        };
+        const paymentResult = await initiateSecurePayment(orderId, totalAmountAed, secureOptions);
         if (!paymentResult.success) {
             isPaymentSubmissionInProgress = false;
             setPaymentButtonsLoading(false);
@@ -5920,6 +6142,8 @@
             status: parsedResult.status,
             orderId: parsedResult.orderId,
             amount: restoredSession?.paymentAmount || parsedResult.amount,
+            amountAed: restoredSession?.amountAed || '',
+            currency: parsedResult.currency || restoredSession?.currency || 'AED',
             trackingId: parsedResult.trackingId,
             paymentMode: parsedResult.paymentMode,
             transDate: parsedResult.transDate,
@@ -6260,6 +6484,9 @@
         statusMessage = '',
         cardName = '',
         currency = 'AED',
+        amountAed = '',
+        exchangeRate = '',
+        rateFetchedAt = '',
         responseCode = '',
         billingName = '',
         billingEmail = '',
@@ -6460,6 +6687,9 @@
             statusMessage,
             cardName,
             currency,
+            amountAed,
+            exchangeRate,
+            rateFetchedAt,
             responseCode,
             billingName,
             billingEmail,
@@ -6652,6 +6882,20 @@
             button.dataset.tamaraInit = 'true';
             button.addEventListener('click', handleSetupFeePayment);
         });
+
+        if (document.body.dataset.currencySwitcherInit !== 'true') {
+            document.body.dataset.currencySwitcherInit = 'true';
+            document.querySelectorAll('.payment-currency-btn').forEach(function (button) {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const nextCurrency = button.getAttribute('data-currency');
+                    if (!nextCurrency || button.disabled) return;
+                    setSelectedPaymentCurrency(nextCurrency);
+                });
+            });
+            syncPaymentCurrencyButtons();
+            ensurePaymentExchangeRates();
+        }
     }
 
     function openSummaryPaymentView() {
@@ -6661,9 +6905,11 @@
             return;
         }
         clearPaymentMessages();
-        if (paymentIntegration && typeof paymentIntegration.generateOrderId === 'function') {
-            renderPaymentSummary(paymentIntegration.generateOrderId());
-        }
+        ensurePaymentExchangeRates().then(function () {
+            if (paymentIntegration && typeof paymentIntegration.generateOrderId === 'function') {
+                renderPaymentSummary(paymentIntegration.generateOrderId());
+            }
+        });
         container.classList.add('payment-view-active');
 
         var mobilePanel = document.getElementById('mobile-payment-step');
@@ -9637,8 +9883,7 @@
         const totalCostDisplay = document.getElementById('total-cost-display');
         const mobileGrandTotalPrice = document.getElementById('mobile-grand-total-price');
         
-        // Display the exact value without rounding
-        const formattedTotal = `AED ${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        const formattedTotal = formatPaymentAmount(totalCost, getSelectedPaymentCurrency());
 
         if (totalCostDisplay) {
             totalCostDisplay.textContent = formattedTotal;

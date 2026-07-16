@@ -786,34 +786,36 @@
         <input type="text" id="bsa-code" placeholder="Business Setup Advisor's Code (Optional)">
       </div> -->
             <div class="grand-total" id="grand-total-clickable">
-                <div class="grand-total-currency-row">
-                    <p class="grand-total-currency-label">Choose Currency</p>
-                    <div class="payment-currency-switcher" id="summary-currency-switcher" role="group" aria-label="Display currency">
-                        <button type="button" class="payment-currency-btn is-active" data-currency="AED" aria-pressed="true">AED</button>
-                        <button type="button" class="payment-currency-btn" data-currency="USD" aria-pressed="false">USD</button>
-                        <button type="button" class="payment-currency-btn" data-currency="GBP" aria-pressed="false">GBP</button>
+                <div class="grand-total-currency-container">
+                    <div class="grand-total-currency-row">
+                        <p class="grand-total-currency-label">Choose Currency</p>
+                        <div class="payment-currency-switcher" id="summary-currency-switcher" role="group" aria-label="Display currency">
+                            <button type="button" class="payment-currency-btn is-active" data-currency="AED" aria-pressed="true">AED</button>
+                            <button type="button" class="payment-currency-btn" data-currency="USD" aria-pressed="false">USD</button>
+                            <button type="button" class="payment-currency-btn" data-currency="GBP" aria-pressed="false">GBP</button>
+                        </div>
                     </div>
+                    <p class="payment-currency-note" id="summary-currency-note" hidden></p>
                 </div>
-                <p class="payment-currency-note" id="summary-currency-note" hidden></p>
                 <div class="grand-total-row">
-                    <div class="grand-total-left">
-                        <span class="grand-total-label">Grand Total</span>
-                        <span class="grand-total-amount" id="total-cost-display">AED 0</span>
-                    </div>
-                    <button type="button" id="share-btn" class="share-btn" onclick="handleShareClick()">
-                    <svg width="21" height="25" viewBox="0 0 21 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5.75635 5.43733L10.2764 1.61279L14.7665 5.41204" stroke="#308CC7" stroke-width="2.46227" stroke-miterlimit="10" stroke-linecap="round"/>
-                    <path d="M10.2603 14.04V1.85205" stroke="#308CC7" stroke-width="2.46227" stroke-miterlimit="10" stroke-linecap="round"/>
-                    <path d="M14.4375 8.94043H18.0095C18.7183 8.94043 19.2917 9.42705 19.2917 10.0253V21.7504C19.2917 22.7787 18.3068 23.6121 17.0915 23.6121H3.43117C2.21586 23.6121 1.23096 22.7787 1.23096 21.7504V10.0253C1.23096 9.42557 1.80607 8.94043 2.51309 8.94043H6.108" stroke="#308CC7" stroke-width="2.46227" stroke-miterlimit="10" stroke-linecap="round"/>
-                    </svg>
-
-
-                    <span class="share-text">Share</span>
-                    <span class="share-loading" style="display: none;">Sharing...</span>
-                    <span class="share-copied" style="display: none;">Copied!</span>
-                    </button>
+                <div class="grand-total-left">
+                    <span class="grand-total-label">Grand Total</span>
+                    <span class="grand-total-amount" id="total-cost-display">AED 0</span>
                 </div>
+                <button type="button" id="share-btn" class="share-btn" onclick="handleShareClick()">
+                <svg width="21" height="25" viewBox="0 0 21 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5.75635 5.43733L10.2764 1.61279L14.7665 5.41204" stroke="#308CC7" stroke-width="2.46227" stroke-miterlimit="10" stroke-linecap="round"/>
+                <path d="M10.2603 14.04V1.85205" stroke="#308CC7" stroke-width="2.46227" stroke-miterlimit="10" stroke-linecap="round"/>
+                <path d="M14.4375 8.94043H18.0095C18.7183 8.94043 19.2917 9.42705 19.2917 10.0253V21.7504C19.2917 22.7787 18.3068 23.6121 17.0915 23.6121H3.43117C2.21586 23.6121 1.23096 22.7787 1.23096 21.7504V10.0253C1.23096 9.42557 1.80607 8.94043 2.51309 8.94043H6.108" stroke="#308CC7" stroke-width="2.46227" stroke-miterlimit="10" stroke-linecap="round"/>
+                </svg>
+
+
+                <span class="share-text">Share</span>
+                <span class="share-loading" style="display: none;">Sharing...</span>
+                <span class="share-copied" style="display: none;">Copied!</span>
+                </button>
             </div>
+          </div>
         </div>
 
         

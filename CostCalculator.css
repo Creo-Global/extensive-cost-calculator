@@ -800,15 +800,13 @@ align-items: center;
 }
 
 .grand-total {
-    background-color: #f9fafb;
-    border-radius: 12px;
+    background-color: #fff;
+    border-radius: 10px;
     padding: 16px !important;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
-    border-radius: 10px;
-    background: #fff;
+    gap: 0;
     -webkit-backdrop-filter: blur(24px);
     backdrop-filter: blur(24px);
 }
@@ -827,22 +825,31 @@ align-items: center;
     line-height: normal;
     font-size: 14px;
     color: #111827;
-    font-weight: 500;
+    font-weight: 600;
+    flex-shrink: 0;
 }
 
 .grand-total-row {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     width: 100%;
+    padding-top: 16px;
+    margin-top: 12px;
+    border-top: 1px solid #e1dcdc;
 }
 
 .grand-total .payment-currency-note {
-    margin: 0;
+    margin: 8px 0 0;
+    padding: 0;
     width: 100%;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #6b7280;
+    font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 .grand-total-left {
@@ -850,15 +857,22 @@ align-items: center;
     flex-direction: column;
     gap: 4px;
     min-width: 0;
+    flex: 1 1 auto;
 }
 
 .grand-total-label {
     font-size: 14px;
     color: #111827;
     font-weight: 500;
+    line-height: normal;
 }
 
-.grand-total-amount {font-size: 18px;font-weight: 700;color: #0171E3;}
+.grand-total-amount {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0171E3;
+    line-height: 1.2;
+}
 
 .get-call-btn {
     width: 100%;
@@ -1133,12 +1147,12 @@ background: #F9FAFB;
     
     .grand-total {
         padding: 16px;
-        gap: 8px;
+        gap: 0;
     }
     
     .grand-total-amount {
-font-size: 18px;
-}
+        font-size: 20px;
+    }
 
     .form-sections-container {
         max-height: none;
@@ -3653,17 +3667,9 @@ margin-bottom: 16px;
 }
 
 /* Share Button Styles */
-.grand-total-row {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.grand-total-left {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.grand-total-row .share-btn {
+    flex-shrink: 0;
+    color: #0171E3;
 }
 
 .share-btn {
@@ -5342,30 +5348,32 @@ background-size: 16px 16px !important;
 .payment-currency-switcher {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   padding: 4px;
   border-radius: 999px;
   background: #eef2f7;
+  flex-shrink: 0;
 }
 
 .payment-currency-btn {
-  border: 0;
+  border: 1px solid transparent;
   background: transparent;
   color: #4b5563;
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
-  padding: 8px 12px;
+  padding: 8px 14px;
   border-radius: 999px;
   cursor: pointer;
   font-family: "Plus Jakarta Sans", sans-serif;
-  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .payment-currency-btn.is-active {
   background: #ffffff;
   color: #0171E3;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  border-color: #0171E3;
+  box-shadow: none;
 }
 
 .payment-currency-btn:disabled {
@@ -5374,7 +5382,7 @@ background-size: 16px 16px !important;
 }
 
 .payment-currency-note {
-  margin: 8px 0 0;
+  margin: 0;
   font-size: 11px;
   line-height: 1.45;
   color: #6b7280;
@@ -5389,11 +5397,20 @@ background-size: 16px 16px !important;
   .grand-total-currency-row {
     width: 100%;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .grand-total-currency-row .payment-currency-switcher {
     width: auto;
     justify-content: center;
+  }
+
+  .grand-total-row {
+    flex-wrap: wrap;
+  }
+
+  .grand-total-amount {
+    font-size: 20px;
   }
 }
 

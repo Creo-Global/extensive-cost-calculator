@@ -804,15 +804,45 @@ align-items: center;
     border-radius: 12px;
     padding: 16px !important;
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
     gap: 12px;
     border-radius: 10px;
     background: #fff;
     -webkit-backdrop-filter: blur(24px);
     backdrop-filter: blur(24px);
+}
+
+.grand-total-currency-row {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+.grand-total-currency-label {
+    padding: 0;
+    margin: 0;
+    line-height: normal;
+    font-size: 14px;
+    color: #111827;
+    font-weight: 500;
+}
+
+.grand-total-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+}
+
+.grand-total .payment-currency-note {
+    margin: 0;
+    width: 100%;
 }
 
 .grand-total-left {
@@ -2563,17 +2593,6 @@ backdrop-filter: blur(24px);
 }
 
 
-/* Grand Total Clickable */
-.grand-total {
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.grand-total:hover {
-    background: #f8f9fa;
-    border-radius: 8px;
-}
-
 /* Detailed Summary (Hidden by default) */
 .detailed-summary {
     display: none;
@@ -3634,7 +3653,7 @@ margin-bottom: 16px;
 }
 
 /* Share Button Styles */
-.grand-total {
+.grand-total-row {
     display: flex !important;
     flex-direction: row !important;
     align-items: center;
@@ -3712,7 +3731,7 @@ margin-bottom: 16px;
 
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
-    .grand-total {
+    .grand-total-row {
         flex-direction: row;
         flex-wrap: wrap;
         align-items: center;
@@ -3720,6 +3739,14 @@ margin-bottom: 16px;
         gap: 12px;
         min-width: 0;
         max-width: 100%;
+    }
+
+    .grand-total-currency-row {
+        flex-wrap: wrap;
+    }
+
+    .grand-total-currency-row .payment-currency-switcher {
+        flex-shrink: 0;
     }
 
     .grand-total-left {
@@ -4149,6 +4176,13 @@ background-size: 16px 16px !important;
       flex: 1 1 auto;
       min-width: 0;
       margin: 0 !important;
+    }
+
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .grand-total-currency-row,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .grand-total-currency-row,
+    .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .payment-currency-note,
+    .cc-form.mobile-steps-active .sticky-summary-container:not(.sheet-open) .payment-currency-note {
+      display: none !important;
     }
 
     .b2c-costcalculator.mobile-steps-active .sticky-summary-container:not(.sheet-open) .grand-total,
@@ -5213,6 +5247,12 @@ background-size: 16px 16px !important;
 
 @media (min-width: 641px) {
   .sticky-summary-container.payment-view-active .grand-total-container {
+    display: flex !important;
+    margin-top: 0 !important;
+    margin-bottom: 16px !important;
+  }
+
+  .sticky-summary-container.payment-view-active .grand-total-row {
     display: none !important;
   }
 
@@ -5295,18 +5335,6 @@ background-size: 16px 16px !important;
   margin-bottom: 24px;
 }
 
-.summary-currency-bar {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.sticky-summary-container.payment-view-active .summary-currency-bar {
-  display: flex !important;
-}
-
 .payment-currency-panel {
   margin-bottom: 16px;
 }
@@ -5353,18 +5381,18 @@ background-size: 16px 16px !important;
   font-family: "Plus Jakarta Sans", sans-serif;
 }
 
-.grand-total .payment-currency-switcher {
+.grand-total-currency-row .payment-currency-switcher {
   flex-shrink: 0;
 }
 
 @media (max-width: 640px) {
-  .summary-currency-bar {
+  .grand-total-currency-row {
     width: 100%;
-    align-items: stretch;
+    align-items: center;
   }
 
-  .summary-currency-bar .payment-currency-switcher {
-    width: 100%;
+  .grand-total-currency-row .payment-currency-switcher {
+    width: auto;
     justify-content: center;
   }
 }

@@ -10539,9 +10539,8 @@
             });
           }
 
-          var grandRow = summary.querySelector('#grand-total-clickable') || summary.querySelector('.grand-total');
+          var grandRow = summary.querySelector('.grand-total-row') || summary.querySelector('#grand-total-clickable') || summary.querySelector('.grand-total');
           if (grandRow) {
-            grandRow.style.cursor = 'pointer';
             grandRow.addEventListener('click', function (e) {
               if (!self._getWizardRoot() || !self._getWizardRoot().classList.contains('mobile-steps-active')) return;
               if (summary.classList.contains('sheet-open')) return;

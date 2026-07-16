@@ -607,14 +607,6 @@
         <div class="sheet-close-handle">
             <div class="handle-bar"></div>
         </div>
-        <div class="summary-currency-bar" id="summary-currency-bar">
-          <div class="payment-currency-switcher" id="summary-currency-switcher" role="group" aria-label="Display currency">
-            <button type="button" class="payment-currency-btn is-active" data-currency="AED" aria-pressed="true">AED</button>
-            <button type="button" class="payment-currency-btn" data-currency="USD" aria-pressed="false">USD</button>
-            <button type="button" class="payment-currency-btn" data-currency="GBP" aria-pressed="false">GBP</button>
-          </div>
-          <p class="payment-currency-note" id="summary-currency-note" hidden></p>
-        </div>
         <div class="summary-header">
             <h3>Your Business Setup Estimate</h3>
             <p class="summary-subtitle">Here's your total cost, based on the options you selected.</p>
@@ -794,11 +786,21 @@
         <input type="text" id="bsa-code" placeholder="Business Setup Advisor's Code (Optional)">
       </div> -->
             <div class="grand-total" id="grand-total-clickable">
-                <div class="grand-total-left">
-                    <span class="grand-total-label">Grand Total</span>
-                    <span class="grand-total-amount" id="total-cost-display">AED 0</span>
+                <div class="grand-total-currency-row">
+                    <p class="grand-total-currency-label">Choose Currency</p>
+                    <div class="payment-currency-switcher" id="summary-currency-switcher" role="group" aria-label="Display currency">
+                        <button type="button" class="payment-currency-btn is-active" data-currency="AED" aria-pressed="true">AED</button>
+                        <button type="button" class="payment-currency-btn" data-currency="USD" aria-pressed="false">USD</button>
+                        <button type="button" class="payment-currency-btn" data-currency="GBP" aria-pressed="false">GBP</button>
+                    </div>
                 </div>
-                <button type="button" id="share-btn" class="share-btn" onclick="handleShareClick()">
+                <p class="payment-currency-note" id="summary-currency-note" hidden></p>
+                <div class="grand-total-row">
+                    <div class="grand-total-left">
+                        <span class="grand-total-label">Grand Total</span>
+                        <span class="grand-total-amount" id="total-cost-display">AED 0</span>
+                    </div>
+                    <button type="button" id="share-btn" class="share-btn" onclick="handleShareClick()">
                     <svg width="21" height="25" viewBox="0 0 21 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5.75635 5.43733L10.2764 1.61279L14.7665 5.41204" stroke="#308CC7" stroke-width="2.46227" stroke-miterlimit="10" stroke-linecap="round"/>
                     <path d="M10.2603 14.04V1.85205" stroke="#308CC7" stroke-width="2.46227" stroke-miterlimit="10" stroke-linecap="round"/>
@@ -809,7 +811,8 @@
                     <span class="share-text">Share</span>
                     <span class="share-loading" style="display: none;">Sharing...</span>
                     <span class="share-copied" style="display: none;">Copied!</span>
-                </button>
+                    </button>
+                </div>
             </div>
         </div>
 

@@ -4113,14 +4113,14 @@
                 description: 'Fawri is your express route to a 60-minute, compliance-led LLC license. This 100% digital, fast-track license is designed exclusively for ambitious solo entrepreneurs and freelancers who want speed, control, and minimal setup friction.',
                 additional: 'With over 1,800 activities, Fawri gets you licensed, visa-ready, and enables bank account applications on the same day. It’s the fastest, most reliable way to launch your business in Dubai.',
                 actionText: 'Select Fawri License',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff65033b9a144013518dba_fawri-licences.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/6a62f249d3a684c5316bbb74_Fawri-bl.webp'
             },
             'regular': {
                 title: 'Regular Business License',
                 description: 'The regular business license is built for founders who need flexibility, scalability, and full ownership. It’s a customisable license that supports multi-partner setups, cross-industry models, and long-term growth.',
                 additional: 'Choose from 2,500+ business activities across 3 groups with instant access to visa processing and banking. 100% digital, fully foreign-owned, and designed for serious entrepreneurs ready to build broad, future-ready businesses in Dubai.', 
                 actionText: 'Select Regular License',
-                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/68ff650362c775d28eb2dcc8_reg-licences.webp'
+                image: 'https://cdn.prod.website-files.com/6746fa16829349829922b7c4/6a62f249d53e9282cd88be76_regular-bl.webp'
             }
         };
         

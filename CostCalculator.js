@@ -185,6 +185,8 @@
 
     const NAME_ALLOWED_CHAR_REGEX = /[a-zA-Z\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\u0370-\u03FF\u0400-\u04FF\u1E00-\u1EFF\u1F00-\u1FFF\u2100-\u214F\u0100-\u017F\u1EA0-\u1EF9\u00C0-\u024F'-]/;
     const NAME_VALIDATION_REGEX = /^[a-zA-Z\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\u0590-\u05FF\u0370-\u03FF\u0400-\u04FF\u1E00-\u1EFF\u1F00-\u1FFF\u2100-\u214F\u0100-\u017F\u1EA0-\u1EF9\u00C0-\u024F'-]+$/;
+    // HTML5-style local part, but require a domain with an alphabetic TLD (rejects user@gmailcom).
+    const EMAIL_VALIDATION_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
 
     window.addEventListener('error', function(event) {
         logNonProdError('Unhandled error', event.error || event.message);
@@ -1211,7 +1213,7 @@
                 },
                 email: {
                     required: true,
-                    pattern: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+                    pattern: EMAIL_VALIDATION_REGEX,
                     maxLength: 254
                 },
                 phone: {
@@ -6151,8 +6153,7 @@
         
         if (!emailValue) return; // Don't validate empty field
         
-        // Email validation regex
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailPattern = EMAIL_VALIDATION_REGEX;
 
         
         if (!emailPattern.test(emailValue)) {
@@ -6772,7 +6773,7 @@
             
             // Strict validation - ALL fields must be valid
             const isNameValid = fullName && fullName.length >= 2 && NAME_VALIDATION_REGEX.test(fullName);
-            const isEmailValid = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            const isEmailValid = email && EMAIL_VALIDATION_REGEX.test(email);
             
             // Consent validation
             const isConsentValid = consentCheckbox?.checked === true;
